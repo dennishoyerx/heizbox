@@ -16,6 +16,7 @@ id = "fa8331445aee4fb89d28386b5229a6a2"
 
 [dev]
 local_protocol = "http"
+web_sockets = true
 
 [observability.logs]
 enabled = true
