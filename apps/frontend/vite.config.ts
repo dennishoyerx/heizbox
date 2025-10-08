@@ -20,7 +20,6 @@ export default defineConfig(() => ({
   },
   resolve: {
     alias: {
-      '@heizbox/ui': fileURLToPath(new URL('../../libs/ui/src/index.ts', import.meta.url)),
       '@heizbox/utils': fileURLToPath(new URL('../../libs/utils/src/index.ts', import.meta.url)),
       '@heizbox/types': fileURLToPath(new URL('../../libs/types/src/index.ts', import.meta.url)),
     },

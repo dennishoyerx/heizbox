@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import type { ApiResponse } from '../../libs/types/src/interfaces'; // Adjusted path for ApiResponse
-import { fetchSessions } from '../api'; // Adjusted path
-import { SessionCard } from '@heizbox/ui'; // Import SessionCard from the ui library
+import type { ApiResponse } from '@heizbox/types';
+import { fetchSessions } from '../api';
+import { SessionCard } from './components/SessionCard';
 
 // --- REDESIGNED MAIN APP ---
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import type { SessionGroup } from '@heizbox/types'; // Assuming @heizbox/types is available
-import { formatDateForDisplay, formatTimeForDisplay, calculateConsumption } from '@heizbox/utils'; // Assuming @heizbox/utils is available
-import { ChevronIcon } from './ChevronIcon'; // Import ChevronIcon from the same library
+import type { SessionGroup } from '@heizbox/types';
+import { formatDateForDisplay, formatTimeForDisplay, calculateConsumption } from '@heizbox/utils';
+import { ChevronIcon } from './ChevronIcon';
 
 export const SessionCard = ({ session, index, totalSessions }: { session: SessionGroup, index: number, totalSessions: number }) => {
   const [isOpen, setIsOpen] = useState(false);
