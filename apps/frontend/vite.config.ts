@@ -2,6 +2,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig(() => ({
   root: __dirname,
@@ -16,6 +17,13 @@ export default defineConfig(() => ({
   preview: {
     port: 4200,
     host: 'localhost',
+  },
+  resolve: {
+    alias: {
+      '@heizbox/ui': fileURLToPath(new URL('../../libs/ui/src/index.ts', import.meta.url)),
+      '@heizbox/utils': fileURLToPath(new URL('../../libs/utils/src/index.ts', import.meta.url)),
+      '@heizbox/types': fileURLToPath(new URL('../../libs/types/src/index.ts', import.meta.url)),
+    },
   },
   plugins: [
     react(),

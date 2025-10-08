@@ -10,7 +10,11 @@
     ],
     "rootDir": "src",
     "jsx": "react-jsx",
-    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "paths": {
+      "@heizbox/utils": ["../../libs/utils/src/index.ts"],
+      "@heizbox/types": ["../../libs/types/src/index.ts"]
+    }
   },
   "exclude": [
     "out-tsc",

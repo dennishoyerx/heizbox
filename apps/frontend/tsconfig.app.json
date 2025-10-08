@@ -11,7 +11,10 @@
       "node",
       "vite/client"
     ],
-    "rootDir": "src"
+    "rootDir": "src",
+    "paths": {
+      "@heizbox/ui": ["../../libs/ui/src/index.ts"]
+    }
   },
   "exclude": [
     "out-tsc",
