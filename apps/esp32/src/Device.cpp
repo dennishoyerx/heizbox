@@ -4,9 +4,17 @@
 #include "credentials.h"
 #include <HTTPClient.h>
 #include <ArduinoOTA.h>
+#include <ArduinoJson.h>
 
 // Static instance pointer initialization
 Device* Device::instance = nullptr;
+
+// WebSocket event handler
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+    if (Device::instance) {
+        Device::instance->handleWebSocketEvent(type, payload, length);
+    }
+}
 
 Device::Device()
     : input(),
@@ -58,6 +66,8 @@ void Device::setup() {
         this->handleInput(event);
     });
 
+    // Initialize WebSocket
+    initWebSocket();
 
     ArduinoOTA.setHostname("Heizbox");
     //ArduinoOTA.setPassword("esp_pass");
@@ -84,6 +94,7 @@ void Device::loop() {
     heater.update();
     clockManager.update();
     display.renderStatusBar();
+    webSocket.loop(); // Process WebSocket events
 
     if (heater.isCycleFinished()) {
         sendHeatingData(heater.getLastCycleDuration());
@@ -96,6 +107,38 @@ void Device::loop() {
     ArduinoOTA.handle();
 
     delay(5);
+}
+
+void Device::initWebSocket() {
+    webSocket.beginSSL("heizbox.dh19.workers.dev", 443, "/ws/status", "", "/", "wss");
+    webSocket.onEvent(webSocketEvent);
+    webSocket.setReconnectInterval(5000); // Try to reconnect every 5s
+}
+
+void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+    switch (type) {
+        case WStype_DISCONNECTED:
+            Serial.println("[WS] Disconnected!");
+            break;
+        case WStype_CONNECTED:
+            Serial.printf("[WS] Connected to url: %s\n", payload);
+            // Send device info on connect
+            webSocket.sendTXT("{\"topic\":\"heizbox/device\",\"data\":{\"id\":\"esp32-heizbox-1\",\"status\":\"online\"}}");
+            break;
+        case WStype_TEXT:
+            Serial.printf("[WS] get text: %s\n", payload);
+            // Handle incoming messages if needed
+            break;
+        case WStype_BIN:
+            Serial.printf("[WS] get binary length: %u\n", length);
+            break;
+        case WStype_ERROR:
+        case WStype_FRAGMENT_TEXT_START:
+        case WStype_FRAGMENT_BIN_START:
+        case WStype_FRAGMENT:
+        case WStype_FRAGMENT_FIN:
+            break;
+    }
 }
 
 void Device::handleInput(InputEvent event) {
@@ -124,47 +167,21 @@ void Device::handleGlobalScreenSwitching(InputEvent event) {
 }
 
 void Device::sendHeatingData(unsigned long duration) {
-    if (WiFi.status() == WL_CONNECTED) {
-        unsigned long* durationPtr = new unsigned long(duration);
-        xTaskCreate(
-            sendHeatingDataTask,       // Task function
-            "HeatingDataSender",       // Name of the task
-            10000,                     // Stack size in words
-            (void*)durationPtr,        // Task input parameter
-            1,                         // Priority of the task
-            NULL                       // Task handle
-        );
+    if (webSocket.isConnected()) {
+        DynamicJsonDocument doc(128);
+        doc["topic"] = "heizbox/status";
+        JsonObject data = doc.createNestedObject("data");
+        data["heating"] = "on"; // Example status
+        data["state"] = "on";   // Example status
+        data["duration"] = duration / 1000; // Convert milliseconds to seconds
+
+        String output;
+        serializeJson(doc, output);
+        webSocket.sendTXT(output);
+        Serial.printf("✅ WS Sent heating data: %s\n", output.c_str());
     } else {
-        Serial.println("❌ WiFi not connected, cannot send heating data.");
+        Serial.println("❌ WebSocket not connected, cannot send heating data.");
     }
-}
-
-void Device::sendHeatingDataTask(void* pvParameters) {
-    unsigned long duration = *((unsigned long*)pvParameters);
-    delete (unsigned long*)pvParameters; // Free the allocated memory for the parameter
-
-    instance->display.freeSprites(); // Free memory before HTTPS request
-    
-    HTTPClient http;
-    unsigned long durationInSeconds = duration / 1000; // Convert milliseconds to seconds
-    String url = "http://heizbox.dh19.workers.dev/api/create?duration=" + String(durationInSeconds);
-
-    http.begin(url);
-    int httpResponseCode = http.GET();
-
-    if (httpResponseCode > 0) {
-        Serial.printf("✅ HTTP Request successful, code: %d\n", httpResponseCode);
-        String payload = http.getString();
-        Serial.println(payload);
-    } else {
-        Serial.printf("❌ HTTP Request failed, error: %s\n", http.errorToString(httpResponseCode).c_str());
-    }
-    http.end();
-    
-    instance->display.reallocateSprites(); // Reallocate sprites after request
-    Serial.printf("Heap after reallocate: %d\n", ESP.getFreeHeap());
-
-    vTaskDelete(NULL); // Delete the task when done
 }
 
 void Device::WiFiEvent(WiFiEvent_t event) {
@@ -181,6 +198,9 @@ void Device::WiFiEvent(WiFiEvent_t event) {
             if (instance && !instance->clockManager.isTimeSynced()) {
                 instance->clockManager.init();
             }
+            if (instance) {
+                instance->webSocket.beginSSL("heizbox.dh19.workers.dev", 443, "/ws/status", "", "/", "wss");
+            }
             break;
         case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
             Serial.println("🌐 Verbindung verloren, versuche neu...");
@@ -188,4 +208,9 @@ void Device::WiFiEvent(WiFiEvent_t event) {
         default:
             break;
     }
+}
+
+void Device::sendHeatingDataTask(void* pvParameters) {
+    // This task is no longer needed as data is sent via WebSocket
+    vTaskDelete(NULL); // Delete the task immediately
 }

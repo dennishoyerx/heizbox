@@ -10,6 +10,7 @@
 #include "ScreenManager.h"
 #include "ClockManager.h"
 #include "StatsManager.h"
+#include <WebSocketsClient.h>
 
 // Screens
 #include "FireScreen.h"
@@ -33,6 +34,7 @@ private:
     ClockManager clockManager;
     Preferences preferences;
     StatsManager statsManager;
+    WebSocketsClient webSocket;
 
     // Screen management
     ScreenManager screenManager;
@@ -47,6 +49,8 @@ private:
     void handleInput(InputEvent event);
     void handleGlobalScreenSwitching(InputEvent event);
     void sendHeatingData(unsigned long duration);
+    void initWebSocket();
+    void handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t length);
     static void WiFiEvent(WiFiEvent_t event);
     static void sendHeatingDataTask(void* pvParameters);
 
