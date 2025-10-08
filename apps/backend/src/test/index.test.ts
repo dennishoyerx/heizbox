@@ -67,4 +67,33 @@ describe('API Routes', () => {
     expect(res.status).toBe(200);
     expect(text).toBe('OK');
   });
+
+  it('should create a session with default cycle when cycle is not provided', async () => {
+    const mockDb = {
+      prepare: vi.fn(() => ({
+        bind: vi.fn(() => ({
+          first: vi.fn(() => Promise.resolve({ count: 0 })),
+          run: vi.fn(() => Promise.resolve()),
+        })),
+      })),
+    };
+
+    const env = { 
+      db: mockDb, 
+      __STATIC_CONTENT: {
+        get: vi.fn((key) => {
+          if (key === '__STATIC_CONTENT_MANIFEST') {
+            return Promise.resolve('{}');
+          }
+          return Promise.resolve(null);
+        }),
+      }, 
+    } as any;
+
+    const res = await app.request('/api/create?duration=10', { method: 'GET' }, env);
+    const text = await res.text();
+
+    expect(res.status).toBe(200);
+    expect(text).toBe('OK');
+  });
 });

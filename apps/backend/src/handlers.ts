@@ -42,12 +42,12 @@ export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
     const durationStr = c.req.query("duration");
     const cycleStr = c.req.query("cycle");
 
-    if (!durationStr || !cycleStr) {
-      return c.text("Missing duration or cycle", 400);
+    if (!durationStr) {
+      return c.text("Missing duration", 400);
     }
 
     const duration = parseFloat(durationStr);
-    const cycle = parseInt(cycleStr, 10);
+    const cycle = cycleStr ? parseInt(cycleStr, 10) : 1; // Default to 1 if not provided
 
     if (isNaN(duration) || duration <= 0 || isNaN(cycle) || cycle <= 0) {
       return c.text("Invalid duration or cycle", 400);
