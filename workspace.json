@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "projects": {
+    "frontend": "apps/frontend",
+    "backend": "apps/backend",
+    "esp32": "apps/esp32"
+  }
+}

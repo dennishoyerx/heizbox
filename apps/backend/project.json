@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/backend",
+        "main": "apps/backend/src/index.ts",
+        "tsConfig": "apps/backend/tsconfig.json"
+      }
+    },
+    "serve": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "wrangler dev",
+        "cwd": "apps/backend"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "wrangler deploy",
+        "cwd": "apps/backend"
+      }
+    },
+    "db-sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec wrangler d1 export heizbox --remote --output=./heizbox-backup.sql && pnpm exec wrangler d1 execute heizbox --local --command=\"DROP TABLE IF EXISTS sessions;\" && pnpm exec wrangler d1 execute heizbox --local --file=./heizbox-backup.sql && del .\\heizbox-backup.sql",
+        "cwd": "apps/backend"
+      }
+    }
+  },
+  "tags": []
+}
