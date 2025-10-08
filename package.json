@@ -49,6 +49,8 @@
     "esp:build": "pnpm exec nx run esp32:build",
     "esp:upload": "pnpm exec nx run esp32:upload",
     "esp:ota": "pnpm exec nx run esp32:ota",
-    "esp:monitor": "pnpm exec nx run esp32:monitor"
+    "esp:monitor": "pnpm exec nx run esp32:monitor",
+    "migrate:local": "cd apps/backend && wrangler d1 migrations apply heizbox --local",
+    "migrate:remote": "cd apps/backend && wrangler d1 migrations apply heizbox --remote"
   }
 }

@@ -3,6 +3,7 @@ export interface Session {
   startTime: Date;
   endTime: Date;
   duration: number;
+  cycle: number;
 }
 
 export interface Device {
@@ -15,4 +16,5 @@ export interface SessionRow {
   id: string;
   created_at: string;
   duration: number;
+  cycle: number;
 }

@@ -6,7 +6,7 @@ export const handleGetSessions = async (c: Context<{ Bindings: Env }>) => {
   try {
     const { start, end } = getBerlinTimeRange();
     const { results } = await c.env.db.prepare(
-      "SELECT id, created_at, duration FROM sessions WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
+      "SELECT id, created_at, duration, cycle FROM sessions WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
     ).bind(start, end).all<SessionRow>();
 
     if (!results) {
@@ -26,7 +26,7 @@ export const handleGetSessions = async (c: Context<{ Bindings: Env }>) => {
 export const handleGetJson = async (c: Context<{ Bindings: Env }>) => {
   try {
     const { results } = await c.env.db.prepare(
-      "SELECT id, created_at, duration FROM sessions ORDER BY id DESC"
+      "SELECT id, created_at, duration, cycle FROM sessions ORDER BY id DESC"
     ).all<SessionRow>();
 
     return c.json(results);
@@ -40,20 +40,24 @@ export const handleGetJson = async (c: Context<{ Bindings: Env }>) => {
 export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
   try {
     const durationStr = c.req.query("duration");
-    if (!durationStr) {
-      return c.text("Missing duration", 400);
+    const cycleStr = c.req.query("cycle");
+
+    if (!durationStr || !cycleStr) {
+      return c.text("Missing duration or cycle", 400);
     }
 
     const duration = parseFloat(durationStr);
-    if (isNaN(duration) || duration <= 0) {
-      return c.text("Invalid duration", 400);
+    const cycle = parseInt(cycleStr, 10);
+
+    if (isNaN(duration) || duration <= 0 || isNaN(cycle) || cycle <= 0) {
+      return c.text("Invalid duration or cycle", 400);
     }
 
     // Debounce: Check for recent identical entries
     const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
     const { count } = await c.env.db.prepare(
-      "SELECT COUNT(*) as count FROM sessions WHERE duration = ?1 AND created_at > ?2"
-    ).bind(duration, thirtySecondsAgo).first<{ count: number }>();
+      "SELECT COUNT(*) as count FROM sessions WHERE duration = ?1 AND cycle = ?2 AND created_at > ?3"
+    ).bind(duration, cycle, thirtySecondsAgo).first<{ count: number }>();
 
     if (count > 0) {
       return c.text("Duplicate within 30s, not inserted", 200);
@@ -61,8 +65,8 @@ export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
 
     const now = new Date().toISOString();
     await c.env.db.prepare(
-      "INSERT INTO sessions (duration, created_at) VALUES (?1, ?2)"
-    ).bind(duration, now).run();
+      "INSERT INTO sessions (duration, cycle, created_at) VALUES (?1, ?2, ?3)"
+    ).bind(duration, cycle, now).run();
 
     return c.text("OK");
   } catch (e: unknown) {
