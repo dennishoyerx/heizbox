@@ -42,3 +42,8 @@ wrangler.toml.bak
 # Backup files
 *.bak
 *.sql
+
+# ESP32 specific
+apps/esp32/include/credentials.h
+apps/esp32/.gemini/
+apps/esp32/gha-creds-*.json

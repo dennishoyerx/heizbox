@@ -1,1 +1,8 @@
 .pio
+.vscode
+out
+.vs
+include/credentials.h
+
+.gemini/
+gha-creds-*.json

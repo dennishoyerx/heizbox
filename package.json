@@ -43,8 +43,12 @@
   },
   "scripts": {
     "dev": "pnpm exec nx run-many --target=serve --projects=frontend,backend --parallel",
-    "build": "pnpm exec nx run-many --target=build --projects=frontend,backend --parallel && pio run -d apps/esp32",
-    "deploy": "pnpm exec nx run-many --target=deploy --projects=frontend,backend --parallel && pio run --target upload -d apps/esp32",
-    "down": "pnpm exec nx run backend:db-sync"
+    "build": "pnpm exec nx run-many --target=build --projects=frontend,backend --parallel",
+    "deploy": "pnpm exec nx run-many --target=deploy --projects=frontend,backend --parallel",
+    "down": "pnpm exec nx run backend:db-sync",
+    "esp:build": "pnpm exec nx run esp32:build",
+    "esp:upload": "pnpm exec nx run esp32:upload",
+    "esp:ota": "pnpm exec nx run esp32:ota",
+    "esp:monitor": "pnpm exec nx run esp32:monitor"
   }
 }
