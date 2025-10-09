@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import type { ApiResponse } from '@heizbox/types';
 import { fetchSessions } from '../api';
 import { SessionCard } from './components/SessionCard';
 import { Circle, CircleNotch } from '@phosphor-icons/react';
+import { UsagePage } from './usage';
 
 // --- REDESIGNED MAIN APP ---
 
@@ -97,7 +99,11 @@ function App() {
     <div className="bg-slate-50 font-sans min-h-screen">
       <main className="max-w-2xl mx-auto py-10 px-4">
         <header className="pb-6 border-b border-slate-200 mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Heizbox Sessions</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Heizbox</h1>
+          <nav className="mt-4">
+            <Link to="/" className="mr-4 text-blue-600 hover:underline">Sessions</Link>
+            <Link to="/usage" className="text-blue-600 hover:underline">Usage Statistics</Link>
+          </nav>
           {data && <div className="font-mono text-slate-600 mt-1">Verbrauch: {data.totalConsumption}g</div>}
           <div className="mt-2 text-sm text-slate-500">
             Gerät Status: <span className={`inline-block w-4 h-4 align-middle ${deviceIsOn ? 'text-green-500' : 'text-red-500'}`}>
@@ -118,27 +124,34 @@ function App() {
           </div>
         </header>
 
-        {loading && <p className="text-slate-500">Lade Daten...</p>}
-        {error && <p className="text-red-600 font-semibold">Fehler beim Laden: {error}</p>}
+        <Routes>
+          <Route path="/" element={
+            <>
+              {loading && <p className="text-slate-500">Lade Daten...</p>}
+              {error && <p className="text-red-600 font-semibold">Fehler beim Laden: {error}</p>}
 
-        {data && (
-          <>
-            {data.sessions && data.sessions.length > 0 ? (
-              <div>
-                {data.sessions.map((session, index) => (
-                  <SessionCard
-                    key={session[0]?.id || index}
-                    session={session}
-                    index={index}
-                    totalSessions={data.sessions.length}
-                  />
-                ))}
-              </div>
-            ) : (
-              !loading && <p className="text-slate-500 text-center py-8">Keine Sessions im ausgewählten Zeitraum gefunden.</p>
-            )}
-          </>
-        )}
+              {data && (
+                <>
+                  {data.sessions && data.sessions.length > 0 ? (
+                    <div>
+                      {data.sessions.map((session, index) => (
+                        <SessionCard
+                          key={session[0]?.id || index}
+                          session={session}
+                          index={index}
+                          totalSessions={data.sessions.length}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    !loading && <p className="text-slate-500 text-center py-8">Keine Sessions im ausgewählten Zeitraum gefunden.</p>
+                  )}
+                </>
+              )}
+            </>
+          } />
+          <Route path="/usage" element={<UsagePage />} />
+        </Routes>
       </main>
     </div>
   );

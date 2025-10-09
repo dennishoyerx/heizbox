@@ -40,7 +40,8 @@
     "@phosphor-icons/react": "^2.1.10",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-router-dom": "6.29.0"
+    "react-router-dom": "6.29.0",
+    "recharts": "^3.2.1"
   },
   "scripts": {
     "dev": "pnpm exec nx run-many --target=serve --projects=frontend,backend --parallel",

@@ -1,24 +1,26 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { handleGetSessions, handleGetJson, handleCreateSession, handleStaticAssets } from './handlers';
+import { handleGetSessions, handleGetJson, handleStaticAssets } from './handlers';
 import { handleWebSocket } from './handlers/websocket';
 import { handleHeartbeat } from './routes/heartbeat';
+import { handleCreateRoute } from './routes/create';
+import { handleStatisticsRoute } from './routes/statistics';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// ... existing code ...
-
-app.get('/api/sessions', cors({
+app.use(cors({
   origin: ['https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
   allowMethods: ['POST', 'GET', 'OPTIONS'],
   exposeHeaders: ['Content-Length'],
-  maxAge: 600,
   credentials: true,
-}), handleGetSessions);
+}));
+
+app.get('/api/sessions', handleGetSessions);
 app.get('/api/json', handleGetJson);
-app.get('/api/create', handleCreateSession);
-app.get('/api/add', handleCreateSession); // Legacy endpoint
+app.get('/api/create', handleCreateRoute);
+app.get('/api/add', handleCreateRoute); // Legacy endpoint
+app.get('/api/statistics', handleStatisticsRoute);
 app.get('/ws/status', handleWebSocket);
 
 // New route for heartbeat
