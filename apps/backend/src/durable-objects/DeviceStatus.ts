@@ -50,6 +50,25 @@ export class DeviceStatus {
 
     this.app.post('/publish', async (c) => {
       const message = await c.req.json();
+      console.log('DeviceStatus: Received message for publish:', message);
+
+      if (message.type === 'statusUpdate' && typeof message.isOn === 'boolean' && typeof message.isHeating === 'boolean') {
+        let statusChanged = false;
+        if (this.isOn !== message.isOn) {
+          this.isOn = message.isOn;
+          await this.state.storage.put('isOn', this.isOn);
+          statusChanged = true;
+        }
+        if (this.isHeating !== message.isHeating) {
+          this.isHeating = message.isHeating;
+          await this.state.storage.put('isHeating', this.isHeating);
+          statusChanged = true;
+        }
+        if (statusChanged) {
+          console.log('DeviceStatus: State updated from WebSocket message.', { isOn: this.isOn, isHeating: this.isHeating });
+        }
+      }
+
       this.publish(message);
       return c.json({ success: true });
     });

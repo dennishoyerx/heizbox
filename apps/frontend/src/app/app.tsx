@@ -28,6 +28,25 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const fetchInitialStatus = async () => {
+      try {
+        const deviceId = 'my-esp32-device';
+        const backendBaseUrl = import.meta.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787';
+        const response = await fetch(`${backendBaseUrl}/api/device-status/${deviceId}/status`);
+        if (response.ok) {
+          const status = await response.json();
+          setDeviceIsOn(status.isOn);
+          setDeviceIsHeating(status.isHeating);
+        } else {
+          console.error('Failed to fetch initial device status', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching initial device status:', error);
+      }
+    };
+
+    fetchInitialStatus();
+
     // For now, hardcode a deviceId. In a real app, this would come from user context or a config.
     const deviceId = 'my-esp32-device';
     const backendBaseUrl = import.meta.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787';

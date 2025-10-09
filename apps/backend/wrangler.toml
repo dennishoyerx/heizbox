@@ -23,7 +23,7 @@ class_name = "DeviceStatus" # The class name of your Durable Object
 
 [[migrations]]
 tag = "v1" # A unique tag for this migration
-new_classes = ["DeviceStatus"]
+new_sqlite_classes = ["DeviceStatus"]
 
 [dev]
 local_protocol = "http"
