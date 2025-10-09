@@ -197,12 +197,18 @@ void Device::handleInput(InputEvent event) {
     const char* btnStr = event.button == UP ? "UP" :
                          event.button == DOWN ? "DOWN" :
                          event.button == LEFT ? "LEFT" :
-                         event.button == RIGHT ? "RIGHT" : "FIRE";
+                         event.button == RIGHT ? "RIGHT" :
+                         event.button == CENTER ? "CENTER" : "FIRE";
     Serial.printf("🎮 %s %s\n", btnStr, typeStr);
 
     // Pass input to the screen manager
     screenManager.handleInput(event);
+
+    // Handle global screen switching
+    handleGlobalScreenSwitching(event);
 }
+
+void Device::handleGlobalScreenSwitching(InputEvent event) {
 
 void Device::handleGlobalScreenSwitching(InputEvent event) {
     if (screenManager.getCurrentScreenType() == ScreenType::MAIN_MENU && event.button == LEFT && event.type == HOLD) {
