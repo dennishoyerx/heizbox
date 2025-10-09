@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { ApiResponse } from '@heizbox/types';
 import { fetchSessions } from '../api';
 import { SessionCard } from './components/SessionCard';
+import { Circle, CircleNotch } from '@phosphor-icons/react';
 
 // --- REDESIGNED MAIN APP ---
 
@@ -77,8 +78,8 @@ function App() {
 
     ws.onclose = () => {
       console.log('WebSocket disconnected from device status');
-      setDeviceIsOn(false); // Device is off if WebSocket disconnects
-      setDeviceIsHeating(false); // Device is not heating if WebSocket disconnects
+      setDeviceIsOn(false);
+      setDeviceIsHeating(false); 
     };
 
     ws.onerror = (err) => {
@@ -90,7 +91,7 @@ function App() {
     return () => {
       // ws.close(); // Temporarily commented out for debugging
     };
-  }, []); // Run once on component mount
+  }, []);
 
   return (
     <div className="bg-slate-50 font-sans min-h-screen">
@@ -99,7 +100,14 @@ function App() {
           <h1 className="text-3xl font-bold text-slate-900">Heizbox Sessions</h1>
           {data && <div className="font-mono text-slate-600 mt-1">Verbrauch: {data.totalConsumption}g</div>}
           <div className="mt-2 text-sm text-slate-500">
-            Gerät Status: <span className={`font-semibold ${deviceIsOn ? 'text-green-500' : 'text-red-500'}`}>
+            Gerät Status: <span className={`inline-block w-4 h-4 align-middle ${deviceIsOn ? 'text-green-500' : 'text-red-500'}`}>
+              {deviceIsOn ? (
+                <Circle weight="fill" className="w-full h-full" />
+              ) : (
+                <CircleNotch weight="fill" className="w-full h-full" />
+              )}
+            </span>
+            <span className="font-semibold ml-2">
               {deviceIsOn ? 'Online' : 'Offline'}
             </span>
           </div>
