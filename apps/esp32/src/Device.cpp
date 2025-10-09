@@ -209,6 +209,8 @@ void Device::handleInput(InputEvent event) {
 }
 
 void Device::handleGlobalScreenSwitching(InputEvent event) {
+
+void Device::handleGlobalScreenSwitching(InputEvent event) {
     if (screenManager.getCurrentScreenType() == ScreenType::MAIN_MENU && event.button == LEFT && event.type == HOLD) {
         screenManager.setScreen(&fireScreen);
     } else if (screenManager.getCurrentScreenType() == ScreenType::FIRE && event.button == LEFT && event.type == HOLD) {
