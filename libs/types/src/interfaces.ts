@@ -18,3 +18,14 @@ export interface SessionRow {
   duration: number;
   cycle: number;
 }
+
+export interface WebSocketMessage {
+  type: string;
+  [key: string]: any;
+}
+
+export interface SessionData {
+  clicks: number;
+  lastClick: number;
+  sessionStart: number;
+}

@@ -1,13 +1,17 @@
 import { Hono } from 'hono';
 import { createSession } from '../lib/session';
+import type { SessionData } from '@heizbox/types';
 
 export class DeviceStatus {
   state: DurableObjectState;
   app: Hono;
   env: Env; // Add env member variable
-  isOn: boolean = false; // Default status
-  isHeating: boolean = false; // New: Default heating status
-  lastSeen: number = 0; // Timestamp of last heartbeat
+  isOn = false; // Default status
+  isHeating = false; // New: Default heating status
+  lastSeen = 0; // Timestamp of last heartbeat
+  currentSessionClicks = 0; // New: Clicks in current heating session
+  currentSessionLastClick = 0; // New: Timestamp of last click in current heating session
+  currentSessionStart = 0; // New: Timestamp of current heating session start
   subscribers: Set<WebSocket> = new Set(); // Store connected WebSocket clients (subscribers)
 
   private readonly OFFLINE_THRESHOLD = 90 * 1000; // 90 seconds
@@ -28,6 +32,15 @@ export class DeviceStatus {
       const storedLastSeen = await this.state.storage.get<number>('lastSeen');
       this.lastSeen = storedLastSeen !== undefined ? storedLastSeen : 0;
 
+      const storedSessionClicks = await this.state.storage.get<number>('currentSessionClicks');
+      this.currentSessionClicks = storedSessionClicks !== undefined ? storedSessionClicks : 0;
+
+      const storedSessionLastClick = await this.state.storage.get<number>('currentSessionLastClick');
+      this.currentSessionLastClick = storedSessionLastClick !== undefined ? storedSessionLastClick : 0;
+
+      const storedSessionStart = await this.state.storage.get<number>('currentSessionStart');
+      this.currentSessionStart = storedSessionStart !== undefined ? storedSessionStart : 0;
+
       // Set an alarm to periodically check for offline devices
       const currentAlarm = await this.state.storage.getAlarm();
       if (currentAlarm === null) {
@@ -38,6 +51,14 @@ export class DeviceStatus {
     // Define routes for the Durable Object
     this.app.get('/status', (c) => {
       return c.json({ isOn: this.isOn, isHeating: this.isHeating });
+    });
+
+    this.app.get('/session-data', (c) => {
+      return c.json({
+        clicks: this.currentSessionClicks,
+        lastClick: this.currentSessionLastClick,
+        sessionStart: this.currentSessionStart,
+      });
     });
 
     this.app.post('/status', async (c) => {
@@ -91,6 +112,22 @@ export class DeviceStatus {
     });
   }
 
+  // Method to send current session data to a specific WebSocket
+  sendSessionData(ws: WebSocket) {
+    const sessionData: SessionData & { type: string } = {
+      type: 'sessionData',
+      clicks: this.currentSessionClicks,
+      lastClick: this.currentSessionLastClick,
+      sessionStart: this.currentSessionStart,
+    };
+    try {
+      ws.send(JSON.stringify(sessionData));
+    } catch (err) {
+      console.error('Error sending session data to WebSocket:', err);
+      this.subscribers.delete(ws); // Remove broken connection
+    }
+  }
+
   // Method to publish messages to all connected subscribers
   publish(message: any) {
     console.log('DeviceStatus: Publishing message to subscribers:', message);
@@ -116,6 +153,13 @@ export class DeviceStatus {
       server.accept();
       console.log('DeviceStatus: WebSocket server accepted');
       this.subscribers.add(server);
+
+      // If it's a device connection, send current session data
+      const url = new URL(request.url);
+      const connectionType = url.searchParams.get('type');
+      if (connectionType === 'device') {
+        this.sendSessionData(server);
+      }
 
       server.addEventListener('message', async (event) => {
         try {
@@ -200,6 +244,27 @@ export class DeviceStatus {
         this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
       }
       this.publish(message); // Publish the heat cycle completed message to all subscribers
+    } else if (message.type === 'sessionUpdate' && typeof message.clicks === 'number' && typeof message.lastClick === 'number' && typeof message.sessionStart === 'number') {
+      let sessionDataChanged = false;
+      if (this.currentSessionClicks !== message.clicks) {
+        this.currentSessionClicks = message.clicks;
+        await this.state.storage.put('currentSessionClicks', this.currentSessionClicks);
+        sessionDataChanged = true;
+      }
+      if (this.currentSessionLastClick !== message.lastClick) {
+        this.currentSessionLastClick = message.lastClick;
+        await this.state.storage.put('currentSessionLastClick', this.currentSessionLastClick);
+        sessionDataChanged = true;
+      }
+      if (this.currentSessionStart !== message.sessionStart) {
+        this.currentSessionStart = message.sessionStart;
+        await this.state.storage.put('currentSessionStart', this.currentSessionStart);
+        sessionDataChanged = true;
+      }
+      if (sessionDataChanged) {
+        console.log('DeviceStatus: Session data updated from device message.', { clicks: this.currentSessionClicks, lastClick: this.currentSessionLastClick, sessionStart: this.currentSessionStart });
+        this.publish({ type: 'sessionData', clicks: this.currentSessionClicks, lastClick: this.currentSessionLastClick, sessionStart: this.currentSessionStart }); // Publish the session data update to all subscribers
+      }
     }
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }

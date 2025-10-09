@@ -1,9 +1,5 @@
 import type { Context } from 'hono';
-
-interface WebSocketMessage {
-  topic: string;
-  data: any;
-}
+import type { WebSocketMessage } from '@heizbox/types';
 
 export const handleWebSocket = async (c: Context<{ Bindings: Env }>) => {
   const upgradeHeader = c.req.header('Upgrade');
@@ -30,6 +26,11 @@ export const handleWebSocket = async (c: Context<{ Bindings: Env }>) => {
     const [client, server] = Object.values(webSocketPair);
 
     server.accept();
+
+    // Fetch initial session data from Durable Object and send to device
+    const sessionDataResponse = await stub.fetch(new Request('http://dummy-host/session-data'));
+    const sessionData = await sessionDataResponse.json();
+    server.send(JSON.stringify({ type: 'sessionData', ...sessionData }));
 
     // Update device status to 'on' when connected
     await stub.fetch(new Request('http://dummy-host/status', {

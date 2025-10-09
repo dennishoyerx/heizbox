@@ -1,6 +1,6 @@
 import { D1Database } from '@cloudflare/workers-types';
 
-export async function createSession(db: D1Database, duration: number, cycle: number = 1): Promise<boolean> {
+export async function createSession(db: D1Database, duration: number, cycle = 1): Promise<boolean> {
   try {
     console.log(`createSession called with duration: ${duration}, cycle: ${cycle}`);
     if (isNaN(duration) || duration <= 0 || isNaN(cycle) || cycle <= 0) {
