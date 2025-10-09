@@ -67,6 +67,10 @@ function App() {
       if (message && typeof message.isHeating === 'boolean') {
         setDeviceIsHeating(message.isHeating);
       }
+      if (message && message.type === 'sessionCreated') {
+        console.log('New session created, re-fetching sessions...');
+        loadData(); // Re-fetch sessions
+      }
       // TODO: Handle other types of messages from the device
     };
 

@@ -1,16 +1,18 @@
-// apps/backend/src/durable-objects/DeviceStatus.ts
 import { Hono } from 'hono';
+import { createSession } from '../lib/session';
 
 export class DeviceStatus {
   state: DurableObjectState;
   app: Hono;
+  env: Env; // Add env member variable
   isOn: boolean = false; // Default status
   isHeating: boolean = false; // New: Default heating status
   subscribers: Set<WebSocket> = new Set(); // Store connected WebSocket clients (subscribers)
 
-  constructor(state: DurableObjectState) {
+  constructor(state: DurableObjectState, env: Env) { // Accept env in constructor
     this.state = state;
     this.app = new Hono();
+    this.env = env; // Store env
 
     // Initialize the status from storage when the Durable Object is created
     this.state.blockConcurrencyWhile(async () => {
@@ -67,6 +69,9 @@ export class DeviceStatus {
         if (statusChanged) {
           console.log('DeviceStatus: State updated from WebSocket message.', { isOn: this.isOn, isHeating: this.isHeating });
         }
+      } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
+        console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
+        await createSession(this.env.db, message.duration, message.cycle || 1); // Use this.env.db
       }
 
       this.publish(message);
@@ -76,6 +81,7 @@ export class DeviceStatus {
 
   // Method to publish messages to all connected subscribers
   publish(message: any) {
+    console.log('DeviceStatus: Publishing message to subscribers:', message);
     const messageString = JSON.stringify(message);
     this.subscribers.forEach((ws) => {
       try {
@@ -88,33 +94,91 @@ export class DeviceStatus {
   }
 
   async fetch(request: Request): Promise<Response> {
+    console.log('DeviceStatus fetch called');
     const upgradeHeader = request.headers.get('Upgrade');
     if (upgradeHeader === 'websocket') {
+      console.log('DeviceStatus: Upgrade header is websocket');
       const webSocketPair = new WebSocketPair();
       const [client, server] = Object.values(webSocketPair);
 
       server.accept();
+      console.log('DeviceStatus: WebSocket server accepted');
       this.subscribers.add(server);
 
       server.addEventListener('message', async (event) => {
-        // Handle messages from subscribers if needed (e.g., for topic subscriptions)
-        console.log('Received message from subscriber:', event.data);
+        try {
+          const message = JSON.parse(event.data as string);
+          console.log('Received message from subscriber:', message);
+          // For frontend subscribers, just publish the message
+          this.publish(message);
+        } catch (error) {
+          console.error('Error in DeviceStatus WebSocket message handler:', error);
+        }
       });
 
       server.addEventListener('close', () => {
-        this.subscribers.delete(server);
-        console.log('Subscriber WebSocket closed');
+        try {
+          this.subscribers.delete(server);
+          console.log('Subscriber WebSocket closed');
+        } catch (error) {
+          console.error('Error in DeviceStatus WebSocket close handler:', error);
+        }
       });
 
       server.addEventListener('error', (err) => {
-        this.subscribers.delete(server);
-        console.error('Subscriber WebSocket error:', err);
+        try {
+          this.subscribers.delete(server);
+          console.error('Subscriber WebSocket error:', err);
+        } catch (error) {
+          console.error('Error in DeviceStatus WebSocket error handler:', error);
+        }
       });
 
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    // If not a WebSocket upgrade, handle as a regular HTTP request
+    // Handle HTTP requests for status updates and device messages
+    if (request.url.endsWith('/process-device-message')) {
+      return this.processDeviceMessage(request);
+    }
+
+    // If not a WebSocket upgrade or device message, handle as a regular HTTP request
     return this.app.fetch(request);
+  }
+
+  // New method to process messages coming from devices
+  async processDeviceMessage(request: Request): Promise<Response> {
+    const rawBody = await request.text();
+    console.log('DeviceStatus: Raw device message body:', rawBody);
+    const message = JSON.parse(rawBody);
+    console.log('DeviceStatus: Processing device message:', message);
+    if (message.type === 'statusUpdate') {
+      let statusChanged = false;
+
+      if (typeof message.isOn === 'boolean' && this.isOn !== message.isOn) {
+        this.isOn = message.isOn;
+        await this.state.storage.put('isOn', this.isOn);
+        statusChanged = true;
+      }
+
+      if (typeof message.isHeating === 'boolean' && this.isHeating !== message.isHeating) {
+        this.isHeating = message.isHeating;
+        await this.state.storage.put('isHeating', this.isHeating);
+        statusChanged = true;
+      }
+
+      if (statusChanged) {
+        console.log('DeviceStatus: State updated from device message.', { isOn: this.isOn, isHeating: this.isHeating });
+        this.publish(message); // Publish the status update to all subscribers
+      }
+    } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
+      console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
+      const success = await createSession(this.env.db, message.duration, message.cycle || 1);
+      if (success) {
+        this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
+      }
+      this.publish(message); // Publish the heat cycle completed message to all subscribers
+    }
+    return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
   }
 }

@@ -104,6 +104,25 @@ void Device::loop() {
         _lastHeatingStatusSent = currentHeatingStatus;
     }
 
+    // Check if a heat cycle has finished and send data
+    if (heater.isCycleFinished()) {
+        unsigned long duration = heater.getLastCycleDuration();
+        if (webSocket.isConnected()) {
+            DynamicJsonDocument doc(128);
+            doc["type"] = "heatCycleCompleted";
+            doc["duration"] = duration / 1000; // Convert to seconds
+            // Optionally add cycle count if needed
+            // doc["cycle"] = heater.getCycleCount();
+            String output;
+            serializeJson(doc, output);
+            webSocket.sendTXT(output);
+            Serial.printf("✅ WS Sent heat cycle completed: %s\n", output.c_str());
+        } else {
+            Serial.println("❌ WebSocket not connected, cannot send heat cycle data.");
+        }
+        heater.clearCycleFinishedFlag();
+    }
+
     screenManager.update();
     screenManager.draw();
 
@@ -160,11 +179,11 @@ void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t lengt
             }
             break;
         case WStype_TEXT:
-            Serial.printf("[WS] get text: %s\n", payload);
+            // Serial.printf("[WS] get text: %s\n", payload);
             // Handle incoming messages if needed
             break;
         case WStype_BIN:
-            Serial.printf("[WS] get binary length: %u\n", length);
+            // Serial.printf("[WS] get binary length: %u\n", length);
             break;
         case WStype_ERROR:
             Serial.printf("[WS] Error: %s\n", payload);
@@ -178,15 +197,11 @@ void Device::handleInput(InputEvent event) {
     const char* btnStr = event.button == UP ? "UP" :
                          event.button == DOWN ? "DOWN" :
                          event.button == LEFT ? "LEFT" :
-                         event.button == RIGHT ? "RIGHT" :
-                         event.button == CENTER ? "CENTER" : "FIRE";
+                         event.button == RIGHT ? "RIGHT" : "FIRE";
     Serial.printf("🎮 %s %s\n", btnStr, typeStr);
 
     // Pass input to the screen manager
     screenManager.handleInput(event);
-
-    // Handle global screen switching
-    handleGlobalScreenSwitching(event);
 }
 
 void Device::handleGlobalScreenSwitching(InputEvent event) {

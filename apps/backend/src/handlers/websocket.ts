@@ -43,28 +43,32 @@ export const handleWebSocket = async (c: Context<{ Bindings: Env }>) => {
         const message: WebSocketMessage = JSON.parse(event.data as string);
         console.log('Received WebSocket message from device:', deviceId, message);
 
-        // Forward message to the Durable Object to be published to subscribers
-        await stub.fetch(new Request('http://dummy-host/publish', { // Use a dummy URL, actual path doesn't matter for DO internal routing
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(message),
-        }));
+    // Forward message to the Durable Object for processing
+    await stub.fetch(new Request('http://dummy-host/process-device-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    }));
 
-      } catch (error) {
-        console.error('Error processing WebSocket message from device:', error);
-        server.send(JSON.stringify({ error: 'Invalid message format' }));
-      }
-    });
-
+        } catch (error) {
+          console.error('Error processing WebSocket message from device:', deviceId, error);
+          server.send(JSON.stringify({ error: 'Invalid message format' }));
+        }
+      });
     server.addEventListener('close', async () => {
-      console.log('WebSocket closed for device:', deviceId);
-      // Update device status to 'off' when disconnected
-      await stub.fetch(new Request('http://dummy-host/status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isOn: false, isHeating: false }), // Include isHeating
-      }));
-    });
+        console.log('WebSocket closed for device (handler):', deviceId);
+        // Update device status to 'off' when disconnected
+        try {
+          await stub.fetch(new Request('http://dummy-host/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ isOn: false, isHeating: false }), // Include isHeating
+          }));
+          console.log('Device status updated to offline for device:', deviceId);
+        } catch (error) {
+          console.error('Error updating device status to offline for device:', deviceId, error);
+        }
+      });
 
     server.addEventListener('error', (error) => {
       console.error('WebSocket error for device:', deviceId, error);

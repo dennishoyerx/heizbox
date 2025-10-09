@@ -4,6 +4,8 @@ compatibility_date = "2025-04-01"
 account_id = "3ebe65c531d29ca9dd24e28af3da9a82"
 compatibility_flags = ["nodejs_compat"]
 
+web_sockets = true
+
 [[d1_databases]]
 binding = "db" # This is the binding name in your Worker code
 database_name = "heizbox"
@@ -13,8 +15,6 @@ migrations_dir = "migrations"
 [[kv_namespaces]]
 binding = "__STATIC_CONTENT"
 id = "fa8331445aee4fb89d28386b5229a6a2"
-
-web_sockets = true
 
 # Durable Object binding for DeviceStatus
 [[durable_objects.bindings]]

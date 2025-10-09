@@ -46,6 +46,7 @@
     "build": "pnpm exec nx run-many --target=build --projects=frontend,backend --parallel",
     "deploy": "pnpm exec nx run-many --target=deploy --projects=frontend,backend --parallel",
     "down": "pnpm exec nx run backend:db-sync",
+    "backend:down": "pnpm exec nx run backend:db-sync",
     "esp:build": "pnpm exec nx run esp32:build",
     "esp:upload": "pnpm exec nx run esp32:upload",
     "esp:ota": "pnpm exec nx run esp32:ota",
@@ -59,6 +60,7 @@
     "dev:backend": "pnpm nx serve backend",
     "build:backend": "pnpm nx build backend",
     "deploy:backend": "pnpm nx deploy backend",
+    "deploy:esp": "pnpm esp:ota",
     "build:esp32": "pnpm nx build esp32",
     "upload:esp32": "pnpm nx upload esp32",
     "monitor:esp32": "pnpm nx monitor esp32"

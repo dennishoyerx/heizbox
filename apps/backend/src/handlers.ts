@@ -1,6 +1,7 @@
 import type { SessionRow } from '@heizbox/types';
 import { getBerlinTimeRange, groupSessions, calculateConsumption, getMimeType } from './utils';
 import type { Context } from 'hono';
+import { createSession } from './lib/session';
 
 export const handleGetSessions = async (c: Context<{ Bindings: Env }>) => {
   try {
@@ -49,26 +50,13 @@ export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
     const duration = parseFloat(durationStr);
     const cycle = cycleStr ? parseInt(cycleStr, 10) : 1; // Default to 1 if not provided
 
-    if (isNaN(duration) || duration <= 0 || isNaN(cycle) || cycle <= 0) {
-      return c.text("Invalid duration or cycle", 400);
+    const success = await createSession(c.env.db, duration, cycle);
+
+    if (success) {
+      return c.text("OK");
+    } else {
+      return c.text("Failed to create session", 500);
     }
-
-    // Debounce: Check for recent identical entries
-    const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
-    const { count } = await c.env.db.prepare(
-      "SELECT COUNT(*) as count FROM sessions WHERE duration = ?1 AND cycle = ?2 AND created_at > ?3"
-    ).bind(duration, cycle, thirtySecondsAgo).first<{ count: number }>();
-
-    if (count > 0) {
-      return c.text("Duplicate within 30s, not inserted", 200);
-    }
-
-    const now = new Date().toISOString();
-    await c.env.db.prepare(
-      "INSERT INTO sessions (duration, cycle, created_at) VALUES (?1, ?2, ?3)"
-    ).bind(duration, cycle, now).run();
-
-    return c.text("OK");
   } catch (e: unknown) {
     console.error("Error in handleCreateSession:", e);
     const error = e as Error;
