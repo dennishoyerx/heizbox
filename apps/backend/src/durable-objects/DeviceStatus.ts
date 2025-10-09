@@ -7,7 +7,10 @@ export class DeviceStatus {
   env: Env; // Add env member variable
   isOn: boolean = false; // Default status
   isHeating: boolean = false; // New: Default heating status
+  lastSeen: number = 0; // Timestamp of last heartbeat
   subscribers: Set<WebSocket> = new Set(); // Store connected WebSocket clients (subscribers)
+
+  private readonly OFFLINE_THRESHOLD = 90 * 1000; // 90 seconds
 
   constructor(state: DurableObjectState, env: Env) { // Accept env in constructor
     this.state = state;
@@ -21,6 +24,15 @@ export class DeviceStatus {
 
       const storedIsHeating = await this.state.storage.get<boolean>('isHeating');
       this.isHeating = storedIsHeating !== undefined ? storedIsHeating : false;
+
+      const storedLastSeen = await this.state.storage.get<number>('lastSeen');
+      this.lastSeen = storedLastSeen !== undefined ? storedLastSeen : 0;
+
+      // Set an alarm to periodically check for offline devices
+      const currentAlarm = await this.state.storage.getAlarm();
+      if (currentAlarm === null) {
+        await this.state.storage.setAlarm(Date.now() + this.OFFLINE_THRESHOLD);
+      }
     });
 
     // Define routes for the Durable Object
@@ -171,6 +183,16 @@ export class DeviceStatus {
         console.log('DeviceStatus: State updated from device message.', { isOn: this.isOn, isHeating: this.isHeating });
         this.publish(message); // Publish the status update to all subscribers
       }
+    } else if (message.type === 'heartbeat') {
+      this.lastSeen = Date.now();
+      await this.state.storage.put('lastSeen', this.lastSeen);
+      console.log('DeviceStatus: Heartbeat received. lastSeen updated to', this.lastSeen);
+      // Optionally, publish a status update if the device was previously considered offline
+      if (!this.isOn) {
+        this.isOn = true;
+        await this.state.storage.put('isOn', this.isOn);
+        this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating });
+      }
     } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
       console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
       const success = await createSession(this.env.db, message.duration, message.cycle || 1);
@@ -180,5 +202,18 @@ export class DeviceStatus {
       this.publish(message); // Publish the heat cycle completed message to all subscribers
     }
     return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+  }
+
+  async alarm() {
+    console.log('DeviceStatus: Alarm triggered.');
+    const now = Date.now();
+    if (this.isOn && (now - this.lastSeen > this.OFFLINE_THRESHOLD)) {
+      console.log('DeviceStatus: Device is offline. Setting isOn to false.');
+      this.isOn = false;
+      await this.state.storage.put('isOn', this.isOn);
+      this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating });
+    }
+    // Reschedule the alarm
+    await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
   }
 }

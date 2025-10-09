@@ -104,6 +104,22 @@ void Device::loop() {
         _lastHeatingStatusSent = currentHeatingStatus;
     }
 
+    // Send heartbeat
+    if (millis() - _lastHeartbeatTime > HEARTBEAT_INTERVAL) {
+        if (webSocket.isConnected()) {
+            DynamicJsonDocument doc(128);
+            doc["type"] = "heartbeat";
+            doc["isOn"] = true; // Device is on and sending heartbeat
+            String output;
+            serializeJson(doc, output);
+            webSocket.sendTXT(output);
+            Serial.printf("❤️ WS Sent heartbeat: %s\n", output.c_str());
+        } else {
+            Serial.println("❌ WebSocket not connected, cannot send heartbeat.");
+        }
+        _lastHeartbeatTime = millis();
+    }
+
     // Check if a heat cycle has finished and send data
     if (heater.isCycleFinished()) {
         unsigned long duration = heater.getLastCycleDuration();
@@ -177,6 +193,7 @@ void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t lengt
                 webSocket.sendTXT(output);
                 Serial.printf("✅ WS Sent initial status: %s\n", output.c_str());
             }
+            _lastHeartbeatTime = millis(); // Initialize heartbeat timer on connection
             break;
         case WStype_TEXT:
             // Serial.printf("[WS] get text: %s\n", payload);
@@ -209,16 +226,12 @@ void Device::handleInput(InputEvent event) {
 }
 
 void Device::handleGlobalScreenSwitching(InputEvent event) {
-
-void Device::handleGlobalScreenSwitching(InputEvent event) {
     if (screenManager.getCurrentScreenType() == ScreenType::MAIN_MENU && event.button == LEFT && event.type == HOLD) {
         screenManager.setScreen(&fireScreen);
     } else if (screenManager.getCurrentScreenType() == ScreenType::FIRE && event.button == LEFT && event.type == HOLD) {
         screenManager.setScreen(&mainMenuScreen);
     }
 }
-
-
 
 void Device::WiFiEvent(WiFiEvent_t event) {
     switch (event) {

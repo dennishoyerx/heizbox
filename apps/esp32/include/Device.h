@@ -59,4 +59,6 @@ private:
     static void sendHeatingDataTask(void* pvParameters); // This can probably be removed later
 
     bool _lastHeatingStatusSent = false; // Track last sent heating status
+    unsigned long _lastHeartbeatTime = 0;
+    const unsigned long HEARTBEAT_INTERVAL = 30000; // 30 seconds
 };
