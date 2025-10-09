@@ -11,9 +11,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
   const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
-
-  useEffect(() => {
-    const loadData = async () => {
+  
+  const loadData = async () => {
       try {
         setLoading(true);
         const result = await fetchSessions();
@@ -23,7 +22,9 @@ function App() {
       } finally {
         setLoading(false);
       }
-    };
+  };
+
+  useEffect(() => {
     loadData();
   }, []);
 
