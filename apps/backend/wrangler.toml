@@ -14,9 +14,19 @@ migrations_dir = "migrations"
 binding = "__STATIC_CONTENT"
 id = "fa8331445aee4fb89d28386b5229a6a2"
 
+web_sockets = true
+
+# Durable Object binding for DeviceStatus
+[[durable_objects.bindings]]
+name = "DEVICE_STATUS" # The binding name used in your Worker
+class_name = "DeviceStatus" # The class name of your Durable Object
+
+[[migrations]]
+tag = "v1" # A unique tag for this migration
+new_classes = ["DeviceStatus"]
+
 [dev]
 local_protocol = "http"
-web_sockets = true
 
 [observability.logs]
 enabled = true
