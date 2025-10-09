@@ -12,20 +12,7 @@ function App() {
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
   const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const result = await fetchSessions();
-        setData(result);
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
+
 
   useEffect(() => {
     const fetchInitialStatus = async () => {
@@ -89,7 +76,7 @@ function App() {
     return () => {
       // ws.close(); // Temporarily commented out for debugging
     };
-  }, []); // Run once on component mount
+  }, [loadData]); // Run once on component mount
 
   return (
     <div className="bg-slate-50 font-sans min-h-screen">
