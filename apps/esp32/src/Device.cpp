@@ -2,19 +2,13 @@
 #include "nvs_flash.h"
 #include "ScreenType.h"
 #include "credentials.h"
+#include "config.h" // Include config.h
 #include <HTTPClient.h>
 #include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 
 // Static instance pointer initialization
 Device* Device::instance = nullptr;
-
-// WebSocket event handler
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
-    if (Device::instance) {
-        Device::instance->handleWebSocketEvent(type, payload, length);
-    }
-}
 
 Device::Device()
     : input(),
@@ -30,6 +24,13 @@ Device::Device()
       screensaverScreen(clockManager, 30000, &display),
       otaUpdateScreen(&display) {
     instance = this; // Set the static instance pointer
+}
+
+// WebSocket event handler
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+    if (Device::instance) {
+        Device::instance->handleWebSocketEvent(type, payload, length);
+    }
 }
 
 void Device::setup() {
@@ -96,9 +97,11 @@ void Device::loop() {
     display.renderStatusBar();
     webSocket.loop(); // Process WebSocket events
 
-    if (heater.isCycleFinished()) {
-        sendHeatingData(heater.getLastCycleDuration());
-        heater.clearCycleFinishedFlag();
+    // Check heating status and send update if changed
+    bool currentHeatingStatus = heater.isHeating();
+    if (currentHeatingStatus != _lastHeatingStatusSent) {
+        sendHeatingStatus(currentHeatingStatus);
+        _lastHeatingStatusSent = currentHeatingStatus;
     }
 
     screenManager.update();
@@ -109,8 +112,30 @@ void Device::loop() {
     delay(5);
 }
 
+void Device::sendHeatingStatus(bool heatingStatus) {
+    if (webSocket.isConnected()) {
+        DynamicJsonDocument doc(128);
+        doc["type"] = "statusUpdate";
+        doc["isHeating"] = heatingStatus;
+        String output;
+        serializeJson(doc, output);
+        webSocket.sendTXT(output);
+        Serial.printf("✅ WS Sent heating status: %s\n", output.c_str());
+    } else {
+        Serial.println("❌ WebSocket not connected, cannot send heating status.");
+    }
+}
+
 void Device::initWebSocket() {
-    webSocket.beginSSL("heizbox.dh19.workers.dev", 443, "/ws/status", "", "/", "wss");
+    String wsUrl = String(BACKEND_WS_URL) + "?deviceId=" + DEVICE_ID + "&type=device";
+    Serial.printf("[WS] Connecting to: %s\n", wsUrl.c_str());
+
+    // Parse URL to get host, port, and path
+    String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws/status"));
+    String path = wsUrl.substring(wsUrl.indexOf("/ws/status"));
+    int port = 443; // Assuming SSL/WSS
+
+    webSocket.beginSSL(host.c_str(), port, path.c_str(), "", "/");
     webSocket.onEvent(webSocketEvent);
     webSocket.setReconnectInterval(5000); // Try to reconnect every 5s
 }
@@ -122,8 +147,17 @@ void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t lengt
             break;
         case WStype_CONNECTED:
             Serial.printf("[WS] Connected to url: %s\n", payload);
-            // Send device info on connect
-            webSocket.sendTXT("{\"topic\":\"heizbox/device\",\"data\":{\"id\":\"esp32-heizbox-1\",\"status\":\"online\"}}");
+            // Send initial status (isOn: true, isHeating: false)
+            {
+                DynamicJsonDocument doc(128);
+                doc["type"] = "statusUpdate";
+                doc["isOn"] = true;
+                doc["isHeating"] = false;
+                String output;
+                serializeJson(doc, output);
+                webSocket.sendTXT(output);
+                Serial.printf("✅ WS Sent initial status: %s\n", output.c_str());
+            }
             break;
         case WStype_TEXT:
             Serial.printf("[WS] get text: %s\n", payload);
@@ -133,10 +167,7 @@ void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t lengt
             Serial.printf("[WS] get binary length: %u\n", length);
             break;
         case WStype_ERROR:
-        case WStype_FRAGMENT_TEXT_START:
-        case WStype_FRAGMENT_BIN_START:
-        case WStype_FRAGMENT:
-        case WStype_FRAGMENT_FIN:
+            Serial.printf("[WS] Error: %s\n", payload);
             break;
     }
 }
@@ -166,23 +197,7 @@ void Device::handleGlobalScreenSwitching(InputEvent event) {
     }
 }
 
-void Device::sendHeatingData(unsigned long duration) {
-    if (webSocket.isConnected()) {
-        DynamicJsonDocument doc(128);
-        doc["topic"] = "heizbox/status";
-        JsonObject data = doc.createNestedObject("data");
-        data["heating"] = "on"; // Example status
-        data["state"] = "on";   // Example status
-        data["duration"] = duration / 1000; // Convert milliseconds to seconds
 
-        String output;
-        serializeJson(doc, output);
-        webSocket.sendTXT(output);
-        Serial.printf("✅ WS Sent heating data: %s\n", output.c_str());
-    } else {
-        Serial.println("❌ WebSocket not connected, cannot send heating data.");
-    }
-}
 
 void Device::WiFiEvent(WiFiEvent_t event) {
     switch (event) {
@@ -199,7 +214,11 @@ void Device::WiFiEvent(WiFiEvent_t event) {
                 instance->clockManager.init();
             }
             if (instance) {
-                instance->webSocket.beginSSL("heizbox.dh19.workers.dev", 443, "/ws/status", "", "/", "wss");
+                String wsUrl = String(BACKEND_WS_URL) + "?deviceId=" + DEVICE_ID + "&type=device";
+                String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws/status"));
+                String path = wsUrl.substring(wsUrl.indexOf("/ws/status"));
+                int port = 443; // Assuming SSL/WSS
+                instance->webSocket.beginSSL(host.c_str(), port, path.c_str(), "", "/");
             }
             break;
         case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:

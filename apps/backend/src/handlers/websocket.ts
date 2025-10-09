@@ -35,7 +35,7 @@ export const handleWebSocket = async (c: Context<{ Bindings: Env }>) => {
     await stub.fetch(new Request('http://dummy-host/status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isOn: true }),
+      body: JSON.stringify({ isOn: true, isHeating: false }), // Include isHeating
     }));
 
     server.addEventListener('message', async (event) => {
@@ -62,7 +62,7 @@ export const handleWebSocket = async (c: Context<{ Bindings: Env }>) => {
       await stub.fetch(new Request('http://dummy-host/status', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isOn: false }),
+        body: JSON.stringify({ isOn: false, isHeating: false }), // Include isHeating
       }));
     });
 

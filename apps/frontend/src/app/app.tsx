@@ -10,6 +10,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
+  const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
 
   useEffect(() => {
     const loadData = async () => {
@@ -29,7 +30,7 @@ function App() {
   useEffect(() => {
     // For now, hardcode a deviceId. In a real app, this would come from user context or a config.
     const deviceId = 'my-esp32-device';
-    const backendBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8787'; // Assuming backend runs on 8787 locally
+    const backendBaseUrl = import.meta.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787';
     const wsUrl = `${backendBaseUrl.replace('http', 'ws')}/ws/status?deviceId=${deviceId}&type=frontend`;
 
     const ws = new WebSocket(wsUrl);
@@ -44,21 +45,26 @@ function App() {
       if (message && typeof message.isOn === 'boolean') {
         setDeviceIsOn(message.isOn);
       }
+      if (message && typeof message.isHeating === 'boolean') {
+        setDeviceIsHeating(message.isHeating);
+      }
       // TODO: Handle other types of messages from the device
     };
 
     ws.onclose = () => {
       console.log('WebSocket disconnected from device status');
       setDeviceIsOn(false); // Device is off if WebSocket disconnects
+      setDeviceIsHeating(false); // Device is not heating if WebSocket disconnects
     };
 
     ws.onerror = (err) => {
       console.error('WebSocket error:', err);
       setDeviceIsOn(false);
+      setDeviceIsHeating(false);
     };
 
     return () => {
-      ws.close();
+      // ws.close(); // Temporarily commented out for debugging
     };
   }, []); // Run once on component mount
 
@@ -71,6 +77,11 @@ function App() {
           <div className="mt-2 text-sm text-slate-500">
             Gerät Status: <span className={`font-semibold ${deviceIsOn ? 'text-green-500' : 'text-red-500'}`}>
               {deviceIsOn ? 'Online' : 'Offline'}
+            </span>
+          </div>
+          <div className="mt-1 text-sm text-slate-500">
+            Heizstatus: <span className={`font-semibold ${deviceIsHeating ? 'text-orange-500' : 'text-gray-500'}`}>
+              {deviceIsHeating ? 'Heizt' : 'Inaktiv'}
             </span>
           </div>
         </header>

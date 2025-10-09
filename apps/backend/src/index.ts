@@ -1,8 +1,33 @@
 import { Hono } from 'hono';
+import { cors } from 'hono/cors';
 import { handleGetSessions, handleGetJson, handleCreateSession, handleStaticAssets } from './handlers';
 import { handleWebSocket } from './handlers/websocket';
 
 const app = new Hono<{ Bindings: Env }>();
+
+app.use(
+  '/api/*',
+  cors({
+    origin: ['https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    exposeHeaders: ['Content-Length'],
+    maxAge: 600,
+    credentials: true,
+  })
+);
+
+app.use(
+  '/ws/*',
+  cors({
+    origin: ['https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
+    allowMethods: ['GET', 'OPTIONS'],
+    exposeHeaders: ['Content-Length'],
+    maxAge: 600,
+    credentials: true,
+  })
+);
 
 // API Routes
 app.get('/api/sessions', handleGetSessions);

@@ -21,7 +21,7 @@
     "ota": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pio run --target upload",
+        "command": "pio run -t upload -e esp32dev --upload-port Heizbox.local",
         "cwd": "apps/esp32"
       }
     },

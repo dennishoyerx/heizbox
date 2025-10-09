@@ -26,6 +26,13 @@ public:
     void setup();
     void loop();
 
+    // Public methods for WebSocket and static callbacks
+    void handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t length);
+    static void WiFiEvent(WiFiEvent_t event);
+    static Device* instance; 
+    void sendHeatingStatus(bool heatingStatus);
+
+
 private:
     // Core components
     InputManager input;
@@ -48,12 +55,8 @@ private:
 
     void handleInput(InputEvent event);
     void handleGlobalScreenSwitching(InputEvent event);
-    void sendHeatingData(unsigned long duration);
     void initWebSocket();
-    void handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t length);
-    static void WiFiEvent(WiFiEvent_t event);
-    static void sendHeatingDataTask(void* pvParameters);
+    static void sendHeatingDataTask(void* pvParameters); // This can probably be removed later
 
-    // A static pointer to the device instance to access it in static callbacks
-    static Device* instance; 
+    bool _lastHeatingStatusSent = false; // Track last sent heating status
 };

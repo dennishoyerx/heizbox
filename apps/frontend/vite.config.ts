@@ -11,7 +11,7 @@ export default defineConfig(() => ({
     port: 5173,
     host: '127.0.0.1',
     proxy: {
-      '/api': 'http://127.0.0.1:8787'
+      '/api': process.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787'
     }
   },
   preview: {
@@ -41,6 +41,7 @@ export default defineConfig(() => ({
     },
   },
   define: {
-    '__STATIC_CONTENT_MANIFEST': JSON.stringify('{}')
+    '__STATIC_CONTENT_MANIFEST': JSON.stringify('{}'),
+    'import.meta.env.VITE_PUBLIC_API_URL': JSON.stringify(process.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787')
   }
 }));

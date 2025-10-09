@@ -52,6 +52,15 @@
     "esp:monitor": "pnpm exec nx run esp32:monitor",
     "migrate:local": "cd apps/backend && wrangler d1 migrations apply heizbox --local",
     "migrate:remote": "cd apps/backend && wrangler d1 migrations apply heizbox --remote",
-    "test:backend": "pnpm exec nx run backend:test"
+    "test:backend": "pnpm exec nx run backend:test",
+    "dev:frontend": "pnpm nx serve frontend",
+    "build:frontend": "pnpm nx build frontend",
+    "deploy:frontend": "pnpm nx deploy frontend",
+    "dev:backend": "pnpm nx serve backend",
+    "build:backend": "pnpm nx build backend",
+    "deploy:backend": "pnpm nx deploy backend",
+    "build:esp32": "pnpm nx build esp32",
+    "upload:esp32": "pnpm nx upload esp32",
+    "monitor:esp32": "pnpm nx monitor esp32"
   }
 }

@@ -5,6 +5,7 @@ export class DeviceStatus {
   state: DurableObjectState;
   app: Hono;
   isOn: boolean = false; // Default status
+  isHeating: boolean = false; // New: Default heating status
   subscribers: Set<WebSocket> = new Set(); // Store connected WebSocket clients (subscribers)
 
   constructor(state: DurableObjectState) {
@@ -13,24 +14,38 @@ export class DeviceStatus {
 
     // Initialize the status from storage when the Durable Object is created
     this.state.blockConcurrencyWhile(async () => {
-      const stored = await this.state.storage.get<boolean>('isOn');
-      this.isOn = stored !== undefined ? stored : false;
+      const storedIsOn = await this.state.storage.get<boolean>('isOn');
+      this.isOn = storedIsOn !== undefined ? storedIsOn : false;
+
+      const storedIsHeating = await this.state.storage.get<boolean>('isHeating');
+      this.isHeating = storedIsHeating !== undefined ? storedIsHeating : false;
     });
 
     // Define routes for the Durable Object
     this.app.get('/status', (c) => {
-      return c.json({ isOn: this.isOn });
+      return c.json({ isOn: this.isOn, isHeating: this.isHeating });
     });
 
     this.app.post('/status', async (c) => {
-      const { isOn } = await c.req.json();
-      if (typeof isOn === 'boolean') {
+      const { isOn, isHeating } = await c.req.json();
+      let statusChanged = false;
+
+      if (typeof isOn === 'boolean' && this.isOn !== isOn) {
         this.isOn = isOn;
         await this.state.storage.put('isOn', this.isOn);
-        this.publish({ type: 'statusUpdate', isOn: this.isOn }); // Publish status update
-        return c.json({ success: true, isOn: this.isOn });
+        statusChanged = true;
       }
-      return c.json({ success: false, error: 'Invalid status' }, 400);
+
+      if (typeof isHeating === 'boolean' && this.isHeating !== isHeating) {
+        this.isHeating = isHeating;
+        await this.state.storage.put('isHeating', this.isHeating);
+        statusChanged = true;
+      }
+
+      if (statusChanged) {
+        this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating }); // Publish status update
+      }
+      return c.json({ success: true, isOn: this.isOn, isHeating: this.isHeating });
     });
 
     this.app.post('/publish', async (c) => {
