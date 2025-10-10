@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createSession } from '../lib/session';
+import { createHeatCycle } from '../lib/session';
 import type { SessionData } from '@heizbox/types';
 
 export class DeviceStatus {
@@ -104,7 +104,7 @@ export class DeviceStatus {
         }
       } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
         console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
-        await createSession(this.env.db, message.duration, message.cycle || 1); // Use this.env.db
+        await createHeatCycle(this.env.db, message.duration, message.cycle || 1); // Use this.env.db
       }
 
       this.publish(message);
@@ -239,7 +239,7 @@ export class DeviceStatus {
       }
     } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
       console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
-      const success = await createSession(this.env.db, message.duration, message.cycle || 1);
+      const success = await createHeatCycle(this.env.db, message.duration, message.cycle || 1);
       if (success) {
         this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
       }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import type { ApiResponse } from '@heizbox/types';
-import { fetchSessions } from '../api';
-import { SessionCard } from './components';
+import { fetchHeatCycles } from '../api';
+import { HeatCycleCard } from './components';
 import Header from './components/Header';
 import { UsagePage } from './usage';
 import { Flex, Text } from '@radix-ui/themes';
@@ -19,7 +19,7 @@ function App() {
   const loadData = async () => {
       try {
         setLoading(true);
-        const result = await fetchSessions();
+        const result = await fetchHeatCycles();
         setData(result);
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -74,9 +74,9 @@ function App() {
       if (message && typeof message.isHeating === 'boolean') {
         setDeviceIsHeating(message.isHeating);
       }
-      if (message && message.type === 'sessionCreated') {
-        console.log('New session created, re-fetching sessions...');
-        loadData(); // Re-fetch sessions
+      if (message && message.type === 'heatCycleCreated') {
+        console.log('New heat cycle created, re-fetching heat cycles...');
+        loadData(); // Re-fetch heat cycles
       }
       // TODO: Handle other types of messages from the device
     };
@@ -117,19 +117,19 @@ function App() {
 
               {data && (
                 <>
-                  {data.sessions && data.sessions.length > 0 ? (
+                  {data.heatCycles && data.heatCycles.length > 0 ? (
                     <Flex direction="column" gap="3">
-                      {data.sessions.map((session, index) => (
-                        <SessionCard
-                          key={session[0]?.id || index}
-                          session={session}
+                      {data.heatCycles.map((heatCycle, index) => (
+                        <HeatCycleCard
+                          key={heatCycle.id || index}
+                          heatCycle={heatCycle}
                           index={index}
-                          totalSessions={data.sessions.length}
+                          totalHeatCycles={data.heatCycles.length}
                         />
                       ))}
                     </Flex>
                   ) : (
-                    !loading && <Text>Keine Sessions im ausgewählten Zeitraum gefunden.</Text>
+                    !loading && <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
                   )}
                 </>
               )}

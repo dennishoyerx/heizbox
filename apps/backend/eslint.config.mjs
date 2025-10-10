@@ -4,7 +4,8 @@ export default [
     ...baseConfig,
     {
         ignores: [
-            "**/out-tsc"
+            "**/out-tsc",
+            "**/.wrangler"
         ]
     }
 ];

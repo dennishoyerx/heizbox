@@ -1,9 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { handleGetSessions, handleGetJson, handleStaticAssets } from './handlers';
+import { handleGetJson, handleStaticAssets, handleCreateHeatCycle, handleGetHeatCycles } from './handlers';
 import { handleWebSocket } from './handlers/websocket';
-import { handleHeartbeat } from './routes/heartbeat';
-import { handleCreateRoute } from './routes/create';
+
 import { handleStatisticsRoute } from './routes/statistics';
 
 const app = new Hono<{ Bindings: Env }>();
@@ -16,10 +15,10 @@ app.use(cors({
   credentials: true,
 }));
 
-app.get('/api/sessions', handleGetSessions);
+app.get('/api/heat_cycles', handleGetHeatCycles);
 app.get('/api/json', handleGetJson);
-app.get('/api/create', handleCreateRoute);
-app.get('/api/add', handleCreateRoute); // Legacy endpoint
+app.get('/api/create', handleCreateHeatCycle);
+app.get('/api/add', handleCreateHeatCycle); // Legacy endpoint
 app.get('/api/statistics', handleStatisticsRoute);
 app.get('/ws/status', handleWebSocket);
 

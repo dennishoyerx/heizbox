@@ -3,8 +3,8 @@ import type { StatisticsData } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL;
 
-export const fetchSessions = async (): Promise<ApiResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/sessions`);
+export const fetchHeatCycles = async (): Promise<ApiResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/heat_cycles`);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }

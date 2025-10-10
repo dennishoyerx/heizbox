@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { fetchStatistics } from '../../api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-interface SessionData {
+interface HeatCycleData {
   created_at: string;
   duration: number;
 }
 
 interface StatisticsData {
   range: string;
-  totalSessions: number;
+  totalHeatCycles: number;
   totalDuration: number;
-  sessions: SessionData[];
+  heatCycles: HeatCycleData[];
 }
 
 const UsagePage: React.FC = () => {
@@ -41,12 +41,10 @@ const UsagePage: React.FC = () => {
     loadStatistics();
   }, []);
 
-  const processMonthlyHeatmapData = (sessions: SessionData[]) => {
+  const processMonthlyHeatmapData = (heatCycles: HeatCycleData[]) => {
     const heatmap: { [key: number]: number } = {}; // dayOfMonth: count
-    const maxDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-
-    sessions.forEach(session => {
-      const date = new Date(session.created_at);
+    const maxDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).heatCycles.forEach(heatCycle => {
+      const date = new Date(heatCycle.created_at);
       const dayOfMonth = date.getDate();
       heatmap[dayOfMonth] = (heatmap[dayOfMonth] || 0) + 1;
     });
@@ -58,28 +56,28 @@ const UsagePage: React.FC = () => {
     return formattedHeatmapData;
   };
 
-  const monthlyHeatmapData = monthlyStats ? processMonthlyHeatmapData(monthlyStats.sessions) : [];
-  const maxSessionsPerDay = Math.max(...monthlyHeatmapData.map(data => data.count));
+  const monthlyHeatmapData = monthlyStats ? processMonthlyHeatmapData(monthlyStats.heatCycles) : [];
+  const maxHeatCyclesPerDay = Math.max(...monthlyHeatmapData.map(data => data.count));
 
-  const processHourlyData = (sessions: SessionData[]) => {
+  const processHourlyData = (heatCycles: HeatCycleData[]) => {
     const hourlyCounts: { [key: number]: number } = {};
     for (let i = 0; i < 24; i++) {
       hourlyCounts[i] = 0;
     }
 
-    sessions.forEach(session => {
-      const date = new Date(session.created_at);
+    heatCycles.forEach(heatCycle => {
+      const date = new Date(heatCycle.created_at);
       const hour = date.getHours();
       hourlyCounts[hour]++;
     });
 
     return Object.keys(hourlyCounts).map(hour => ({
       hour: parseInt(hour, 10),
-      sessions: hourlyCounts[parseInt(hour, 10)],
+      heatCycles: hourlyCounts[parseInt(hour, 10)],
     })).sort((a, b) => a.hour - b.hour);
   };
 
-  const hourlySessionsData = monthlyStats ? processHourlyData(monthlyStats.sessions) : [];
+  const hourlyHeatCyclesData = monthlyStats ? processHourlyData(monthlyStats.heatCycles) : [];
 
   if (loading) {
     return <p className="text-slate-500">Lade Statistiken...</p>;
@@ -97,16 +95,16 @@ const UsagePage: React.FC = () => {
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-2">Daily Overview</h2>
           {dailyStats && (
-            <p>Total Sessions: {dailyStats.totalSessions}, Total Duration: {dailyStats.totalDuration}s</p>
+            <p>Total Heat Cycles: {dailyStats.totalHeatCycles}, Total Duration: {dailyStats.totalDuration}s</p>
           )}
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={dailyStats ? [{ name: 'Today', sessions: dailyStats.totalSessions, duration: dailyStats.totalDuration }] : []}>
+            <BarChart data={dailyStats ? [{ name: 'Today', heatCycles: dailyStats.totalHeatCycles, duration: dailyStats.totalDuration }] : []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="sessions" fill="#8884d8" name="Sessions" />
+              <Bar dataKey="heatCycles" fill="#8884d8" name="Heat Cycles" />
               <Bar dataKey="duration" fill="#82ca9d" name="Duration (s)" />
             </BarChart>
           </ResponsiveContainer>
@@ -115,16 +113,16 @@ const UsagePage: React.FC = () => {
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-2">Weekly Overview</h2>
           {weeklyStats && (
-            <p>Total Sessions: {weeklyStats.totalSessions}, Total Duration: {weeklyStats.totalDuration}s</p>
+            <p>Total Heat Cycles: {weeklyStats.totalHeatCycles}, Total Duration: {weeklyStats.totalDuration}s</p>
           )}
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={weeklyStats ? [{ name: 'This Week', sessions: weeklyStats.totalSessions, duration: weeklyStats.totalDuration }] : []}>
+            <BarChart data={weeklyStats ? [{ name: 'This Week', heatCycles: weeklyStats.totalHeatCycles, duration: weeklyStats.totalDuration }] : []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="sessions" fill="#8884d8" name="Sessions" />
+              <Bar dataKey="heatCycles" fill="#8884d8" name="Heat Cycles" />
               <Bar dataKey="duration" fill="#82ca9d" name="Duration (s)" />
             </BarChart>
           </ResponsiveContainer>
@@ -133,16 +131,16 @@ const UsagePage: React.FC = () => {
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-xl font-semibold mb-2">Monthly Overview</h2>
           {monthlyStats && (
-            <p>Total Sessions: {monthlyStats.totalSessions}, Total Duration: {monthlyStats.totalDuration}s</p>
+            <p>Total Heat Cycles: {monthlyStats.totalHeatCycles}, Total Duration: {monthlyStats.totalDuration}s</p>
           )}
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={monthlyStats ? [{ name: 'This Month', sessions: monthlyStats.totalSessions, duration: monthlyStats.totalDuration }] : []}>
+            <BarChart data={monthlyStats ? [{ name: 'This Month', heatCycles: monthlyStats.totalHeatCycles, duration: monthlyStats.totalDuration }] : []}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="sessions" fill="#8884d8" name="Sessions" />
+              <Bar dataKey="heatCycles" fill="#8884d8" name="Heat Cycles" />
               <Bar dataKey="duration" fill="#82ca9d" name="Duration (s)" />
             </BarChart>
           </ResponsiveContainer>
@@ -153,14 +151,14 @@ const UsagePage: React.FC = () => {
         <h2 className="text-xl font-semibold mb-2">Monthly Usage Heatmap</h2>
         <div className="grid grid-cols-7 gap-1 p-2">
           {monthlyHeatmapData.map((dataPoint) => {
-            const intensity = maxSessionsPerDay > 0 ? (dataPoint.count / maxSessionsPerDay) * 100 : 0;
+            const intensity = maxHeatCyclesPerDay > 0 ? (dataPoint.count / maxHeatCyclesPerDay) * 100 : 0;
             const color = `hsl(210, 70%, ${100 - (intensity * 0.6)}%)`; // Scale lightness from 100% (white) to 40% (dark blue)
             return (
               <div
                 key={dataPoint.day}
                 className="w-full aspect-square flex items-center justify-center text-xs rounded"
                 style={{ backgroundColor: color }}
-                title={`Day ${dataPoint.day}: ${dataPoint.count} sessions`}
+                title={`Day ${dataPoint.day}: ${dataPoint.count} heat cycles`}
               >
                 {dataPoint.day} ({dataPoint.count})
               </div>
@@ -170,15 +168,15 @@ const UsagePage: React.FC = () => {
       </div>
 
       <div className="bg-white p-4 rounded shadow mb-8">
-        <h2 className="text-xl font-semibold mb-2">Sessions per Hour (Monthly)</h2>
+        <h2 className="text-xl font-semibold mb-2">Heat Cycles per Hour (Monthly)</h2>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={hourlySessionsData}>
+          <BarChart data={hourlyHeatCyclesData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="hour" label={{ value: 'Hour of Day', position: 'insideBottom', offset: -5 }} />
-            <YAxis label={{ value: 'Sessions', angle: -90, position: 'insideLeft' }} />
+            <YAxis label={{ value: 'Heat Cycles', angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <Bar dataKey="sessions" fill="#8884d8" name="Sessions" />
+<Bar dataKey="heatCycles" fill="#8884d8" name="Heat Cycles" />
           </BarChart>
         </ResponsiveContainer>
       </div>

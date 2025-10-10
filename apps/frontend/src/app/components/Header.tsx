@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus
           </DropdownMenu.Trigger>
           <DropdownMenu.Content>
             <DropdownMenu.Item asChild>
-              <Link to="/">Sessions</Link>
+              <Link to="/">Heat Cycles</Link>
             </DropdownMenu.Item>
             <DropdownMenu.Item asChild>
               <Link to="/usage">Usage Statistics</Link>

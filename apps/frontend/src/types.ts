@@ -5,7 +5,7 @@ export interface SessionData {
 
 export interface StatisticsData {
   range: string;
-  totalSessions: number;
+  totalHeatCycles: number;
   totalDuration: number;
-  sessions: SessionData[];
+  heatCycles: HeatCycleData[];
 }

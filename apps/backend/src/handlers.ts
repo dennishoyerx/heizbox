@@ -1,44 +1,44 @@
-import type { SessionRow } from '@heizbox/types';
+import type { HeatCycleRow } from '@heizbox/types';
 import { getBerlinTimeRange, groupSessions, calculateConsumption, getMimeType } from './utils';
 import type { Context } from 'hono';
-import { createSession } from './lib/session';
+import { createHeatCycle } from './lib/session';
 
-export const handleGetSessions = async (c: Context<{ Bindings: Env }>) => {
+export const handleGetHeatCycles = async (c: Context<{ Bindings: Env }>) => {
   try {
     const { start, end } = getBerlinTimeRange();
     const { results } = await c.env.db.prepare(
-      "SELECT id, created_at, duration, cycle FROM sessions WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
-    ).bind(start, end).all<SessionRow>();
+      "SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
+    ).bind(start, end).all<HeatCycleRow>();
 
     if (!results) {
-      return c.json({ sessions: [], totalConsumption: "0.00" });
+      return c.json({ heatCycles: [], totalConsumption: "0.00" });
     }
 
-    const sessions = groupSessions(results);
+    const heatCycles = groupSessions(results);
     const totalConsumption = calculateConsumption(results.length);
-    return c.json({ sessions, totalConsumption });
+    return c.json({ heatCycles, totalConsumption });
   } catch (e: unknown) {
-    console.error("Error in handleGetSessions:", e);
+    console.error("Error in handleGetHeatCycles:", e);
     const error = e as Error;
-    return c.json({ err: "Failed to retrieve sessions", details: error.message }, 500);
+    return c.json({ err: "Failed to retrieve heat cycles", details: error.message }, 500);
   }
 };
 
 export const handleGetJson = async (c: Context<{ Bindings: Env }>) => {
   try {
     const { results } = await c.env.db.prepare(
-      "SELECT id, created_at, duration, cycle FROM sessions ORDER BY id DESC"
-    ).all<SessionRow>();
+      "SELECT id, created_at, duration, cycle FROM heat_cycles ORDER BY id DESC"
+    ).all<HeatCycleRow>();
 
     return c.json(results);
   } catch (e: unknown) {
     console.error("Error in handleGetJson:", e);
     const error = e as Error;
-    return c.json({ err: "Failed to retrieve all sessions", details: error.message }, 500);
+    return c.json({ err: "Failed to retrieve all heat cycles", details: error.message }, 500);
   }
 };
 
-export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
+export const handleCreateHeatCycle = async (c: Context<{ Bindings: Env }>) => {
   try {
     const durationStr = c.req.query("duration");
     const cycleStr = c.req.query("cycle");
@@ -50,17 +50,17 @@ export const handleCreateSession = async (c: Context<{ Bindings: Env }>) => {
     const duration = parseFloat(durationStr);
     const cycle = cycleStr ? parseInt(cycleStr, 10) : 1; // Default to 1 if not provided
 
-    const success = await createSession(c.env.db, duration, cycle);
+    const success = await createHeatCycle(c.env.db, duration, cycle);
 
     if (success) {
       return c.text("OK");
     } else {
-      return c.text("Failed to create session", 500);
+      return c.text("Failed to create heat cycle", 500);
     }
   } catch (e: unknown) {
-    console.error("Error in handleCreateSession:", e);
+    console.error("Error in handleCreateHeatCycle:", e);
     const error = e as Error;
-    return c.json({ err: "Failed to create session", details: error.message }, 500);
+    return c.json({ err: "Failed to create heat cycle", details: error.message }, 500);
   }
 };
 

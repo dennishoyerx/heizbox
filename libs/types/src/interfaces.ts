@@ -1,4 +1,4 @@
-export interface Session {
+export interface HeatCycle {
   id: string;
   startTime: Date;
   endTime: Date;
@@ -12,7 +12,7 @@ export interface Device {
   location: string;
 }
 
-export interface SessionRow {
+export interface HeatCycleRow {
   id: string;
   created_at: string;
   duration: number;
@@ -24,8 +24,10 @@ export interface WebSocketMessage {
   [key: string]: any;
 }
 
-export interface SessionData {
+export interface HeatCycleData {
   clicks: number;
   lastClick: number;
   sessionStart: number;
 }
+
+export type HeatCycleGroup = HeatCycleRow[];

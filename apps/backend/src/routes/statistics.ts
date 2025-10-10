@@ -14,17 +14,17 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
   switch (range) {
     case 'day':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      query = 'SELECT * FROM sessions WHERE created_at >= ?';
+      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     case 'week':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-      query = 'SELECT * FROM sessions WHERE created_at >= ?';
+      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     case 'month':
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      query = 'SELECT * FROM sessions WHERE created_at >= ?';
+      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     default:
@@ -35,13 +35,13 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
     const { results } = await db.prepare(query).bind(...params).all();
 
     // Basic aggregation for now, more sophisticated aggregation can be added later
-    const totalSessions = results.length;
-    const totalDuration = results.reduce((sum, session: any) => {
-      const durationValue = Number(session.duration);
+    const totalHeatCycles = results.length;
+    const totalDuration = results.reduce((sum, heatCycle: any) => {
+      const durationValue = Number(heatCycle.duration);
       return sum + (isNaN(durationValue) ? 0 : durationValue);
     }, 0);
 
-    return c.json({ range, totalSessions, totalDuration, sessions: results });
+    return c.json({ range, totalHeatCycles, totalDuration, heatCycles: results });
   } catch (error) {
     console.error('Error fetching statistics:', error);
     return c.json({ error: 'Failed to fetch statistics' }, 500);
