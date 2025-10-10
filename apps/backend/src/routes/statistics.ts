@@ -35,14 +35,12 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
     const { results } = await db.prepare(query).bind(...params).all();
 
     // Basic aggregation for now, more sophisticated aggregation can be added later
-    console.log('Statistics query results:', results);
     const totalSessions = results.length;
     const totalDuration = results.reduce((sum, session: any) => {
       const durationValue = Number(session.duration);
       return sum + (isNaN(durationValue) ? 0 : durationValue);
     }, 0);
 
-    console.log('Calculated totalDuration:', totalDuration);
     return c.json({ range, totalSessions, totalDuration, sessions: results });
   } catch (error) {
     console.error('Error fetching statistics:', error);

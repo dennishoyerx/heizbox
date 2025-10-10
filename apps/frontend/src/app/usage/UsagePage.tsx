@@ -162,7 +162,7 @@ const UsagePage: React.FC = () => {
                 style={{ backgroundColor: color }}
                 title={`Day ${dataPoint.day}: ${dataPoint.count} sessions`}
               >
-                {dataPoint.day}
+                {dataPoint.day} ({dataPoint.count})
               </div>
             );
           })}
