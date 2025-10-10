@@ -5,6 +5,9 @@
   "type": "module",
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/themes": "^3.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.26.1"

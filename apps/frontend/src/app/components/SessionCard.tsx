@@ -1,20 +1,20 @@
-import { useState } from 'react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import type { SessionGroup } from '@heizbox/types';
 import { formatDateForDisplay, formatTimeForDisplay, calculateConsumption } from '@heizbox/utils';
-import { ChevronIcon } from './ChevronIcon';
+import { CaretDown } from '@phosphor-icons/react';
+import { Card, Flex, Text, Heading, Badge } from '@radix-ui/themes';
 
 export const SessionCard = ({ session, index, totalSessions }: { session: SessionGroup, index: number, totalSessions: number }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const count = session.length;
 
   const sessionConsumption = calculateConsumption(count);
   const consumptionValue = parseFloat(sessionConsumption);
 
-  let consumptionClasses = 'bg-red-100 text-red-800';
+  let consumptionColor: "red" | "yellow" | "green" = 'red';
   if (consumptionValue <= 0.2) {
-    consumptionClasses = 'bg-green-100 text-green-800';
+    consumptionColor = 'green';
   } else if (consumptionValue <= 0.3) {
-    consumptionClasses = 'bg-yellow-100 text-yellow-800';
+    consumptionColor = 'yellow';
   }
 
   // Calculate time range
@@ -23,34 +23,33 @@ export const SessionCard = ({ session, index, totalSessions }: { session: Sessio
   const timeRangeString = `${formatTimeForDisplay(startTime)} - ${formatTimeForDisplay(endTime)}`;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 mb-3 transition-all duration-200 hover:border-blue-500 hover:shadow-sm">
-      <button
-        className="flex justify-between items-center w-full p-4 text-left"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div className="flex items-baseline space-x-3">
-          <h2 className="font-bold text-lg text-slate-800">Session {totalSessions - index}</h2>
-          <p className="text-sm text-slate-500 font-mono">{timeRangeString}</p>
-        </div>
-        <div className="flex items-center space-x-2">
-            <span className="text-xs font-semibold bg-slate-100 text-slate-600 px-2 py-1 rounded-md">{count} Klicks</span>
-            <span className={`text-xs font-bold px-2 py-1 rounded-md ${consumptionClasses}`}>{sessionConsumption}g</span>
-            <ChevronIcon isOpen={isOpen} />
-        </div>
-      </button>
+    <Card>
+      <Collapsible.Root>
+        <Collapsible.Trigger style={{ width: '100%' }}>
+          <Flex justify="between" align="center">
+            <Flex align="baseline" gap="3">
+              <Heading size="3">Session {totalSessions - index}</Heading>
+              <Text size="2" color="gray">{timeRangeString}</Text>
+            </Flex>
+            <Flex align="center" gap="3">
+              <Badge>{count} Klicks</Badge>
+              <Badge color={consumptionColor}>{sessionConsumption}g</Badge>
+              <CaretDown />
+            </Flex>
+          </Flex>
+        </Collapsible.Trigger>
 
-      {isOpen && (
-        <div className="px-4 pb-4">
-          <div className="mt-2 pt-4 space-y-2 border-t border-slate-100">
+        <Collapsible.Content>
+          <Flex direction="column" gap="2" mt="4">
             {session.map(row => (
-              <div key={row.id} className="flex justify-between text-sm font-mono text-slate-600">
-                <span>{formatDateForDisplay(new Date(row.created_at))}</span>
-                <span className="font-semibold">{row.duration}s</span>
-              </div>
+              <Flex key={row.id} justify="between">
+                <Text size="2" color="gray">{formatDateForDisplay(new Date(row.created_at))}</Text>
+                <Text size="2" weight="bold">{row.duration}s</Text>
+              </Flex>
             ))}
-          </div>
-        </div>
-      )}
-    </div>
+          </Flex>
+        </Collapsible.Content>
+      </Collapsible.Root>
+    </Card>
   );
 };

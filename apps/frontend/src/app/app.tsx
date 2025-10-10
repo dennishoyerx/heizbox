@@ -4,8 +4,8 @@ import type { ApiResponse } from '@heizbox/types';
 import { fetchSessions } from '../api';
 import { SessionCard } from './components';
 import Header from './components/Header';
-import { Circle, CircleNotch } from '@phosphor-icons/react';
 import { UsagePage } from './usage';
+import { Flex, Text } from '@radix-ui/themes';
 
 // --- REDESIGNED MAIN APP ---
 
@@ -21,8 +21,10 @@ function App() {
         setLoading(true);
         const result = await fetchSessions();
         setData(result);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        }
       } finally {
         setLoading(false);
       }
@@ -97,26 +99,26 @@ function App() {
   }, []);
 
   return (
-    <div className="bg-slate-50 font-sans min-h-screen">
+    <Flex direction="column" gap="4">
       <Header
         deviceName="Heizbox"
         deviceStatus={deviceIsOn ? 'Online' : 'Offline'}
         heatingStatus={deviceIsHeating ? 'Heizt' : 'Inaktiv'}
       />
 
-      <main className="max-w-2xl mx-auto py-6 px-4">
-        {data && <div className="font-mono text-slate-600 mt-1">Verbrauch: {data.totalConsumption}g</div>}
+      <main>
+        {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
 
         <Routes>
           <Route path="/" element={
-            <>
-              {loading && <p className="text-slate-500">Lade Daten...</p>}
-              {error && <p className="text-red-600 font-semibold">Fehler beim Laden: {error}</p>}
+            <Flex direction="column" gap="3">
+              {loading && <Text>Lade Daten...</Text>}
+              {error && <Text color="red">Fehler beim Laden: {error}</Text>}
 
               {data && (
                 <>
                   {data.sessions && data.sessions.length > 0 ? (
-                    <div>
+                    <Flex direction="column" gap="3">
                       {data.sessions.map((session, index) => (
                         <SessionCard
                           key={session[0]?.id || index}
@@ -125,18 +127,18 @@ function App() {
                           totalSessions={data.sessions.length}
                         />
                       ))}
-                    </div>
+                    </Flex>
                   ) : (
-                    !loading && <p className="text-slate-500 text-center py-8">Keine Sessions im ausgewählten Zeitraum gefunden.</p>
+                    !loading && <Text>Keine Sessions im ausgewählten Zeitraum gefunden.</Text>
                   )}
                 </>
               )}
-            </>
+            </Flex>
           } />
           <Route path="/usage" element={<UsagePage />} />
         </Routes>
       </main>
-    </div>
+    </Flex>
   );
 }
 

@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@heizbox/types';
+import type { StatisticsData } from './types';
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL;
 
@@ -10,7 +11,7 @@ export const fetchSessions = async (): Promise<ApiResponse> => {
   return response.json();
 };
 
-export const fetchStatistics = async (range: string): Promise<any> => {
+export const fetchStatistics = async (range: string): Promise<StatisticsData> => {
   const response = await fetch(`${API_BASE_URL}/api/statistics?range=${range}`);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);

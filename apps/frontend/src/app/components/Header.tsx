@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { List, X } from '@phosphor-icons/react'; // Burger menu icons
+import { Flex, Heading, DropdownMenu, Button, Text } from '@radix-ui/themes';
+import { List } from '@phosphor-icons/react';
 
 interface HeaderProps {
   deviceName: string;
@@ -9,41 +10,29 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
-    <header className="bg-white shadow-sm p-4">
-      <div className="max-w-2xl mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-900">{deviceName}</h1>
-
-        {/* Burger menu button for small screens */}
-        <button className="md:hidden text-slate-600" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <X size={24} /> : <List size={24} />}
-        </button>
-
-        {/* Desktop navigation */}
-        <nav className="hidden md:block">
-          <Link to="/" className="mr-4 text-blue-600 hover:underline">Sessions</Link>
-          <Link to="/usage" className="text-blue-600 hover:underline">Usage Statistics</Link>
-        </nav>
-      </div>
-
-      {/* Mobile navigation */}
-      {isMenuOpen && (
-        <nav className="md:hidden bg-white py-2 px-4 border-t border-slate-200 mt-2">
-          <Link to="/" className="block py-2 text-blue-600 hover:underline" onClick={() => setIsMenuOpen(false)}>Sessions</Link>
-          <Link to="/usage" className="block py-2 text-blue-600 hover:underline" onClick={() => setIsMenuOpen(false)}>Usage Statistics</Link>
-        </nav>
-      )}
-
-      {/* Device Status (always visible) */}
-      <div className="max-w-2xl mx-auto mt-2 text-sm text-slate-500">
-        Gerät Status: <span className="font-semibold ml-2">{deviceStatus}</span>
-      </div>
-      <div className="max-w-2xl mx-auto mt-1 text-sm text-slate-500">
-        Heizstatus: <span className="font-semibold ml-2">{heatingStatus}</span>
-      </div>
-    </header>
+    <Flex direction="column" gap="2" p="4" className="shadow-sm">
+      <Flex justify="between" align="center">
+        <Heading>{deviceName}</Heading>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="soft">
+              <List size={24} />
+            </Button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Content>
+            <DropdownMenu.Item asChild>
+              <Link to="/">Sessions</Link>
+            </DropdownMenu.Item>
+            <DropdownMenu.Item asChild>
+              <Link to="/usage">Usage Statistics</Link>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      </Flex>
+      <Text size="2" color="gray">Gerät Status: <Text weight="bold">{deviceStatus}</Text></Text>
+      <Text size="2" color="gray">Heizstatus: <Text weight="bold">{heatingStatus}</Text></Text>
+    </Flex>
   );
 };
 
