@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import type { ApiResponse } from '@heizbox/types';
 import { fetchSessions } from '../api';
-import { SessionCard } from './components/SessionCard';
+import { SessionCard } from './components';
+import Header from './components/Header';
 import { Circle, CircleNotch } from '@phosphor-icons/react';
 import { UsagePage } from './usage';
 
@@ -97,32 +98,14 @@ function App() {
 
   return (
     <div className="bg-slate-50 font-sans min-h-screen">
-      <main className="max-w-2xl mx-auto py-10 px-4">
-        <header className="pb-6 border-b border-slate-200 mb-6">
-          <h1 className="text-3xl font-bold text-slate-900">Heizbox</h1>
-          <nav className="mt-4">
-            <Link to="/" className="mr-4 text-blue-600 hover:underline">Sessions</Link>
-            <Link to="/usage" className="text-blue-600 hover:underline">Usage Statistics</Link>
-          </nav>
-          {data && <div className="font-mono text-slate-600 mt-1">Verbrauch: {data.totalConsumption}g</div>}
-          <div className="mt-2 text-sm text-slate-500">
-            Gerät Status: <span className={`inline-block w-4 h-4 align-middle ${deviceIsOn ? 'text-green-500' : 'text-red-500'}`}>
-              {deviceIsOn ? (
-                <Circle weight="fill" className="w-full h-full" />
-              ) : (
-                <CircleNotch weight="fill" className="w-full h-full" />
-              )}
-            </span>
-            <span className="font-semibold ml-2">
-              {deviceIsOn ? 'Online' : 'Offline'}
-            </span>
-          </div>
-          <div className="mt-1 text-sm text-slate-500">
-            Heizstatus: <span className={`font-semibold ${deviceIsHeating ? 'text-orange-500' : 'text-gray-500'}`}>
-              {deviceIsHeating ? 'Heizt' : 'Inaktiv'}
-            </span>
-          </div>
-        </header>
+      <Header
+        deviceName="Heizbox"
+        deviceStatus={deviceIsOn ? 'Online' : 'Offline'}
+        heatingStatus={deviceIsHeating ? 'Heizt' : 'Inaktiv'}
+      />
+
+      <main className="max-w-2xl mx-auto py-6 px-4">
+        {data && <div className="font-mono text-slate-600 mt-1">Verbrauch: {data.totalConsumption}g</div>}
 
         <Routes>
           <Route path="/" element={
