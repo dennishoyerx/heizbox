@@ -1,4 +1,4 @@
-import type { SessionRow } from '@heizbox/types';
+import type { HeatCycleRow } from '@heizbox/types';
 
 export const formatDateForDB = (date: Date): string => {
   return date.toISOString();
@@ -25,13 +25,13 @@ export const getBerlinTimeRange = () => {
   };
 };
 
-export const groupSessions = (rows: SessionRow[]): SessionRow[][] => {
+export const groupSessions = (rows: HeatCycleRow[]): HeatCycleRow[][] => {
   if (!rows || rows.length === 0) {
     return [];
   }
 
-  const sessions: SessionRow[][] = [];
-  let currentGroup: SessionRow[] = [rows[0]];
+  const heatCycles: HeatCycleRow[][] = [];
+  let currentGroup: HeatCycleRow[] = [rows[0]];
 
   for (let i = 1; i < rows.length; i++) {
     const currentRow = rows[i];
@@ -40,15 +40,15 @@ export const groupSessions = (rows: SessionRow[]): SessionRow[][] => {
     const previousDate = new Date(previousRow.created_at);
 
     if (currentDate.getTime() - previousDate.getTime() >= 3600000) { // 1 hour gap
-      sessions.push(currentGroup);
+      heatCycles.push(currentGroup);
       currentGroup = [currentRow];
     } else {
       currentGroup.push(currentRow);
     }
   }
 
-  sessions.push(currentGroup);
-  return sessions.reverse();
+  heatCycles.push(currentGroup);
+  return heatCycles.reverse();
 };
 
 export const calculateConsumption = (count: number): string => (0.05 * Math.ceil(count / 2)).toFixed(2);
@@ -66,4 +66,8 @@ export const getMimeType = (path: string): string => {
     case 'json': return 'application/json';
     default: return 'application/octet-stream';
   }
+};
+
+export const generateUuid = (): string => {
+  return crypto.randomUUID();
 };
