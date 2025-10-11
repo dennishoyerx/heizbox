@@ -6,11 +6,14 @@ import { createHeatCycle } from './lib/session';
 export const handleGetHeatCycles = async (c: Context<{ Bindings: Env }>) => {
   try {
     const { start, end } = getBerlinTimeRange();
+    console.log(`Querying heat_cycles from ${new Date(start).toISOString()} (${start}) to ${new Date(end).toISOString()} (${end})`);
     const { results } = await c.env.db.prepare(
       "SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
     ).bind(start, end).all<HeatCycleRow>();
 
-    if (!results) {
+    console.log("Raw heat_cycles results:", results);
+
+    if (!results || results.length === 0) {
       return c.json({ heatCycles: [], totalConsumption: "0.00" });
     }
 
