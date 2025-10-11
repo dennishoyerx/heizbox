@@ -15,21 +15,25 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
     case 'day':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.toISOString()];
+      params = [startDate.getTime()];
       break;
     case 'week':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.toISOString()];
+      params = [startDate.getTime()];
       break;
     case 'month':
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.toISOString()];
+      params = [startDate.getTime()];
       break;
     default:
       return c.json({ error: 'Invalid range specified. Use day, week, or month.' }, 400);
   }
+
+  console.log(`Statistics route called with range: ${range}`);
+  console.log(`Generated startDate: ${startDate.toISOString()} (${startDate.getTime()})`);
+  console.log(`Query parameters: ${params}`);
 
   try {
     const { results } = await db.prepare(query).bind(...params).all();

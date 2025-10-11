@@ -1,7 +1,7 @@
 import type { HeatCycleRow } from '@heizbox/types';
 
-export const formatDateForDB = (date: Date): string => {
-  return date.toISOString();
+export const formatDateForDB = (date: Date): number => {
+  return date.getTime();
 };
 
 export const getBerlinTimeRange = () => {

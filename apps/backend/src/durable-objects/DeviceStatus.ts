@@ -239,7 +239,9 @@ export class DeviceStatus {
       }
     } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
       console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
+      console.log('DeviceStatus: Calling createHeatCycle with db:', this.env.db, 'duration:', message.duration, 'cycle:', message.cycle || 1);
       const success = await createHeatCycle(this.env.db, message.duration, message.cycle || 1);
+      console.log('DeviceStatus: createHeatCycle returned success:', success);
       if (success) {
         this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
       }

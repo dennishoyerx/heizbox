@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { handleGetJson, handleStaticAssets, handleCreateHeatCycle, handleGetHeatCycles } from './handlers';
+import { handleGetJson, handleStaticAssets, handleCreateHeatCycle, handleGetHeatCycles, handleGetAllHeatCycles } from './handlers';
 import { handleWebSocket } from './handlers/websocket';
 
 import { handleStatisticsRoute } from './routes/statistics';
@@ -8,7 +8,7 @@ import { handleStatisticsRoute } from './routes/statistics';
 const app = new Hono<{ Bindings: Env }>();
 
 app.use(cors({
-  origin: ['https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['https://heizbox.pages.dev', 'https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
   allowMethods: ['POST', 'GET', 'OPTIONS'],
   exposeHeaders: ['Content-Length'],
@@ -20,6 +20,7 @@ app.get('/api/json', handleGetJson);
 app.get('/api/create', handleCreateHeatCycle);
 app.get('/api/add', handleCreateHeatCycle); // Legacy endpoint
 app.get('/api/statistics', handleStatisticsRoute);
+app.get('/api/all_heat_cycles', handleGetAllHeatCycles);
 app.get('/ws/status', handleWebSocket);
 
 // New route for heartbeat

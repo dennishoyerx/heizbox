@@ -3,7 +3,7 @@ import { fetchStatistics } from '../../api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface HeatCycleData {
-  created_at: string;
+  created_at: number;
   duration: number;
 }
 

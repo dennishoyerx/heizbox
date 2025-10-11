@@ -14,7 +14,7 @@ export interface Device {
 
 export interface HeatCycleRow {
   id: string;
-  created_at: string;
+  created_at: number;
   duration: number;
   cycle: number;
 }

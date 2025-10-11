@@ -96,3 +96,14 @@ export const handleStaticAssets = async (c: Context<{ Bindings: Env }>) => {
     return c.text("Internal Server Error", 500);
   }
 };
+
+export const handleGetAllHeatCycles = async (c: Context<{ Bindings: Env }>) => {
+  try {
+    const { results } = await c.env.db.prepare("SELECT id, created_at, duration, cycle FROM heat_cycles ORDER BY created_at DESC").all<HeatCycleRow>();
+    return c.json(results);
+  } catch (e: unknown) {
+    console.error("Error in handleGetAllHeatCycles:", e);
+    const error = e as Error;
+    return c.json({ err: "Failed to retrieve all heat cycles", details: error.message }, 500);
+  }
+};
