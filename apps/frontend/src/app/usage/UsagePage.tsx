@@ -43,7 +43,8 @@ const UsagePage: React.FC = () => {
 
   const processMonthlyHeatmapData = (heatCycles: HeatCycleData[]) => {
     const heatmap: { [key: number]: number } = {}; // dayOfMonth: count
-    const maxDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).heatCycles.forEach(heatCycle => {
+    const maxDay = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    heatCycles.forEach(heatCycle => {
       const date = new Date(heatCycle.created_at);
       const dayOfMonth = date.getDate();
       heatmap[dayOfMonth] = (heatmap[dayOfMonth] || 0) + 1;

@@ -14,17 +14,17 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
   switch (range) {
     case 'day':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
+      query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     case 'week':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
-      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
+      query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     case 'month':
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      query = 'SELECT * FROM heatCycles WHERE created_at >= ?';
+      query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
       params = [startDate.toISOString()];
       break;
     default:
