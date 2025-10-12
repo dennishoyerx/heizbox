@@ -1,6 +1,6 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
 import type { HeatCycleGroup } from '@heizbox/types';
-import { formatDateForDisplay, formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
+import {  formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
 import { CaretDown } from '@phosphor-icons/react';
 import { Card, Flex, Text, Heading, Badge } from '@radix-ui/themes';
 

@@ -1,38 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import type { ApiResponse } from '@heizbox/types';
-import { fetchHeatCycles } from '../api';
-import { HeatCycleCard } from './components';
 import Header from './components/Header';
 import { UsagePage } from './usage';
+import { SessionPage } from './session';
 import { Flex, Text } from '@radix-ui/themes';
 
 // --- REDESIGNED MAIN APP ---
 
 function App() {
-  const [data, setData] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
   const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
-  
-  const loadData = async () => {
-      try {
-        setLoading(true);
-        const result = await fetchHeatCycles();
-        setData(result);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          setError(e.message);
-        }
-      } finally {
-        setLoading(false);
-      }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
+  const [sessionKey, setSessionKey] = useState(0);
 
   useEffect(() => {
     const fetchInitialStatus = async () => {
@@ -76,7 +54,7 @@ function App() {
       }
       if (message && message.type === 'heatCycleCreated') {
         console.log('New heat cycle created, re-fetching heat cycles...');
-        loadData(); // Re-fetch heat cycles
+        setSessionKey(prevKey => prevKey + 1); // Re-fetch heat cycles
       }
       // TODO: Handle other types of messages from the device
     };
@@ -107,34 +85,8 @@ function App() {
       />
 
       <main>
-        {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
-
         <Routes>
-          <Route path="/" element={
-            <Flex direction="column" gap="3">
-              {loading && <Text>Lade Daten...</Text>}
-              {error && <Text color="red">Fehler beim Laden: {error}</Text>}
-
-              {data && (
-                <>
-                  {data.heatCycles && data.heatCycles.length > 0 ? (
-                    <Flex direction="column" gap="3">
-                      {data.heatCycles.map((heatCycle, index) => (
-                        <HeatCycleCard
-                          key={heatCycle.id || index}
-                          heatCycle={heatCycle}
-                          index={index}
-                          totalHeatCycles={data.heatCycles.length}
-                        />
-                      ))}
-                    </Flex>
-                  ) : (
-                    !loading && <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
-                  )}
-                </>
-              )}
-            </Flex>
-          } />
+          <Route path="/" element={<SessionPage key={sessionKey} />} />
           <Route path="/usage" element={<UsagePage />} />
         </Routes>
       </main>
