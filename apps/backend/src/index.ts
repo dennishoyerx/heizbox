@@ -11,14 +11,19 @@ import websocketRoute from './routes/websocket';
 const app = new Hono<{ Bindings: Env }>();
 
 app.use(cors({
-  origin: ['https://heizbox.pages.dev', 'https://heizbox-frontend.pages.dev', 'http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: (origin) => {
+    if (origin.endsWith('.heizbox.pages.dev') || origin === 'https://heizbox.pages.dev' || origin === 'http://localhost:5173' || origin === 'http://127.0.0.1:5173') {
+      return origin;
+    }
+    return undefined;
+  },
   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests'],
   allowMethods: ['POST', 'GET', 'OPTIONS'],
   exposeHeaders: ['Content-Length'],
   credentials: true,
 }));
 
-app.route('/api', heatCyclesRoute);
+app.route('/api/heat_cycles', heatCyclesRoute);
 app.route('/api/json', jsonRoute);
 app.route('/api/statistics', statisticsRoute);
 app.route('/api/heartbeat', heartbeatRoute);
