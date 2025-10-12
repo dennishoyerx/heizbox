@@ -7,6 +7,7 @@ import jsonRoute from './routes/json';
 import heartbeatRoute from './routes/heartbeat';
 import deviceStatusRoute from './routes/deviceStatus';
 import websocketRoute from './routes/websocket';
+import sessionRoute from './routes/session';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -29,6 +30,7 @@ app.route('/api/statistics', statisticsRoute);
 app.route('/api/heartbeat', heartbeatRoute);
 app.route('/api/device-status', deviceStatusRoute);
 app.route('/ws', websocketRoute);
+app.route('/api/session', sessionRoute);
 
 // Static asset handler
 export default app;
