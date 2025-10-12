@@ -17,17 +17,17 @@ statistics.get('/', async (c) => {
     case 'day':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.getTime()];
+      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     case 'week':
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.getTime()];
+      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     case 'month':
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       query = 'SELECT * FROM heat_cycles WHERE created_at >= ?';
-      params = [startDate.getTime()];
+      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     default:
       return c.json({ error: 'Invalid range specified. Use day, week, or month.' }, 400);
@@ -39,6 +39,7 @@ statistics.get('/', async (c) => {
 
   try {
     const { results } = await db.prepare(query).bind(...params).all();
+    console.log("Statistics query results:", results);
 
     // Basic aggregation for now, more sophisticated aggregation can be added later
     const totalHeatCycles = results.length;
