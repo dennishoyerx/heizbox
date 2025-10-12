@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { getDb } from '../lib/db';
 
-export const handleStatisticsRoute = async (c: Hono.Context) => {
+const statistics = new Hono<{ Bindings: Env }>();
+
+statistics.get('/', async (c) => {
   const db = getDb(c.env);
   const range = c.req.query('range') || 'month'; // Default to month
 
@@ -50,4 +52,7 @@ export const handleStatisticsRoute = async (c: Hono.Context) => {
     console.error('Error fetching statistics:', error);
     return c.json({ error: 'Failed to fetch statistics' }, 500);
   }
-};
+});
+
+export default statistics;
+

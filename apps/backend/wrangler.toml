@@ -12,9 +12,6 @@ database_name = "heizbox"
 database_id = "0756a6f6-e6de-43b0-918d-115e81f0a9cc"
 migrations_dir = "migrations"
 
-[[kv_namespaces]]
-binding = "__STATIC_CONTENT"
-id = "fa8331445aee4fb89d28386b5229a6a2"
 
 # Durable Object binding for DeviceStatus
 [[durable_objects.bindings]]

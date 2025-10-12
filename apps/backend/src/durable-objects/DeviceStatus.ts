@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createHeatCycle } from '../lib/session';
+import { createHeatCycle } from '../lib/heatCycleService';
 import type { SessionData } from '@heizbox/types';
 
 export class DeviceStatus {
