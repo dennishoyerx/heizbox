@@ -1,6 +1,6 @@
 import * as Collapsible from '@radix-ui/react-collapsible';
 import type { HeatCycleGroup } from '@heizbox/types';
-import { formatDateForDisplay, formatTimeForDisplay, calculateConsumption } from '@heizbox/utils';
+import { formatDateForDisplay, formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
 import { CaretDown } from '@phosphor-icons/react';
 import { Card, Flex, Text, Heading, Badge } from '@radix-ui/themes';
 
@@ -18,9 +18,9 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
   }
 
   // Calculate time range
-  const startTime = new Date(heatCycle[0].created_at);
-  const endTime = new Date(heatCycle[heatCycle.length - 1].created_at);
-  const timeRangeString = `${formatTimeForDisplay(startTime)} - ${formatTimeForDisplay(endTime)}`;
+  const startTimestamp = heatCycle[0].created_at
+  const endTimestamp = heatCycle[heatCycle.length - 1].created_at;
+    const timeRangeString = `${formatTimestampForTimeDisplay(startTimestamp)} - ${formatTimestampForTimeDisplay(endTimestamp)}`;
 
   return (
     <Card>
@@ -43,7 +43,7 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
           <Flex direction="column" gap="2" mt="4">
             {heatCycle.map(row => (
               <Flex key={row.id} justify="between">
-                <Text size="2" color="gray">{formatDateForDisplay(new Date(row.created_at))}</Text>
+                    <Text size="2" color="gray">{formatTimestampForTimeDisplay(row.created_at)}</Text>
                 <Text size="2" weight="bold">{row.duration}s</Text>
               </Flex>
             ))}
