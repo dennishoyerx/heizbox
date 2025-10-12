@@ -1,5 +1,5 @@
 export interface SessionData {
-  created_at: string;
+  created_at: number;
   duration: number;
 }
 
