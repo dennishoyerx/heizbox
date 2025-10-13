@@ -84,7 +84,9 @@ function App() {
   }, []);
 
   return (
-    <Theme appearance={theme as 'light' | 'dark'}>
+      <Theme appearance={theme as 'light' | 'dark'} grayColor="slate"
+          accentColor="blue"
+          radius="medium">
       <Box className="min-h-screen">
         <Flex direction="column" gap="4">
           <Header

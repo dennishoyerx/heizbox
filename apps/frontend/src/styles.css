@@ -4,3 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "@radix-ui/themes/styles.css";
+
+:root {
+    --color-background: theme(colors.slate.50);
+}
+
+.dark {
+    --color-background: theme(colors.slate.950);
+}
+
+
+/* genereller override */
+@layer components {
+    [data-has-background="true"] {
+        @apply bg-slate-800;
+    }
+
+    /* nur im dark mode */
+    .dark div[data-has-background="true"] {
+        @apply bg-slate-900;
+    }
+}

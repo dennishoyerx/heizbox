@@ -1,5 +1,7 @@
+import { slate, slateDark } from "@radix-ui/colors"
 const { createGlobPatternsForDependencies } = require('@nx/react/tailwind');
 const { join } = require('path');
+
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -12,7 +14,14 @@ module.exports = {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+      extend: {
+          colors: {
+              ...slate,
+              ...slateDark,
+              gray: slate,
+              grayDark: slateDark,
+          },
+      },
   },
   plugins: [],
 };
