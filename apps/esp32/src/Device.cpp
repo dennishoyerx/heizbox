@@ -10,6 +10,11 @@
 // Static instance pointer initialization
 Device* Device::instance = nullptr;
 
+void Device::setCurrentCycle(int cycle) {
+    _lastSetCycle = cycle;
+    Serial.printf("Current cycle set to: %d\n", _lastSetCycle);
+}
+
 Device::Device()
     : input(),
       heater(),
@@ -18,7 +23,7 @@ Device::Device()
       preferences(),
       statsManager(),
       screenManager(display, input),
-      fireScreen(heater, &screenManager, &screensaverScreen),
+      fireScreen(heater, &screenManager, &screensaverScreen, [this](int cycle) { this->setCurrentCycle(cycle); }),
       mainMenuScreen(&display, &screenManager),
       hiddenModeScreen(&display),
       screensaverScreen(clockManager, 30000, &display),
@@ -137,8 +142,7 @@ void Device::loop() {
             DynamicJsonDocument doc(128);
             doc["type"] = "heatCycleCompleted";
             doc["duration"] = duration / 1000; // Convert to seconds
-            // Optionally add cycle count if needed
-            // doc["cycle"] = heater.getCycleCount();
+            doc["cycle"] = _lastSetCycle; // Include the last set cycle
             String output;
             serializeJson(doc, output);
             webSocket.sendTXT(output);

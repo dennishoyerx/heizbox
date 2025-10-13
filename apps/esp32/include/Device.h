@@ -34,6 +34,7 @@ public:
     static void WiFiEvent(WiFiEvent_t event);
     static Device* instance; 
     void sendHeatingStatus(bool heatingStatus);
+    void setCurrentCycle(int cycle);
 
 
 private:
@@ -66,4 +67,5 @@ private:
     bool _lastHeatingStatusSent = false; // Track last sent heating status
     unsigned long _lastHeartbeatTime = 0;
     const unsigned long HEARTBEAT_INTERVAL = 30000; // 30 seconds
+    int _lastSetCycle = 1; // Store the last set cycle, default to 1
 };

@@ -2,13 +2,13 @@
 #include <WiFi.h>
 #include <time.h>
 
-ClockManager::ClockManager() : timeSynced(false), gmtOffset_sec(3600) { // Default to GMT+1
+ClockManager::ClockManager() : timeSynced(false), daylightOffset_sec(0), gmtOffset_sec(7200) { // Default to GMT+1
 }
 
 void ClockManager::init() {
     prefs.begin("clock", false);
-    // Load timezone offset from NVS, default to 3600 seconds (GMT+1)
-    gmtOffset_sec = prefs.getLong("gmtOffset", 3600);
+    // Load timezone offset from NVS, default to 7200  seconds (GMT+1)
+    gmtOffset_sec = prefs.getLong("gmtOffset", 7200);
     prefs.end();
 
     reconfigureTime();

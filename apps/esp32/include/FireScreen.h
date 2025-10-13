@@ -8,6 +8,10 @@
 #include "ScreenType.h"
 #include "ScreensaverScreen.h"
 
+#include <functional> // Required for std::function
+
+#include <functional> // Required for std::function
+
 class FireScreen : public Screen {
 private:
     HeaterController& heater;
@@ -17,6 +21,11 @@ private:
     unsigned long elapsedTime;
     unsigned long lastActivityTime;
 
+    int _currentCycle;
+    bool _showSavedConfirmation;
+    unsigned long _savedConfirmationTime;
+    std::function<void(int)> _setCycleCallback;
+
 protected:
     void initState() override {
         setState("timer", 0);
@@ -25,7 +34,7 @@ protected:
     }
 
 public:
-    FireScreen(HeaterController& hc, ScreenManager* sm, ScreensaverScreen* ss);
+    FireScreen(HeaterController& hc, ScreenManager* sm, ScreensaverScreen* ss, std::function<void(int)> setCycleCb);
     void draw(DisplayManager& display) override;
     void update() override;
     void handleInput(InputEvent event) override;
