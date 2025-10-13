@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Flex, Heading, DropdownMenu, Button, Text } from '@radix-ui/themes';
 import { List, Sun, Moon } from '@phosphor-icons/react';
+import { Box } from '@radix-ui/themes/src/index.js';
 
 interface HeaderProps {
   deviceName: string;
@@ -13,7 +14,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus, theme, toggleTheme }) => {
   return (
-    <div className="shadow-sm bg-white dark:bg-gray-800">
+    <Box className="shadow-sm">
       <Flex direction="column" gap="2" p="4">
         <Flex justify="between" align="center">
           <Heading>{deviceName}</Heading>
@@ -43,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus
         <Text size="2" color="gray">Gerät Status: <Text weight="bold">{deviceStatus}</Text></Text>
         <Text size="2" color="gray">Heizstatus: <Text weight="bold">{heatingStatus}</Text></Text>
       </Flex>
-    </div>
+    </Box>
   );
 };
 

@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import { UsagePage } from './usage';
 import { SessionPage } from './session';
-import { Flex, Theme } from '@radix-ui/themes';
+import { Box, Flex, Theme } from '@radix-ui/themes';
 
 function App() {
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
@@ -85,7 +85,7 @@ function App() {
 
   return (
     <Theme appearance={theme as 'light' | 'dark'}>
-      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <Box className="min-h-screen">
         <Flex direction="column" gap="4">
           <Header
             deviceName="Heizbox"
@@ -102,7 +102,7 @@ function App() {
             </Routes>
           </main>
         </Flex>
-      </div>
+      </Box>
     </Theme>
   );
 }
