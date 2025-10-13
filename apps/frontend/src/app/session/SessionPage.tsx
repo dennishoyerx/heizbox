@@ -5,7 +5,7 @@ import { HeatCycleCard } from '../components';
 import { SessionHeader } from './';
 import { Flex, Text } from '@radix-ui/themes';
 
-function SessionPage() {
+function SessionPage({ isHeating }: { isHeating: boolean }) {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,8 +29,8 @@ function SessionPage() {
   }, []);
 
   return (
-    <Flex direction="column" gap="3">
-      <SessionHeader />
+    <Flex direction="column" gap="3" className="bg-slate-950">
+      <SessionHeader isHeating={isHeating} />
       {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
       {loading && <Text>Lade Daten...</Text>}
       {error && <Text color="red">Fehler beim Laden: {error}</Text>}

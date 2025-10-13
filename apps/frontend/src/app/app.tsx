@@ -5,12 +5,10 @@ import { UsagePage } from './usage';
 import { SessionPage } from './session';
 import { Flex, Text } from '@radix-ui/themes';
 
-// --- REDESIGNED MAIN APP ---
-
 function App() {
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
   const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
-  const [sessionKey, setSessionKey] = useState(0);
+    const [sessionKey, setSessionKey] = useState(0);
 
   useEffect(() => {
     const fetchInitialStatus = async () => {
@@ -86,7 +84,7 @@ function App() {
 
       <main>
         <Routes>
-          <Route path="/" element={<SessionPage key={sessionKey} />} />
+          <Route path="/" element={<SessionPage key={sessionKey} isHeating={deviceIsHeating} />} />
           <Route path="/usage" element={<UsagePage />} />
         </Routes>
       </main>

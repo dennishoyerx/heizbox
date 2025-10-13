@@ -14,8 +14,6 @@ const handleGetHeatCycles = async (c: Context<{ Bindings: Env }>) => {
       "SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC"
     ).bind(start, end).all<HeatCycleRow>();
 
-    console.log("Raw heat_cycles results:", results);
-
     if (!results || results.length === 0) {
       return c.json({ heatCycles: [], totalConsumption: "0.00" });
     }

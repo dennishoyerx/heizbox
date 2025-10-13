@@ -7,7 +7,7 @@ const session = new Hono<{ Bindings: Env }>();
 
 const handleGetSession = async (c: Context<{ Bindings: Env }>) => {
   try {
-    const twoHoursAgo = Date.now() - (2 * 60 * 60 * 1000);
+    const twoHoursAgo = Math.floor(Date.now() / 1000) - (2 * 60 * 60);
 
     const { results } = await c.env.db.prepare(
       "SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 ORDER BY created_at ASC"

@@ -31,3 +31,15 @@ export interface HeatCycleData {
 }
 
 export type HeatCycleGroup = HeatCycleRow[];
+
+export interface ApiResponse {
+  heatCycles: HeatCycleGroup[];
+  totalConsumption: string;
+  totalHeatCycles: number;
+}
+
+export interface SessionApiResponse {
+  totalDuration: number;
+  clickCount: number;
+  lastClickAt: string | null;
+}
