@@ -1,5 +1,7 @@
 import type { HeatCycleRow } from '@heizbox/types';
 
+const GROUP_SESSION_INTERVAL_MINUTES = 60;
+
 export const formatDateForDB = (date: Date): number => {
   return Math.floor(date.getTime() / 1000);
 };
@@ -30,16 +32,17 @@ export const groupSessions = (rows: HeatCycleRow[]): HeatCycleRow[][] => {
     return [];
   }
 
+  const intervalMs = GROUP_SESSION_INTERVAL_MINUTES * 60 * 1000;
   const heatCycles: HeatCycleRow[][] = [];
   let currentGroup: HeatCycleRow[] = [rows[0]];
 
   for (let i = 1; i < rows.length; i++) {
     const currentRow = rows[i];
     const previousRow = rows[i - 1];
-    const currentDate = new Date(currentRow.created_at);
-    const previousDate = new Date(previousRow.created_at);
+    const currentDate = new Date(Number(currentRow.created_at) * 1000);
+    const previousDate = new Date(Number(previousRow.created_at) * 1000);
 
-    if (currentDate.getTime() - previousDate.getTime() >= 3600000) { // 1 hour gap
+    if (currentDate.getTime() - previousDate.getTime() >= intervalMs) {
       heatCycles.push(currentGroup);
       currentGroup = [currentRow];
     } else {

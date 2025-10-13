@@ -27,7 +27,7 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
       <Collapsible.Root>
         <Collapsible.Trigger style={{ width: '100%' }}>
           <Flex justify="between" align="center">
-            <Flex align="baseline" gap="3">
+            <Flex align="baseline" gap="3" wrap="wrap" gapY="0">
               <Heading size="3">Heat Cycle {totalHeatCycles - index}</Heading>
               <Text size="2" color="gray">{timeRangeString}</Text>
             </Flex>
