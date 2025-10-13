@@ -63,8 +63,8 @@
     "build:backend": "pnpm nx build backend",
     "deploy:backend": "pnpm nx deploy backend",
     "deploy:esp": "pnpm esp:ota",
-    "build:esp32": "pnpm nx build esp32",
-    "upload:esp32": "pnpm nx upload esp32",
-    "monitor:esp32": "pnpm nx monitor esp32"
+    "build:esp": "pnpm nx build esp32",
+    "upload:esp": "pnpm nx upload esp32",
+    "monitor:esp": "pnpm nx monitor esp32"
   }
 }
