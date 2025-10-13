@@ -17,9 +17,7 @@ if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
       <BrowserRouter>
-        <Theme>
-          <App />
-        </Theme>
+        <App />
       </BrowserRouter>
     </React.StrictMode>,
   );

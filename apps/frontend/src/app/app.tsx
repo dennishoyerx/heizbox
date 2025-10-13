@@ -3,12 +3,27 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import { UsagePage } from './usage';
 import { SessionPage } from './session';
-import { Flex, Text } from '@radix-ui/themes';
+import { Flex, Theme } from '@radix-ui/themes';
 
 function App() {
   const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
   const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
-    const [sessionKey, setSessionKey] = useState(0);
+  const [sessionKey, setSessionKey] = useState(0);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   useEffect(() => {
     const fetchInitialStatus = async () => {
@@ -30,7 +45,6 @@ function App() {
 
     fetchInitialStatus();
 
-    // For now, hardcode a deviceId. In a real app, this would come from user context or a config.
     const deviceId = 'my-esp32-device';
     const backendBaseUrl = import.meta.env.VITE_PUBLIC_API_URL || 'http://127.0.0.1:8787';
     const wsUrl = `${backendBaseUrl.replace('http', 'ws')}/ws/status?deviceId=${deviceId}&type=frontend`;
@@ -43,7 +57,6 @@ function App() {
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
-      console.log('Received WebSocket message from device:', message);
       if (message && typeof message.isOn === 'boolean') {
         setDeviceIsOn(message.isOn);
       }
@@ -51,44 +64,46 @@ function App() {
         setDeviceIsHeating(message.isHeating);
       }
       if (message && message.type === 'heatCycleCreated') {
-        console.log('New heat cycle created, re-fetching heat cycles...');
-        setSessionKey(prevKey => prevKey + 1); // Re-fetch heat cycles
+        setSessionKey(prevKey => prevKey + 1);
       }
-      // TODO: Handle other types of messages from the device
     };
 
     ws.onclose = () => {
-      console.log('WebSocket disconnected from device status');
       setDeviceIsOn(false);
       setDeviceIsHeating(false); 
     };
 
     ws.onerror = (err) => {
-      console.error('WebSocket error:', err);
       setDeviceIsOn(false);
       setDeviceIsHeating(false);
     };
 
     return () => {
-      // ws.close(); // Temporarily commented out for debugging
+      // ws.close();
     };
   }, []);
 
   return (
-    <Flex direction="column" gap="4">
-      <Header
-        deviceName="Heizbox"
-        deviceStatus={deviceIsOn ? 'Online' : 'Offline'}
-        heatingStatus={deviceIsHeating ? 'Heizt' : 'Inaktiv'}
-      />
+    <Theme appearance={theme as 'light' | 'dark'}>
+      <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <Flex direction="column" gap="4">
+          <Header
+            deviceName="Heizbox"
+            deviceStatus={deviceIsOn ? 'Online' : 'Offline'}
+            heatingStatus={deviceIsHeating ? 'Heizt' : 'Inaktiv'}
+            theme={theme}
+            toggleTheme={toggleTheme}
+          />
 
-      <main>
-        <Routes>
-          <Route path="/" element={<SessionPage key={sessionKey} isHeating={deviceIsHeating} />} />
-          <Route path="/usage" element={<UsagePage />} />
-        </Routes>
-      </main>
-    </Flex>
+          <main className="p-4">
+            <Routes>
+              <Route path="/" element={<SessionPage key={sessionKey} isHeating={deviceIsHeating} />} />
+              <Route path="/usage" element={<UsagePage theme={theme} />} />
+            </Routes>
+          </main>
+        </Flex>
+      </div>
+    </Theme>
   );
 }
 
