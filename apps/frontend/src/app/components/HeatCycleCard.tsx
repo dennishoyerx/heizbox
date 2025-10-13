@@ -1,10 +1,11 @@
-import * as Collapsible from '@radix-ui/react-collapsible';
+import { useState } from 'react';
 import type { HeatCycleGroup } from '@heizbox/types';
-import {  formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
-import { CaretDown } from '@phosphor-icons/react';
+import { formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
 import { Card, Flex, Text, Heading, Badge } from '@radix-ui/themes';
+import { HeatCycleDetailModal } from './HeatCycleDetailModal';
 
 export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle: HeatCycleGroup, index: number, totalHeatCycles: number }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const count = heatCycle.length;
 
   const heatCycleConsumption = calculateConsumption(count);
@@ -18,38 +19,31 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
   }
 
   // Calculate time range
-  const startTimestamp = heatCycle[0].created_at
+  const startTimestamp = heatCycle[0].created_at;
   const endTimestamp = heatCycle[heatCycle.length - 1].created_at;
-    const timeRangeString = `${formatTimestampForTimeDisplay(startTimestamp)} - ${formatTimestampForTimeDisplay(endTimestamp)}`;
+  const timeRangeString = `${formatTimestampForTimeDisplay(startTimestamp)} - ${formatTimestampForTimeDisplay(endTimestamp)}`;
 
   return (
-    <Card>
-      <Collapsible.Root>
-        <Collapsible.Trigger style={{ width: '100%' }}>
-          <Flex justify="between" align="center">
-            <Flex align="baseline" gap="3" wrap="wrap" gapY="0">
-              <Heading size="3">Heat Cycle {totalHeatCycles - index}</Heading>
-              <Text size="2" color="gray">{timeRangeString}</Text>
-            </Flex>
-            <Flex align="center" gap="3">
+    <>
+      <Card>
+        <Flex justify="between" align="center">
+          <Flex align="baseline" gap="3" wrap="wrap" gapY="0">
+            <Heading size="3">Heat Cycle {totalHeatCycles - index}</Heading>
+            <Text size="2" color="gray">{timeRangeString}</Text>
+          </Flex>
+          <Flex align="center" gap="3">
+            <button onClick={() => setIsModalOpen(true)} className="cursor-pointer">
               <Badge>{count} Klicks</Badge>
-              <Badge color={consumptionColor}>{heatCycleConsumption}g</Badge>
-              <CaretDown />
-            </Flex>
+            </button>
+            <Badge color={consumptionColor}>{heatCycleConsumption}g</Badge>
           </Flex>
-        </Collapsible.Trigger>
-
-        <Collapsible.Content>
-          <Flex direction="column" gap="2" mt="4">
-            {heatCycle.map(row => (
-              <Flex key={row.id} justify="between">
-                    <Text size="2" color="gray">{formatTimestampForTimeDisplay(row.created_at)}</Text>
-                <Text size="2" weight="bold">{row.duration}s</Text>
-              </Flex>
-            ))}
-          </Flex>
-        </Collapsible.Content>
-      </Collapsible.Root>
-    </Card>
+        </Flex>
+      </Card>
+      <HeatCycleDetailModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        heatCycle={heatCycle} 
+      />
+    </>
   );
 };

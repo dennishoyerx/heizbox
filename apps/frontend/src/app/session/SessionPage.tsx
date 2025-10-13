@@ -41,7 +41,7 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
             <Flex direction="column" gap="3">
               {data.heatCycles.map((heatCycle, index) => (
                 <HeatCycleCard
-                  key={heatCycle.id || index}
+                  key={heatCycle[0]?.id || index}
                   heatCycle={heatCycle}
                   index={index}
                   totalHeatCycles={data.heatCycles.length}
