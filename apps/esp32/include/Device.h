@@ -19,6 +19,9 @@
 #include "ScreensaverScreen.h"
 #include "OtaUpdateScreen.h"
 
+#include "StatsScreen.h"
+#include "TimezoneScreen.h"
+
 class Device {
 public:
     Device();
@@ -52,6 +55,8 @@ private:
     HiddenModeScreen hiddenModeScreen;
     ScreensaverScreen screensaverScreen;
     OtaUpdateScreen otaUpdateScreen;
+    StatsScreen statsScreen;
+    TimezoneScreen timezoneScreen;
 
     void handleInput(InputEvent event);
     void handleGlobalScreenSwitching(InputEvent event);

@@ -5,6 +5,7 @@ enum class ScreenType {
     MAIN_MENU,
     FIRE,
     STATS,
+    TIMEZONE,
     HIDDEN_MODE,
     SCREENSAVER,
     OTA_UPDATE

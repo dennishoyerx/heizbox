@@ -5,6 +5,7 @@
 #include "ScreenType.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7789.h>
+#include "TimezoneScreen.h"
 
 // Define missing color
 #define ST77XX_GRAY 0x7BEF
@@ -20,8 +21,14 @@ MainMenuScreen::MainMenuScreen(DisplayManager* display, ScreenManager* screenMan
         {"Brightness", [this]() { adjustBrightness(); }},
         {"AutoStop Time", [this]() { configureAutoStop(); }},
         {"Sleep Timeout", [this]() { configureSleepTimeout(); }},
+        {"Timezone", [this]() { 
+            if (this->timezoneScreen) {
+                this->timezoneScreen->onEnter();
+                this->screenManager->setScreen(this->timezoneScreen);
+            }
+        }},
+        {"Statistics", [this]() { if(this->statsScreen) this->screenManager->setScreen(this->statsScreen); }},
         {"Hidden Mode", [this]() { enterHiddenMode(); }},
-        {"Statistics", [this]() { /* Transition to stats screen */ }}
     };
 }
 
@@ -43,7 +50,7 @@ void MainMenuScreen::draw(DisplayManager& display) {
     }
 
     // Draw instructions
-    display.drawText(30, 200, "CENTER: Select", ST77XX_GRAY, 1);
+    display.drawText(30, 220, "CENTER: Select", ST77XX_GRAY, 1);
 }
 
 void MainMenuScreen::update() {
@@ -110,4 +117,12 @@ void MainMenuScreen::configureSleepTimeout() {
 
 void MainMenuScreen::enterHiddenMode() {
     // Transition to hidden mode screen
+}
+
+void MainMenuScreen::setStatsScreen(Screen* screen) {
+    statsScreen = screen;
+}
+
+void MainMenuScreen::setTimezoneScreen(TimezoneScreen* screen) {
+    timezoneScreen = screen;
 }

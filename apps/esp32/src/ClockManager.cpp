@@ -2,45 +2,43 @@
 #include <WiFi.h>
 #include <time.h>
 
-
-
-
-ClockManager::ClockManager() : timeSynced(false) {
+ClockManager::ClockManager() : timeSynced(false), gmtOffset_sec(3600) { // Default to GMT+1
 }
 
 void ClockManager::init() {
-    // Note: WiFi connection would need to be established first
-    // This is a simplified implementation
+    prefs.begin("clock", false);
+    // Load timezone offset from NVS, default to 3600 seconds (GMT+1)
+    gmtOffset_sec = prefs.getLong("gmtOffset", 3600);
+    prefs.end();
 
+    reconfigureTime();
+}
+
+void ClockManager::reconfigureTime() {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+    Serial.printf("🕐 Time configured with offset: %ld seconds\n", gmtOffset_sec);
 }
 
 void ClockManager::update() {
     struct tm timeinfo;
-    if (getLocalTime(&timeinfo, 0)) { // Non-blocking check
+    if (getLocalTime(&timeinfo, 500)) { // Small timeout to attempt sync
         if (!timeSynced) {
             timeSynced = true;
-            Serial.printf("🕐 Time synchronized via NTP: %s\n", asctime(&timeinfo));
+            Serial.printf("🕐 Time synchronized via NTP: %s", asctime(&timeinfo));
         }
     } else {
         if (timeSynced) {
             Serial.println("❌ Time synchronization lost");
         }
-        timeSynced = false; // Time is no longer synced
+        timeSynced = false;
     }
 }
 
 String ClockManager::getFormattedTime() {
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo, 0)) {
+    if (!getLocalTime(&timeinfo)) {
         return "--:--";
     }
-
-    time_t rawtime;
-    time(&rawtime);
-    rawtime += (gmtOffset_sec + daylightOffset_sec);
-    localtime_r(&rawtime, &timeinfo);
-
     char buffer[6];
     strftime(buffer, sizeof(buffer), "%H:%M", &timeinfo);
     return String(buffer);
@@ -48,15 +46,9 @@ String ClockManager::getFormattedTime() {
 
 String ClockManager::getFormattedDate() {
     struct tm timeinfo;
-    if (!getLocalTime(&timeinfo, 0)) {
+    if (!getLocalTime(&timeinfo)) {
         return "--.--.--";
     }
-
-    time_t rawtime;
-    time(&rawtime);
-    rawtime += (gmtOffset_sec + daylightOffset_sec);
-    localtime_r(&rawtime, &timeinfo);
-
     char buffer[11];
     strftime(buffer, sizeof(buffer), "%d.%m.%Y", &timeinfo);
     return String(buffer);
@@ -64,4 +56,16 @@ String ClockManager::getFormattedDate() {
 
 bool ClockManager::isTimeSynced() const {
     return timeSynced;
+}
+
+void ClockManager::setTimezoneOffset(long offset_sec) {
+    gmtOffset_sec = offset_sec;
+    prefs.begin("clock", false);
+    prefs.putLong("gmtOffset", gmtOffset_sec);
+    prefs.end();
+    reconfigureTime(); // Re-apply the time configuration
+}
+
+long ClockManager::getTimezoneOffset() const {
+    return gmtOffset_sec;
 }

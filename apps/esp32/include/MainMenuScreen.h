@@ -16,12 +16,16 @@ struct MenuItem {
     std::function<void()> action;
 };
 
+class TimezoneScreen; // Forward declaration
+
 class MainMenuScreen : public Screen {
 private:
     std::vector<MenuItem> items;
     int selectedIndex;
     DisplayManager* display;
     ScreenManager* screenManager;
+    Screen* statsScreen = nullptr;
+    TimezoneScreen* timezoneScreen = nullptr;
 
 public:
     MainMenuScreen(DisplayManager* display, ScreenManager* screenManager);
@@ -34,6 +38,9 @@ public:
     void configureAutoStop();
     void configureSleepTimeout();
     void enterHiddenMode();
+
+    void setStatsScreen(Screen* screen);
+    void setTimezoneScreen(TimezoneScreen* screen);
 };
 
 #endif

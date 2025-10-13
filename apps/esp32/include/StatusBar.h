@@ -6,7 +6,7 @@
 #include "ClockManager.h"
 #include <TFT_eSPI.h>
 
-#define STATUS_BAR_HEIGHT 40
+#define STATUS_BAR_HEIGHT 50
 
 class StatusBar {
 private:
@@ -16,6 +16,7 @@ private:
     wl_status_t lastWifiStatus = WL_IDLE_STATUS;
     String lastDisplayedTime = "";
     TFT_eSPI* tft_display;
+    int8_t lastWifiStrength = -1;
 
 public:
     StatusBar(TFT_eSPI* tft_instance, uint16_t width, ClockManager* cm, uint8_t h);

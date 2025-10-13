@@ -20,7 +20,7 @@ uint8_t loadBrightness() {
     return b;
 }
 
-#define SPRITE_HEIGHT 240  
+#define SPRITE_HEIGHT 230  
 
 // TFT_eSPI display instance (global)
 TFT_eSPI tft = TFT_eSPI();  // TFT_eSPI handles pin config via User_Setup.h

@@ -51,6 +51,7 @@
     "backend:down": "pnpm exec nx run backend:db-sync",
     "esp:build": "pnpm exec nx run esp32:build",
     "esp:upload": "pnpm exec nx run esp32:upload",
+    "ota": "pnpm exec nx run esp32:ota",
     "esp:ota": "pnpm exec nx run esp32:ota",
     "esp:monitor": "pnpm exec nx run esp32:monitor",
     "migrate:local": "cd apps/backend && wrangler d1 migrations apply heizbox --local",

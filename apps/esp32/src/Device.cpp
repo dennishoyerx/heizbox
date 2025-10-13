@@ -22,7 +22,9 @@ Device::Device()
       mainMenuScreen(&display, &screenManager),
       hiddenModeScreen(&display),
       screensaverScreen(clockManager, 30000, &display),
-      otaUpdateScreen(&display) {
+      otaUpdateScreen(&display),
+      statsScreen(statsManager),
+      timezoneScreen(clockManager, &screenManager) {
     instance = this; // Set the static instance pointer
 }
 
@@ -51,10 +53,18 @@ void Device::setup() {
     // Setup core components
     input.init();
     heater.init();
+    statsManager.init();
     display.init(&screenManager);
 
     // Set initial screen
     screenManager.setScreen(&fireScreen);
+
+    // Configure screen navigation
+    mainMenuScreen.setStatsScreen(&statsScreen);
+    mainMenuScreen.setTimezoneScreen(&timezoneScreen);
+    timezoneScreen.onExit([this]() {
+        screenManager.setScreen(&mainMenuScreen);
+    });
 
     // Configure screensaver exit
     screensaverScreen.onExit([this]() {
