@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Flex, Heading, DropdownMenu, Button, Text } from '@radix-ui/themes';
-import { List, Sun, Moon } from '@phosphor-icons/react';
+import { List, Sun, Moon, Circle, CircleNotch , Fire } from '@phosphor-icons/react';
 import { Box } from '@radix-ui/themes/src/index.js';
 
 interface HeaderProps {
@@ -15,12 +15,20 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus, theme, toggleTheme }) => {
   return (
     <Box className="shadow-sm">
-      <Flex direction="column" gap="2" p="4">
+      <Flex direction="column" gap="2" p="4" className="shadow-sm mx-auto" maxWidth="600px">
         <Flex justify="between" align="center">
-          <Heading>{deviceName}</Heading>
+          <Flex gap="2" align="center">
+            <Heading>{deviceName}</Heading>
+          </Flex>
+                  <Flex gap="2" align="center">
+                      <Flex>
+                          {heatingStatus === 'Heizt' && <Fire size={24} color="orange" />}                      </Flex>
+
+                          {deviceStatus === 'Online' && <Circle weight="bold" size={20} color='green' />}
+                          {deviceStatus === 'Offline' && <CircleNotch weight="bold" size={20} color='red' />}
           <DropdownMenu.Root>
             <DropdownMenu.Trigger>
-              <Button variant="soft">
+              <Button variant="ghost">
                 <List size={24} />
               </Button>
             </DropdownMenu.Trigger>
@@ -40,9 +48,8 @@ const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus
               </DropdownMenu.Item>
             </DropdownMenu.Content>
           </DropdownMenu.Root>
+          </Flex>
         </Flex>
-        <Text size="2" color="gray">Gerät Status: <Text weight="bold">{deviceStatus}</Text></Text>
-        <Text size="2" color="gray">Heizstatus: <Text weight="bold">{heatingStatus}</Text></Text>
       </Flex>
     </Box>
   );

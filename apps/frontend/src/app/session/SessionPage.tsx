@@ -29,7 +29,7 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
   }, []);
 
   return (
-    <Flex direction="column" gap="3" className="bg-slate-950">
+    <Flex direction="column" gap="3" maxWidth="600px" className="mx-auto">
       <SessionHeader isHeating={isHeating} />
       {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
       {loading && <Text>Lade Daten...</Text>}
