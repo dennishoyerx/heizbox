@@ -5,13 +5,13 @@ import { formatTimestampForTimeDisplay } from '@heizbox/utils';
 import { X } from '@phosphor-icons/react';
 import { Badge } from '@radix-ui/themes';
 
-interface HeatCycleDetailModalProps {
+interface SessionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   heatCycle: HeatCycleGroup | null;
 }
 
-export const HeatCycleDetailModal = ({ isOpen, onClose, heatCycle }: HeatCycleDetailModalProps) => {
+export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetailModalProps) => {
   if (!heatCycle) {
     return null;
   }

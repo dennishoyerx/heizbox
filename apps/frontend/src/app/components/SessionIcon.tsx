@@ -1,6 +1,6 @@
 import { Flame, ArrowClockwise } from "@phosphor-icons/react";
 
-export function HeatCycleIcon() {
+export function SessionIcon() {
   return (
     <div className="relative w-6 h-6">
       <ArrowClockwise

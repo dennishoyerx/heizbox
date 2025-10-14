@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { ApiResponse } from '@heizbox/types';
 import { fetchHeatCycles } from '../../api';
-import { HeatCycleCard } from '../components';
+import { SessionCard } from '../components';
 import { SessionHeader } from './';
 import { Flex, Text } from '@radix-ui/themes';
 
@@ -40,7 +40,7 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
           {data.heatCycles && data.heatCycles.length > 0 ? (
             <Flex direction="column" gap="3">
               {data.heatCycles.map((heatCycle, index) => (
-                <HeatCycleCard
+                <SessionCard
                   key={heatCycle[0]?.id || index}
                   heatCycle={heatCycle}
                   index={index}

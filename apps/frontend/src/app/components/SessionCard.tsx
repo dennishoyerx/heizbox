@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { HeatCycleGroup } from '@heizbox/types';
 import { formatTimestampForTimeDisplay, calculateConsumption } from '@heizbox/utils';
 import { Card, Flex, Text, Heading, Badge } from '@radix-ui/themes';
-import { HeatCycleDetailModal } from './HeatCycleDetailModal';
+import { SessionDetailModal } from './SessionDetailModal';
 
-export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle: HeatCycleGroup, index: number, totalHeatCycles: number }) => {
+export const SessionCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle: HeatCycleGroup, index: number, totalHeatCycles: number }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const count = heatCycle.length;
   const caps = heatCycle.filter(x => x.cycle === 1).length;
@@ -43,7 +43,7 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
           </Flex>
         </Flex>
       </Card>
-      <HeatCycleDetailModal 
+      <SessionDetailModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         heatCycle={heatCycle} 
