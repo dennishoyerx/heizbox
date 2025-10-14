@@ -4,7 +4,7 @@
 #include "StatusBar.h"
 #include "ScreenType.h"
 #include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
+#include <TFT_eSPI.h>
 #include "bitmaps.h" // Include the bitmaps header
 
 ScreenType StartupScreen::getType() const {
@@ -15,7 +15,7 @@ StartupScreen::StartupScreen() : startTime(millis()), animationComplete(false) {
 }
 
 void StartupScreen::draw(DisplayManager& display) {
-    display.clear(ST77XX_BLACK);
+    display.clear(TFT_BLACK);
 
     // Assuming catBitmap is 24x48 pixels
     int16_t bitmapWidth = 24;
@@ -23,7 +23,7 @@ void StartupScreen::draw(DisplayManager& display) {
     int16_t x = (display.getTFTWidth() - bitmapWidth) / 2;
     int16_t y = (display.getTFTHeight() - bitmapHeight) / 2;
 
-    display.drawBitmap(x, y, catBitmap, bitmapWidth, bitmapHeight, ST77XX_WHITE);
+    display.drawBitmap(x, y, catBitmap, bitmapWidth, bitmapHeight, TFT_WHITE);
 }
 
 void StartupScreen::update() {

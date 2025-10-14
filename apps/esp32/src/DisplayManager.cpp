@@ -20,6 +20,19 @@ uint8_t loadBrightness() {
     return b;
 }
 
+void saveDarkMode(bool darkMode) {
+    prefs.begin("display", false);
+    prefs.putBool("darkMode", darkMode);
+    prefs.end();
+}
+
+bool loadDarkMode() {
+    prefs.begin("display", true); // Read-only
+    bool d = prefs.getBool("darkMode", true); // Default true
+    prefs.end();
+    return d;
+}
+
 #define SPRITE_HEIGHT 230  
 
 // TFT_eSPI display instance (global)
@@ -27,6 +40,7 @@ TFT_eSPI tft = TFT_eSPI();  // TFT_eSPI handles pin config via User_Setup.h
 
 DisplayManager::DisplayManager(ClockManager* cm)
     : brightness(100), clock(cm), sprTop(&tft) {
+    darkMode = loadDarkMode();
 }
 
 DisplayManager::~DisplayManager() {
@@ -42,7 +56,7 @@ void DisplayManager::init(ScreenManager* mgr) {
     // PWM für Backlight
     ledcAttachPin(TFT_BL, 1);     // Channel 1
     ledcSetup(1, 5000, 8);        // 5 kHz, 8 Bit
-    setBrightness(brightness);
+    setBrightness(loadBrightness());
 
     reallocateSprites();
 }
@@ -65,20 +79,21 @@ void DisplayManager::reallocateSprites() {
 
 void DisplayManager::clear(uint16_t color) {
     if (spriteAllocated) {
-        sprTop.fillSprite(color);
+        sprTop.fillSprite(darkMode ? TFT_BLACK : TFT_WHITE);
     } else {
-        tft.fillScreen(color);
+        tft.fillScreen(darkMode ? TFT_BLACK : TFT_WHITE);
     }
 }
 
 void DisplayManager::drawText(int16_t x, int16_t y, const char* text, uint16_t color, uint8_t size) {
+    uint16_t bg = darkMode ? TFT_BLACK : TFT_WHITE;
     if (spriteAllocated) {
-        sprTop.setTextColor(color, TFT_BLACK, false);
+        sprTop.setTextColor(color, bg, false);
         sprTop.setTextSize(size);
         sprTop.setCursor(x, y);
         sprTop.print(text);
     } else {
-        tft.setTextColor(color, TFT_BLACK, false);
+        tft.setTextColor(color, bg, false);
         tft.setTextSize(size);
         tft.setCursor(x, y);
         tft.print(text);
@@ -139,6 +154,15 @@ void DisplayManager::setBrightness(uint8_t level) {
 
 uint8_t DisplayManager::getBrightness() const {
     return brightness;
+}
+
+void DisplayManager::toggleDarkMode() {
+    darkMode = !darkMode;
+    saveDarkMode(darkMode);
+}
+
+bool DisplayManager::isDarkMode() const {
+    return darkMode;
 }
 
 int DisplayManager::getTextWidth(const char* text, uint8_t size) {

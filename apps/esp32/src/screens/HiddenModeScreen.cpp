@@ -3,7 +3,7 @@
 #include "DisplayManager.h"
 #include "InputManager.h"
 #include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
+#include <TFT_eSPI.h>
 
 ScreenType HiddenModeScreen::getType() const {
     return ScreenType::HIDDEN_MODE;
@@ -14,7 +14,7 @@ HiddenModeScreen::HiddenModeScreen(DisplayManager* dm) : enterTime(millis()), fi
 
 void HiddenModeScreen::draw(DisplayManager& display) {
     // Hidden mode - turn off display completely
-    display.clear(ST77XX_BLACK);
+    display.clear(TFT_BLACK);
     display.setBrightness(0); // Turn off backlight
 }
 

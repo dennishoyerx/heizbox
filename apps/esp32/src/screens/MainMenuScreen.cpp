@@ -4,11 +4,10 @@
 #include "StatusBar.h"
 #include "ScreenType.h"
 #include <Adafruit_GFX.h>
-#include <Adafruit_ST7789.h>
+#include <TFT_eSPI.h>
 #include "TimezoneScreen.h"
 
-// Define missing color
-#define ST77XX_GRAY 0x7BEF
+#define TFT_GRAY 0x7BEF
 
 ScreenType MainMenuScreen::getType() const {
     return ScreenType::MAIN_MENU;
@@ -28,29 +27,33 @@ MainMenuScreen::MainMenuScreen(DisplayManager* display, ScreenManager* screenMan
             }
         }},
         {"Statistics", [this]() { if(this->statsScreen) this->screenManager->setScreen(this->statsScreen); }},
+        {"Dark Mode", [this]() { this->display->toggleDarkMode(); }},
         {"Hidden Mode", [this]() { enterHiddenMode(); }},
     };
 }
 
 void MainMenuScreen::draw(DisplayManager& display) {
-    display.clear(ST77XX_BLACK);
+    display.clear(TFT_BLACK);
 
     // Draw title
-    display.drawText(70, 10, "MENU", ST77XX_WHITE, 2);
+    display.drawText(70, 10, "MENU", TFT_WHITE, 2);
+
+    // Update dark mode menu item title
+    items[5].title = display.isDarkMode() ? "Dark Mode: On" : "Dark Mode: Off";
 
     // Draw menu items
     for (size_t i = 0; i < items.size(); i++) {
         if (i == selectedIndex) {
-            display.drawText(30, 50 + i * 30, ">", ST77XX_WHITE, 2);
-            display.drawText(50, 50 + i * 30, items[i].title, ST77XX_YELLOW, 2);
+            display.drawText(30, 50 + i * 30, ">", TFT_WHITE, 2);
+            display.drawText(50, 50 + i * 30, items[i].title, TFT_YELLOW, 2);
         }
         else {
-            display.drawText(50, 50 + i * 30, items[i].title, ST77XX_WHITE, 2);
+            display.drawText(50, 50 + i * 30, items[i].title, TFT_WHITE, 2);
         }
     }
 
     // Draw instructions
-    display.drawText(30, 220, "CENTER: Select", ST77XX_GRAY, 1);
+    display.drawText(30, 220, "CENTER: Select", TFT_GRAY, 1);
 }
 
 void MainMenuScreen::update() {

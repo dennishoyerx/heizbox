@@ -39,14 +39,15 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating }) => {
     <Flex direction="column" align="center" gap="4" className="mt-8">
       <div id="heat-circle" className={heatCircleClass}>
         {session && isHeating && (
-        <><div id="heat-glow" className={heatGlowClass}></div>
-          <Flame
-            weight="fill"
-            size={96}
-            className="text-orange-500 drop-shadow-sm"
-          />
-      </>
-              )}
+          <>
+            <div id="heat-glow" className={heatGlowClass}></div>
+            <Flame
+              weight="fill"
+              size="96px"
+              className="text-orange-50 drop-shadow-sm absolute text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            />
+          </>
+        )}
         {session && !isHeating && (
           <Flex direction="column" align="center" className="absolute text-white">
             <Text size="8" weight="bold" color="white">{session.clicks}</Text>

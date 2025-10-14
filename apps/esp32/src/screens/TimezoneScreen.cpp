@@ -1,8 +1,9 @@
 #include "TimezoneScreen.h"
 #include "MainMenuScreen.h"
+#include <TFT_eSPI.h>
 
 // Define missing color
-#define ST77XX_GRAY 0x7BEF
+#define TFT_GRAY 0x7BEF
 
 TimezoneScreen::TimezoneScreen(ClockManager& cm, ScreenManager* sm)
     : clockManager(cm), screenManager(sm), mainMenuScreen(nullptr), timezoneOffsetHours(0) {
@@ -19,19 +20,19 @@ void TimezoneScreen::onEnter() {
 }
 
 void TimezoneScreen::draw(DisplayManager& display) {
-    display.clear(ST77XX_BLACK);
+    display.clear(TFT_BLACK);
 
     // Draw title
-    display.drawText(50, 10, "TIMEZONE", ST77XX_WHITE, 2);
+    display.drawText(50, 10, "TIMEZONE", TFT_WHITE, 2);
 
     // Draw current offset
     char buffer[20];
     sprintf(buffer, "UTC %+d", timezoneOffsetHours);
-    display.drawText(60, 80, buffer, ST77XX_WHITE, 3);
+    display.drawText(60, 80, buffer, TFT_WHITE, 3);
 
     // Draw instructions
-    display.drawText(30, 160, "UP/DOWN: Adjust", ST77XX_GRAY, 1);
-    display.drawText(30, 180, "CENTER: Save & Exit", ST77XX_GRAY, 1);
+    display.drawText(30, 160, "UP/DOWN: Adjust", TFT_GRAY, 1);
+    display.drawText(30, 180, "CENTER: Save & Exit", TFT_GRAY, 1);
 }
 
 void TimezoneScreen::update() {

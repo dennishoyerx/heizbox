@@ -9,6 +9,8 @@
 #include "ScreenType.h"
 #include "InputManager.h"
 
+class DisplayManager;
+
 struct InputEvent;
 
 struct MenuItem {
