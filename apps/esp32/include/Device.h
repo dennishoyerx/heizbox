@@ -21,6 +21,7 @@
 
 #include "StatsScreen.h"
 #include "TimezoneScreen.h"
+#include "StartupScreen.h" // Include StartupScreen.h
 
 class Device {
 public:
@@ -58,6 +59,7 @@ private:
     OtaUpdateScreen otaUpdateScreen;
     StatsScreen statsScreen;
     TimezoneScreen timezoneScreen;
+    StartupScreen startupScreen; // Add StartupScreen here
 
     void handleInput(InputEvent event);
     void handleGlobalScreenSwitching(InputEvent event);

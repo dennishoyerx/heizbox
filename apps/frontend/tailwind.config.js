@@ -20,6 +20,7 @@ module.exports = {
               ...slateDark,
               gray: slate,
               grayDark: slateDark,
+              background: colors.slate[900],
           },
       },
   },

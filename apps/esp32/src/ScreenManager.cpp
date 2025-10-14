@@ -13,6 +13,7 @@ void ScreenManager::setScreen(Screen* newScreen) {
         display.clear();
         currentScreen->draw(display);
         display.render();
+        display.renderStatusBar(); // Call renderStatusBar after screen is drawn
     }
 }
 
@@ -26,6 +27,7 @@ void ScreenManager::draw() {
     if (dirty && currentScreen) {
         currentScreen->draw(display);
         display.render();
+        display.renderStatusBar(); // Call renderStatusBar after screen is drawn
         dirty = false;
     }
 }

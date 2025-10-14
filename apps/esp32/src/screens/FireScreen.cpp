@@ -55,7 +55,7 @@ void FireScreen::draw(DisplayManager& display) {
     // Display current cycle
     char cycleText[15];
     snprintf(cycleText, sizeof(cycleText), "Cycle: %d", _currentCycle);
-    display.drawText(10, 10, cycleText, ST77XX_WHITE, 2);
+    display.drawText(10, 10, cycleText, ST77XX_WHITE, 3);
 }
 
 void FireScreen::update() {

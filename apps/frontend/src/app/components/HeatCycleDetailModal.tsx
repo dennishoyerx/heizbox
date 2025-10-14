@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { HeatCycleGroup } from '@heizbox/types';
 import { formatTimestampForTimeDisplay } from '@heizbox/utils';
 import { X } from '@phosphor-icons/react';
+import { Badge } from '@radix-ui/themes';
 
 interface HeatCycleDetailModalProps {
   isOpen: boolean;
@@ -68,7 +69,10 @@ export const HeatCycleDetailModal = ({ isOpen, onClose, heatCycle }: HeatCycleDe
                       {heatCycle.map(row => (
                         <div key={row.id} className="flex justify-between px-3 py-1 text-sm hover:bg-slate-800 transition-colors">
                           <span>{formatTimestampForTimeDisplay(row.created_at)}</span>
-                          <span className="font-mono text-slate-400">{row.duration}s</span>
+                          <div className="flex gap-1">
+                            <span className="font-mono text-slate-400">{row.duration}s</span>
+                            <Badge size="2" color="indigo" variant="outline" className="px-2">{row.cycle}</Badge>
+                          </div>
                         </div>
                       ))}
                     </div>

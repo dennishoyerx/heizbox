@@ -29,7 +29,8 @@ Device::Device()
       screensaverScreen(clockManager, 30000, &display),
       otaUpdateScreen(&display),
       statsScreen(statsManager),
-      timezoneScreen(clockManager, &screenManager) {
+      timezoneScreen(clockManager, &screenManager),
+      startupScreen() { // Initialize startupScreen here
     instance = this; // Set the static instance pointer
 }
 
@@ -63,7 +64,7 @@ void Device::setup() {
     clockManager.init(); // Initialize ClockManager here
 
     // Set initial screen
-    screenManager.setScreen(&fireScreen);
+    screenManager.setScreen(&fireScreen); // Set fireScreen as the initial screen
 
     // Configure screen navigation
     mainMenuScreen.setStatsScreen(&statsScreen);
