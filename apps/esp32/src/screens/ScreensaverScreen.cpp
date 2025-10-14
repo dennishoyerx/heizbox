@@ -44,7 +44,7 @@ void ScreensaverScreen::handleInput(InputEvent event) {
     displayManager->setBrightness(100);
 
     // Specific inputs might exit screensaver
-    if (event.type == PRESS && (event.button == CENTER || event.button == FIRE)) {
+    if (event.type == PRESS) {
         if (exitCallback) {
             exitCallback();
         }

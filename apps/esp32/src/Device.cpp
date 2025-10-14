@@ -60,6 +60,7 @@ void Device::setup() {
     heater.init();
     statsManager.init();
     display.init(&screenManager);
+    clockManager.init(); // Initialize ClockManager here
 
     // Set initial screen
     screenManager.setScreen(&fireScreen);
@@ -258,9 +259,6 @@ void Device::WiFiEvent(WiFiEvent_t event) {
         case ARDUINO_EVENT_WIFI_STA_GOT_IP:
             Serial.print("🌐 IP: ");
             Serial.println(WiFi.localIP());
-            if (instance && !instance->clockManager.isTimeSynced()) {
-                instance->clockManager.init();
-            }
             if (instance) {
                 String wsUrl = String(BACKEND_WS_URL) + "?deviceId=" + DEVICE_ID + "&type=device";
                 String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws/status"));
