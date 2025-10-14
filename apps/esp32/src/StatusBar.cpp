@@ -62,7 +62,7 @@ void StatusBar::draw() {
 
     // Redraw icon only if status or strength level changes
     if (currentWifiStatus != lastWifiStatus || currentWifiStrength != lastWifiStrength) {
-        target->fillRect(target->width() - 40, height - 27, 19, 15, 0x885); // Clear icon area
+        target->fillRect(target->width() - 40, height - 27, 19, 15, 0x000); // Clear icon area //0x885
 
         const uint8_t* wifi_icon;
         if (currentWifiStatus == WL_CONNECTED) {

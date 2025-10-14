@@ -96,15 +96,26 @@ void FireScreen::handleInput(InputEvent event) {
                 startTime = millis();
                 elapsedTime = 0;
             } else {
+                bool updateCycle = heater.isHeating();
                 heater.stopHeating();
-                _setCycleCallback(_currentCycle);
-                _currentCycle = (_currentCycle == 1) ? 2 : 1;
+                if (updateCycle) {
+                    _setCycleCallback(_currentCycle);
+                    _currentCycle = (_currentCycle == 1) ? 2 : 1;
+				}
             }
             screenManager->setDirty();
             break;
 
         case UP:
-            _currentCycle = (_currentCycle == 1) ? 2 : 1;
+            if (_currentCycle == 1) {
+                _currentCycle = 2;
+            }
+            else if (_currentCycle == 3) {
+                _currentCycle = 4;
+            }
+            else if (_currentCycle == 4) {
+                _currentCycle = 1;
+            }
             _setCycleCallback(_currentCycle);
             screenManager->setDirty();
             break;

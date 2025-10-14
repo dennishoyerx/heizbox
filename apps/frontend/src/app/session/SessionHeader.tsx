@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchSession } from '../../api';
 import type { SessionApiResponse } from '@heizbox/types';
 import { Text, Flex } from '@radix-ui/themes';
+import { Flame } from "@phosphor-icons/react";
 
 interface SessionHeaderProps {
   isHeating: boolean;
@@ -39,10 +40,13 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating }) => {
       <div id="heat-circle" className={heatCircleClass}>
         {session && isHeating && (
         <><div id="heat-glow" className={heatGlowClass}></div>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.85 14.85A3.5 3.5 0 0112 17.5a3.5 3.5 0 01-2.85-2.65M12 3v4m0 4v1m6.364 6.364A9 9 0 1112 3a9 9 0 016.364 15.364z" />
-                      </svg></>
-        )}
+          <Flame
+            weight="fill"
+            size={96}
+            className="text-orange-500 drop-shadow-sm"
+          />
+      </>
+              )}
         {session && !isHeating && (
           <Flex direction="column" align="center" className="absolute text-white">
             <Text size="8" weight="bold" color="white">{session.clicks}</Text>
