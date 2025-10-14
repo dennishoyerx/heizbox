@@ -16,11 +16,8 @@ export const HeatCycleDetailModal = ({ isOpen, onClose, heatCycle }: HeatCycleDe
     return null;
   }
 
-  const averageInterval = heatCycle.length > 1
-    ? heatCycle.slice(1).reduce((acc, row, index) => {
-      const prevRow = heatCycle[index];
-      return acc + (row.created_at - prevRow.created_at);
-    }, 0) / (heatCycle.length - 1)
+  const averageInterval = heatCycle.length > 0
+    ? heatCycle.reduce((acc, row) => acc + row.duration, 0) / heatCycle.length
     : 0;
 
   return (
