@@ -7,8 +7,9 @@ import { HeatCycleDetailModal } from './HeatCycleDetailModal';
 export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle: HeatCycleGroup, index: number, totalHeatCycles: number }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const count = heatCycle.length;
+  const caps = heatCycle.filter(x => x.cycle === 1).length;
 
-  const heatCycleConsumption = calculateConsumption(count);
+  const heatCycleConsumption = calculateConsumption(caps);
   const consumptionValue = parseFloat(heatCycleConsumption);
 
   let consumptionColor: "red" | "yellow" | "green" = 'red';
@@ -25,16 +26,19 @@ export const HeatCycleCard = ({ heatCycle, index, totalHeatCycles }: { heatCycle
 
   return (
     <>
-      <Card>
+      <Card onClick={() => setIsModalOpen(true)} className="cursor-pointer">
         <Flex justify="between" align="center">
           <Flex align="baseline" gap="3" wrap="wrap" gapY="0">
-            <Heading size="3">Heat Cycle {totalHeatCycles - index}</Heading>
+            <Heading size="3">Session {totalHeatCycles - index}</Heading>
             <Text size="2" color="gray">{timeRangeString}</Text>
           </Flex>
           <Flex align="center" gap="3">
-            <button onClick={() => setIsModalOpen(true)} className="cursor-pointer">
-              <Badge>{count} Klicks</Badge>
-            </button>
+                      <Badge>
+              <Flex align="center" direction="column">
+                <div>{caps} Caps</div>
+                <div>{count} Klicks</div>
+              </Flex>
+              </Badge>
             <Badge color={consumptionColor}>{heatCycleConsumption}g</Badge>
           </Flex>
         </Flex>

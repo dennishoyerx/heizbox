@@ -19,7 +19,7 @@ const handleGetHeatCycles = async (c: Context<{ Bindings: Env }>) => {
     }
 
     const heatCycles = groupSessions(results);
-    const totalConsumption = calculateConsumption(results.length);
+    const totalConsumption = calculateConsumption(results.filter(x => x.cycle === 1).length);
     return c.json({ heatCycles, totalConsumption });
   } catch (e: unknown) {
     console.error("Error in handleGetHeatCycles:", e);

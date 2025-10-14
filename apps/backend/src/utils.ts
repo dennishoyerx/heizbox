@@ -54,7 +54,7 @@ export const groupSessions = (rows: HeatCycleRow[]): HeatCycleRow[][] => {
   return heatCycles.reverse();
 };
 
-export const calculateConsumption = (count: number): string => (0.05 * Math.ceil(count / 2)).toFixed(2);
+export const calculateConsumption = (count: number): string => (0.05 * Math.ceil(count)).toFixed(2);
 
 export const getMimeType = (path: string): string => {
   const extension = path.split('.').pop()?.toLowerCase();

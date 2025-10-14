@@ -16,6 +16,7 @@ const handleGetSession = async (c: Context<{ Bindings: Env }>) => {
     if (!results || results.length === 0) {
       return c.json({
         clicks: 0,
+        caps: 0,
         lastClick: null,
         heat_cycles: [],
         totalConsumption: "0.00"
@@ -23,9 +24,10 @@ const handleGetSession = async (c: Context<{ Bindings: Env }>) => {
     }
 
     const clicks = results.length;
+    const caps = results.filter(x => x.cycle === 1).length;
     const lastClick = results[results.length - 1].created_at;
     const heat_cycles = groupSessions(results);
-    const totalConsumption = calculateConsumption(clicks);
+    const totalConsumption = calculateConsumption(caps);
 
     return c.json({ clicks, lastClick, heat_cycles, totalConsumption });
   } catch (e: unknown) {

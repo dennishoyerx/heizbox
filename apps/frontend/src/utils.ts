@@ -10,4 +10,4 @@ export const formatTimeForDisplay = (date: Date) => {
   return `${pad(berlinDate.getHours())}:${pad(berlinDate.getMinutes())}`;
 };
 
-export const calculateConsumption = (count: number) => (0.05 * Math.ceil(count / 2)).toFixed(2);
+export const calculateConsumption = (count: number) => (0.05 * Math.ceil(count)).toFixed(2);
