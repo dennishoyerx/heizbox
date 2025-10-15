@@ -55,26 +55,23 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
       {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
       {loading && <Text>Lade Daten...</Text>}
       {error && <Text color="red">Fehler beim Laden: {error}</Text>}
-      {data && (
-        <>
-          {data.heatCycles && data.heatCycles.length > 0 ? (
-            <Flex direction="column" gap="3">
-              {data.heatCycles.map((heatCycle, index) => (
-                <SessionCard
-                  key={heatCycle[0]?.id || index}
-                  heatCycle={heatCycle}
-                  index={index}
-                  totalHeatCycles={data.heatCycles.length}
-                />
-              ))}
-            </Flex>
-          ) : (
-            !loading && (
-              <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
-            )
-          )}
-        </>
-      )}
+      {data &&
+        (data.heatCycles && data.heatCycles.length > 0 ? (
+          <Flex direction="column" gap="3">
+            {data.heatCycles.map((heatCycle, index) => (
+              <SessionCard
+                key={heatCycle[0]?.id || index}
+                heatCycle={heatCycle}
+                index={index}
+                totalHeatCycles={data.heatCycles.length}
+              />
+            ))}
+          </Flex>
+        ) : (
+          !loading && (
+            <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
+          )
+        ))}
     </Flex>
   );
 }
