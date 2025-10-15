@@ -27,13 +27,13 @@
     },
     "deploy": {
       "executor": "nx:run-commands",
-        "options": {
-            "command": "pnpm nx build frontend && wrangler pages deploy dist/apps/frontend --project-name=heizbox",
-            "cwd": ".",
-            "env": {
-                "VITE_PUBLIC_API_URL": "https://backend.hzbx.de"
-            }
+      "options": {
+        "command": "pnpm nx build frontend && wrangler pages deploy dist/apps/frontend --project-name=heizbox --commit-dirty=true",
+        "cwd": ".",
+        "env": {
+          "VITE_PUBLIC_API_URL": "https://backend.hzbx.de"
         }
+      }
     }
   },
   "tags": []

@@ -5,15 +5,13 @@
 @tailwind components;
 @tailwind utilities;
 
-
-:root {
-    //--color-background: theme(colors.slate.50);
+/*:root {
+    --color-background: theme(colors.slate.50);
 }
 
 .dark {
-    //--color-background: theme(colors.slate.950);
-}
-
+    --color-background: theme(colors.slate.950);
+}*/
 
 /* genereller override
 @layer components {
@@ -59,22 +57,25 @@
     --color-border-focus: var(--slate-8);
 }
 
-    /* Dark mode tuning */
-    .radix-themes[data-theme="dark"] {
-        --color-panel: var(--slate-3);
-        --color-panel-solid: var(--slate-4);
-        --color-panel-hover: var(--slate-5);
-        --color-surface: var(--slate-2);
-        --color-surface-hover: var(--slate-3);
-        --color-surface-active: var(--slate-4);
-        --color-text: var(--slate-12);
-        --color-text-subtle: var(--slate-11);
-        --color-border: var(--slate-6);
-        --color-border-hover: var(--slate-7);
-        --color-border-focus: var(--slate-8);
-    }
+/* Dark mode tuning */
+.radix-themes[data-theme="dark"] {
+    --color-panel: var(--slate-3);
+    --color-panel-solid: var(--slate-4);
+    --color-panel-hover: var(--slate-5);
+    --color-surface: var(--slate-2);
+    --color-surface-hover: var(--slate-3);
+    --color-surface-active: var(--slate-4);
+    --color-text: var(--slate-12);
+    --color-text-subtle: var(--slate-11);
+    --color-border: var(--slate-6);
+    --color-border-hover: var(--slate-7);
+    --color-border-focus: var(--slate-8);
+}
 
 /* Optional: smooth transition between themes */
 .radix-themes {
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
 }

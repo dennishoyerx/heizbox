@@ -38,7 +38,6 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "deploy": "VITE_API_URL=https://heizbox-backend.dh19.workers.dev vite build && nx exec -- wrangler pages deploy dist --project-name=heizbox"
+    "preview": "vite preview"
   }
 }

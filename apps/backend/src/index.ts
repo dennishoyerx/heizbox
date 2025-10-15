@@ -25,8 +25,28 @@ app.onError((err, c) => {
   return c.json({ error: "Internal server error" }, 500);
 });
 
-app.use(cors({ origin: "*" }));
+app.use(
+  cors({
+    origin: (origin) => {
+      if (
+        origin.endsWith(".hzbx.de") ||
+        origin === "https://hzbx.de" ||
+        origin.endsWith(".heizbox.pages.dev") ||
+        origin === "https://heizbox.pages.dev" ||
+        origin === "http://localhost:5173" ||
+        origin === "http://127.0.0.1:5173"
+      ) {
+        return origin;
+      }
 
+      return undefined;
+    },
+    allowHeaders: ["X-Custom-Header", "Upgrade-Insecure-Requests"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    credentials: true,
+  }),
+);
 app.route("/api/heat_cycles", heatCyclesRoute);
 app.route("/api/json", jsonRoute);
 app.route("/api/statistics", statisticsRoute);
