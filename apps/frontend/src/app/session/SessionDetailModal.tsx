@@ -1,24 +1,29 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { HeatCycleGroup } from '@heizbox/types';
-import { formatTimestampForTimeDisplay } from '@heizbox/utils';
-import { X } from '@phosphor-icons/react';
-import { Badge } from '@radix-ui/themes';
+import * as Dialog from "@radix-ui/react-dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import type { HeatCycleRows } from "@heizbox/types";
+import { formatTimestampForTimeDisplay } from "@heizbox/utils";
+import { X } from "@phosphor-icons/react";
+import { Badge } from "@radix-ui/themes";
 
 interface SessionDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  heatCycle: HeatCycleGroup | null;
+  heatCycle: HeatCycleRows | null;
 }
 
-export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetailModalProps) => {
+export const SessionDetailModal = ({
+  isOpen,
+  onClose,
+  heatCycle,
+}: SessionDetailModalProps) => {
   if (!heatCycle) {
     return null;
   }
 
-  const averageInterval = heatCycle.length > 0
-    ? heatCycle.reduce((acc, row) => acc + row.duration, 0) / heatCycle.length
-    : 0;
+  const averageInterval =
+    heatCycle.length > 0
+      ? heatCycle.reduce((acc, row) => acc + row.duration, 0) / heatCycle.length
+      : 0;
 
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
@@ -43,7 +48,9 @@ export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetail
               >
                 <div className="w-full max-w-md bg-slate-900 rounded-2xl shadow-xl border border-slate-700/50 p-5 space-y-4 text-white">
                   <header className="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <Dialog.Title className="text-lg font-semibold">Session Details</Dialog.Title>
+                    <Dialog.Title className="text-lg font-semibold">
+                      Session Details
+                    </Dialog.Title>
                     <Dialog.Close asChild>
                       <button className="text-slate-400 hover:text-white transition-colors rounded-full p-1">
                         <X size={20} />
@@ -53,33 +60,49 @@ export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetail
 
                   <div className="grid grid-cols-3 gap-3 text-sm text-slate-300">
                     <div className="bg-slate-800/70 p-4 rounded-lg flex flex-col items-center justify-center space-y-1">
-                      <span className="text-3xl font-bold text-cyan-400">{heatCycle.filter(x => x.cycle === 1).length}</span>
+                      <span className="text-3xl font-bold text-cyan-400">
+                        {heatCycle.filter((x) => x.cycle === 1).length}
+                      </span>
                       <span className="text-xs text-slate-400">Caps</span>
                     </div>
                     <div className="bg-slate-800/70 p-4 rounded-lg flex flex-col items-center justify-center space-y-1">
-                      <span className="text-3xl font-bold text-cyan-400">{heatCycle.length}</span>
+                      <span className="text-3xl font-bold text-cyan-400">
+                        {heatCycle.length}
+                      </span>
                       <span className="text-xs text-slate-400">Clicks</span>
                     </div>
                     <div className="bg-slate-800/70 p-4 rounded-lg flex flex-col items-center justify-center space-y-1">
-                      <span className="text-3xl font-bold text-cyan-400">{averageInterval.toFixed(2)}s</span>
-                      <span className="text-xs text-slate-400">Avg. Interval</span>
+                      <span className="text-3xl font-bold text-cyan-400">
+                        {averageInterval.toFixed(2)}s
+                      </span>
+                      <span className="text-xs text-slate-400">
+                        Avg. Interval
+                      </span>
                     </div>
                   </div>
 
                   <section className="space-y-2 pt-2">
-                    <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider px-1">Caps</h3>
+                    <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider px-1">
+                      Caps
+                    </h3>
                     <div className="bg-slate-800/50 rounded-lg max-h-60 overflow-y-auto divide-y divide-slate-800 border border-slate-800">
                       {groupConsecutiveCycles(heatCycle).map((group, idx) => (
-                        <div key={group.map(r => r.id).join('-')} className="flex justify-between px-3 py-1 text-sm hover:bg-slate-800 transition-colors">
+                        <div
+                          key={group.map((r) => r.id).join("-")}
+                          className="flex justify-between px-3 py-1 text-sm hover:bg-slate-800 transition-colors"
+                        >
                           <span>
                             {group.length > 1
                               ? `${formatTimestampForTimeDisplay(group[0].created_at)} - ${formatTimestampForTimeDisplay(group[group.length - 1].created_at)}`
-                              : formatTimestampForTimeDisplay(group[0].created_at)
-                            }
+                              : formatTimestampForTimeDisplay(
+                                  group[0].created_at,
+                                )}
                           </span>
                           <div className="flex gap-1">
                             <span className="font-mono text-slate-400 flex gap-1">
-                              {group.map((r) => <span>{r.duration}s</span>)}
+                              {group.map((r) => (
+                                <span>{r.duration}s</span>
+                              ))}
                             </span>
                             {/*group.length > 1 ? (
                               <Badge size="2" color="indigo" variant="solid" className="px-2">
@@ -105,9 +128,9 @@ export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetail
   );
 };
 
-function groupConsecutiveCycles(cycles: HeatCycleGroup) {
-  const groups: Array<HeatCycleGroup> = [];
-  let currentGroup: HeatCycleGroup = [];
+function groupConsecutiveCycles(cycles: HeatCycleRows) {
+  const groups: Array<HeatCycleRows> = [];
+  let currentGroup: HeatCycleRows = [];
 
   for (let i = 0; i < cycles.length; i++) {
     const curr = cycles[i];

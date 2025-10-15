@@ -4,14 +4,9 @@
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
     "jsx": "react-jsx",
-    "lib": [
-      "dom"
-    ],
-    "types": [
-      "node",
-      "vite/client"
-    ],
-    "rootDir": "src",
+    "lib": ["dom"],
+    "types": ["node", "vite/client"],
+    "rootDir": "src"
   },
   "exclude": [
     "out-tsc",
@@ -33,6 +28,7 @@
     "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "../../libs/types/src/index.ts"
+    "../../libs/types/src/index.ts",
+    "../../libs/utils/src/index.ts"
   ]
 }

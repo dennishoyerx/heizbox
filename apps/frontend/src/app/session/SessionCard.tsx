@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { HeatCycleGroup, HeatCycleRow } from "@heizbox/types";
+import type { HeatCycleRows, HeatCycleRow } from "@heizbox/types";
 import {
   formatTimestampForTimeDisplay,
   calculateConsumption,
@@ -12,7 +12,7 @@ export const SessionCard = ({
   index,
   totalHeatCycles,
 }: {
-  heatCycle: HeatCycleGroup;
+  heatCycle: HeatCycleRows;
   index: number;
   totalHeatCycles: number;
 }) => {

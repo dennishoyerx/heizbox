@@ -17,26 +17,32 @@ export interface Session {
   heatCycles: HeatCycleRow[];
 }
 
+export interface RunningSession {
+  startedAt: number;
+  lastAt: number;
+  caps: number;
+  clicks: number;
+  consumption: number;
+  heatCycles: HeatCycleRow[];
+}
+
 /**
  * Ein einzelner Heizzyklus, wie er von der Datenbank kommt.
  */
-export interface HeatCycleRow {
+export interface HeatCycleRow extends HeatCycle {
   id: string;
-  created_at: number; // Unix-Timestamp (Sekunden)
-  duration: number; // in Sekunden
-  cycle: number;
 }
 
 /**
  * Eine Gruppe von zusammengehörigen Heizzyklen, die eine "Session" bilden.
  */
-export type HeatCycleGroup = HeatCycleRow[];
+export type HeatCycleRows = HeatCycleRow[];
 
 /**
  * Die Antwort der API für die Heat-Cycle-Liste.
  */
 export interface HeatCyclesApiResponse {
-  heatCycles: HeatCycleGroup[];
+  heatCycles: HeatCycleRows[];
   totalConsumption: string;
   totalHeatCycles: number;
 }

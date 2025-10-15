@@ -16,6 +16,11 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@nx/source"]
+    "customConditions": ["@nx/source"],
+    "paths": {
+      "@heizbox/types": ["./libs/types/src/index.ts"],
+      "@heizbox/utils": ["./libs/utils/src/index.ts"]
+      // oder wo auch immer dein types Package liegt
+    }
   }
 }
