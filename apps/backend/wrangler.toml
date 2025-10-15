@@ -1,5 +1,9 @@
 name = "heizbox-backend"
 main = "src/index.ts"
+workers_dev = true
+routes = [
+    { pattern = "backend.hzbx.de", custom_domain = true }
+]
 compatibility_date = "2025-04-01"
 account_id = "3ebe65c531d29ca9dd24e28af3da9a82"
 compatibility_flags = ["nodejs_compat"]

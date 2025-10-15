@@ -31,7 +31,7 @@
             "command": "pnpm nx build frontend && wrangler pages deploy dist/apps/frontend --project-name=heizbox",
             "cwd": ".",
             "env": {
-                "VITE_PUBLIC_API_URL": "https://heizbox-backend.dh19.workers.dev"
+                "VITE_PUBLIC_API_URL": "https://backend.hzbx.de"
             }
         }
     }

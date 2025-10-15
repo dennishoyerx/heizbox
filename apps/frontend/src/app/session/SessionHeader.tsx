@@ -23,9 +23,7 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating }) => {
     };
 
     loadSession();
-    const interval = setInterval(loadSession, 5000); // every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
+  }, [isHeating]);
 
   const heatCircleClass = isHeating
     ? "relative flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 shadow-[0_0_60px_10px_rgba(255,100,0,0.7)] animate-pulse"
@@ -34,7 +32,6 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating }) => {
   const heatGlowClass = isHeating
     ? "absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(255,200,100,0.8),transparent)] blur-2xl animate-ping"
     : "absolute inset-0 rounded-full bg-[radial-gradient(circle_at_center,rgba(100,100,100,0.2),transparent)] blur-xl";
-    console.log('Rendering SessionHeader with session:', session, 'isHeating:', isHeating);
   return (
     <Flex direction="column" align="center" gap="4" className="mt-8">
       <div id="heat-circle" className={heatCircleClass}>
