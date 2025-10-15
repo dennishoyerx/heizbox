@@ -73,7 +73,6 @@ void FireScreen::update() {
             lastDirty = now;
         }
     } else if (wasActive) {
-        // Condition just changed from true to false, call setDirty once
         screenManager->setDirty();
         elapsedTime = 0;
     }
@@ -109,6 +108,9 @@ void FireScreen::handleInput(InputEvent event) {
         case UP:
             if (_currentCycle == 1) {
                 _currentCycle = 2;
+            }
+            else if (_currentCycle == 2) {
+                _currentCycle = 3;
             }
             else if (_currentCycle == 3) {
                 _currentCycle = 4;

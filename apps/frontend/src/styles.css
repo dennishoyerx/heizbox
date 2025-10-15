@@ -1,4 +1,4 @@
-@import "@radix-ui/themes/styles.css";
+﻿@import "@radix-ui/themes/styles.css";
 @import "tailwindcss";
 
 @tailwind base;
@@ -7,22 +7,74 @@
 
 
 :root {
-    --color-background: theme(colors.slate.50);
+    //--color-background: theme(colors.slate.50);
 }
 
 .dark {
-    --color-background: theme(colors.slate.950);
+    //--color-background: theme(colors.slate.950);
 }
 
 
-/* genereller override */
+/* genereller override
 @layer components {
     body [data-has-background="true"] {
         @apply bg-slate-800;
     }
 
-    /* nur im dark mode */
     body .dark div[data-has-background="true"] {
         @apply bg-slate-900;
     }
+}
+*/
+/* heizbox-theme.css */
+/* Radix neutral tones → Slate remap + Panel override */
+#root .radix-themes,
+#root .radix-themes:where([data-gray-color="slate"]) {
+    /* --- Neutral Tone Mapping --- */
+    --gray-1: var(--slate-1);
+    --gray-2: var(--slate-2);
+    --gray-3: var(--slate-3);
+    --gray-4: var(--slate-4);
+    --gray-5: var(--slate-5);
+    --gray-6: var(--slate-6);
+    --gray-7: var(--slate-7);
+    --gray-8: var(--slate-8);
+    --gray-9: var(--slate-9);
+    --gray-10: var(--slate-10);
+    --gray-11: var(--slate-11);
+    --gray-12: var(--slate-12);
+    --color-background: var(--slate-900);
+    /* --- Panel & Surface Overrides --- */
+    --color-panel: var(--slate-2);
+    --color-panel-solid: var(--slate-3);
+    --color-panel-hover: var(--slate-4);
+    --color-surface: var(--slate-1);
+    --color-surface-hover: var(--slate-2);
+    --color-surface-active: var(--slate-3);
+    /* --- Text & Border --- */
+    --color-text: var(--slate-12);
+    --color-text-subtle: var(--slate-11);
+    --color-border: var(--slate-6);
+    --color-border-hover: var(--slate-7);
+    --color-border-focus: var(--slate-8);
+}
+
+    /* Dark mode tuning */
+    .radix-themes[data-theme="dark"] {
+        --color-panel: var(--slate-3);
+        --color-panel-solid: var(--slate-4);
+        --color-panel-hover: var(--slate-5);
+        --color-surface: var(--slate-2);
+        --color-surface-hover: var(--slate-3);
+        --color-surface-active: var(--slate-4);
+        --color-text: var(--slate-12);
+        --color-text-subtle: var(--slate-11);
+        --color-border: var(--slate-6);
+        --color-border-hover: var(--slate-7);
+        --color-border-focus: var(--slate-8);
+    }
+
+/* Optional: smooth transition between themes */
+.radix-themes {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
