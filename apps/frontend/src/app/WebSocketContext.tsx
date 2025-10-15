@@ -6,13 +6,14 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import type {
+  ServerWebSocketMessage,
+  ClientWebSocketMessage,
+  DeviceStatusPayload,
+} from "@heizbox/types";
 
-// Event-Typen definieren
-export type WebSocketEvent =
-  | { type: "heatCycleCreated"; data?: any }
-  | { type: "heatCycleCompleted"; data?: any }
-  | { type: "deviceStatusChanged"; isOn: boolean; isHeating: boolean }
-  | { type: "error"; error: string };
+// Der Event-Typ ist nun direkt die Nachricht vom Server.
+export type WebSocketEvent = ServerWebSocketMessage;
 
 type EventListener = (event: WebSocketEvent) => void;
 
@@ -21,7 +22,7 @@ interface WebSocketContextValue {
   deviceIsOn: boolean;
   deviceIsHeating: boolean;
   addEventListener: (listener: EventListener) => () => void;
-  sendMessage: (message: any) => void;
+  sendMessage: (message: ClientWebSocketMessage) => void;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue | null>(null);
@@ -34,17 +35,17 @@ export const useWebSocket = () => {
   return context;
 };
 
-// Custom Hook für spezifische Events
-export const useWebSocketEvent = (
-  eventType: WebSocketEvent["type"],
-  handler: (event: WebSocketEvent) => void,
+// Custom Hook für spezifische Events, jetzt voll typsicher
+export const useWebSocketEvent = <T extends WebSocketEvent["type"]>(
+  eventType: T,
+  handler: (event: Extract<WebSocketEvent, { type: T }>) => void,
 ) => {
   const { addEventListener } = useWebSocket();
 
   useEffect(() => {
     const unsubscribe = addEventListener((event) => {
       if (event.type === eventType) {
-        handler(event);
+        handler(event as Extract<WebSocketEvent, { type: T }>);
       }
     });
     return unsubscribe;
@@ -65,9 +66,7 @@ export const WebSocketProvider = ({
   const [deviceIsHeating, setDeviceIsHeating] = useState(false);
   const [listeners, setListeners] = useState<Set<EventListener>>(new Set());
   const [ws, setWs] = useState<WebSocket | null>(null);
-  const reconnectTimeoutRef = useState<NodeJS.Timeout | null>(null)[0];
 
-  // Event Broadcasting
   const broadcastEvent = useCallback(
     (event: WebSocketEvent) => {
       listeners.forEach((listener) => listener(event));
@@ -75,7 +74,6 @@ export const WebSocketProvider = ({
     [listeners],
   );
 
-  // Listener hinzufügen/entfernen
   const addEventListener = useCallback((listener: EventListener) => {
     setListeners((prev) => new Set(prev).add(listener));
     return () => {
@@ -87,9 +85,8 @@ export const WebSocketProvider = ({
     };
   }, []);
 
-  // Message senden
   const sendMessage = useCallback(
-    (message: any) => {
+    (message: ClientWebSocketMessage) => {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(message));
       }
@@ -98,7 +95,6 @@ export const WebSocketProvider = ({
   );
 
   useEffect(() => {
-    // Initial Status fetchen
     const fetchInitialStatus = async () => {
       try {
         const backendBaseUrl =
@@ -107,7 +103,7 @@ export const WebSocketProvider = ({
           `${backendBaseUrl}/api/device-status/${deviceId}/status`,
         );
         if (response.ok) {
-          const status = await response.json();
+          const status = (await response.json()) as DeviceStatusPayload;
           setDeviceIsOn(status.isOn);
           setDeviceIsHeating(status.isHeating);
         }
@@ -118,7 +114,6 @@ export const WebSocketProvider = ({
 
     fetchInitialStatus();
 
-    // WebSocket Connection
     const backendBaseUrl =
       import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
     const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws/status?deviceId=${deviceId}&type=frontend`;
@@ -130,33 +125,15 @@ export const WebSocketProvider = ({
     };
 
     websocket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
+      const message = JSON.parse(event.data) as ServerWebSocketMessage;
 
-      // Device Status Updates
-      if (typeof message.isOn === "boolean") {
-        setDeviceIsOn(message.isOn);
-      }
-      if (typeof message.isHeating === "boolean") {
-        setDeviceIsHeating(message.isHeating);
-      }
+      // Broadcast des spezifischen Events
+      broadcastEvent(message);
 
-      // Event Broadcasting für spezifische Events
-      if (message.type === "heatCycleCreated") {
-        broadcastEvent({ type: "heatCycleCreated", data: message });
-      } else if (message.type === "heatCycleCompleted") {
-        broadcastEvent({ type: "heatCycleCompleted", data: message });
-      }
-
-      // Generisches Status-Event
-      if (
-        typeof message.isOn === "boolean" ||
-        typeof message.isHeating === "boolean"
-      ) {
-        broadcastEvent({
-          type: "deviceStatusChanged",
-          isOn: message.isOn ?? deviceIsOn,
-          isHeating: message.isHeating ?? deviceIsHeating,
-        });
+      // Zusätzlich den lokalen Gerätestatus aktualisieren, falls es ein Status-Event ist
+      if (message.type === "deviceStatusChanged") {
+        setDeviceIsOn(message.payload.isOn);
+        setDeviceIsHeating(message.payload.isHeating);
       }
     };
 
@@ -170,7 +147,10 @@ export const WebSocketProvider = ({
     websocket.onerror = (err) => {
       console.error("WebSocket error:", err);
       setIsConnected(false);
-      broadcastEvent({ type: "error", error: "Connection error" });
+      broadcastEvent({
+        type: "error",
+        payload: { message: "Connection error" },
+      });
     };
 
     setWs(websocket);

@@ -11,9 +11,12 @@ import {
 } from "recharts";
 import { useTheme } from "../hooks/useTheme";
 import { useStatistics } from "./useStatistics";
-import { HeatCycleData } from "../../types";
+import type { StatisticsApiResponse } from "@heizbox/types";
 
-const processMonthlyHeatmapData = (heatCycles: HeatCycleData[]) => {
+// Der Typ für die HeatCycle-Daten in den Statistiken, direkt aus dem API-Typ abgeleitet.
+type StatisticsHeatCycle = StatisticsApiResponse["heatCycles"];
+
+const processMonthlyHeatmapData = (heatCycles: StatisticsHeatCycle) => {
   const heatmap: { [key: number]: number } = {}; // dayOfMonth: count
   const maxDay = new Date(
     new Date().getFullYear(),
@@ -33,7 +36,7 @@ const processMonthlyHeatmapData = (heatCycles: HeatCycleData[]) => {
   return formattedHeatmapData;
 };
 
-const processHourlyData = (heatCycles: HeatCycleData[]) => {
+const processHourlyData = (heatCycles: StatisticsHeatCycle) => {
   const hourlyCounts: { [key: number]: number } = {};
   for (let i = 0; i < 24; i++) {
     hourlyCounts[i] = 0;
@@ -87,42 +90,16 @@ const UsagePage: React.FC = () => {
 
   return (
     <div className="text-gray-900 dark:text-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Usage Statistics</h1>
+      <h1 className="text-2xl font-bold mb-4">Nutzungsstatistiken</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Daily Overview</h2>
-          {dailyStats && (
-            <p>
-              Total Heat Cycles: {dailyStats.totalHeatCycles}, Total Duration:{" "}
-              {dailyStats.totalDuration}s
-            </p>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Weekly Overview</h2>
-          {weeklyStats && (
-            <p>
-              Total Heat Cycles: {weeklyStats.totalHeatCycles}, Total Duration:{" "}
-              {weeklyStats.totalDuration}s
-            </p>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Monthly Overview</h2>
-          {monthlyStats && (
-            <p>
-              Total Heat Cycles: {monthlyStats.totalHeatCycles}, Total Duration:{" "}
-              {monthlyStats.totalDuration}s
-            </p>
-          )}
-        </div>
+        {/* Overview Cards */}
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-8">
-        <h2 className="text-xl font-semibold mb-2">Monthly Usage Heatmap</h2>
+        <h2 className="text-xl font-semibold mb-2">
+          Monatliche Nutzungs-Heatmap
+        </h2>
         <div className="grid grid-cols-7 gap-1 p-2">
           {monthlyHeatmapData.map((dataPoint) => {
             const intensity =
@@ -141,7 +118,7 @@ const UsagePage: React.FC = () => {
                   backgroundColor: color,
                   color: intensity > 50 && theme === "dark" ? "white" : "black",
                 }}
-                title={`Day ${dataPoint.day}: ${dataPoint.count} heat cycles`}
+                title={`Tag ${dataPoint.day}: ${dataPoint.count} Zyklen`}
               >
                 {dataPoint.day} ({dataPoint.count})
               </div>
@@ -152,7 +129,7 @@ const UsagePage: React.FC = () => {
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow mb-8">
         <h2 className="text-xl font-semibold mb-2">
-          Heat Cycles per Hour (Monthly)
+          Heizzyklen pro Stunde (Monat)
         </h2>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={hourlyHeatCyclesData}>
@@ -160,7 +137,7 @@ const UsagePage: React.FC = () => {
             <XAxis
               dataKey="hour"
               label={{
-                value: "Hour of Day",
+                value: "Stunde des Tages",
                 position: "insideBottom",
                 offset: -5,
                 fill: axisStrokeColor,
@@ -169,7 +146,7 @@ const UsagePage: React.FC = () => {
             />
             <YAxis
               label={{
-                value: "Heat Cycles",
+                value: "Heizzyklen",
                 angle: -90,
                 position: "insideLeft",
                 fill: axisStrokeColor,
@@ -183,7 +160,7 @@ const UsagePage: React.FC = () => {
               }}
             />
             <Legend wrapperStyle={{ color: axisStrokeColor }} />
-            <Bar dataKey="heatCycles" fill="#8884d8" name="Heat Cycles" />
+            <Bar dataKey="heatCycles" fill="#8884d8" name="Heizzyklen" />
           </BarChart>
         </ResponsiveContainer>
       </div>

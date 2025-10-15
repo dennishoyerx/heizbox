@@ -1,5 +1,8 @@
-import type { ApiResponse, SessionApiResponse } from "@heizbox/types";
-import type { StatisticsData } from "./types";
+import type {
+  HeatCyclesApiResponse,
+  SessionApiResponse,
+  StatisticsApiResponse,
+} from "@heizbox/types";
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL;
 
@@ -28,8 +31,9 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-// Aufrufe werden schlanker
-export const fetchHeatCycles = () => apiFetch<ApiResponse>("/api/heat_cycles");
+// Aufrufe sind jetzt vollständig typsicher
+export const fetchHeatCycles = () =>
+  apiFetch<HeatCyclesApiResponse>("/api/heat_cycles");
 export const fetchStatistics = (range: string) =>
-  apiFetch<StatisticsData>(`/api/statistics?range=${range}`);
+  apiFetch<StatisticsApiResponse>(`/api/statistics?range=${range}`);
 export const fetchSession = () => apiFetch<SessionApiResponse>("/api/session");
