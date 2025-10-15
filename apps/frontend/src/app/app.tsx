@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import { UsagePage } from "./usage";
@@ -6,28 +5,15 @@ import { SessionPage } from "./session";
 import { Box, Flex, Theme } from "@radix-ui/themes";
 import { WebSocketProvider, useWebSocket } from "./WebSocketContext";
 import { ConnectionStatus } from "./components/ConnectionStatus";
+import { useTheme } from "./hooks/useTheme";
 
 function AppContent() {
   const { deviceIsOn, deviceIsHeating } = useWebSocket();
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Theme
-      appearance={theme as "light" | "dark"}
+      appearance={theme}
       grayColor="slate"
       accentColor="orange"
       radius="medium"
@@ -43,11 +29,8 @@ function AppContent() {
           />
           <main className="p-4">
             <Routes>
-              <Route
-                path="/"
-                element={<SessionPage isHeating={deviceIsHeating} />}
-              />
-              <Route path="/usage" element={<UsagePage theme={theme} />} />
+              <Route path="/" element={<SessionPage />} />
+              <Route path="/usage" element={<UsagePage />} />
             </Routes>
           </main>
         </Flex>

@@ -1,28 +1,35 @@
-import type { ApiResponse, SessionApiResponse } from '@heizbox/types';
-import type { StatisticsData } from './types';
+import type { ApiResponse, SessionApiResponse } from "@heizbox/types";
+import type { StatisticsData } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL;
 
-export const fetchHeatCycles = async (): Promise<ApiResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/heat_cycles`);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+// Ein benutzerdefinierter Error für API-Fehler
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
   }
-  return response.json();
-};
+}
 
-export const fetchStatistics = async (range: string): Promise<StatisticsData> => {
-  const response = await fetch(`${API_BASE_URL}/api/statistics?range=${range}`);
+// Wrapper für fetch
+async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${url}`, options);
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const errorBody = await response.text();
+    console.error("API Error Response:", errorBody);
+    throw new ApiError(
+      `HTTP error! status: ${response.status}`,
+      response.status,
+    );
   }
-  return response.json();
-};
+  return response.json() as Promise<T>;
+}
 
-export const fetchSession = async (): Promise<SessionApiResponse> => {
-  const response = await fetch(`${API_BASE_URL}/api/session`);
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-};
+// Aufrufe werden schlanker
+export const fetchHeatCycles = () => apiFetch<ApiResponse>("/api/heat_cycles");
+export const fetchStatistics = (range: string) =>
+  apiFetch<StatisticsData>(`/api/statistics?range=${range}`);
+export const fetchSession = () => apiFetch<SessionApiResponse>("/api/session");
