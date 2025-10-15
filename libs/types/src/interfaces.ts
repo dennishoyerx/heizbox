@@ -1,3 +1,22 @@
+export interface Device {
+  isOn: boolean;
+  isHeating: boolean;
+}
+
+export interface HeatCycle {
+  created_at: number;
+  duration: number;
+  cycle: 1 | 2 | 3 | 4;
+}
+
+export interface Session {
+  startedAt: number;
+  endedAt: number;
+  caps: number;
+  consumption: number;
+  heatCycles: HeatCycleRow[];
+}
+
 /**
  * Ein einzelner Heizzyklus, wie er von der Datenbank kommt.
  */
@@ -29,7 +48,7 @@ export interface StatisticsApiResponse {
   range: "day" | "week" | "month";
   totalHeatCycles: number;
   totalDuration: number;
-  heatCycles: Pick<HeatCycleRow, "created_at" | "duration">[];
+  heatCycles: Pick<HeatCycleRow, "created_at" | "duration" | "cycle">[];
 }
 
 /**

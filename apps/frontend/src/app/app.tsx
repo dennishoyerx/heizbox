@@ -27,7 +27,7 @@ function AppContent() {
             theme={theme}
             toggleTheme={toggleTheme}
           />
-          <main className="p-4">
+          <main>
             <Routes>
               <Route path="/" element={<SessionPage />} />
               <Route path="/usage" element={<UsagePage />} />
