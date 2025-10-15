@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchSession } from '../../api';
 import type { SessionApiResponse } from '@heizbox/types';
 import { Text, Flex } from '@radix-ui/themes';
-import { Flame } from "@phosphor-icons/react";
+import { Fire } from "@phosphor-icons/react";
 
 interface SessionHeaderProps {
   isHeating: boolean;
@@ -41,8 +41,7 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating }) => {
         {session && isHeating && (
           <>
             <div id="heat-glow" className={heatGlowClass}></div>
-            <Flame
-              weight="fill"
+            <Fire
               size="96px"
               className="text-orange-50 drop-shadow-sm absolute text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             />
