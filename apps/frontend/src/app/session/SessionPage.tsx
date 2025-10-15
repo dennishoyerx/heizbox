@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import type { ApiResponse } from '@heizbox/types';
-import { fetchHeatCycles } from '../../api';
-import { SessionCard } from '../components';
-import { SessionHeader } from './';
-import { Flex, Text } from '@radix-ui/themes';
+import { useState, useEffect, useCallback } from "react";
+import type { ApiResponse } from "@heizbox/types";
+import { fetchHeatCycles } from "../../api";
+import { SessionCard } from "./SessionCard";
+import SessionHeader from "./SessionHeader";
+import { Flex, Text } from "@radix-ui/themes";
+import { useWebSocketEvent } from "../WebSocketContext";
 
 function SessionPage({ isHeating }: { isHeating: boolean }) {
   const [data, setData] = useState<ApiResponse | null>(null);
@@ -15,6 +16,7 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
       setLoading(true);
       const result = await fetchHeatCycles();
       setData(result);
+      setError(null);
     } catch (e: unknown) {
       if (e instanceof Error) {
         setError(e.message);
@@ -24,9 +26,28 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
     }
   };
 
+  // Initial Load
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auf heatCycleCompleted Event reagieren - Daten neu laden
+  useWebSocketEvent(
+    "heatCycleCompleted",
+    useCallback((event) => {
+      console.log("Heat cycle completed, reloading data...", event);
+      loadData();
+    }, []),
+  );
+
+  // Auf heatCycleCreated Event reagieren - auch neu laden
+  useWebSocketEvent(
+    "heatCycleCreated",
+    useCallback((event) => {
+      console.log("New heat cycle created, reloading data...", event);
+      loadData();
+    }, []),
+  );
 
   return (
     <Flex direction="column" gap="3" maxWidth="600px" className="mx-auto">
@@ -34,7 +55,6 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
       {data && <Text>Verbrauch: {data.totalConsumption}g</Text>}
       {loading && <Text>Lade Daten...</Text>}
       {error && <Text color="red">Fehler beim Laden: {error}</Text>}
-
       {data && (
         <>
           {data.heatCycles && data.heatCycles.length > 0 ? (
@@ -49,7 +69,9 @@ function SessionPage({ isHeating }: { isHeating: boolean }) {
               ))}
             </Flex>
           ) : (
-            !loading && <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
+            !loading && (
+              <Text>Keine Heat Cycles im ausgewählten Zeitraum gefunden.</Text>
+            )
           )}
         </>
       )}

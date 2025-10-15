@@ -3,12 +3,12 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import { UsagePage } from "./usage";
 import { SessionPage } from "./session";
-import { Box, Flex, Theme, ThemePanel } from "@radix-ui/themes";
+import { Box, Flex, Theme } from "@radix-ui/themes";
+import { WebSocketProvider, useWebSocket } from "./WebSocketContext";
+import { ConnectionStatus } from "./components/ConnectionStatus";
 
-function App() {
-  const [deviceIsOn, setDeviceIsOn] = useState<boolean>(false); // New state for device status
-  const [deviceIsHeating, setDeviceIsHeating] = useState<boolean>(false); // New state for heating status
-  const [sessionKey, setSessionKey] = useState(0);
+function AppContent() {
+  const { deviceIsOn, deviceIsHeating } = useWebSocket();
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   useEffect(() => {
@@ -24,71 +24,6 @@ function App() {
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-
-  useEffect(() => {
-    const fetchInitialStatus = async () => {
-      try {
-        const deviceId = "my-esp32-device";
-        const backendBaseUrl =
-          import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-        const response = await fetch(
-          `${backendBaseUrl}/api/device-status/${deviceId}/status`,
-        );
-        if (response.ok) {
-          const status = await response.json();
-          setDeviceIsOn(status.isOn);
-          setDeviceIsHeating(status.isHeating);
-        } else {
-          console.error(
-            "Failed to fetch initial device status",
-            response.statusText,
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching initial device status:", error);
-      }
-    };
-
-    fetchInitialStatus();
-
-    const deviceId = "my-esp32-device";
-    const backendBaseUrl =
-      import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-    const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws/status?deviceId=${deviceId}&type=frontend`;
-
-    const ws = new WebSocket(wsUrl);
-
-    ws.onopen = () => {
-      console.log("WebSocket connected to device status (frontend)");
-    };
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      if (message && typeof message.isOn === "boolean") {
-        setDeviceIsOn(message.isOn);
-      }
-      if (message && typeof message.isHeating === "boolean") {
-        setDeviceIsHeating(message.isHeating);
-      }
-      if (message && message.type === "heatCycleCreated") {
-        setSessionKey((prevKey) => prevKey + 1);
-      }
-    };
-
-    ws.onclose = () => {
-      setDeviceIsOn(false);
-      setDeviceIsHeating(false);
-    };
-
-    ws.onerror = (err) => {
-      setDeviceIsOn(false);
-      setDeviceIsHeating(false);
-    };
-
-    return () => {
-      // ws.close();
-    };
-  }, []);
 
   return (
     <Theme
@@ -106,21 +41,27 @@ function App() {
             theme={theme}
             toggleTheme={toggleTheme}
           />
-
           <main className="p-4">
             <Routes>
               <Route
                 path="/"
-                element={
-                  <SessionPage key={sessionKey} isHeating={deviceIsHeating} />
-                }
+                element={<SessionPage isHeating={deviceIsHeating} />}
               />
               <Route path="/usage" element={<UsagePage theme={theme} />} />
             </Routes>
           </main>
         </Flex>
       </Box>
+      <ConnectionStatus />
     </Theme>
+  );
+}
+
+function App() {
+  return (
+    <WebSocketProvider deviceId="my-esp32-device">
+      <AppContent />
+    </WebSocketProvider>
   );
 }
 
