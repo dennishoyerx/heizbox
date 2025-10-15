@@ -3,6 +3,7 @@ import SessionHeader from "./SessionHeader";
 import { Flex, Text } from "@radix-ui/themes";
 import { useWebSocket } from "../WebSocketContext";
 import { useHeatCycles } from "./useHeatCycles";
+import type { HeatCycleRow } from "@heizbox/types";
 
 function SessionPage() {
   const { data, isLoading, isError, error } = useHeatCycles();
@@ -17,7 +18,7 @@ function SessionPage() {
       {data &&
         (data.heatCycles && data.heatCycles.length > 0 ? (
           <Flex direction="column" gap="3">
-            {data.heatCycles.map((heatCycle, index) => (
+            {data.heatCycles.map((heatCycle: HeatCycleRow, index: number) => (
               <SessionCard
                 key={heatCycle[0]?.id || index}
                 heatCycle={heatCycle}

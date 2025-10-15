@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { HeatCycleGroup } from "@heizbox/types";
+import type { HeatCycleGroup, HeatCycleRow } from "@heizbox/types";
 import {
   formatTimestampForTimeDisplay,
   calculateConsumption,
@@ -18,7 +18,7 @@ export const SessionCard = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const count = heatCycle.length;
-  const caps = heatCycle.filter((x) => x.cycle === 1).length;
+  const caps = heatCycle.filter((hc: HeatCycleRow) => hc.cycle === 1).length;
 
   const heatCycleConsumption = calculateConsumption(caps);
   const consumptionValue = parseFloat(heatCycleConsumption);
