@@ -389,6 +389,7 @@ export class DeviceStatus {
         isHeating: this.isHeating,
       });
     }
+
     // Reschedule the alarm
     await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
   }
