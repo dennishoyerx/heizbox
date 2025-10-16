@@ -30,7 +30,6 @@ app.route("/api/device-status", deviceStatusRoute);
 app.route("/ws", websocketRoute);
 app.route("/api/session", sessionRoute);
 
-// Export with Sentry integration
 export default Sentry.withSentry(
   (env: Env) => ({
     dsn: config.sentry.dsn,

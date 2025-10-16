@@ -7,13 +7,11 @@ import App from "./app/app";
 import "./styles.css";
 import "@radix-ui/themes/styles.css";
 
-// Sentry Integration
 Sentry.init({
   dsn: "https://b449f6b3711bcef239d2028c85f349ff@o4510082700345344.ingest.de.sentry.io/4510173450010704",
   sendDefaultPii: true,
 });
 
-// Create a client
 const queryClient = new QueryClient();
 
 const rootElement = document.getElementById("root");
