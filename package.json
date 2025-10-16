@@ -38,6 +38,7 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
+    "nx": "^21.6.5",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-router-dom": "6.29.0",
