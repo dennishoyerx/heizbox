@@ -3,13 +3,12 @@ name: Deploy Frontend & Backend
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - "apps/frontend/**"
       - "apps/backend/**"
       - "libs/**"
       - "package.json"
-      - "pnpm-lock.yaml"
 
 jobs:
   deploy:
@@ -31,7 +30,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Setup NX cache
         uses: nrwl/nx-set-shas@v3
