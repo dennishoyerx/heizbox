@@ -3,7 +3,7 @@ name: Deploy Frontend & Backend
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "apps/frontend/**"
       - "apps/backend/**"
