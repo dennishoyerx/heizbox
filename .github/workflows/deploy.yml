@@ -1,72 +1,60 @@
-name: Deploy to Cloudflare
+name: Deploy Frontend & Backend
+
 on:
   push:
     branches:
-      - master
+      - main
     paths:
-      - "apps/backend/**"
       - "apps/frontend/**"
+      - "apps/backend/**"
+      - "libs/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
-  deploy-backend:
-    name: 🚀 Deploy Backend (Worker)
+  deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/backend
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node & pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node cache
         uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      #  - name: Install dependencies
-      #    run: pnpm ci
+      - name: Setup NX cache
+        uses: nrwl/nx-set-shas@v3
 
-      - name: Deploy Worker
-        run: npx wrangler deploy
+      - name: Build affected projects
+        run: npx nx affected --target=build --parallel=3
+
+      # Optional: Test step
+      - name: Test affected projects
+        run: npx nx affected --target=test --parallel=3
+
+      # Backend Deploy (Cloudflare Worker)
+      - name: Deploy Backend Worker
+        if: ${{ steps.build.outcome == 'success' }}
+        run: npx wrangler deploy apps/backend/src/index.ts
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
 
-  deploy-frontend:
-    name: 🌐 Deploy Frontend (Pages)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/frontend
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      # - name: Install dependencies
-      #  run: pnpm ci
-
-      - name: Build Frontend
-        run: pnpm run build
-
-      - name: Deploy to Cloudflare Pages
-        run: npx wrangler pages deploy ./dist --project-name="${{ secrets.CLOUDFLARE_PROJECT_NAME }}"
+      # Frontend Deploy (Cloudflare Pages)
+      - name: Deploy Frontend
+        if: ${{ steps.build.outcome == 'success' }}
+        run: |
+          pnpm run --filter frontend deploy
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
