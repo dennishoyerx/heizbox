@@ -9,6 +9,7 @@ on:
       - "apps/backend/**"
       - "libs/**"
       - "package.json"
+      - "pnpm-lock.yaml"
 
 jobs:
   deploy:
@@ -30,7 +31,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Setup NX cache
         uses: nrwl/nx-set-shas@v3

@@ -14,9 +14,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Runtime data
-pnpm-lock.yaml
-
 # Build artifacts
 dist/
 build/
