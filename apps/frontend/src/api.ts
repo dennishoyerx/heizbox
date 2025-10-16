@@ -35,6 +35,8 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
 // Aufrufe sind jetzt vollständig typsicher
 export const fetchHeatCycles = () =>
   apiFetch<HeatCyclesApiResponse>("/api/heat_cycles");
+
 export const fetchStatistics = (range: string) =>
   apiFetch<StatisticsApiResponse>(`/api/statistics?range=${range}`);
+
 export const fetchSession = () => apiFetch<SessionApiResponse>("/api/session");
