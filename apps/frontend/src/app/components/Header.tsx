@@ -67,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({
                 <DropdownMenu.Item asChild>
                   <Link to="/usage">Usage Statistics</Link>
                 </DropdownMenu.Item>
+
                 <DropdownMenu.Separator />
 
                 <DropdownMenu.Item onClick={toggleTheme}>

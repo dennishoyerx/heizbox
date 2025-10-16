@@ -370,6 +370,7 @@ export class DeviceStatus {
         }); // Publish the session data update to all subscribers
       }
     }
+
     return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json" },
     });
