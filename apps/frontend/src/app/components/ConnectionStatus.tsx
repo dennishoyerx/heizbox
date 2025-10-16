@@ -6,7 +6,7 @@ export const ConnectionStatus = () => {
   const { isConnected } = useWebSocket();
 
   if (isConnected) {
-    return null; // Nichts anzeigen wenn verbunden
+    return null;
   }
 
   return (

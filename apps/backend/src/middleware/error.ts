@@ -6,7 +6,6 @@ import type { Context } from "hono";
 export const errorHandler = (err: Error, c: Context) => {
   Sentry.captureException(err);
 
-  // Handle specific error types
   if (err instanceof ValidationError) {
     return c.json({ error: err.message }, 400);
   }
