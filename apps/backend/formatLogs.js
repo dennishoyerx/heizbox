@@ -16,8 +16,10 @@ function colorLog(line) {
 rl.on("line", (line) => {
   // Optional: Datum/Zeit extrahieren und hervorheben
   const dateMatch = line.match(/@ (\d{2}\.\d{2}\.\d{4}, \d{2}:\d{2}:\d{2})/);
+
   if (dateMatch) {
     line = line.replace(dateMatch[0], chalk.magenta(dateMatch[1]));
   }
+
   console.log(colorLog(line));
 });
