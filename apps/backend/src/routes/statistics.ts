@@ -1,24 +1,18 @@
 import { Hono } from "hono";
-import { getDb } from "../lib/db";
+import { HeatCycleService } from '../services/heatCycleService';
 import type { StatisticsApiResponse, HeatCycleRow } from "@heizbox/types";
 
 const statistics = new Hono<{ Bindings: Env }>();
 
 statistics.get("/", async (c) => {
-  const db = getDb(c.env);
   const range = c.req.query("range") || "month"; // Default to month
 
-  let query = "";
-  let params: (string | number)[] = [];
-
-  const now = new Date();
   let startDate: Date;
+  const now = new Date();
 
   switch (range) {
     case "day":
       startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      query = "SELECT * FROM heat_cycles WHERE created_at >= ?";
-      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     case "week":
       startDate = new Date(
@@ -26,13 +20,9 @@ statistics.get("/", async (c) => {
         now.getMonth(),
         now.getDate() - now.getDay(),
       );
-      query = "SELECT * FROM heat_cycles WHERE created_at >= ?";
-      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     case "month":
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-      query = "SELECT * FROM heat_cycles WHERE created_at >= ?";
-      params = [Math.floor(startDate.getTime() / 1000)];
       break;
     default:
       return c.json(
@@ -41,17 +31,17 @@ statistics.get("/", async (c) => {
       );
   }
 
+  const start = Math.floor(startDate.getTime() / 1000);
+  const end = Math.floor(now.getTime() / 1000);
+
   console.log(`Statistics route called with range: ${range}`);
   console.log(
     `Generated startDate: ${startDate.toISOString()} (${startDate.getTime()})`,
   );
-  console.log(`Query parameters: ${params}`);
 
   try {
-    const { results } = await db
-      .prepare(query)
-      .bind(...params)
-      .all();
+    const service = new HeatCycleService(c.env.db);
+    const results = await service.getHeatCyclesInRange(start, end);
     console.log("Statistics query results:", results);
 
     // Basic aggregation for now, more sophisticated aggregation can be added later

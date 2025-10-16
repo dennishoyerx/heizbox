@@ -181,9 +181,7 @@ void Device::initWebSocket() {
     String wsUrl = String(BACKEND_WS_URL) + "?deviceId=" + DEVICE_ID + "&type=device";
     Serial.printf("[WS] Connecting to: %s\n", wsUrl.c_str());
 
-    // Parse URL to get host, port, and path
-    String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws/status"));
-    String path = wsUrl.substring(wsUrl.indexOf("/ws/status"));
+    String path = wsUrl.substring(wsUrl.indexOf("/ws"));
     int port = 443; // Assuming SSL/WSS
 
     webSocket.beginSSL(host.c_str(), port, path.c_str(), "", "/");
@@ -262,8 +260,8 @@ void Device::WiFiEvent(WiFiEvent_t event) {
             Serial.println(WiFi.localIP());
             if (instance) {
                 String wsUrl = String(BACKEND_WS_URL) + "?deviceId=" + DEVICE_ID + "&type=device";
-                String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws/status"));
-                String path = wsUrl.substring(wsUrl.indexOf("/ws/status"));
+                String host = wsUrl.substring(wsUrl.indexOf("//") + 2, wsUrl.indexOf("/ws"));
+                String path = wsUrl.substring(wsUrl.indexOf("/ws"));
                 int port = 443; // Assuming SSL/WSS
                 instance->webSocket.beginSSL(host.c_str(), port, path.c_str(), "", "/");
             }

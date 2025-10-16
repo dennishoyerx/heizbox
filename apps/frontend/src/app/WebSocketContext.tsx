@@ -116,7 +116,7 @@ export const WebSocketProvider = ({
 
     const backendBaseUrl =
       import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-    const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws/status?deviceId=${deviceId}&type=frontend`;
+    const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws?deviceId=${deviceId}&type=frontend`;
     const websocket = new WebSocket(wsUrl);
 
     websocket.onopen = () => {

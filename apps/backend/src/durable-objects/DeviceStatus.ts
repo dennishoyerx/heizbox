@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { createHeatCycle } from '../lib/heatCycleService';
+import { HeatCycleService } from '../services/heatCycleService';
 import type { SessionData } from '@heizbox/types';
 
 export class DeviceStatus {
@@ -104,7 +104,8 @@ export class DeviceStatus {
         }
       } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
         console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
-        await createHeatCycle(this.env.db, message.duration, message.cycle || 1); // Use this.env.db
+        const heatCycleService = new HeatCycleService(this.env.db);
+        await heatCycleService.createHeatCycle(message.duration, message.cycle || 1); // Use this.env.db
       }
 
       this.publish(message);
@@ -240,7 +241,8 @@ export class DeviceStatus {
     } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
       console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
       console.log('DeviceStatus: Calling createHeatCycle with db:', this.env.db, 'duration:', message.duration, 'cycle:', message.cycle || 1);
-      const success = await createHeatCycle(this.env.db, message.duration, message.cycle || 1);
+      const heatCycleService = new HeatCycleService(this.env.db);
+      const success = await heatCycleService.createHeatCycle(message.duration, message.cycle || 1);
       console.log('DeviceStatus: createHeatCycle returned success:', success);
       if (success) {
         this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
