@@ -6,6 +6,7 @@ import * as Sentry from "@sentry/react";
 import App from "./app/app";
 import "./styles.css";
 import "@radix-ui/themes/styles.css";
+import { WebSocketProvider } from "./app/WebSocketContext";
 
 Sentry.init({
   dsn: "https://b449f6b3711bcef239d2028c85f349ff@o4510082700345344.ingest.de.sentry.io/4510173450010704",
@@ -18,11 +19,13 @@ const rootElement = document.getElementById("root");
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <App />
-        </Router>
-      </QueryClientProvider>
+      <WebSocketProvider deviceId="my-esp32-device">
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <App />
+          </Router>
+        </QueryClientProvider>
+      </WebSocketProvider>
     </React.StrictMode>,
   );
 }

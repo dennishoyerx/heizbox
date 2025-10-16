@@ -3,7 +3,7 @@ import Header from "./components/Header";
 import { UsagePage } from "./usage";
 import { SessionPage } from "./session";
 import { Box, Flex, Theme } from "@radix-ui/themes";
-import { WebSocketProvider, useWebSocket } from "./WebSocketContext";
+import { useWebSocket } from "./WebSocketContext";
 import { ConnectionStatus } from "./components/ConnectionStatus";
 import { useTheme } from "./hooks/useTheme";
 
@@ -18,7 +18,7 @@ function AppContent() {
       accentColor="orange"
       radius="medium"
     >
-      <Box className="min-h-screen">
+      <Box className="min-h-screen font-josefin-sans">
         <Flex direction="column" gap="4">
           <Header
             deviceName="Heizbox"
@@ -41,11 +41,7 @@ function AppContent() {
 }
 
 function App() {
-  return (
-    <WebSocketProvider deviceId="my-esp32-device">
-      <AppContent />
-    </WebSocketProvider>
-  );
+  return <AppContent />;
 }
 
 export default App;

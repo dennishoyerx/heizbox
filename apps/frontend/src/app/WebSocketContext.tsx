@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   useCallback,
   ReactNode,
 } from "react";
@@ -12,9 +13,7 @@ import type {
   DeviceStatusPayload,
 } from "@heizbox/types";
 
-// Der Event-Typ ist nun direkt die Nachricht vom Server.
 export type WebSocketEvent = ServerWebSocketMessage;
-
 type EventListener = (event: WebSocketEvent) => void;
 
 interface WebSocketContextValue {
@@ -29,24 +28,20 @@ const WebSocketContext = createContext<WebSocketContextValue | null>(null);
 
 export const useWebSocket = () => {
   const context = useContext(WebSocketContext);
-  if (!context) {
+  if (!context)
     throw new Error("useWebSocket must be used within WebSocketProvider");
-  }
   return context;
 };
 
-// Custom Hook für spezifische Events, jetzt voll typsicher
 export const useWebSocketEvent = <T extends WebSocketEvent["type"]>(
   eventType: T,
   handler: (event: Extract<WebSocketEvent, { type: T }>) => void,
 ) => {
   const { addEventListener } = useWebSocket();
-
   useEffect(() => {
     return addEventListener((event) => {
-      if (event.type === eventType) {
+      if (event.type === eventType)
         handler(event as Extract<WebSocketEvent, { type: T }>);
-      }
     });
   }, [addEventListener, eventType, handler]);
 };
@@ -63,124 +58,124 @@ export const WebSocketProvider = ({
   const [isConnected, setIsConnected] = useState(false);
   const [deviceIsOn, setDeviceIsOn] = useState(false);
   const [deviceIsHeating, setDeviceIsHeating] = useState(false);
-  const [listeners, setListeners] = useState<Set<EventListener>>(new Set());
-  const [ws, setWs] = useState<WebSocket | null>(null);
 
-  const broadcastEvent = useCallback(
-    (event: WebSocketEvent) => {
-      listeners.forEach((listener) => listener(event));
-    },
-    [listeners],
-  );
+  const listeners = useRef<Set<EventListener>>(new Set());
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectRef = useRef<NodeJS.Timeout | null>(null);
+  const statusUpdateTimeout = useRef<NodeJS.Timeout | null>(null);
+  const pendingStatus = useRef<{ isOn?: boolean; isHeating?: boolean }>({});
 
+  // Listener Management
   const addEventListener = useCallback((listener: EventListener) => {
-    setListeners((prev) => new Set(prev).add(listener));
-    return () => {
-      setListeners((prev) => {
-        const next = new Set(prev);
-        next.delete(listener);
-        return next;
-      });
-    };
+    listeners.current.add(listener);
+    return () => listeners.current.delete(listener);
   }, []);
 
-  const sendMessage = useCallback(
-    (message: ClientWebSocketMessage) => {
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify(message));
-      }
-    },
-    [ws],
-  );
+  // Send Message
+  const sendMessage = useCallback((message: ClientWebSocketMessage) => {
+    const ws = wsRef.current;
+    if (ws && ws.readyState === WebSocket.OPEN)
+      ws.send(JSON.stringify(message));
+  }, []);
 
+  // Fetch initial device status
   useEffect(() => {
-    let websocket: WebSocket | null = null;
-    let timeoutId: NodeJS.Timeout | null = null;
-
     const fetchInitialStatus = async () => {
       try {
         const backendBaseUrl =
           import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-        const response = await fetch(
+        const res = await fetch(
           `${backendBaseUrl}/api/device-status/${deviceId}/status`,
         );
-        if (response.ok) {
-          const status = (await response.json()) as DeviceStatusPayload;
+        if (res.ok) {
+          const status = (await res.json()) as DeviceStatusPayload;
           setDeviceIsOn(status.isOn);
           setDeviceIsHeating(status.isHeating);
         }
-      } catch (error) {
-        console.error("Error fetching initial device status:", error);
+      } catch (err) {
+        console.error("Error fetching initial device status:", err);
       }
     };
+    fetchInitialStatus();
+  }, [deviceId]);
+
+  // Debounced Status Update
+  const queueStatusUpdate = useCallback(
+    (status: { isOn?: boolean; isHeating?: boolean }) => {
+      Object.assign(pendingStatus.current, status);
+      if (statusUpdateTimeout.current)
+        clearTimeout(statusUpdateTimeout.current);
+      statusUpdateTimeout.current = setTimeout(() => {
+        if (pendingStatus.current.isOn !== undefined)
+          setDeviceIsOn(pendingStatus.current.isOn);
+        if (pendingStatus.current.isHeating !== undefined)
+          setDeviceIsHeating(pendingStatus.current.isHeating);
+        pendingStatus.current = {};
+      }, 50); // 50ms debounce
+    },
+    [],
+  );
+
+  // WebSocket Connection & Reconnect
+  useEffect(() => {
+    let isUnmounted = false;
 
     const connect = () => {
-      fetchInitialStatus();
+      if (isUnmounted) return;
 
       const backendBaseUrl =
         import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-      const wsUrl = `${backendBaseUrl.replace(
-        "http",
-        "ws",
-      )}/ws?deviceId=${deviceId}&type=frontend`;
-      websocket = new WebSocket(wsUrl);
-      setWs(websocket);
+      const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws?deviceId=${deviceId}&type=frontend`;
 
-      websocket.onopen = () => {
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
         console.log("WebSocket connected");
         setIsConnected(true);
       };
 
-      websocket.onmessage = (event) => {
-        const message = JSON.parse(event.data) as ServerWebSocketMessage;
+      ws.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data) as ServerWebSocketMessage;
 
-        // Broadcast the specific event
-        broadcastEvent(message);
+          // Broadcast to all listeners
+          listeners.current.forEach((l) => l(message));
 
-        // Additionally, update the local device status if it's a status event
-        if (message.type === "statusUpdate") {
-          if (typeof message.isOn === "boolean") {
-            setDeviceIsOn(message.isOn);
+          // Debounced status updates
+          if (message.type === "statusUpdate") {
+            queueStatusUpdate({
+              isOn: message.isOn,
+              isHeating: message.isHeating,
+            });
           }
-          if (typeof message.isHeating === "boolean") {
-            setDeviceIsHeating(message.isHeating);
-          }
+        } catch (err) {
+          console.error("Failed to parse WS message:", err);
         }
       };
 
-      websocket.onclose = () => {
+      ws.onclose = () => {
         console.log("WebSocket disconnected");
         setIsConnected(false);
-        setDeviceIsOn(false);
-        setDeviceIsHeating(false);
-
-        // Reconnect after 3 seconds
-        if (timeoutId) clearTimeout(timeoutId);
-        timeoutId = setTimeout(connect, 3000);
+        if (!isUnmounted) reconnectRef.current = setTimeout(connect, 3000);
       };
 
-      websocket.onerror = (err) => {
+      ws.onerror = (err) => {
         console.error("WebSocket error:", err);
-        setIsConnected(false);
-        setDeviceIsOn(false);
-        setDeviceIsHeating(false);
-        broadcastEvent({
-          type: "error",
-          payload: { message: "Connection error" },
-        });
-        // The browser will close the connection, which will trigger onclose and reconnect
+        ws.close(); // triggers onclose
       };
     };
 
     connect();
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      if (websocket) {
-        websocket.close();
-      }
+      isUnmounted = true;
+      if (reconnectRef.current) clearTimeout(reconnectRef.current);
+      if (statusUpdateTimeout.current)
+        clearTimeout(statusUpdateTimeout.current);
+      wsRef.current?.close();
     };
-  }, [deviceId, broadcastEvent]);
+  }, [deviceId, queueStatusUpdate]);
 
   const value: WebSocketContextValue = {
     isConnected,

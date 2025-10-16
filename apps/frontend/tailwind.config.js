@@ -16,6 +16,9 @@ module.exports = {
       extend: {
           colors: {
           },
+          fontFamily: {
+              'josefin-sans': ['"Josefin Sans"', 'sans-serif'],
+          },
       },
   },
   plugins: [],
