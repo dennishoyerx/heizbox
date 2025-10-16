@@ -59,6 +59,7 @@ const Header: React.FC<HeaderProps> = ({
                   <List size={24} />
                 </Button>
               </DropdownMenu.Trigger>
+
               <DropdownMenu.Content>
                 <DropdownMenu.Item asChild>
                   <Link to="/">Heat Cycles</Link>

@@ -362,6 +362,7 @@ export class DeviceStatus {
           lastClick: this.currentSessionLastClick,
           sessionStart: this.currentSessionStart,
         });
+
         this.publish({
           type: "sessionData",
           clicks: this.currentSessionClicks,
