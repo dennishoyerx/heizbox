@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({
 
               <DropdownMenu.Content>
                 <DropdownMenu.Item asChild>
-                  <Link to="/">Heat Cycles</Link>
+                  <Link to="/">Sessions</Link>
                 </DropdownMenu.Item>
 
                 <DropdownMenu.Item asChild>
