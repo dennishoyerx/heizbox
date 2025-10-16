@@ -20,7 +20,6 @@
     "paths": {
       "@heizbox/types": ["./libs/types/src/index.ts"],
       "@heizbox/utils": ["./libs/utils/src/index.ts"]
-      // oder wo auch immer dein types Package liegt
     }
   }
 }

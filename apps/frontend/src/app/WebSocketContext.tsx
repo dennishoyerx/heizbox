@@ -43,12 +43,11 @@ export const useWebSocketEvent = <T extends WebSocketEvent["type"]>(
   const { addEventListener } = useWebSocket();
 
   useEffect(() => {
-    const unsubscribe = addEventListener((event) => {
+    return addEventListener((event) => {
       if (event.type === eventType) {
         handler(event as Extract<WebSocketEvent, { type: T }>);
       }
     });
-    return unsubscribe;
   }, [addEventListener, eventType, handler]);
 };
 
@@ -95,6 +94,9 @@ export const WebSocketProvider = ({
   );
 
   useEffect(() => {
+    let websocket: WebSocket | null = null;
+    let timeoutId: NodeJS.Timeout | null = null;
+
     const fetchInitialStatus = async () => {
       try {
         const backendBaseUrl =
@@ -112,51 +114,71 @@ export const WebSocketProvider = ({
       }
     };
 
-    fetchInitialStatus();
+    const connect = () => {
+      fetchInitialStatus();
 
-    const backendBaseUrl =
-      import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
-    const wsUrl = `${backendBaseUrl.replace("http", "ws")}/ws?deviceId=${deviceId}&type=frontend`;
-    const websocket = new WebSocket(wsUrl);
+      const backendBaseUrl =
+        import.meta.env.VITE_PUBLIC_API_URL || "http://127.0.0.1:8787";
+      const wsUrl = `${backendBaseUrl.replace(
+        "http",
+        "ws",
+      )}/ws?deviceId=${deviceId}&type=frontend`;
+      websocket = new WebSocket(wsUrl);
+      setWs(websocket);
 
-    websocket.onopen = () => {
-      console.log("WebSocket connected");
-      setIsConnected(true);
+      websocket.onopen = () => {
+        console.log("WebSocket connected");
+        setIsConnected(true);
+      };
+
+      websocket.onmessage = (event) => {
+        const message = JSON.parse(event.data) as ServerWebSocketMessage;
+
+        // Broadcast the specific event
+        broadcastEvent(message);
+
+        // Additionally, update the local device status if it's a status event
+        if (message.type === "statusUpdate") {
+          if (typeof message.isOn === "boolean") {
+            setDeviceIsOn(message.isOn);
+          }
+          if (typeof message.isHeating === "boolean") {
+            setDeviceIsHeating(message.isHeating);
+          }
+        }
+      };
+
+      websocket.onclose = () => {
+        console.log("WebSocket disconnected");
+        setIsConnected(false);
+        setDeviceIsOn(false);
+        setDeviceIsHeating(false);
+
+        // Reconnect after 3 seconds
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(connect, 3000);
+      };
+
+      websocket.onerror = (err) => {
+        console.error("WebSocket error:", err);
+        setIsConnected(false);
+        setDeviceIsOn(false);
+        setDeviceIsHeating(false);
+        broadcastEvent({
+          type: "error",
+          payload: { message: "Connection error" },
+        });
+        // The browser will close the connection, which will trigger onclose and reconnect
+      };
     };
 
-    websocket.onmessage = (event) => {
-      const message = JSON.parse(event.data) as ServerWebSocketMessage;
-
-      // Broadcast des spezifischen Events
-      broadcastEvent(message);
-
-      // Zusätzlich den lokalen Gerätestatus aktualisieren, falls es ein Status-Event ist
-      if (message.type === "deviceStatusChanged") {
-        setDeviceIsOn(message.payload.isOn);
-        setDeviceIsHeating(message.payload.isHeating);
-      }
-    };
-
-    websocket.onclose = () => {
-      console.log("WebSocket disconnected");
-      setIsConnected(false);
-      setDeviceIsOn(false);
-      setDeviceIsHeating(false);
-    };
-
-    websocket.onerror = (err) => {
-      console.error("WebSocket error:", err);
-      setIsConnected(false);
-      broadcastEvent({
-        type: "error",
-        payload: { message: "Connection error" },
-      });
-    };
-
-    setWs(websocket);
+    connect();
 
     return () => {
-      websocket.close();
+      if (timeoutId) clearTimeout(timeoutId);
+      if (websocket) {
+        websocket.close();
+      }
     };
   }, [deviceId, broadcastEvent]);
 

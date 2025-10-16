@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { HeatCycleService } from '../services/heatCycleService';
-import { groupSessions, calculateConsumption } from '../utils/session';
+import { HeatCycleService } from '../services/heatCycleService.js';
+import { groupSessions, calculateConsumption } from '../utils/session.js';
 
 const session = new Hono<{ Bindings: Env }>();
 

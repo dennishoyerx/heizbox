@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { validateDeviceId, validateConnectionType } from '../utils/validation';
+import { validateDeviceId, validateConnectionType } from '../utils/validation.js';
 
 const websocket = new Hono<{ Bindings: Env }>();
 

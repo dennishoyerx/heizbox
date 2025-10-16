@@ -1,5 +1,5 @@
 import type { HeatCycleRow } from '@heizbox/types';
-import { config } from '../config';
+import { config } from '../config/index.js';
 
 export const groupSessions = (rows: HeatCycleRow[]): HeatCycleRow[][] => {
   if (!rows || rows.length === 0) return [];

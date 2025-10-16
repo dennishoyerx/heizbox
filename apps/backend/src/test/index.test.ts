@@ -1,6 +1,6 @@
 
 import { describe, it, expect, vi } from 'vitest';
-import app from '../index';
+import app from '../index.js';
 import type { HeatCycleRow } from '@heizbox/types';
 
 describe('API Routes', () => {

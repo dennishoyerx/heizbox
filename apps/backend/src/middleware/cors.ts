@@ -1,5 +1,5 @@
 import { cors } from 'hono/cors';
-import { isOriginAllowed } from '../utils/cors';
+import { isOriginAllowed } from '../utils/cors.js';
 
 export const corsMiddleware = cors({
   origin: (origin) => {

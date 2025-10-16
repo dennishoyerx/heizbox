@@ -1,7 +1,7 @@
-import type { D1Database } from '@cloudflare/workers-types';
-import { HeatCycleRepository } from '../repositories/heatCycleRepository';
-import { validateHeatCycle } from '../utils/validation';
-import { generateUuid } from '../utils';
+import type { D1Database } from "@cloudflare/workers-types";
+import { HeatCycleRepository } from "../repositories/heatCycleRepository.js";
+import { validateHeatCycle } from "../utils/validation.js";
+import { generateUuid } from "../utils/index.js";
 
 export class HeatCycleService {
   private repository: HeatCycleRepository;
@@ -10,7 +10,7 @@ export class HeatCycleService {
     this.repository = new HeatCycleRepository(db);
   }
 
-  async createHeatCycle(duration: number, cycle: number = 1): Promise<boolean> {
+  async createHeatCycle(duration: number, cycle = 1): Promise<boolean> {
     try {
       validateHeatCycle(duration, cycle);
 
@@ -18,21 +18,23 @@ export class HeatCycleService {
       const duplicateCount = await this.repository.findDuplicates(
         duration,
         cycle,
-        30000 // 30 seconds
+        30000, // 30 seconds
       );
 
       if (duplicateCount > 0) {
-        console.log('Duplicate heat cycle within 30s, not inserted.');
+        console.log("Duplicate heat cycle within 30s, not inserted.");
         return false;
       }
 
       const id = generateUuid();
       await this.repository.create(id, duration, cycle);
 
-      console.log(`Heat cycle created: id=${id}, duration=${duration}, cycle=${cycle}`);
+      console.log(
+        `Heat cycle created: id=${id}, duration=${duration}, cycle=${cycle}`,
+      );
       return true;
     } catch (error) {
-      console.error('Error in createHeatCycle:', error);
+      console.error("Error in createHeatCycle:", error);
       return false;
     }
   }
@@ -45,7 +47,7 @@ export class HeatCycleService {
     return this.repository.findAll();
   }
 
-  async getRecentSession(timeLimitSeconds: number = 7200) {
+  async getRecentSession(timeLimitSeconds = 7200) {
     return this.repository.findRecentForSession(timeLimitSeconds);
   }
 }

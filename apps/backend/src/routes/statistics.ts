@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { HeatCycleService } from '../services/heatCycleService';
+import { HeatCycleService } from '../services/heatCycleService.js';
 import type { StatisticsApiResponse, HeatCycleRow } from "@heizbox/types";
 
 const statistics = new Hono<{ Bindings: Env }>();

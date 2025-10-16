@@ -1,6 +1,6 @@
-import { Hono } from 'hono';
-import { HeatCycleService } from '../services/heatCycleService';
-import type { SessionData } from '@heizbox/types';
+import { Hono } from "hono";
+import { HeatCycleService } from "../services/heatCycleService.js";
+import type { SessionData } from "@heizbox/types";
 
 export class DeviceStatus {
   state: DurableObjectState;
@@ -16,30 +16,41 @@ export class DeviceStatus {
 
   private readonly OFFLINE_THRESHOLD = 90 * 1000; // 90 seconds
 
-  constructor(state: DurableObjectState, env: Env) { // Accept env in constructor
+  constructor(state: DurableObjectState, env: Env) {
+    // Accept env in constructor
     this.state = state;
     this.app = new Hono();
     this.env = env; // Store env
 
     // Initialize the status from storage when the Durable Object is created
     this.state.blockConcurrencyWhile(async () => {
-      const storedIsOn = await this.state.storage.get<boolean>('isOn');
+      const storedIsOn = await this.state.storage.get<boolean>("isOn");
       this.isOn = storedIsOn !== undefined ? storedIsOn : false;
 
-      const storedIsHeating = await this.state.storage.get<boolean>('isHeating');
+      const storedIsHeating =
+        await this.state.storage.get<boolean>("isHeating");
       this.isHeating = storedIsHeating !== undefined ? storedIsHeating : false;
 
-      const storedLastSeen = await this.state.storage.get<number>('lastSeen');
+      const storedLastSeen = await this.state.storage.get<number>("lastSeen");
       this.lastSeen = storedLastSeen !== undefined ? storedLastSeen : 0;
 
-      const storedSessionClicks = await this.state.storage.get<number>('currentSessionClicks');
-      this.currentSessionClicks = storedSessionClicks !== undefined ? storedSessionClicks : 0;
+      const storedSessionClicks = await this.state.storage.get<number>(
+        "currentSessionClicks",
+      );
+      this.currentSessionClicks =
+        storedSessionClicks !== undefined ? storedSessionClicks : 0;
 
-      const storedSessionLastClick = await this.state.storage.get<number>('currentSessionLastClick');
-      this.currentSessionLastClick = storedSessionLastClick !== undefined ? storedSessionLastClick : 0;
+      const storedSessionLastClick = await this.state.storage.get<number>(
+        "currentSessionLastClick",
+      );
+      this.currentSessionLastClick =
+        storedSessionLastClick !== undefined ? storedSessionLastClick : 0;
 
-      const storedSessionStart = await this.state.storage.get<number>('currentSessionStart');
-      this.currentSessionStart = storedSessionStart !== undefined ? storedSessionStart : 0;
+      const storedSessionStart = await this.state.storage.get<number>(
+        "currentSessionStart",
+      );
+      this.currentSessionStart =
+        storedSessionStart !== undefined ? storedSessionStart : 0;
 
       // Set an alarm to periodically check for offline devices
       const currentAlarm = await this.state.storage.getAlarm();
@@ -49,11 +60,11 @@ export class DeviceStatus {
     });
 
     // Define routes for the Durable Object
-    this.app.get('/status', (c) => {
+    this.app.get("/status", (c) => {
       return c.json({ isOn: this.isOn, isHeating: this.isHeating });
     });
 
-    this.app.get('/session-data', (c) => {
+    this.app.get("/session-data", (c) => {
       return c.json({
         clicks: this.currentSessionClicks,
         lastClick: this.currentSessionLastClick,
@@ -61,51 +72,75 @@ export class DeviceStatus {
       });
     });
 
-    this.app.post('/status', async (c) => {
+    this.app.post("/status", async (c) => {
       const { isOn, isHeating } = await c.req.json();
       let statusChanged = false;
 
-      if (typeof isOn === 'boolean' && this.isOn !== isOn) {
+      if (typeof isOn === "boolean" && this.isOn !== isOn) {
         this.isOn = isOn;
-        await this.state.storage.put('isOn', this.isOn);
+        await this.state.storage.put("isOn", this.isOn);
         statusChanged = true;
       }
 
-      if (typeof isHeating === 'boolean' && this.isHeating !== isHeating) {
+      if (typeof isHeating === "boolean" && this.isHeating !== isHeating) {
         this.isHeating = isHeating;
-        await this.state.storage.put('isHeating', this.isHeating);
+        await this.state.storage.put("isHeating", this.isHeating);
         statusChanged = true;
       }
 
       if (statusChanged) {
-        this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating }); // Publish status update
+        this.publish({
+          type: "statusUpdate",
+          isOn: this.isOn,
+          isHeating: this.isHeating,
+        }); // Publish status update
       }
-      return c.json({ success: true, isOn: this.isOn, isHeating: this.isHeating });
+      return c.json({
+        success: true,
+        isOn: this.isOn,
+        isHeating: this.isHeating,
+      });
     });
 
-    this.app.post('/publish', async (c) => {
+    this.app.post("/publish", async (c) => {
       const message = await c.req.json();
-      console.log('DeviceStatus: Received message for publish:', message);
+      console.log("DeviceStatus: Received message for publish:", message);
 
-      if (message.type === 'statusUpdate' && typeof message.isOn === 'boolean' && typeof message.isHeating === 'boolean') {
+      if (
+        message.type === "statusUpdate" &&
+        typeof message.isOn === "boolean" &&
+        typeof message.isHeating === "boolean"
+      ) {
         let statusChanged = false;
         if (this.isOn !== message.isOn) {
           this.isOn = message.isOn;
-          await this.state.storage.put('isOn', this.isOn);
+          await this.state.storage.put("isOn", this.isOn);
           statusChanged = true;
         }
         if (this.isHeating !== message.isHeating) {
           this.isHeating = message.isHeating;
-          await this.state.storage.put('isHeating', this.isHeating);
+          await this.state.storage.put("isHeating", this.isHeating);
           statusChanged = true;
         }
         if (statusChanged) {
-          console.log('DeviceStatus: State updated from WebSocket message.', { isOn: this.isOn, isHeating: this.isHeating });
+          console.log("DeviceStatus: State updated from WebSocket message.", {
+            isOn: this.isOn,
+            isHeating: this.isHeating,
+          });
         }
-      } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
-        console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
+      } else if (
+        message.type === "heatCycleCompleted" &&
+        typeof message.duration === "number"
+      ) {
+        console.log(
+          "DeviceStatus: Processing heatCycleCompleted message.",
+          message,
+        );
         const heatCycleService = new HeatCycleService(this.env.db);
-        await heatCycleService.createHeatCycle(message.duration, message.cycle || 1); // Use this.env.db
+        await heatCycleService.createHeatCycle(
+          message.duration,
+          message.cycle || 1,
+        ); // Use this.env.db
       }
 
       this.publish(message);
@@ -116,7 +151,7 @@ export class DeviceStatus {
   // Method to send current session data to a specific WebSocket
   sendSessionData(ws: WebSocket) {
     const sessionData: SessionData & { type: string } = {
-      type: 'sessionData',
+      type: "sessionData",
       clicks: this.currentSessionClicks,
       lastClick: this.currentSessionLastClick,
       sessionStart: this.currentSessionStart,
@@ -124,70 +159,83 @@ export class DeviceStatus {
     try {
       ws.send(JSON.stringify(sessionData));
     } catch (err) {
-      console.error('Error sending session data to WebSocket:', err);
+      console.error("Error sending session data to WebSocket:", err);
       this.subscribers.delete(ws); // Remove broken connection
     }
   }
 
   // Method to publish messages to all connected subscribers
   publish(message: any) {
-    console.log('DeviceStatus: Publishing message to subscribers:', message);
+    console.log("DeviceStatus: Publishing message to subscribers:", message);
     const messageString = JSON.stringify(message);
     this.subscribers.forEach((ws) => {
       try {
         ws.send(messageString);
       } catch (err) {
-        console.error('Error sending message to subscriber:', err);
+        console.error("Error sending message to subscriber:", err);
         this.subscribers.delete(ws); // Remove broken connection
       }
     });
   }
 
   async fetch(request: Request): Promise<Response> {
-    console.log('DeviceStatus fetch called');
-    const upgradeHeader = request.headers.get('Upgrade');
-    if (upgradeHeader === 'websocket') {
-      console.log('DeviceStatus: Upgrade header is websocket');
+    console.log("DeviceStatus fetch called");
+    const upgradeHeader = request.headers.get("Upgrade");
+    if (upgradeHeader === "websocket") {
       const webSocketPair = new WebSocketPair();
       const [client, server] = Object.values(webSocketPair);
 
       server.accept();
-      console.log('DeviceStatus: WebSocket server accepted');
       this.subscribers.add(server);
 
       // If it's a device connection, send current session data
       const url = new URL(request.url);
-      const connectionType = url.searchParams.get('type');
-      if (connectionType === 'device') {
+      const connectionType = url.searchParams.get("type");
+
+      console.log("WS connected:", connectionType);
+
+      if (connectionType === "device") {
         this.sendSessionData(server);
       }
 
-      server.addEventListener('message', async (event) => {
+      server.addEventListener("message", async (event) => {
         try {
           const message = JSON.parse(event.data as string);
-          console.log('Received message from subscriber:', message);
+          console.log("Received message from subscriber:", message);
           // For frontend subscribers, just publish the message
           this.publish(message);
+          if (connectionType === "device") {
+            this.processDeviceMessage(request, message);
+          }
         } catch (error) {
-          console.error('Error in DeviceStatus WebSocket message handler:', error);
+          console.error(
+            "Error in DeviceStatus WebSocket message handler:",
+            error,
+          );
         }
       });
 
-      server.addEventListener('close', () => {
+      server.addEventListener("close", () => {
         try {
           this.subscribers.delete(server);
-          console.log('Subscriber WebSocket closed');
+          console.log("Subscriber WebSocket closed");
         } catch (error) {
-          console.error('Error in DeviceStatus WebSocket close handler:', error);
+          console.error(
+            "Error in DeviceStatus WebSocket close handler:",
+            error,
+          );
         }
       });
 
-      server.addEventListener('error', (err) => {
+      server.addEventListener("error", (err) => {
         try {
           this.subscribers.delete(server);
-          console.error('Subscriber WebSocket error:', err);
+          console.error("Subscriber WebSocket error:", err);
         } catch (error) {
-          console.error('Error in DeviceStatus WebSocket error handler:', error);
+          console.error(
+            "Error in DeviceStatus WebSocket error handler:",
+            error,
+          );
         }
       });
 
@@ -195,7 +243,7 @@ export class DeviceStatus {
     }
 
     // Handle HTTP requests for status updates and device messages
-    if (request.url.endsWith('/process-device-message')) {
+    if (request.url.endsWith("/process-device-message")) {
       return this.processDeviceMessage(request);
     }
 
@@ -204,83 +252,141 @@ export class DeviceStatus {
   }
 
   // New method to process messages coming from devices
-  async processDeviceMessage(request: Request): Promise<Response> {
-    const rawBody = await request.text();
-    console.log('DeviceStatus: Raw device message body:', rawBody);
-    const message = JSON.parse(rawBody);
-    console.log('DeviceStatus: Processing device message:', message);
-    if (message.type === 'statusUpdate') {
+  async processDeviceMessage(
+    request: Request,
+    message?: any,
+  ): Promise<Response> {
+    console.log("!!!!!DeviceStatus: Processing device message:", message);
+    if (message.type === "statusUpdate") {
       let statusChanged = false;
 
-      if (typeof message.isOn === 'boolean' && this.isOn !== message.isOn) {
+      if (typeof message.isOn === "boolean" && this.isOn !== message.isOn) {
         this.isOn = message.isOn;
-        await this.state.storage.put('isOn', this.isOn);
+        await this.state.storage.put("isOn", this.isOn);
         statusChanged = true;
       }
 
-      if (typeof message.isHeating === 'boolean' && this.isHeating !== message.isHeating) {
+      if (
+        typeof message.isHeating === "boolean" &&
+        this.isHeating !== message.isHeating
+      ) {
         this.isHeating = message.isHeating;
-        await this.state.storage.put('isHeating', this.isHeating);
+        await this.state.storage.put("isHeating", this.isHeating);
         statusChanged = true;
       }
 
       if (statusChanged) {
-        console.log('DeviceStatus: State updated from device message.', { isOn: this.isOn, isHeating: this.isHeating });
+        console.log("DeviceStatus: State updated from device message.", {
+          isOn: this.isOn,
+          isHeating: this.isHeating,
+        });
         this.publish(message); // Publish the status update to all subscribers
       }
-    } else if (message.type === 'heartbeat') {
+    } else if (message.type === "heartbeat") {
       this.lastSeen = Date.now();
-      await this.state.storage.put('lastSeen', this.lastSeen);
-      console.log('DeviceStatus: Heartbeat received. lastSeen updated to', this.lastSeen);
+      await this.state.storage.put("lastSeen", this.lastSeen);
+      console.log(
+        "DeviceStatus: Heartbeat received. lastSeen updated to",
+        this.lastSeen,
+      );
       // Optionally, publish a status update if the device was previously considered offline
       if (!this.isOn) {
         this.isOn = true;
-        await this.state.storage.put('isOn', this.isOn);
-        this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating });
+        await this.state.storage.put("isOn", this.isOn);
+        this.publish({
+          type: "statusUpdate",
+          isOn: this.isOn,
+          isHeating: this.isHeating,
+        });
       }
-    } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
-      console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
-      console.log('DeviceStatus: Calling createHeatCycle with db:', this.env.db, 'duration:', message.duration, 'cycle:', message.cycle || 1);
+    } else if (
+      message.type === "heatCycleCompleted" &&
+      typeof message.duration === "number"
+    ) {
+      console.log(
+        "DeviceStatus: Processing heatCycleCompleted message.",
+        message,
+      );
+      console.log(
+        "DeviceStatus: Calling createHeatCycle with db:",
+        this.env.db,
+        "duration:",
+        message.duration,
+        "cycle:",
+        message.cycle || 1,
+      );
       const heatCycleService = new HeatCycleService(this.env.db);
-      const success = await heatCycleService.createHeatCycle(message.duration, message.cycle || 1);
-      console.log('DeviceStatus: createHeatCycle returned success:', success);
+      const success = await heatCycleService.createHeatCycle(
+        message.duration,
+        message.cycle || 1,
+      );
+      console.log("DeviceStatus: createHeatCycle returned success:", success);
       if (success) {
-        this.publish({ type: 'sessionCreated' }); // Notify subscribers that a new session was created
+        this.publish({ type: "sessionCreated" }); // Notify subscribers that a new session was created
       }
       this.publish(message); // Publish the heat cycle completed message to all subscribers
-    } else if (message.type === 'sessionUpdate' && typeof message.clicks === 'number' && typeof message.lastClick === 'number' && typeof message.sessionStart === 'number') {
+    } else if (
+      message.type === "sessionUpdate" &&
+      typeof message.clicks === "number" &&
+      typeof message.lastClick === "number" &&
+      typeof message.sessionStart === "number"
+    ) {
       let sessionDataChanged = false;
       if (this.currentSessionClicks !== message.clicks) {
         this.currentSessionClicks = message.clicks;
-        await this.state.storage.put('currentSessionClicks', this.currentSessionClicks);
+        await this.state.storage.put(
+          "currentSessionClicks",
+          this.currentSessionClicks,
+        );
         sessionDataChanged = true;
       }
       if (this.currentSessionLastClick !== message.lastClick) {
         this.currentSessionLastClick = message.lastClick;
-        await this.state.storage.put('currentSessionLastClick', this.currentSessionLastClick);
+        await this.state.storage.put(
+          "currentSessionLastClick",
+          this.currentSessionLastClick,
+        );
         sessionDataChanged = true;
       }
       if (this.currentSessionStart !== message.sessionStart) {
         this.currentSessionStart = message.sessionStart;
-        await this.state.storage.put('currentSessionStart', this.currentSessionStart);
+        await this.state.storage.put(
+          "currentSessionStart",
+          this.currentSessionStart,
+        );
         sessionDataChanged = true;
       }
       if (sessionDataChanged) {
-        console.log('DeviceStatus: Session data updated from device message.', { clicks: this.currentSessionClicks, lastClick: this.currentSessionLastClick, sessionStart: this.currentSessionStart });
-        this.publish({ type: 'sessionData', clicks: this.currentSessionClicks, lastClick: this.currentSessionLastClick, sessionStart: this.currentSessionStart }); // Publish the session data update to all subscribers
+        console.log("DeviceStatus: Session data updated from device message.", {
+          clicks: this.currentSessionClicks,
+          lastClick: this.currentSessionLastClick,
+          sessionStart: this.currentSessionStart,
+        });
+        this.publish({
+          type: "sessionData",
+          clicks: this.currentSessionClicks,
+          lastClick: this.currentSessionLastClick,
+          sessionStart: this.currentSessionStart,
+        }); // Publish the session data update to all subscribers
       }
     }
-    return new Response(JSON.stringify({ success: true }), { headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   async alarm() {
-    console.log('DeviceStatus: Alarm triggered.');
+    console.log("DeviceStatus: Alarm triggered.");
     const now = Date.now();
-    if (this.isOn && (now - this.lastSeen > this.OFFLINE_THRESHOLD)) {
-      console.log('DeviceStatus: Device is offline. Setting isOn to false.');
+    if (this.isOn && now - this.lastSeen > this.OFFLINE_THRESHOLD) {
+      console.log("DeviceStatus: Device is offline. Setting isOn to false.");
       this.isOn = false;
-      await this.state.storage.put('isOn', this.isOn);
-      this.publish({ type: 'statusUpdate', isOn: this.isOn, isHeating: this.isHeating });
+      await this.state.storage.put("isOn", this.isOn);
+      this.publish({
+        type: "statusUpdate",
+        isOn: this.isOn,
+        isHeating: this.isHeating,
+      });
     }
     // Reschedule the alarm
     await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);

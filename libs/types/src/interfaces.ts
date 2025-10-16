@@ -79,9 +79,11 @@ export interface HeatCyclePayload extends HeatCycleRow {}
  * Eine diskriminierte Union für alle möglichen Events, die vom Server gesendet werden.
  */
 export type ServerWebSocketMessage =
-  | { type: "deviceStatusChanged"; payload: DeviceStatusPayload }
+  | { type: "statusUpdate"; payload: Partial<DeviceStatusPayload> }
   | { type: "heatCycleCreated"; payload: HeatCyclePayload }
   | { type: "heatCycleCompleted"; payload: HeatCyclePayload }
+  | { type: "sessionCreated" }
+  | { type: "sessionData"; payload: SessionData }
   | { type: "error"; payload: { message: string } };
 
 /**

@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
-import { HeatCycleService } from '../services/heatCycleService';
-import { getBerlinTimeRange } from '../utils/time';
-import { groupSessions, calculateConsumption } from '../utils/session';
+import { HeatCycleService } from '../services/heatCycleService.js';
+import { getBerlinTimeRange } from '../utils/time.js';
+import { groupSessions, calculateConsumption } from '../utils/session.js';
 
 const heatCycles = new Hono<{ Bindings: Env }>();
 

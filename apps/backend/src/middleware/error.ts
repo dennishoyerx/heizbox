@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/cloudflare';
 import { HTTPException } from 'hono/http-exception';
-import { ValidationError } from '../utils/validation';
+import { ValidationError } from '../utils/validation.js';
 import type { Context } from 'hono';
 
 export const errorHandler = (err: Error, c: Context) => {
