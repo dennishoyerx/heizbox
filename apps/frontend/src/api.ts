@@ -20,6 +20,7 @@ export class ApiError extends Error {
 // Wrapper für fetch
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, options);
+
   if (!response.ok) {
     const errorBody = await response.text();
     console.error("API Error Response:", errorBody);

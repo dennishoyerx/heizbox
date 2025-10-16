@@ -52,6 +52,7 @@ const Header: React.FC<HeaderProps> = ({
             {deviceStatus === "Offline" && (
               <CircleNotch weight="bold" size={20} color="red" />
             )}
+
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
                 <Button variant="ghost">
