@@ -18,7 +18,7 @@ function AppContent() {
       accentColor="orange"
       radius="medium"
     >
-      <Box className="min-h-screen font-josefin-sans ">
+      <Box className="min-h-screen font-josefin-sans">
         <Flex direction="column" gap="4">
           <Header
             deviceName="Heizbox"
