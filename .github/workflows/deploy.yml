@@ -39,11 +39,11 @@ jobs:
         uses: nrwl/nx-set-shas@v3
 
       - name: Build affected projects
-        run: npx nx affected --target=build --parallel=3
+        run: npx nx affected --target=build --parallel=3 --base=main --head=HEAD
 
       # Optional: Test step
       - name: Test affected projects
-        run: npx nx affected --target=test --parallel=3
+        run: npx nx affected --target=test --parallel=3 --base=main --head=HEAD
 
       - name: Check affected projects
         id: affected
