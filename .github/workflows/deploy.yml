@@ -1,0 +1,60 @@
+name: Deploy to Cloudflare
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/backend/**"
+      - "apps/frontend/**"
+
+jobs:
+  deploy-backend:
+    name: 🚀 Deploy Backend (Worker)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/backend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Deploy Worker
+        run: npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-frontend:
+    name: 🌐 Deploy Frontend (Pages)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: pnpm ci
+
+      - name: Build Frontend
+        run: pnpm run build
+
+      - name: Deploy to Cloudflare Pages
+        run: npx wrangler pages deploy ./dist --project-name="${{ secrets.CLOUDFLARE_PROJECT_NAME }}"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
