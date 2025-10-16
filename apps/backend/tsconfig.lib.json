@@ -9,7 +9,8 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "types": ["node", "@cloudflare/workers-types"],
+    "lib": ["esnext", "webworker"]
   },
   "include": [
     "src/**/*.js",
