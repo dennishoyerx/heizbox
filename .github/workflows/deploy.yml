@@ -45,18 +45,19 @@ jobs:
       - name: Test affected projects
         run: npx nx affected --target=test --parallel=3
 
-      # Backend Deploy (Cloudflare Worker)
+      - name: Check affected projects
+        id: affected
+        run: echo "affected=$(npx nx print-affected --target=build --select=projects)" >> $GITHUB_OUTPUT
+
       - name: Deploy Backend Worker
-        if: ${{ steps.build.outcome == 'success' }}
+        if: contains(steps.affected.outputs.affected, 'backend')
         run: npx wrangler deploy apps/backend/src/index.ts
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
 
-      # Frontend Deploy (Cloudflare Pages)
       - name: Deploy Frontend
-        if: ${{ steps.build.outcome == 'success' }}
-        run: |
-          pnpm run --filter frontend deploy
+        if: contains(steps.affected.outputs.affected, 'frontend')
+        run: pnpm --filter frontend deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
