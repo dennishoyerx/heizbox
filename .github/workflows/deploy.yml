@@ -47,7 +47,9 @@ jobs:
 
       - name: Check affected projects
         id: affected
-        run: echo "affected=$(npx nx print-affected --target=build --select=projects)" >> $GITHUB_OUTPUT
+        run: |
+          AFFECTED=$(npx nx show projects --affected)
+          echo "affected=$AFFECTED" >> $GITHUB_OUTPUT
 
       - name: Deploy Backend Worker
         if: contains(steps.affected.outputs.affected, 'backend')
