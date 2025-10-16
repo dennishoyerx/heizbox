@@ -378,6 +378,7 @@ export class DeviceStatus {
   async alarm() {
     console.log("DeviceStatus: Alarm triggered.");
     const now = Date.now();
+
     if (this.isOn && now - this.lastSeen > this.OFFLINE_THRESHOLD) {
       console.log("DeviceStatus: Device is offline. Setting isOn to false.");
       this.isOn = false;

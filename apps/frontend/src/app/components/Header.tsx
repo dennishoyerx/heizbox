@@ -67,6 +67,7 @@ const Header: React.FC<HeaderProps> = ({
                   <Link to="/usage">Usage Statistics</Link>
                 </DropdownMenu.Item>
                 <DropdownMenu.Separator />
+
                 <DropdownMenu.Item onClick={toggleTheme}>
                   <Flex gap="2" align="center">
                     {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
