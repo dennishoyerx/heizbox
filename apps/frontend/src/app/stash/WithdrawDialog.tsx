@@ -46,7 +46,7 @@ export const WithdrawDialog = ({
       await withdrawItem({
         itemId: item.id,
         data: {
-          amount: quantityNum,
+          quantity: quantityNum,
           notes: notes.trim() || undefined,
         },
       });

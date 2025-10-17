@@ -12,7 +12,7 @@ export class StashRepository {
   async findAllItems(): Promise<StashItemRow[]> {
     const { results } = await this.db
       .prepare(
-        "SELECT id, name, initial_amount, current_amount, created_at FROM stash_items ORDER BY created_at DESC",
+        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at FROM stash_items ORDER BY created_at DESC",
       )
       .all<StashItemRow>();
     return results || [];
@@ -21,7 +21,7 @@ export class StashRepository {
   async findItemById(id: string): Promise<StashItemRow | null> {
     const result = await this.db
       .prepare(
-        "SELECT id, name, initial_amount, current_amount, created_at FROM stash_items WHERE id = ?1",
+        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at FROM stash_items WHERE id = ?1",
       )
       .bind(id)
       .first<StashItemRow>();

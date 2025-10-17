@@ -9,7 +9,7 @@ export const corsMiddleware = cors({
     return undefined;
   },
   allowHeaders: ['X-Custom-Header', 'Upgrade-Insecure-Requests', 'Content-Type'],
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'DELETE', 'PUT'],
   exposeHeaders: ['Content-Length'],
   credentials: true,
 });
