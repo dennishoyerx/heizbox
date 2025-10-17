@@ -30,5 +30,13 @@
     "src/**/*.tsx",
     "../../libs/types/src/index.ts",
     "../../libs/utils/src/index.ts"
+  ],
+  "references": [
+    {
+      "path": "../../libs/utils/tsconfig.lib.json"
+    },
+    {
+      "path": "../../libs/types/tsconfig.lib.json"
+    }
   ]
 }

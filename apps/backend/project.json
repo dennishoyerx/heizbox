@@ -33,7 +33,7 @@
     "db-sync": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm run sync",
+        "command": "pnpm exec node scripts/db-sync.mjs",
         "cwd": "apps/backend"
       }
     }

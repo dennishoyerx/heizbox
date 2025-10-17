@@ -20,5 +20,9 @@
     "../../libs/types/src/index.ts",
     "../../libs/utils/src/index.ts"
   ],
-  "references": []
+  "references": [
+    {
+      "path": "../../libs/types/tsconfig.lib.json"
+    }
+  ]
 }

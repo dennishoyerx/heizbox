@@ -29,7 +29,6 @@
     "deploy": "wrangler deploy --minify",
     "test": "vitest run",
     "monitor": "wrangler tail --format json",
-    "monitor:script": "wrangler tail | node formatLogs.js",
-    "sync": "node scripts/db-sync.mjs"
+    "monitor:script": "wrangler tail | node formatLogs.js"
   }
 }
