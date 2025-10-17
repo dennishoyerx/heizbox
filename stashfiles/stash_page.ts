@@ -76,16 +76,13 @@ function StashPage() {
 
           <Table.Body>
             {data?.items.map((item) => {
-              const progress = (item.quantity_current / item.quantity_start) * 100;
+              const progress = (item.current_amount / item.initial_amount) * 100;
               const progressColor = progress > 50 ? 'green' : progress > 20 ? 'yellow' : 'red';
               
               return (
                 <Table.Row key={item.id}>
                   <Table.Cell>
-                    <Text weight="bold">{item.item_name}</Text>
-                    {item.notes && (
-                      <Text size="1" color="gray" className="block">{item.notes}</Text>
-                    )}
+                    <Text weight="bold">{item.name}</Text>
                   </Table.Cell>
                   <Table.Cell>
                     <Flex direction="column" gap="1">
@@ -150,7 +147,7 @@ function StashPage() {
           <Dialog.Content style={{ maxWidth: 450 }}>
             <Dialog.Title>Item löschen?</Dialog.Title>
             <Dialog.Description size="2" mb="4">
-              Möchtest du "{deleteConfirmItem.item_name}" wirklich löschen? 
+              Möchtest du "{deleteConfirmItem.name}" wirklich löschen? 
               Alle Entnahme-Daten bleiben erhalten.
             </Dialog.Description>
 

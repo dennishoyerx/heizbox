@@ -12,21 +12,20 @@ interface WithdrawDialogProps {
 
 export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) => {
   const { withdrawItem, isWithdrawing } = useStash();
-  const [quantity, setQuantity] = useState('');
-  const [notes, setNotes] = useState('');
+  const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
     setError('');
 
-    const quantityNum = parseFloat(quantity);
-    if (isNaN(quantityNum) || quantityNum <= 0) {
+    const amountNum = parseFloat(amount);
+    if (isNaN(amountNum) || amountNum <= 0) {
       setError('Bitte eine gültige Menge eingeben');
       return;
     }
 
-    if (quantityNum > item.quantity_current) {
-      setError(`Nur ${item.quantity_current.toFixed(1)}g verfügbar`);
+    if (amountNum > item.current_amount) {
+      setError(`Nur ${item.current_amount.toFixed(1)}g verfügbar`);
       return;
     }
 
@@ -34,13 +33,11 @@ export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) =
       await withdrawItem({
         itemId: item.id,
         data: {
-          quantity: quantityNum,
-          notes: notes.trim() || undefined,
+          amount: amountNum,
         },
       });
       
-      setQuantity('');
-      setNotes('');
+      setAmount('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler bei der Entnahme');
@@ -53,9 +50,9 @@ export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) =
   return (
     <Dialog.Root open={isOpen} onOpenChange={onClose}>
       <Dialog.Content style={{ maxWidth: 450 }}>
-        <Dialog.Title>Entnahme: {item.item_name}</Dialog.Title>
+        <Dialog.Title>Entnahme: {item.name}</Dialog.Title>
         <Dialog.Description size="2" mb="4">
-          Verfügbar: <Badge color="green">{item.quantity_current.toFixed(1)}g</Badge>
+          Verfügbar: <Badge color="green">{item.current_amount.toFixed(1)}g</Badge>
         </Dialog.Description>
 
         <Flex direction="column" gap="3">
@@ -67,44 +64,32 @@ export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) =
               type="number"
               step="0.1"
               placeholder="0.5"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
             />
           </label>
 
           <Flex gap="2" wrap="wrap">
-            {quickAmounts.map((amount) => (
+            {quickAmounts.map((quickAmount) => (
               <Button
-                key={amount}
+                key={quickAmount}
                 size="1"
                 variant="soft"
-                onClick={() => setQuantity(amount.toString())}
-                disabled={amount > item.quantity_current}
+                onClick={() => setAmount(quickAmount.toString())}
+                disabled={quickAmount > item.current_amount}
               >
-                {amount}g
+                {quickAmount}g
               </Button>
             ))}
             <Button
               size="1"
               variant="soft"
               color="orange"
-              onClick={() => setQuantity(item.quantity_current.toFixed(1))}
+              onClick={() => setAmount(item.current_amount.toFixed(1))}
             >
               Alles
             </Button>
           </Flex>
-
-          <label>
-            <Text as="div" size="2" mb="1" weight="bold">
-              Notizen (optional)
-            </Text>
-            <TextArea
-              placeholder="z.B. Für Abendkonsum"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
-            />
-          </label>
 
           {error && (
             <Text color="red" size="2">{error}</Text>

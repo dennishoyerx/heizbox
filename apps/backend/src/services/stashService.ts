@@ -11,25 +11,21 @@ export class StashService {
   }
 
   async createStashItem(
-    item_name: string,
-    quantity_start: number,
-    device_id?: string,
-    notes?: string,
+    name: string,
+    initial_amount: number,
   ) {
-    if (!item_name || item_name.trim().length === 0) {
+    if (!name || name.trim().length === 0) {
       throw new Error("Item name is required");
     }
-    if (quantity_start < 0) {
+    if (initial_amount < 0) {
       throw new Error("Quantity must be non-negative");
     }
 
     const id = generateUuid();
     await this.repository.createItem(
       id,
-      item_name.trim(),
-      quantity_start,
-      device_id || null,
-      notes || null,
+      name.trim(),
+      initial_amount,
     );
 
     return this.repository.findItemById(id);
@@ -45,11 +41,9 @@ export class StashService {
 
   async withdrawFromStash(
     item_id: string,
-    quantity: number,
-    device_id?: string,
-    notes?: string,
+    amount: number,
   ) {
-    if (quantity <= 0) {
+    if (amount <= 0) {
       throw new Error("Withdrawal quantity must be positive");
     }
 
@@ -58,30 +52,25 @@ export class StashService {
       throw new Error("Stash item not found");
     }
 
-    if (item.quantity_current < quantity) {
+    if (item.current_amount < amount) {
       throw new Error(
-        `Insufficient quantity. Available: ${item.quantity_current}g, requested: ${quantity}g`,
+        `Insufficient quantity. Available: ${item.current_amount}g, requested: ${amount}g`,
       );
     }
 
     const withdrawal_id = generateUuid();
-    await this.repository.createWithdrawal(withdrawal_id, item_id, quantity);
+    await this.repository.createWithdrawal(withdrawal_id, item_id, amount);
 
-    console.log('StashService: item.quantity_current before withdrawal:', item.quantity_current);
-    console.log('StashService: quantity to withdraw:', quantity);
-    const new_quantity = item.quantity_current - quantity;
-    console.log('StashService: new_quantity after withdrawal:', new_quantity);
+    const new_quantity = item.current_amount - amount;
     await this.repository.updateItemQuantity(item_id, new_quantity);
 
     return {
       item: await this.repository.findItemById(item_id),
       withdrawal: {
         id: withdrawal_id,
-        item_id,
-        quantity,
-        taken_at: Math.floor(Date.now() / 1000),
-        device_id: device_id || null,
-        notes: notes || null,
+        stash_item_id: item_id,
+        amount,
+        withdrawn_at: Math.floor(Date.now() / 1000),
       },
     };
   }
@@ -120,7 +109,7 @@ export class StashService {
     );
 
     const total_current = items.reduce(
-      (sum, item) => sum + item.quantity_current,
+      (sum, item) => sum + item.current_amount,
       0,
     );
     const total_withdrawn = items.reduce(

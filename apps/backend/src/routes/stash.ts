@@ -15,7 +15,7 @@ stash.get('/', async (c: Context<{ Bindings: Env }>) => {
     const service = new StashService(c.env.db);
     const items = await service.getStashItems();
     
-    const total_current = items.reduce((sum, item) => sum + item.quantity_current, 0);
+    const total_current = items.reduce((sum, item) => sum + item.current_amount, 0);
     const total_withdrawn = items.reduce((sum, item) => sum + item.total_withdrawn, 0);
 
     return c.json({
@@ -34,14 +34,14 @@ stash.get('/', async (c: Context<{ Bindings: Env }>) => {
 stash.post('/', async (c: Context<{ Bindings: Env }>) => {
   try {
     const body = await c.req.json<CreateStashItemRequest>();
-    const { item_name, quantity_start, device_id, notes } = body;
+    const { name, initial_amount } = body;
 
-    if (!item_name || typeof quantity_start !== 'number') {
-      return c.json({ error: 'item_name and quantity_start are required' }, 400);
+    if (!name || typeof initial_amount !== 'number') {
+      return c.json({ error: 'name and initial_amount are required' }, 400);
     }
 
     const service = new StashService(c.env.db);
-    const item = await service.createStashItem(item_name, quantity_start, device_id, notes);
+    const item = await service.createStashItem(name, initial_amount);
 
     // Benachrichtige Durable Object
     const durableObjectId = c.env.DEVICE_STATUS.idFromName(device_id || 'default');
@@ -68,14 +68,14 @@ stash.put('/:id/withdraw', async (c: Context<{ Bindings: Env }>) => {
   try {
     const id = c.req.param('id');
     const body = await c.req.json<WithdrawStashItemRequest>();
-    const { quantity, notes } = body;
+    const { amount } = body;
 
-    if (typeof quantity !== 'number' || quantity <= 0) {
-      return c.json({ error: 'Valid quantity is required' }, 400);
+    if (typeof amount !== 'number' || amount <= 0) {
+      return c.json({ error: 'Valid amount is required' }, 400);
     }
 
     const service = new StashService(c.env.db);
-    const result = await service.withdrawFromStash(id, quantity, undefined, notes);
+    const result = await service.withdrawFromStash(id, amount);
 
     // Benachrichtige Durable Object
     const durableObjectId = c.env.DEVICE_STATUS.idFromName('default');

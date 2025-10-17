@@ -12,7 +12,7 @@ export class StashRepository {
   async findAllItems(): Promise<StashItemRow[]> {
     const { results } = await this.db
       .prepare(
-        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at FROM stash_items ORDER BY created_at DESC",
+        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at, updated_at FROM stash_items ORDER BY created_at DESC",
       )
       .all<StashItemRow>();
     return results || [];
@@ -21,7 +21,7 @@ export class StashRepository {
   async findItemById(id: string): Promise<StashItemRow | null> {
     const result = await this.db
       .prepare(
-        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at FROM stash_items WHERE id = ?1",
+        "SELECT id, name, initial_amount, COALESCE(current_amount, 0) as current_amount, created_at, updated_at FROM stash_items WHERE id = ?1",
       )
       .bind(id)
       .first<StashItemRow>();
@@ -38,6 +38,7 @@ export class StashRepository {
           s.initial_amount,
           s.current_amount,
           s.created_at,
+          s.updated_at,
           COALESCE(SUM(w.amount), 0) as total_withdrawn,
           COUNT(w.id) as withdrawal_count,
           MAX(w.withdrawn_at) as last_withdrawal
@@ -97,7 +98,7 @@ export class StashRepository {
   ): Promise<StashWithdrawalRow[]> {
     const { results } = await this.db
       .prepare(
-        "SELECT id, stash_item_id, amount, withdrawn_at, notes FROM stash_withdrawals WHERE withdrawn_at >= ?1 AND withdrawn_at < ?2 ORDER BY withdrawn_at DESC",
+        "SELECT id, stash_item_id, amount, withdrawn_at FROM stash_withdrawals WHERE withdrawn_at >= ?1 AND withdrawn_at < ?2 ORDER BY withdrawn_at DESC",
       )
       .bind(start, end)
       .all<StashWithdrawalRow>();
@@ -109,7 +110,7 @@ export class StashRepository {
   ): Promise<StashWithdrawalRow[]> {
     const { results } = await this.db
       .prepare(
-        "SELECT id, stash_item_id, amount, withdrawn_at, notes FROM stash_withdrawals WHERE stash_item_id = ?1 ORDER BY withdrawn_at DESC",
+        "SELECT id, stash_item_id, amount, withdrawn_at FROM stash_withdrawals WHERE stash_item_id = ?1 ORDER BY withdrawn_at DESC",
       )
       .bind(stash_item_id)
       .all<StashWithdrawalRow>();

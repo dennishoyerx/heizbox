@@ -33,7 +33,7 @@
     "db-sync": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "pnpm exec wrangler d1 export heizbox --remote --output=./heizbox-backup.sql && pnpm exec wrangler d1 execute heizbox --local --command=\"DROP TABLE IF EXISTS heat_cycles;\" && pnpm exec wrangler d1 execute heizbox --local --command=\"DROP TABLE IF EXISTS stash_items;\" && pnpm exec wrangler d1 execute heizbox --local --command=\"DROP TABLE IF EXISTS stash_withdrawals;\" && pnpm exec wrangler d1 execute heizbox --local --command=\"DROP TABLE IF EXISTS d1_migrations;\" && pnpm exec wrangler d1 execute heizbox --local --file=./heizbox-backup.sql && del .\\heizbox-backup.sql",
+        "command": "pnpm run sync",
         "cwd": "apps/backend"
       }
     }

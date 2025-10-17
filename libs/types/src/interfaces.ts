@@ -95,21 +95,18 @@ export type ClientWebSocketMessage = { type: "getDeviceStatus" };
 
 export interface StashItemRow {
   id: string;
-  item_name: string;
+  name: string;
   initial_amount: number;
   current_amount: number;
-  added_at: number;
-  device_id: string | null;
-  notes: string | null;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface StashWithdrawalRow {
   id: string;
-  item_id: string;
+  stash_item_id: string;
   amount: number;
-  taken_at: number;
-  device_id: string | null;
-  notes: string | null;
+  withdrawn_at: number;
 }
 
 export interface StashItemWithHistory extends StashItemRow {
@@ -119,15 +116,12 @@ export interface StashItemWithHistory extends StashItemRow {
 }
 
 export interface CreateStashItemRequest {
-  item_name: string;
+  name: string;
   initial_amount: number;
-  device_id?: string;
-  notes?: string;
 }
 
 export interface WithdrawStashItemRequest {
   amount: number;
-  notes?: string;
 }
 
 export interface StashStatsResponse {

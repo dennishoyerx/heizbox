@@ -10,20 +10,19 @@ interface AddStashItemDialogProps {
 
 export const AddStashItemDialog = ({ isOpen, onClose }: AddStashItemDialogProps) => {
   const { createItem, isCreating } = useStash();
-  const [itemName, setItemName] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [notes, setNotes] = useState('');
+  const [name, setName] = useState('');
+  const [initialAmount, setInitialAmount] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
     setError('');
 
-    if (!itemName.trim()) {
+    if (!name.trim()) {
       setError('Bitte einen Namen eingeben');
       return;
     }
 
-    const quantityNum = parseFloat(quantity);
+    const quantityNum = parseFloat(initialAmount);
     if (isNaN(quantityNum) || quantityNum <= 0) {
       setError('Bitte eine gültige Menge eingeben');
       return;
@@ -31,15 +30,13 @@ export const AddStashItemDialog = ({ isOpen, onClose }: AddStashItemDialogProps)
 
     try {
       await createItem({
-        item_name: itemName.trim(),
-        quantity_start: quantityNum,
-        notes: notes.trim() || undefined,
+        name: name.trim(),
+        initial_amount: quantityNum,
       });
       
       // Reset form
-      setItemName('');
-      setQuantity('');
-      setNotes('');
+      setName('');
+      setInitialAmount('');
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Erstellen');
@@ -61,8 +58,8 @@ export const AddStashItemDialog = ({ isOpen, onClose }: AddStashItemDialogProps)
             </Text>
             <TextField.Root
               placeholder="z.B. Purple Haze"
-              value={itemName}
-              onChange={(e) => setItemName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
             />
           </label>
 
@@ -74,20 +71,8 @@ export const AddStashItemDialog = ({ isOpen, onClose }: AddStashItemDialogProps)
               type="number"
               step="0.1"
               placeholder="5.0"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </label>
-
-          <label>
-            <Text as="div" size="2" mb="1" weight="bold">
-              Notizen (optional)
-            </Text>
-            <TextArea
-              placeholder="z.B. Sativa, sehr energetisch"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
+              value={initialAmount}
+              onChange={(e) => setInitialAmount(e.target.value)}
             />
           </label>
 
