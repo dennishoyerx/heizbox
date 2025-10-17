@@ -6,6 +6,8 @@ import { Box, Flex, Theme } from "@radix-ui/themes";
 import { useWebSocket } from "./WebSocketContext";
 import { ConnectionStatus } from "./components/ConnectionStatus";
 import { useTheme } from "./hooks/useTheme";
+import StashPage from "./stash/StashPage";
+import StashStatsPage from "./stash/StashStatsPage";
 
 function AppContent() {
   const { deviceIsOn, deviceIsHeating } = useWebSocket();
@@ -31,6 +33,8 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<SessionPage />} />
               <Route path="/usage" element={<UsagePage />} />
+              <Route path="/stash" element={<StashPage />} />
+              <Route path="/stash/stats" element={<StashStatsPage />} />
             </Routes>
           </main>
         </Flex>

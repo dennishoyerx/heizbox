@@ -370,6 +370,9 @@ export class DeviceStatus {
           sessionStart: this.currentSessionStart,
         }); // Publish the session data update to all subscribers
       }
+    } else if (message.type === 'stashUpdated') {
+      console.log('DeviceStatus: Processing stashUpdated message.', message);
+      this.publish(message); // Broadcast to all subscribers
     }
 
     return new Response(JSON.stringify({ success: true }), {
