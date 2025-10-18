@@ -61,9 +61,11 @@ export interface StatisticsApiResponse {
  * Die Antwort der API für die Session-Daten.
  */
 export interface SessionApiResponse {
-	totalDuration: number
-	clickCount: number
-	lastClickAt: string | null
+	startedAt: number
+	lastAt: number
+	caps: number
+	clicks: number
+	consumption: number
 }
 
 // --- WebSocket Payloads --- //
