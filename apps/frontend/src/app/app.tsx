@@ -8,10 +8,32 @@ import { ConnectionStatus } from "./components/ConnectionStatus";
 import { useTheme } from "./hooks/useTheme";
 import StashPage from "./stash/StashPage";
 import StashStatsPage from "./stash/StashStatsPage";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 function AppContent() {
   const { deviceIsOn, deviceIsHeating } = useWebSocket();
   const { theme, toggleTheme } = useTheme();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("App became visible, invalidating queries.");
+        queryClient.invalidateQueries({ queryKey: ["heatCycles"] });
+        queryClient.invalidateQueries({ queryKey: ["runningSession"] });
+        queryClient.invalidateQueries({ queryKey: ["stash"] });
+        queryClient.invalidateQueries({ queryKey: ["stashStats"] });
+        queryClient.invalidateQueries({ queryKey: ["statistics"] });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [queryClient]);
 
   return (
     <Theme
