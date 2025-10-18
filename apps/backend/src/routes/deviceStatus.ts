@@ -12,7 +12,16 @@ deviceStatus.all('/:deviceId/*', async (c) => {
   url.pathname = url.pathname.replace(`/api/device-status/${deviceId}`, '');
 
   // Forward the request to the Durable Object
-  return stub.fetch(new Request(url.toString(), c.req));
+  let requestBody = null;
+  if (c.req.method === 'POST' || c.req.method === 'PUT') {
+    requestBody = await c.req.arrayBuffer(); // Read body as ArrayBuffer
+  }
+
+  return stub.fetch(new Request(url.toString(), {
+    method: c.req.method,
+    headers: c.req.headers,
+    body: requestBody, // Pass the read body
+  }));
 });
 
 export default deviceStatus;

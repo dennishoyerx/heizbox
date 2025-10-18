@@ -52,8 +52,10 @@ export class StashService {
 		const new_quantity = item.current_amount - amount
 		await this.repository.updateItemQuantity(item_id, new_quantity)
 
+		const updatedItem = { ...item, current_amount: new_quantity }
+
 		return {
-			item: await this.repository.findItemById(item_id),
+			item: updatedItem,
 			withdrawal: {
 				id: withdrawal_id,
 				stash_item_id: item_id,

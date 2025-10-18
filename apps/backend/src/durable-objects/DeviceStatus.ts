@@ -23,32 +23,7 @@ export class DeviceStatus {
 		this.app = new Hono()
 		this.env = env // Store env
 
-		// Initialize the status from storage when the Durable Object is created
-		this.state.blockConcurrencyWhile(async () => {
-			const storedIsOn = await this.state.storage.get<boolean>('isOn')
-			this.isOn = storedIsOn !== undefined ? storedIsOn : false
-
-			const storedIsHeating = await this.state.storage.get<boolean>('isHeating')
-			this.isHeating = storedIsHeating !== undefined ? storedIsHeating : false
-
-			const storedLastSeen = await this.state.storage.get<number>('lastSeen')
-			this.lastSeen = storedLastSeen !== undefined ? storedLastSeen : 0
-
-			const storedSessionClicks = await this.state.storage.get<number>('currentSessionClicks')
-			this.currentSessionClicks = storedSessionClicks !== undefined ? storedSessionClicks : 0
-
-			const storedSessionLastClick = await this.state.storage.get<number>('currentSessionLastClick')
-			this.currentSessionLastClick = storedSessionLastClick !== undefined ? storedSessionLastClick : 0
-
-			const storedSessionStart = await this.state.storage.get<number>('currentSessionStart')
-			this.currentSessionStart = storedSessionStart !== undefined ? storedSessionStart : 0
-
-			// Set an alarm to periodically check for offline devices
-			const currentAlarm = await this.state.storage.getAlarm()
-			if (currentAlarm === null) {
-				await this.state.storage.setAlarm(Date.now() + this.OFFLINE_THRESHOLD)
-			}
-		})
+		this.initialize()
 
 		// Define routes for the Durable Object
 		this.app.get('/status', (c) => {
@@ -127,6 +102,35 @@ export class DeviceStatus {
 
 			this.publish(message)
 			return c.json({ success: true })
+		})
+	}
+
+	async initialize() {
+		// Initialize the status from storage when the Durable Object is created
+		return this.state.blockConcurrencyWhile(async () => {
+			const storedIsOn = await this.state.storage.get<boolean>('isOn')
+			this.isOn = storedIsOn !== undefined ? storedIsOn : false
+
+			const storedIsHeating = await this.state.storage.get<boolean>('isHeating')
+			this.isHeating = storedIsHeating !== undefined ? storedIsHeating : false
+
+			const storedLastSeen = await this.state.storage.get<number>('lastSeen')
+			this.lastSeen = storedLastSeen !== undefined ? storedLastSeen : 0
+
+			const storedSessionClicks = await this.state.storage.get<number>('currentSessionClicks')
+			this.currentSessionClicks = storedSessionClicks !== undefined ? storedSessionClicks : 0
+
+			const storedSessionLastClick = await this.state.storage.get<number>('currentSessionLastClick')
+			this.currentSessionLastClick = storedSessionLastClick !== undefined ? storedSessionLastClick : 0
+
+			const storedSessionStart = await this.state.storage.get<number>('currentSessionStart')
+			this.currentSessionStart = storedSessionStart !== undefined ? storedSessionStart : 0
+
+			// Set an alarm to periodically check for offline devices
+			const currentAlarm = await this.state.storage.getAlarm()
+			if (currentAlarm === null) {
+				await this.state.storage.setAlarm(Date.now() + this.OFFLINE_THRESHOLD)
+			}
 		})
 	}
 

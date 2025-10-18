@@ -65,8 +65,8 @@ void FireScreen::draw(DisplayManager& display) {
     display.drawText(10, 40, statsText, TFT_WHITE, 2);
 
     String consumption = statsManager->getConsumption();
-    snprintf(statsText, sizeof(statsText), "Verbrauch: %s kWh", consumption.c_str());
-    display.drawText(10, 200, statsText, TFT_WHITE, 2);
+    snprintf(statsText, sizeof(statsText), "Verbrauch: %sg", consumption.c_str());
+    display.drawText(10, 170, statsText, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {

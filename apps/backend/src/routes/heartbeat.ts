@@ -12,10 +12,15 @@ heartbeat.post('/:deviceId', async (c) => {
   url.pathname = `/process-device-message`; // Route to the DO's message processing endpoint
 
   // Forward the request to the Durable Object
+  let requestBody = null;
+  if (c.req.method === 'POST') {
+    requestBody = await c.req.arrayBuffer(); // Read body as ArrayBuffer
+  }
+
   return stub.fetch(new Request(url.toString(), {
     method: 'POST',
     headers: c.req.headers,
-    body: c.req.body,
+    body: requestBody,
   }));
 });
 

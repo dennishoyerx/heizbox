@@ -41,7 +41,7 @@ stash.post('/', async (c: Context<{ Bindings: Env }>) => {
 		const item = await service.createStashItem(name, initial_amount)
 
 		// Benachrichtige Durable Object
-		const durableObjectId = c.env.DEVICE_STATUS.idFromName(device_id || 'default')
+		const durableObjectId = c.env.DEVICE_STATUS.idFromName('default')
 		const stub = c.env.DEVICE_STATUS.get(durableObjectId)
 
 		await stub.fetch(
