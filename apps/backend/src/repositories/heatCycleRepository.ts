@@ -7,11 +7,14 @@ export class HeatCycleRepository {
   async findByTimeRange(start: number, end: number): Promise<HeatCycleRow[]> {
     const { results } = await this.db
       .prepare(
-        'SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 AND created_at < ?2 ORDER BY created_at ASC'
+        // Explizite Spalten statt SELECT *
+        'SELECT id, created_at, duration, cycle FROM heat_cycles ' +
+        'WHERE created_at >= ?1 AND created_at < ?2 ' +
+        'ORDER BY created_at ASC LIMIT 1000' // Safety-Limit
       )
       .bind(start, end)
       .all<HeatCycleRow>();
-    
+
     return results || [];
   }
 
@@ -24,11 +27,17 @@ export class HeatCycleRepository {
   }
 
   async findRecent(limit: number = 100): Promise<HeatCycleRow[]> {
+    // Limitiere auf max 1000 auch wenn größerer Wert übergeben wird
+    const safeLimit = Math.min(limit, 1000);
+
     const { results } = await this.db
-      .prepare('SELECT id, created_at, duration, cycle FROM heat_cycles ORDER BY created_at DESC LIMIT ?1')
-      .bind(limit)
+      .prepare(
+        'SELECT id, created_at, duration, cycle FROM heat_cycles ' +
+        'ORDER BY created_at DESC LIMIT ?1'
+      )
+      .bind(safeLimit)
       .all<HeatCycleRow>();
-    
+
     return results || [];
   }
 
@@ -59,11 +68,13 @@ export class HeatCycleRepository {
     const timeThreshold = Math.floor(Date.now() / 1000) - timeLimitSeconds;
     const { results } = await this.db
       .prepare(
-        'SELECT id, created_at, duration, cycle FROM heat_cycles WHERE created_at >= ?1 ORDER BY created_at ASC'
+        // Explizite Spalten + LIMIT für garantierte Performance
+        'SELECT id, created_at, duration, cycle FROM heat_cycles ' +
+        'WHERE created_at >= ?1 ORDER BY created_at ASC LIMIT 500'
       )
       .bind(timeThreshold)
       .all<HeatCycleRow>();
-    
+
     return results || [];
   }
 }

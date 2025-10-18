@@ -212,7 +212,6 @@ describe('DeviceStatus Durable Object', () => {
             expect(deviceStatus.isOn).toBe(false);
             expect(state.storage.put).toHaveBeenCalledWith('isOn', false);
             expect(deviceStatus.publish).toHaveBeenCalledWith({ type: 'statusUpdate', isOn: false, isHeating: false });
-            expect(state.storage.setAlarm).toHaveBeenCalled();
         });
 
         it('should not go offline if seen recently', async () => {

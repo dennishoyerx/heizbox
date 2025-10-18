@@ -3,6 +3,31 @@ import { SessionService } from '../services/sessionService.js' // Import Session
 import type { SessionData } from '@heizbox/types'
 import { HeatCycleService } from '../services/heatCycleService.js'
 
+/**
+ * Einfacher In-Memory-Cache für kürzlich gesehene Heat-Cycle-IDs
+ * Verhindert doppelte DB-Queries zur Duplikaterkennung
+ */
+class RecentCycleCache {
+  private cache: Set<string> = new Set();
+  private readonly maxSize = 100;
+
+  has(duration: number, cycle: number): boolean {
+    const key = `${duration}-${cycle}`;
+    return this.cache.has(key);
+  }
+
+  add(duration: number, cycle: number): void {
+    const key = `${duration}-${cycle}`;
+    this.cache.add(key);
+
+    // FIFO: Entferne ältesten Eintrag bei Überlauf
+    if (this.cache.size > this.maxSize) {
+      const firstKey = this.cache.values().next().value;
+      this.cache.delete(firstKey);
+    }
+  }
+}
+
 export class DeviceStatus {
 	state: DurableObjectState
 	app: Hono
@@ -13,10 +38,17 @@ export class DeviceStatus {
 	currentSessionClicks = 0 // New: Clicks in current heating session
 	currentSessionLastClick = 0 // New: Timestamp of last click in current heating session
 	currentSessionStart = 0 // New: Timestamp of current heating session start
-	subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
-
-	private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
-
+	  subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
+	
+	  private recentCycleCache = new RecentCycleCache();
+	  private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
+	
+	  // Cache für Session-Daten (TTL 5 Sekunden)
+	  private sessionDataCache: {
+	    data: Omit<SessionData, 'type'>;
+	    timestamp: number;
+	  } | null = null;
+	  private readonly SESSION_CACHE_TTL = 5000; // 5 Sekunden
 	constructor(state: DurableObjectState, env: Env) {
 		// Accept env in constructor
 		this.state = state
@@ -134,12 +166,27 @@ export class DeviceStatus {
 		})
 	}
 
-	// New private helper to get the latest session data
-	private async _getLatestSessionData(): Promise<Omit<SessionData, 'type'>> {
-		const sessionService = new SessionService(this.env.db)
-		return sessionService.getCurrentSessionData()
-	}
-
+	  private async _getLatestSessionData(): Promise<Omit<SessionData, 'type'>> {
+	    const now = Date.now();
+	
+	    // Cache-Hit: Gebe gecachte Daten zurück
+	    if (
+	      this.sessionDataCache &&
+	      (now - this.sessionDataCache.timestamp) < this.SESSION_CACHE_TTL
+	    ) {
+	      console.log('DeviceStatus: Returning cached session data');
+	      return this.sessionDataCache.data;
+	    }
+	
+	    // Cache-Miss: Lade Daten aus DB
+	    console.log('DeviceStatus: Fetching fresh session data');
+	    const sessionService = new SessionService(this.env.db);
+	    const data = await sessionService.getCurrentSessionData();
+	
+	    // Aktualisiere Cache
+	    this.sessionDataCache = { data, timestamp: now };
+	    return data;
+	  }
 	// Method to send current session data to a specific WebSocket
 	async sendSessionData(ws: WebSocket) {
 		const sessionDataPayload = await this._getLatestSessionData()
@@ -161,28 +208,60 @@ export class DeviceStatus {
 	}
 
 	// Method to publish messages to all connected subscribers
-	publish(message: any) {
-		console.log('DeviceStatus: Publishing message to subscribers:', message)
+  publish(message: any) {
+    if (this.subscribers.size === 0) return; // Early exit
 
-		this.subscribers.forEach((meta, ws) => {
-			let messageToSend = message
+    // Pre-serialize base message einmalig
+    const baseMessageString = JSON.stringify(message);
 
-			// If the message is sessionData and the subscriber is a device, remove heat_cycles
-			if (message.type === 'sessionData' && meta.type === 'device') {
-				const { heat_cycles, ...rest } = message // Destructure to exclude heat_cycles
-				messageToSend = rest
-			}
+    this.subscribers.forEach((meta, ws) => {
+      let finalMessage = baseMessageString;
 
-			const messageString = JSON.stringify(messageToSend)
+      // Nur bei Bedarf neu serialisieren
+      if (message.type === 'sessionData' && meta.type === 'device') {
+        const { heat_cycles, ...rest } = message;
+        finalMessage = JSON.stringify(rest);
+      }
 
-			try {
-				ws.send(messageString)
-			} catch (err) {
-				console.error('Error sending message to subscriber:', err)
-				this.subscribers.delete(ws) // Remove broken connection
-			}
-		})
-	}
+      try {
+        ws.send(finalMessage);
+      } catch (err) {
+        console.error('DeviceStatus: Failed to send message to subscriber:', err);
+        this.subscribers.delete(ws);
+      }
+    });
+  }
+
+  /**
+   * Optimierte Heartbeat-Verarbeitung ohne HTTP-Overhead
+   */
+  async handleHeartbeat(): Promise<void> {
+    const now = Date.now();
+    this.lastSeen = now;
+    await this.state.storage.put('lastSeen', now);
+
+    console.log('DeviceStatus: Heartbeat processed, lastSeen:', now);
+
+    // Gerät war offline → sende Status-Update
+    if (!this.isOn) {
+      this.isOn = true;
+      await this.state.storage.put('isOn', true);
+
+      this.publish({
+        type: 'statusUpdate',
+        isOn: this.isOn,
+        isHeating: this.isHeating,
+      });
+
+    }
+
+    // NEU: Stelle sicher, dass Alarm läuft
+    const currentAlarm = await this.state.storage.getAlarm();
+    if (currentAlarm === null) {
+      await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
+      console.log('DeviceStatus: Alarm reactivated');
+    }
+  }
 
 	async fetch(request: Request): Promise<Response> {
 		console.log('DeviceStatus fetch called')
@@ -300,25 +379,34 @@ export class DeviceStatus {
 					isHeating: this.isHeating,
 				})
 			}
-		} else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
-			console.log('DeviceStatus: Processing heatCycleCompleted message.', message)
-			console.log(
-				'DeviceStatus: Calling createHeatCycle with db:',
-				this.env.db,
-				'duration:',
-				message.duration,
-				'cycle:',
-				message.cycle || 1,
-			)
-			const heatCycleService = new HeatCycleService(this.env.db)
-			const success = await heatCycleService.createHeatCycle(message.duration, message.cycle || 1)
-			console.log('DeviceStatus: createHeatCycle returned success:', success)
-			if (success) {
-				// Instead of just notifying, send the full updated session data
-				const newSessionData = await this._getLatestSessionData()
-				this.publish({ type: 'sessionData', ...newSessionData })
-			}
-		} else if (message.type === 'stashUpdated') {
+		    } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
+		      console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
+		
+		      // Schneller Cache-Check vor DB-Abfrage
+		      if (this.recentCycleCache.has(message.duration, message.cycle || 1)) {
+		        console.log('DeviceStatus: Duplicate detected in cache, skipping');
+		        return new Response(JSON.stringify({ success: false, reason: 'duplicate' }), {
+		          headers: { 'Content-Type': 'application/json' },
+		        });
+		      }
+		
+		      const heatCycleService = new HeatCycleService(this.env.db);
+		      const success = await heatCycleService.createHeatCycle(
+		        message.duration,
+		        message.cycle || 1
+		      );
+		
+		      if (success) {
+		        // Füge zu Cache hinzu
+		        this.recentCycleCache.add(message.duration, message.cycle || 1);
+		
+		        // Invalidiere Session-Cache
+		        this.sessionDataCache = null;
+		
+		        const newSessionData = await this._getLatestSessionData();
+		        this.publish({ type: 'sessionData', ...newSessionData });
+		      }
+		    } else if (message.type === 'stashUpdated') {
 			console.log('DeviceStatus: Processing stashUpdated message.', message)
 			this.publish(message) // Broadcast to all subscribers
 		}
@@ -328,22 +416,30 @@ export class DeviceStatus {
 		})
 	}
 
-	async alarm() {
-		console.log('DeviceStatus: Alarm triggered.')
-		const now = Date.now()
-
-		if (this.isOn && now - this.lastSeen > this.OFFLINE_THRESHOLD) {
-			console.log('DeviceStatus: Device is offline. Setting isOn to false.')
-			this.isOn = false
-			await this.state.storage.put('isOn', this.isOn)
-			this.publish({
-				type: 'statusUpdate',
-				isOn: this.isOn,
-				isHeating: this.isHeating,
-			})
-		}
-
-		// Reschedule the alarm
-		await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD)
-	}
-}
+	  async alarm() {
+	    console.log('DeviceStatus: Alarm triggered.');
+	    const now = Date.now();
+	    const timeSinceLastSeen = now - this.lastSeen;
+	
+	    // Gerät ist offline geworden
+	    if (this.isOn && timeSinceLastSeen > this.OFFLINE_THRESHOLD) {
+	      console.log('DeviceStatus: Device is offline. Setting isOn to false.');
+	
+	      this.isOn = false;
+	      await this.state.storage.put('isOn', this.isOn);
+	
+	      this.publish({
+	        type: 'statusUpdate',
+	        isOn: this.isOn,
+	        isHeating: this.isHeating,
+	      });
+	    }
+	
+	    // Schedule nächsten Alarm nur wenn Gerät online ist
+	    // (Reduziert unnötige DO-Wakeups)
+	    if (this.isOn) {
+	      await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
+	    } else {
+	      console.log('DeviceStatus: Device offline, skipping alarm reschedule');
+	    }
+	  }}

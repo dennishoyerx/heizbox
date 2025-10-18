@@ -37,6 +37,20 @@ export default Sentry.withSentry(
     dsn: config.sentry.dsn,
     release: env.CF_VERSION_METADATA?.id,
     sendDefaultPii: true,
+
+    // NEU: Sampling für Performance-Optimierung
+    tracesSampleRate: 0.1, // 10% der Requests tracen
+    beforeSend(event, hint) {
+      // Filtere nicht-kritische Errors
+      const error = hint.originalException;
+      if (error instanceof Error) {
+        // ValidationErrors nicht an Sentry senden
+        if (error.name === 'ValidationError') {
+          return null;
+        }
+      }
+      return event;
+    },
   }),
   app,
 );
