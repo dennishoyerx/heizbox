@@ -12,7 +12,7 @@ module.exports = {
 		extend: {
 			colors: {},
 			fontFamily: {
-				'josefin-sans': ['"Josefin Sans"', 'sans-serif'],
+				josefin: ['"Josefin Sans"', 'sans-serif'],
 			},
 		},
 	},

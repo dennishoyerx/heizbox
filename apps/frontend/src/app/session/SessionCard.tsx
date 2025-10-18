@@ -45,11 +45,17 @@ export const SessionCard = ({
 					<Flex align='center' gap='3'>
 						<Badge color='iris'>
 							<Flex align='center' direction='column'>
-								<div>{caps} Caps</div>
-								<div>{count} Klicks</div>
+								<div>
+									<span className='font-numeric'>{caps}</span> Caps
+								</div>
+								<div>
+									<span className='font-numeric'>{count}</span> Klicks
+								</div>
 							</Flex>
 						</Badge>
-						<Badge color={consumptionColor}>{heatCycleConsumption}g</Badge>
+						<Badge color={consumptionColor} className='font-numeric'>
+							{heatCycleConsumption}g
+						</Badge>
 					</Flex>
 				</Flex>
 			</Card>

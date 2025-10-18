@@ -81,7 +81,7 @@ export const SessionDetailModal = ({ isOpen, onClose, heatCycle }: SessionDetail
 															: formatTimestampForTimeDisplay(group[0].created_at)}
 													</span>
 													<div className='flex gap-1'>
-														<span className='font-mono text-slate-400 flex gap-1'>
+														<span className='font-numeric text-slate-400 flex gap-1'>
 															{group.map((r) => (
 																<span>{r.duration}s</span>
 															))}

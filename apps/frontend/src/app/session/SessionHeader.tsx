@@ -1,4 +1,4 @@
-import { Text, Flex } from '@radix-ui/themes'
+import { Text, Flex, Grid } from '@radix-ui/themes'
 import { Fire } from '@phosphor-icons/react'
 import { useSession } from './useSession'
 
@@ -31,26 +31,31 @@ const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating, consumed }) =>
 				)}
 				{session && !isHeating && (
 					<Flex direction='column' align='center' className='absolute text-white'>
-						<Text size='8' weight='bold' color='white'>
-							{session.clicks}
+						<Text size='8' weight='bold' color='white' className='font-numeric'>
+							{session.caps}
+						</Text>
+						<Text size='2' className='opacity-50' color='white'>
+							caps
 						</Text>
 					</Flex>
 				)}
 			</div>
-			<Flex direction='column' align='start' className='absolute left-0 bottom-0'>
-				<Text className='opacity-50'>Heute</Text>
-				<Text>{consumed}g</Text>
-			</Flex>
-			<Flex direction='column' gap='2' className='absolute right-0 bottom-0'>
-				<Flex direction='column' align='end'>
-					<Text className='opacity-50'>Caps</Text>
-					<Text>{session?.caps}</Text>
+			<Grid columns='2' align='end' justify='between' width='100%'>
+				<Flex direction='column' align='start'>
+					<Text className='font-numeric text-lg'>{consumed}g</Text>
+					<Text className='opacity-50'>Heute</Text>
 				</Flex>
-				<Flex direction='column' align='end'>
-					<Text className='opacity-50'>Session</Text>
-					<Text>{session?.consumption}g</Text>
+				<Flex direction='row' gap='4' align='end'>
+					<Flex direction='column' align='end'>
+						<Text className='font-numeric text-lg'>{session?.clicks}</Text>
+						<Text className='opacity-50'>Clicks</Text>
+					</Flex>
+					<Flex direction='column' align='end'>
+						<Text className='font-numeric text-lg'>{session?.consumption}g</Text>
+						<Text className='opacity-50'>Session</Text>
+					</Flex>
 				</Flex>
-			</Flex>
+			</Grid>
 			{isError && <Text color='red'>Error loading session: {error.message}</Text>}
 		</Flex>
 	)

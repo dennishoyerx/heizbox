@@ -6,6 +6,14 @@
 @tailwind components;
 @tailwind utilities;
 
+.font-josefin {
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+.font-numeric {
+	font-family: 'IBM Plex Mono', monospace;
+}
+
 /*:root {
     --color-background: theme(colors.slate.50);
 }
