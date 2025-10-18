@@ -17,11 +17,13 @@ FireScreen::FireScreen(
     HeaterController& hc,
     ScreenManager* sm,
     ScreensaverScreen* ss,
+    StatsManager* stm, // Add StatsManager pointer to constructor
     std::function<void(int)> setCycleCb
 )
     : heater(hc),
       screenManager(sm),
       screensaverScreen(ss),
+      statsManager(stm), // Initialize StatsManager
       startTime(0),
       elapsedTime(0),
       lastActivityTime(0),
@@ -56,6 +58,15 @@ void FireScreen::draw(DisplayManager& display) {
     char cycleText[15];
     snprintf(cycleText, sizeof(cycleText), "Cycle: %d", _currentCycle);
     display.drawText(10, 10, cycleText, TFT_WHITE, 3);
+
+    // Display session stats
+    char statsText[50];
+    snprintf(statsText, sizeof(statsText), "Clicks: %d | Caps: %d", statsManager->getClicks(), statsManager->getCaps());
+    display.drawText(10, 40, statsText, TFT_WHITE, 2);
+
+    String consumption = statsManager->getConsumption();
+    snprintf(statsText, sizeof(statsText), "Verbrauch: %s kWh", consumption.c_str());
+    display.drawText(10, 200, statsText, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {
@@ -125,7 +136,9 @@ void FireScreen::handleInput(InputEvent event) {
         case DOWN:
             if (_currentCycle == 1) {
                 _currentCycle = 3;
-            } else if (_currentCycle == 3) {
+            } else if (_currentCycle == 2) {
+                _currentCycle = 1;
+            }  else if (_currentCycle == 3) {
                 _currentCycle = 4;
             } else if (_currentCycle == 4) {
                 _currentCycle = 1;

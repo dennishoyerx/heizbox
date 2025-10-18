@@ -23,7 +23,7 @@ Device::Device()
       preferences(),
       statsManager(),
       screenManager(display, input),
-      fireScreen(heater, &screenManager, &screensaverScreen, [this](int cycle) { this->setCurrentCycle(cycle); }),
+      fireScreen(heater, &screenManager, &screensaverScreen, &statsManager, [this](int cycle) { this->setCurrentCycle(cycle); }),
       mainMenuScreen(&display, &screenManager),
       hiddenModeScreen(&display),
       screensaverScreen(clockManager, 30000, &display),
@@ -211,8 +211,21 @@ void Device::handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t lengt
             _lastHeartbeatTime = millis(); // Initialize heartbeat timer on connection
             break;
         case WStype_TEXT:
-            // Serial.printf("[WS] get text: %s\n", payload);
-            // Handle incoming messages if needed
+            {
+                Serial.printf("[WS] get text: %s\n", payload);
+                DynamicJsonDocument doc(1024);
+                DeserializationError error = deserializeJson(doc, payload);
+                if (error) {
+                    Serial.print(F("deserializeJson() failed: "));
+                    Serial.println(error.c_str());
+                    return;
+                }
+
+                const char* type = doc["type"];
+                if (type && (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0)) {
+                    statsManager.updateSessionData(doc.as<JsonObject>());
+                }
+            }
             break;
         case WStype_BIN:
             // Serial.printf("[WS] get binary length: %u\n", length);

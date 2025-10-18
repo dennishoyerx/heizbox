@@ -23,7 +23,6 @@ export interface RunningSession {
 	caps: number
 	clicks: number
 	consumption: number
-	heatCycles: HeatCycleRow[]
 }
 
 /**
@@ -85,7 +84,7 @@ export type ServerWebSocketMessage =
 	| { type: 'heatCycleCreated'; payload: HeatCyclePayload }
 	| { type: 'heatCycleCompleted'; payload: HeatCyclePayload }
 	| { type: 'sessionCreated' }
-	| { type: 'sessionData'; payload: SessionData }
+	| { type: 'sessionData'; payload: RunningSession }
 	| { type: 'error'; payload: { message: string } }
 
 /**

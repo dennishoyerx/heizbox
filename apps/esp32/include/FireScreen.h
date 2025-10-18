@@ -7,8 +7,7 @@
 #include "ScreenManager.h"
 #include "ScreenType.h"
 #include "ScreensaverScreen.h"
-
-#include <functional> // Required for std::function
+#include "StatsManager.h" // Include StatsManager
 
 #include <functional> // Required for std::function
 
@@ -17,6 +16,7 @@ private:
     HeaterController& heater;
     ScreenManager* screenManager;
     ScreensaverScreen* screensaverScreen;
+    StatsManager* statsManager; // Add StatsManager pointer
     unsigned long startTime;
     unsigned long elapsedTime;
     unsigned long lastActivityTime;
@@ -34,7 +34,7 @@ protected:
     }
 
 public:
-    FireScreen(HeaterController& hc, ScreenManager* sm, ScreensaverScreen* ss, std::function<void(int)> setCycleCb);
+    FireScreen(HeaterController& hc, ScreenManager* sm, ScreensaverScreen* ss, StatsManager* stm, std::function<void(int)> setCycleCb);
     void draw(DisplayManager& display) override;
     void update() override;
     void handleInput(InputEvent event) override;

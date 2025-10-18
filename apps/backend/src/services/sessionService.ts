@@ -1,0 +1,33 @@
+import type { D1Database } from '@cloudflare/workers-types'
+import { HeatCycleService } from './heatCycleService.js'
+import { groupSessions, calculateConsumption } from '../utils/session.js'
+
+export class SessionService {
+	private heatCycleService: HeatCycleService
+
+	constructor(db: D1Database) {
+		this.heatCycleService = new HeatCycleService(db)
+	}
+
+	async getCurrentSessionData() {
+		const results = await this.heatCycleService.getRecentSession(7200) // 2 hours
+
+		if (!results || results.length === 0) {
+			return {
+				clicks: 0,
+				caps: 0,
+				lastClick: null,
+				heat_cycles: [],
+				consumption: '0.00',
+			}
+		}
+
+		const clicks = results.length
+		const caps = results.filter((x) => x.cycle === 1).length
+		const lastClick = results[results.length - 1].created_at
+		const heat_cycles = groupSessions(results)
+		const consumption = calculateConsumption(caps)
+
+		return { clicks, caps, lastClick, heat_cycles, consumption }
+	}
+}

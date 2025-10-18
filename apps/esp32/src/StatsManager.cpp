@@ -1,7 +1,8 @@
 #include "StatsManager.h"
 
 StatsManager::StatsManager() 
-    : totalCycles(0), sessionCycles(0), totalDuration(0), averageDuration(0) {
+    : totalCycles(0), sessionCycles(0), totalDuration(0), averageDuration(0), 
+      clicks(0), caps(0), lastClick(""), consumption("") {
 }
 
 void StatsManager::init() {
@@ -35,6 +36,24 @@ void StatsManager::addCycle(unsigned long duration) {
     Serial.printf("Cycle added: %lu ms, Total: %lu cycles\n", duration, totalCycles);
 }
 
+void StatsManager::updateSessionData(const JsonObject& data) {
+    if (data.containsKey("clicks")) {
+        clicks = data["clicks"].as<int>();
+    }
+    if (data.containsKey("caps")) {
+        caps = data["caps"].as<int>();
+    }
+    if (data.containsKey("lastClick")) {
+        lastClick = data["lastClick"].as<String>();
+    }
+    if (data.containsKey("consumption")) {
+        consumption = data["consumption"].as<String>();
+    }
+
+    Serial.printf("[Stats] Session updated: Clicks=%d, Caps=%d, LastClick=%s, Consumption=%s\n",
+                  clicks, caps, lastClick.c_str(), consumption.c_str());
+}
+
 void StatsManager::resetSession() {
     sessionCycles = 0;
 }
@@ -49,4 +68,21 @@ unsigned long StatsManager::getSessionCycles() const {
 
 float StatsManager::getAverageDuration() const {
     return averageDuration;
+}
+
+// Implementation of new getters
+int StatsManager::getClicks() const {
+    return clicks;
+}
+
+int StatsManager::getCaps() const {
+    return caps;
+}
+
+String StatsManager::getLastClick() const {
+    return lastClick;
+}
+
+String StatsManager::getConsumption() const {
+    return consumption;
 }
