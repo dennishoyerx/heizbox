@@ -6,7 +6,7 @@
 #include "ScreenType.h"
 #include <Adafruit_GFX.h>
 #include <TFT_eSPI.h>
-
+#include "InputManager.h"
 #define TFT_GRAY 0x7BEF
 
 ScreenType ScreensaverScreen::getType() const {
@@ -49,6 +49,11 @@ void ScreensaverScreen::handleInput(InputEvent event) {
     // Specific inputs might exit screensaver
     if (event.type == PRESS) {
         if (exitCallback) {
+            // Only exit screensaver, do not immediately start heating if FIRE button was pressed
+            if (event.button == FIRE) {
+                exitCallback();
+                return; // Consume the event
+            }
             exitCallback();
         }
     }

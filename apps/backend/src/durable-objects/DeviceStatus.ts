@@ -39,7 +39,7 @@ export class DeviceStatus {
 	currentSessionLastClick = 0 // New: Timestamp of last click in current heating session
 	currentSessionStart = 0 // New: Timestamp of current heating session start
 	subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
-	private webSockets: { ws: WebSocket; type: 'frontend' | 'esp32'; deviceId: string }[] = [] // Initialize webSockets array
+	private webSockets: { ws: WebSocket; type: 'frontend' | 'device'; deviceId: string }[] = [] // Initialize webSockets array
 
 	private recentCycleCache = new RecentCycleCache()
 	private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
@@ -304,17 +304,29 @@ export class DeviceStatus {
 
 				const { 0: client, 1: server } = new WebSocketPair()
 
-				this.webSockets.push({
-					ws: server,
-					type: type as 'frontend' | 'esp32',
-					deviceId,
-				})
+				                                                this.webSockets.push({
 
-				                server.accept()
-				                this.sendInitialStatus(server)
-				                this.sendHeartbeat(server)
+				                                                    ws: server,
+
+				                                                    type: type as 'frontend' | 'device',
+
+				                                                    deviceId,
+
+				                                                }); // Added semicolon here
+
+				                                                this.subscribers.set(server, { type: type as 'frontend' | 'device' }) // Add to subscribers with type
 				
-				                server.addEventListener('message', async (event) => {
+				                                                                server.accept()
+				
+				                                                                this.sendInitialStatus(server)
+				
+				                                                                this.sendHeartbeat(server)
+				
+				                                                                if (type === 'device') {
+				
+				                                                                    this.sendSessionData(server)
+				
+				                                                                }				                server.addEventListener('message', async (event) => {
 				                    try {
 				                                                const message = JSON.parse(event.data as string)
 				                                                await this.processDeviceMessage(server, message)				                    } catch (err) {
