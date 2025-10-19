@@ -10,6 +10,7 @@ import StashPage from './stash/StashPage'
 import StashStatsPage from './stash/StashStatsPage'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import Background from './components/Background'
 
 function AppContent() {
 	const { deviceIsOn, deviceIsHeating } = useWebSocket()
@@ -35,8 +36,13 @@ function AppContent() {
 		}
 	}, [queryClient])
 
+	const heatClass = deviceIsHeating
+		? 'bg-gradient-to-br from-red-700 via-orange-800 to-amber-800 shadow-[inset_0_0_60px_10px_rgba(255,100,0,0.7)] animate-pulse'
+		: ''
+
 	return (
 		<Theme appearance={theme} grayColor='slate' accentColor='orange' radius='medium'>
+			<div className={`absolute inset-0 -z-10 ${heatClass}`}></div>
 			<Box className='min-h-screen font-josefin'>
 				<Flex direction='column' gap='4'>
 					<Header

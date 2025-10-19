@@ -44,6 +44,8 @@ wrangler.toml.bak
 apps/esp32/include/credentials.h
 apps/esp32/.gemini/
 apps/esp32/gha-creds-*.json
+apps/esp32/.cache
+apps/esp32/compile_commands.json
 
 
 !apps/backend/migrations/
