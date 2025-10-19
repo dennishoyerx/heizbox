@@ -1,0 +1,12 @@
+CompileFlags:
+  Add:
+    - -Iapps/esp32/include
+    - -Iapps/esp32/src
+    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\cores\arduino
+    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\variants\esp32
+    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\variants\esp32
+    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\libraries
+    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\tools\sdk\include
+    - -DARDUINO=10813
+    - -DPLATFORMIO=1
+    - -std=gnu++17
