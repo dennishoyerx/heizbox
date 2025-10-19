@@ -16,7 +16,7 @@ HiddenModeScreen::HiddenModeScreen(DisplayManager* dm) : enterTime(millis()), fi
 void HiddenModeScreen::draw(DisplayManager& display) {
     // Hidden mode - turn off display completely
     display.clear(TFT_BLACK);
-    display.setBrightness(0); // Turn off backlight
+    display.setBrightness(50); // Turn off backlight
 }
 
 void HiddenModeScreen::update() {

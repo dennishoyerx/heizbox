@@ -38,6 +38,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
             transition.inProgress = true;
             transition.startTime = millis();
             transition.progress = 0;
+            transition.originalBrightness = display.getBrightness(); // Store original brightness
         } else {
             // Direkter Wechsel
             display.clear();
@@ -128,7 +129,7 @@ void ScreenManager::drawTransitionFrame() {
         case ScreenTransition::FADE:
             // Simplified fade: Brightness-basiert
             {
-                const uint8_t brightness = display.getBrightness();
+                const uint8_t brightness = transition.originalBrightness;
                 const uint8_t targetBrightness = (transition.progress < 50)
                     ? map(transition.progress, 0, 50, brightness, 0)
                     : map(transition.progress, 50, 100, 0, brightness);
@@ -158,7 +159,7 @@ void ScreenManager::completeTransition() {
     previousScreen = nullptr;
 
     // Restore brightness
-    display.setBrightness(display.getBrightness());
+    display.setBrightness(transition.originalBrightness);
 
     // Force full redraw
     display.clear();

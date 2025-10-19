@@ -54,6 +54,7 @@ private:
         bool inProgress;
         uint32_t startTime;
         uint8_t progress;  // 0-100
+        uint8_t originalBrightness;
 
         static constexpr uint32_t DURATION_MS = 200;
     } transition;

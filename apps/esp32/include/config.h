@@ -15,7 +15,7 @@ namespace Config {
     // Timing constants
     namespace Timing {
         constexpr uint32_t HEARTBEAT_INTERVAL_MS = 30000;
-        constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 30000;
+        constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 600000;
         constexpr uint32_t NVS_FLUSH_INTERVAL_MS = 30000;
         constexpr uint32_t WIFI_RECONNECT_INTERVAL_MS = 5000;
         constexpr uint32_t STATUS_CHECK_INTERVAL_MS = 1000;
