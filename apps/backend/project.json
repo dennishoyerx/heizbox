@@ -1,42 +1,49 @@
 {
-  "name": "backend",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "src",
-  "projectType": "application",
-  "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/apps/backend",
-        "main": "apps/backend/src/index.ts",
-        "tsConfig": "apps/backend/tsconfig.json"
-      }
-    },
-    "serve": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "wrangler dev",
-        "cwd": "apps/backend"
-      }
-    },
-    "lint": {
-      "executor": "@nx/eslint:lint"
-    },
-    "deploy": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "wrangler deploy",
-        "cwd": "apps/backend"
-      }
-    },
-    "db-sync": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "pnpm exec node scripts/db-sync.mjs",
-        "cwd": "apps/backend"
-      }
-    }
-  },
-  "tags": []
+	"name": "backend",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nx/js:tsc",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/backend",
+				"main": "apps/backend/src/index.ts",
+				"tsConfig": "apps/backend/tsconfig.json"
+			}
+		},
+		"serve": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "wrangler dev",
+				"cwd": "apps/backend"
+			}
+		},
+		"lint": {
+			"executor": "@nx/eslint:lint"
+		},
+		"deploy": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "wrangler deploy",
+				"cwd": "apps/backend"
+			}
+		},
+		"db-sync": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "pnpm exec node scripts/db-sync.mjs",
+				"cwd": "apps/backend"
+			}
+		},
+		"tail": {
+			"executor": "nx:run-commands",
+			"options": {
+				"command": "pnpm exec wrangler tail",
+				"cwd": "apps/backend"
+			}
+		}
+	},
+	"tags": []
 }

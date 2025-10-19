@@ -40,9 +40,13 @@ const handleCreateHeatCycle = async (c: Context<{ Bindings: Env }>) => {
   try {
     const durationStr = c.req.query('duration');
     const cycleStr = c.req.query('cycle');
+    const deviceId = c.req.query('deviceId'); // Extract deviceId
 
     if (!durationStr) {
       return c.text('Missing duration', 400);
+    }
+    if (!deviceId) {
+      return c.text('Missing deviceId', 400);
     }
 
     const duration = parseFloat(durationStr);
@@ -50,6 +54,21 @@ const handleCreateHeatCycle = async (c: Context<{ Bindings: Env }>) => {
 
     const service = new HeatCycleService(c.env.db);
     const success = await service.createHeatCycle(duration, cycle);
+
+    if (success) {
+      // Get the Durable Object stub
+      const durableObjectId = c.env.DEVICE_STATUS.idFromName(deviceId);
+      const durableObjectStub = c.env.DEVICE_STATUS.get(durableObjectId);
+
+      // Send WebSocket message via the Durable Object
+      await durableObjectStub.fetch(
+        new Request("http://do/send-message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type: "heatCycleCreated" }),
+        }),
+      );
+    }
 
     return success ? c.text('OK') : c.text('Failed to create heat cycle', 500);
   } catch (error) {

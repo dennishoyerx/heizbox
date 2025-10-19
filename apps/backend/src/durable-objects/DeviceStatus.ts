@@ -8,24 +8,24 @@ import { HeatCycleService } from '../services/heatCycleService.js'
  * Verhindert doppelte DB-Queries zur Duplikaterkennung
  */
 class RecentCycleCache {
-  private cache: Set<string> = new Set();
-  private readonly maxSize = 100;
+	private cache: Set<string> = new Set()
+	private readonly maxSize = 100
 
-  has(duration: number, cycle: number): boolean {
-    const key = `${duration}-${cycle}`;
-    return this.cache.has(key);
-  }
+	has(duration: number, cycle: number): boolean {
+		const key = `${duration}-${cycle}`
+		return this.cache.has(key)
+	}
 
-  add(duration: number, cycle: number): void {
-    const key = `${duration}-${cycle}`;
-    this.cache.add(key);
+	add(duration: number, cycle: number): void {
+		const key = `${duration}-${cycle}`
+		this.cache.add(key)
 
-    // FIFO: Entferne ältesten Eintrag bei Überlauf
-    if (this.cache.size > this.maxSize) {
-      const firstKey = this.cache.values().next().value;
-      this.cache.delete(firstKey);
-    }
-  }
+		// FIFO: Entferne ältesten Eintrag bei Überlauf
+		if (this.cache.size > this.maxSize) {
+			const firstKey = this.cache.values().next().value
+			this.cache.delete(firstKey)
+		}
+	}
 }
 
 export class DeviceStatus {
@@ -38,17 +38,18 @@ export class DeviceStatus {
 	currentSessionClicks = 0 // New: Clicks in current heating session
 	currentSessionLastClick = 0 // New: Timestamp of last click in current heating session
 	currentSessionStart = 0 // New: Timestamp of current heating session start
-	  subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
-	
-	  private recentCycleCache = new RecentCycleCache();
-	  private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
-	
-	  // Cache für Session-Daten (TTL 5 Sekunden)
-	  private sessionDataCache: {
-	    data: Omit<SessionData, 'type'>;
-	    timestamp: number;
-	  } | null = null;
-	  private readonly SESSION_CACHE_TTL = 5000; // 5 Sekunden
+	subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
+	private webSockets: { ws: WebSocket; type: 'frontend' | 'esp32'; deviceId: string }[] = [] // Initialize webSockets array
+
+	private recentCycleCache = new RecentCycleCache()
+	private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
+
+	// Cache für Session-Daten (TTL 5 Sekunden)
+	private sessionDataCache: {
+		data: Omit<SessionData, 'type'>
+		timestamp: number
+	} | null = null
+	private readonly SESSION_CACHE_TTL = 5000 // 5 Sekunden
 	constructor(state: DurableObjectState, env: Env) {
 		// Accept env in constructor
 		this.state = state
@@ -166,27 +167,24 @@ export class DeviceStatus {
 		})
 	}
 
-	  private async _getLatestSessionData(): Promise<Omit<SessionData, 'type'>> {
-	    const now = Date.now();
-	
-	    // Cache-Hit: Gebe gecachte Daten zurück
-	    if (
-	      this.sessionDataCache &&
-	      (now - this.sessionDataCache.timestamp) < this.SESSION_CACHE_TTL
-	    ) {
-	      console.log('DeviceStatus: Returning cached session data');
-	      return this.sessionDataCache.data;
-	    }
-	
-	    // Cache-Miss: Lade Daten aus DB
-	    console.log('DeviceStatus: Fetching fresh session data');
-	    const sessionService = new SessionService(this.env.db);
-	    const data = await sessionService.getCurrentSessionData();
-	
-	    // Aktualisiere Cache
-	    this.sessionDataCache = { data, timestamp: now };
-	    return data;
-	  }
+	private async _getLatestSessionData(): Promise<Omit<SessionData, 'type'>> {
+		const now = Date.now()
+
+		// Cache-Hit: Gebe gecachte Daten zurück
+		if (this.sessionDataCache && now - this.sessionDataCache.timestamp < this.SESSION_CACHE_TTL) {
+			console.log('DeviceStatus: Returning cached session data')
+			return this.sessionDataCache.data
+		}
+
+		// Cache-Miss: Lade Daten aus DB
+		console.log('DeviceStatus: Fetching fresh session data')
+		const sessionService = new SessionService(this.env.db)
+		const data = await sessionService.getCurrentSessionData()
+
+		// Aktualisiere Cache
+		this.sessionDataCache = { data, timestamp: now }
+		return data
+	}
 	// Method to send current session data to a specific WebSocket
 	async sendSessionData(ws: WebSocket) {
 		const sessionDataPayload = await this._getLatestSessionData()
@@ -208,140 +206,182 @@ export class DeviceStatus {
 	}
 
 	// Method to publish messages to all connected subscribers
-  publish(message: any) {
-    if (this.subscribers.size === 0) return; // Early exit
+	publish(message: any) {
+		if (this.subscribers.size === 0) return // Early exit
 
-    // Pre-serialize base message einmalig
-    const baseMessageString = JSON.stringify(message);
+		// Pre-serialize base message einmalig
+		const baseMessageString = JSON.stringify(message)
 
-    this.subscribers.forEach((meta, ws) => {
-      let finalMessage = baseMessageString;
+		this.subscribers.forEach((meta, ws) => {
+			let finalMessage = baseMessageString
 
-      // Nur bei Bedarf neu serialisieren
-      if (message.type === 'sessionData' && meta.type === 'device') {
-        const { heat_cycles, ...rest } = message;
-        finalMessage = JSON.stringify(rest);
-      }
-
-      try {
-        ws.send(finalMessage);
-      } catch (err) {
-        console.error('DeviceStatus: Failed to send message to subscriber:', err);
-        this.subscribers.delete(ws);
-      }
-    });
-  }
-
-  /**
-   * Optimierte Heartbeat-Verarbeitung ohne HTTP-Overhead
-   */
-  async handleHeartbeat(): Promise<void> {
-    const now = Date.now();
-    this.lastSeen = now;
-    await this.state.storage.put('lastSeen', now);
-
-    console.log('DeviceStatus: Heartbeat processed, lastSeen:', now);
-
-    // Gerät war offline → sende Status-Update
-    if (!this.isOn) {
-      this.isOn = true;
-      await this.state.storage.put('isOn', true);
-
-      this.publish({
-        type: 'statusUpdate',
-        isOn: this.isOn,
-        isHeating: this.isHeating,
-      });
-
-    }
-
-    // NEU: Stelle sicher, dass Alarm läuft
-    const currentAlarm = await this.state.storage.getAlarm();
-    if (currentAlarm === null) {
-      await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
-      console.log('DeviceStatus: Alarm reactivated');
-    }
-  }
-
-	async fetch(request: Request): Promise<Response> {
-		console.log('DeviceStatus fetch called')
-		const upgradeHeader = request.headers.get('Upgrade')
-		if (upgradeHeader === 'websocket') {
-			const webSocketPair = new WebSocketPair()
-			const [client, server] = Object.values(webSocketPair)
-
-			server.accept()
-			// Add the new subscriber to the Map with its connection type
-			const url = new URL(request.url)
-			const connectionType = url.searchParams.get('type')
-			this.subscribers.set(server, { type: connectionType })
-
-			console.log('WS connected:', connectionType)
-
-			if (connectionType === 'device') {
-				// Fire-and-forget async call to send initial data without blocking
-				;(async () => {
-					try {
-						await this.sendSessionData(server)
-					} catch (e) {
-						console.error('Failed to send initial session data:', e)
-					}
-				})()
+			// Nur bei Bedarf neu serialisieren
+			if (message.type === 'sessionData' && meta.type === 'device') {
+				const { heat_cycles, ...rest } = message
+				finalMessage = JSON.stringify(rest)
 			}
 
-			server.addEventListener('message', async (event) => {
-				try {
-					const message = JSON.parse(event.data as string)
-					console.log('Received message from subscriber:', message)
-					if (connectionType === 'device') {
-						this.processDeviceMessage(request, message)
-					}
-				} catch (error) {
-					console.error('Error in DeviceStatus WebSocket message handler:', error)
-				}
-			})
+			try {
+				ws.send(finalMessage)
+			} catch (err) {
+				console.error('DeviceStatus: Failed to send message to subscriber:', err)
+				this.subscribers.delete(ws)
+			}
+		})
+	}
 
-			server.addEventListener('close', () => {
-				try {
-					this.subscribers.delete(server)
-					console.log('Subscriber WebSocket closed')
-				} catch (error) {
-					console.error('Error in DeviceStatus WebSocket close handler:', error)
-				}
-			})
+	// New: Send initial status to a newly connected WebSocket
+	sendInitialStatus(ws: WebSocket) {
+		try {
+			ws.send(
+				JSON.stringify({
+					type: 'statusUpdate',
+					isOn: this.isOn,
+					isHeating: this.isHeating,
+				}),
+			)
+		} catch (err) {
+			console.error('Error sending initial status to WebSocket:', err)
+			this.subscribers.delete(ws)
+		}
+	}
 
-			server.addEventListener('error', (err) => {
-				try {
-					this.subscribers.delete(server)
-					console.error('Subscriber WebSocket error:', err)
-				} catch (error) {
-					console.error('Error in DeviceStatus WebSocket error handler:', error)
-				}
-			})
+	// New: Send heartbeat to a newly connected WebSocket
+	sendHeartbeat(ws: WebSocket) {
+		try {
+			ws.send(JSON.stringify({ type: 'heartbeat' }))
+		} catch (err) {
+			console.error('Error sending heartbeat to WebSocket:', err)
+			this.subscribers.delete(ws)
+		}
+	}
 
-			return new Response(null, { status: 101, webSocket: client })
+	/**
+	 * Optimierte Heartbeat-Verarbeitung ohne HTTP-Overhead
+	 */
+	async handleHeartbeat(): Promise<void> {
+		const now = Date.now()
+		this.lastSeen = now
+		await this.state.storage.put('lastSeen', now)
+
+		console.log('DeviceStatus: Heartbeat processed, lastSeen:', now)
+
+		// Gerät war offline → sende Status-Update
+		if (!this.isOn) {
+			this.isOn = true
+			await this.state.storage.put('isOn', true)
+
+			this.publish({
+				type: 'statusUpdate',
+				isOn: this.isOn,
+				isHeating: this.isHeating,
+			})
 		}
 
-		// Handle HTTP requests for status updates and device messages
-		if (request.url.endsWith('/process-device-message')) {
-			return this.processDeviceMessage(request)
+		// NEU: Stelle sicher, dass Alarm läuft
+		const currentAlarm = await this.state.storage.getAlarm()
+		if (currentAlarm === null) {
+			await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD)
+			console.log('DeviceStatus: Alarm reactivated')
 		}
+	}
 
-		// If not a WebSocket upgrade or device message, handle as a regular HTTP request
-		return this.app.fetch(request)
+	async fetch(request: Request) {
+		const url = new URL(request.url)
+
+		switch (url.pathname) {
+			case '/': {
+				const deviceId = url.searchParams.get('deviceId')
+				const type = url.searchParams.get('type')
+
+				if (!deviceId || !type) {
+					return new Response('Missing deviceId or type', { status: 400 })
+				}
+
+				if (request.headers.get('Upgrade') !== 'websocket') {
+					return new Response('Expected websocket', { status: 400 })
+				}
+
+				const { 0: client, 1: server } = new WebSocketPair()
+
+				this.webSockets.push({
+					ws: server,
+					type: type as 'frontend' | 'esp32',
+					deviceId,
+				})
+
+				                server.accept()
+				                this.sendInitialStatus(server)
+				                this.sendHeartbeat(server)
+				
+				                server.addEventListener('message', async (event) => {
+				                    try {
+				                                                const message = JSON.parse(event.data as string)
+				                                                await this.processDeviceMessage(server, message)				                    } catch (err) {
+				                        console.error('Error processing device message:', err)
+				                    }
+				                })
+				
+				                server.addEventListener('close', () => {
+				                    console.log('WebSocket closed')
+				                    this.webSockets = this.webSockets.filter(ws => ws.ws !== server)
+				                    this.subscribers.delete(server)
+				                })
+				
+				                server.addEventListener('error', (err) => {
+				                    console.error('WebSocket error:', err)
+				                    this.webSockets = this.webSockets.filter(ws => ws.ws !== server)
+				                    this.subscribers.delete(server)
+				                })
+				
+				                return new Response(null, { status: 101, webSocket: client })
+				            }			case '/status': {
+				return new Response(
+					JSON.stringify({
+						isOn: this.isOn,
+						isHeating: this.isHeating,
+					}),
+					{ headers: { 'Content-Type': 'application/json' } },
+				)
+			}
+			case '/update-status': {
+				const { isOn, isHeating } = (await request.json()) as {
+					isOn?: boolean
+					isHeating?: boolean
+				}
+
+				let statusChanged = false
+				if (isOn !== undefined && isOn !== this.isOn) {
+					this.isOn = isOn
+					statusChanged = true
+				}
+				if (isHeating !== undefined && isHeating !== this.isHeating) {
+					this.isHeating = isHeating
+					statusChanged = true
+				}
+
+				if (statusChanged) {
+					this.broadcast({
+						type: 'statusUpdate',
+						isOn: this.isOn,
+						isHeating: this.isHeating,
+					})
+				}
+
+				return new Response('OK')
+			}
+			case '/send-message': {
+				const message = (await request.json()) as ServerWebSocketMessage
+				this.broadcast(message)
+				return new Response('OK')
+			}
+			default:
+				return new Response('Not found', { status: 404 })
+		}
 	}
 
 	// New method to process messages coming from devices
-	async processDeviceMessage(request: Request, message?: any): Promise<Response> {
-		// If message is not provided, it's likely an HTTP call, so parse the body.
-		if (!message) {
-			try {
-				message = await request.json()
-			} catch (e) {
-				return new Response('Invalid JSON in request body', { status: 400 })
-			}
-		}
-
+	async processDeviceMessage(ws: WebSocket, message: any): Promise<void> {
 		console.log('!!!!!DeviceStatus: Processing device message:', message)
 		if (message.type === 'statusUpdate') {
 			let statusChanged = false
@@ -379,67 +419,67 @@ export class DeviceStatus {
 					isHeating: this.isHeating,
 				})
 			}
-		    } else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
-		      console.log('DeviceStatus: Processing heatCycleCompleted message.', message);
-		
-		      // Schneller Cache-Check vor DB-Abfrage
-		      if (this.recentCycleCache.has(message.duration, message.cycle || 1)) {
-		        console.log('DeviceStatus: Duplicate detected in cache, skipping');
-		        return new Response(JSON.stringify({ success: false, reason: 'duplicate' }), {
-		          headers: { 'Content-Type': 'application/json' },
-		        });
-		      }
-		
-		      const heatCycleService = new HeatCycleService(this.env.db);
-		      const success = await heatCycleService.createHeatCycle(
-		        message.duration,
-		        message.cycle || 1
-		      );
-		
-		      if (success) {
-		        // Füge zu Cache hinzu
-		        this.recentCycleCache.add(message.duration, message.cycle || 1);
-		
-		        // Invalidiere Session-Cache
-		        this.sessionDataCache = null;
-		
-		        const newSessionData = await this._getLatestSessionData();
-		        this.publish({ type: 'sessionData', ...newSessionData });
-		      }
-		    } else if (message.type === 'stashUpdated') {
+		} else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
+			console.log('DeviceStatus: Processing heatCycleCompleted message.', message)
+
+			// Schneller Cache-Check vor DB-Abfrage
+			if (this.recentCycleCache.has(message.duration, message.cycle || 1)) {
+				console.log('DeviceStatus: Duplicate detected in cache, skipping')
+				ws.send(JSON.stringify({ success: false, reason: 'duplicate' }))
+				return
+			}
+
+			const heatCycleService = new HeatCycleService(this.env.db)
+			const success = await heatCycleService.createHeatCycle(message.duration, message.cycle || 1)
+
+			if (success) {
+				// Füge zu Cache hinzu
+				this.recentCycleCache.add(message.duration, message.cycle || 1)
+
+				// Invalidiere Session-Cache
+				this.sessionDataCache = null
+
+				const newSessionData = await this._getLatestSessionData()
+				this.publish({ type: 'sessionData', ...newSessionData })
+				ws.send(JSON.stringify({ success: true })) // Send success response to the device
+				return
+			} else {
+				ws.send(JSON.stringify({ success: false, reason: 'db_error' })) // Send error response to the device
+				return
+			}
+		} else if (message.type === 'stashUpdated') {
 			console.log('DeviceStatus: Processing stashUpdated message.', message)
 			this.publish(message) // Broadcast to all subscribers
 		}
 
-		return new Response(JSON.stringify({ success: true }), {
-			headers: { 'Content-Type': 'application/json' },
-		})
+		ws.send(JSON.stringify({ success: true })) // Default success response
 	}
 
-	  async alarm() {
-	    console.log('DeviceStatus: Alarm triggered.');
-	    const now = Date.now();
-	    const timeSinceLastSeen = now - this.lastSeen;
-	
-	    // Gerät ist offline geworden
-	    if (this.isOn && timeSinceLastSeen > this.OFFLINE_THRESHOLD) {
-	      console.log('DeviceStatus: Device is offline. Setting isOn to false.');
-	
-	      this.isOn = false;
-	      await this.state.storage.put('isOn', this.isOn);
-	
-	      this.publish({
-	        type: 'statusUpdate',
-	        isOn: this.isOn,
-	        isHeating: this.isHeating,
-	      });
-	    }
-	
-	    // Schedule nächsten Alarm nur wenn Gerät online ist
-	    // (Reduziert unnötige DO-Wakeups)
-	    if (this.isOn) {
-	      await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD);
-	    } else {
-	      console.log('DeviceStatus: Device offline, skipping alarm reschedule');
-	    }
-	  }}
+	async alarm() {
+		console.log('DeviceStatus: Alarm triggered.')
+		const now = Date.now()
+		const timeSinceLastSeen = now - this.lastSeen
+
+		// Gerät ist offline geworden
+		if (this.isOn && timeSinceLastSeen > this.OFFLINE_THRESHOLD) {
+			console.log('DeviceStatus: Device is offline. Setting isOn to false.')
+
+			this.isOn = false
+			await this.state.storage.put('isOn', this.isOn)
+
+			this.publish({
+				type: 'statusUpdate',
+				isOn: this.isOn,
+				isHeating: this.isHeating,
+			})
+		}
+
+		// Schedule nächsten Alarm nur wenn Gerät online ist
+		// (Reduziert unnötige DO-Wakeups)
+		if (this.isOn) {
+			await this.state.storage.setAlarm(now + this.OFFLINE_THRESHOLD)
+		} else {
+			console.log('DeviceStatus: Device offline, skipping alarm reschedule')
+		}
+	}
+}
