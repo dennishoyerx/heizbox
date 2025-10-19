@@ -63,19 +63,19 @@ void StatsManager::flushToNvs() {
     Serial.println("💾 Stats saved to NVS");
 }
 
-void StatsManager::updateSessionData(const JsonObject& data) {
+void StatsManager::updateSessionData(const JsonObjectConst& data) {
     // Optimization: Use proper null-checking for JSON values.
     // Benefit: Prevents runtime errors and ensures data is only updated when valid.
-    if (data.containsKey("clicks")) {
+    if (!data["clicks"].isNull()) {
         clicks = data["clicks"].as<int>();
     }
-    if (data.containsKey("caps")) {
+    if (!data["caps"].isNull()) {
         caps = data["caps"].as<int>();
     }
-    if (data.containsKey("lastClick") && !data["lastClick"].isNull()) {
+    if (!data["lastClick"].isNull()) {
         lastClick = data["lastClick"].as<String>();
     }
-    if (data.containsKey("consumption") && !data["consumption"].isNull()) {
+    if (!data["consumption"].isNull()) {
         consumption = data["consumption"].as<String>();
     }
 

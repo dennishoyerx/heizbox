@@ -1,3 +1,4 @@
+// src/screens/HiddenModeScreen.cpp
 #include "HiddenModeScreen.h"
 #include "ScreenManager.h"
 #include "DisplayManager.h"

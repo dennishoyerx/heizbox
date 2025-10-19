@@ -1,150 +1,132 @@
+// src/screens/FireScreen.cpp
 #include "FireScreen.h"
 #include "ScreenManager.h"
-#include "StatusBar.h"
-#include <Adafruit_GFX.h>
 #include <TFT_eSPI.h>
 
-namespace {
-    constexpr unsigned long SCREENSAVER_TIMEOUT = 30000; // 30 seconds
-    constexpr unsigned long CONFIRMATION_DISPLAY_TIME = 2000; // 2 seconds
-}
-
-ScreenType FireScreen::getType() const {
-    return ScreenType::FIRE;
-}
-
-FireScreen::FireScreen(
-    HeaterController& hc,
-    ScreenManager* sm,
-    ScreensaverScreen* ss,
-    StatsManager* stm, // Add StatsManager pointer to constructor
-    std::function<void(int)> setCycleCb
-)
+FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
+                       ScreensaverScreen* ss, StatsManager* stm,
+                       std::function<void(int)> setCycleCb)
     : heater(hc),
       screenManager(sm),
       screensaverScreen(ss),
-      statsManager(stm), // Initialize StatsManager
-      startTime(0),
-      elapsedTime(0),
-      lastActivityTime(0),
-      _currentCycle(1),
-      _showSavedConfirmation(false),
-      _savedConfirmationTime(0),
-      _setCycleCallback(std::move(setCycleCb))
-{}
+      statsManager(stm),
+      setCycleCallback(std::move(setCycleCb))
+{
+    state.heatingStartTime = 0;
+    state.lastActivityTime = millis();
+    state.currentCycle = 1;
+    state.showingSavedConfirmation = false;
+    state.confirmationStartTime = 0;
+}
+
+void FireScreen::onEnter() {
+    resetActivityTimer();
+}
 
 void FireScreen::draw(DisplayManager& display) {
-    display.clear(0x885);
+    display.clear(0x885);  // Dark gray background
 
-    // Display heating timer if heating
-    if (heater.isHeating()) {
-        unsigned long seconds = elapsedTime / 1000;
-        char timeStr[10];
-        snprintf(timeStr, sizeof(timeStr), "%02lu", seconds % 60);
-        display.drawText(90, 80, timeStr, TFT_WHITE, 6);
-    }
+    drawHeatingTimer(display);
+    drawStatus(display);
+    drawCycleInfo(display);
+    drawSessionStats(display);
+}
 
-    // Display status
-    const char* status = "";
+void FireScreen::drawHeatingTimer(DisplayManager& display) {
+    if (!heater.isHeating()) return;
+
+    const uint32_t elapsed = millis() - state.heatingStartTime;
+    const uint32_t seconds = elapsed / 1000;
+
+    char timeStr[10];
+    snprintf(timeStr, sizeof(timeStr), "%02lu", seconds % 60);
+
+    // Zentrierter großer Timer
+    centerText(display, 80, timeStr, TFT_WHITE, 6);
+}
+
+void FireScreen::drawStatus(DisplayManager& display) {
+    const char* status = nullptr;
+
     switch (heater.getState()) {
-        case HeaterController::State::HEATING:   status = "";         break;
+        case HeaterController::State::HEATING:   status = nullptr; break;  // Timer zeigt Status
         case HeaterController::State::COOLDOWN:  status = "COOLDOWN"; break;
-        case HeaterController::State::ERROR:     status = "ERROR";    break;
-        default:        status = "";         break;
+        case HeaterController::State::ERROR:     status = "ERROR"; break;
+        default:                     status = nullptr; break;
     }
-    display.drawText(70, 180, status, TFT_WHITE, 2);
 
-    // Display current cycle
-    char cycleText[15];
-    snprintf(cycleText, sizeof(cycleText), "Cycle: %d", _currentCycle);
-    display.drawText(10, 10, cycleText, TFT_WHITE, 3);
+    if (status) {
+        centerText(display, 180, status, TFT_WHITE, 2);
+    }
+}
 
-    // Display session stats
-    char statsText[50];
-    snprintf(statsText, sizeof(statsText), "Clicks: %d | Caps: %d", statsManager->getClicks(), statsManager->getCaps());
-    display.drawText(10, 40, statsText, TFT_WHITE, 2);
+void FireScreen::drawCycleInfo(DisplayManager& display) {
+    char text[20];
+    snprintf(text, sizeof(text), "Cycle: %d", state.currentCycle);
+    display.drawText(10, 10, text, TFT_WHITE, 3);
+}
 
+void FireScreen::drawSessionStats(DisplayManager& display) {
+    // Zeile 1: Clicks und Caps
+    char line1[50];
+    snprintf(line1, sizeof(line1), "Clicks: %d | Caps: %d",
+             statsManager->getClicks(), statsManager->getCaps());
+    display.drawText(10, 40, line1, TFT_WHITE, 2);
+
+    // Zeile 2: Verbrauch
     String consumption = statsManager->getConsumption();
-    snprintf(statsText, sizeof(statsText), "Verbrauch: %sg", consumption.c_str());
-    display.drawText(10, 170, statsText, TFT_WHITE, 2);
+    char line2[40];
+    snprintf(line2, sizeof(line2), "Verbrauch: %sg", consumption.c_str());
+    display.drawText(10, 170, line2, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {
-    static bool wasActive = false;
-    bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
-    unsigned long now = millis();
+    const bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
 
+    // Update heating timer
     if (isActive) {
-        elapsedTime = now - startTime;
-        lastActivityTime = now; // Reset inactivity timer while heating
+        state.lastActivityTime = millis();
 
-        static unsigned long lastDirty = 0;
-        if (now - lastDirty >= 1000) { // 1 second interval
-            screenManager->setDirty();
-            lastDirty = now;
+        // Redraw timer jede Sekunde
+        static uint32_t lastSecond = 0;
+        const uint32_t currentSecond = (millis() - state.heatingStartTime) / 1000;
+        if (currentSecond != lastSecond) {
+            markDirty();
+            lastSecond = currentSecond;
         }
-    } else if (wasActive) {
-        screenManager->setDirty();
-        elapsedTime = 0;
     }
-    wasActive = isActive;
 
-    if (!isActive && (now - lastActivityTime > SCREENSAVER_TIMEOUT)) {
-        screenManager->setScreen(screensaverScreen);
-    }
+    // Check screensaver timeout
+    checkScreensaverTimeout();
 }
 
 void FireScreen::handleInput(InputEvent event) {
-    lastActivityTime = millis();
-
     if (event.type != PRESS) return;
+
+    resetActivityTimer();
 
     switch (event.button) {
         case FIRE:
             if (!heater.isHeating()) {
                 heater.startHeating();
-                startTime = millis();
-                elapsedTime = 0;
+                state.heatingStartTime = millis();
             } else {
-                bool updateCycle = heater.isHeating();
+                const bool updateCycle = heater.isHeating();
                 heater.stopHeating();
                 if (updateCycle) {
-                    _setCycleCallback(_currentCycle);
-                    _currentCycle = (_currentCycle == 1) ? 2 : 1;
-				}
+                    setCycleCallback(state.currentCycle);
+                    state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
+                }
             }
-            screenManager->setDirty();
+            markDirty();
             break;
 
         case UP:
-            if (_currentCycle == 1) {
-                _currentCycle = 2;
-            }
-            else if (_currentCycle == 2) {
-                _currentCycle = 3;
-            }
-            else if (_currentCycle == 3) {
-                _currentCycle = 4;
-            }
-            else if (_currentCycle == 4) {
-                _currentCycle = 1;
-            }
-            _setCycleCallback(_currentCycle);
-            screenManager->setDirty();
+            handleCycleChange(true);
             break;
 
         case DOWN:
-            if (_currentCycle == 1) {
-                _currentCycle = 3;
-            } else if (_currentCycle == 2) {
-                _currentCycle = 1;
-            }  else if (_currentCycle == 3) {
-                _currentCycle = 4;
-            } else if (_currentCycle == 4) {
-                _currentCycle = 1;
-            }
-            _setCycleCallback(_currentCycle);
-            screenManager->setDirty();
+            handleCycleChange(false);
             break;
 
         default:
@@ -152,6 +134,25 @@ void FireScreen::handleInput(InputEvent event) {
     }
 }
 
+void FireScreen::handleCycleChange(bool increment) {
+    if (increment) {
+        state.currentCycle = (state.currentCycle % 4) + 1;
+    } else {
+        state.currentCycle = (state.currentCycle == 1) ? 4 : state.currentCycle - 1;
+    }
+
+    setCycleCallback(state.currentCycle);
+    markDirty();
+}
+
+void FireScreen::checkScreensaverTimeout() {
+    const bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
+
+    if (!isActive && (millis() - state.lastActivityTime > SCREENSAVER_TIMEOUT_MS)) {
+        screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
+    }
+}
+
 void FireScreen::resetActivityTimer() {
-    lastActivityTime = millis();
+    state.lastActivityTime = millis();
 }

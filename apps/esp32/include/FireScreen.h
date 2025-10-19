@@ -1,45 +1,55 @@
+// include/FireScreen.h
 #ifndef FIRESCREEN_H
 #define FIRESCREEN_H
 
 #include "Screen.h"
-#include "DisplayManager.h"
 #include "HeaterController.h"
-#include "ScreenManager.h"
-#include "ScreenType.h"
 #include "ScreensaverScreen.h"
-#include "StatsManager.h" // Include StatsManager
-
-#include <functional> // Required for std::function
+#include "StatsManager.h"
+#include <functional>
 
 class FireScreen : public Screen {
-private:
-    HeaterController& heater;
-    ScreenManager* screenManager;
-    ScreensaverScreen* screensaverScreen;
-    StatsManager* statsManager; // Add StatsManager pointer
-    unsigned long startTime;
-    unsigned long elapsedTime;
-    unsigned long lastActivityTime;
-
-    int _currentCycle;
-    bool _showSavedConfirmation;
-    unsigned long _savedConfirmationTime;
-    std::function<void(int)> _setCycleCallback;
-
-protected:
-    void initState() override {
-        setState("timer", 0);
-        setState("temperature", 0);
-        setState("active", 0);
-    }
-
 public:
-    FireScreen(HeaterController& hc, ScreenManager* sm, ScreensaverScreen* ss, StatsManager* stm, std::function<void(int)> setCycleCb);
+    FireScreen(HeaterController& hc, ScreenManager* sm,
+               ScreensaverScreen* ss, StatsManager* stm,
+               std::function<void(int)> setCycleCb);
+
     void draw(DisplayManager& display) override;
     void update() override;
     void handleInput(InputEvent event) override;
-    ScreenType getType() const override;
+    ScreenType getType() const override { return ScreenType::FIRE; }
+
+    void onEnter() override;
     void resetActivityTimer();
+
+private:
+    // Dependencies
+    HeaterController& heater;
+    ScreenManager* screenManager;
+    ScreensaverScreen* screensaverScreen;
+    StatsManager* statsManager;
+    std::function<void(int)> setCycleCallback;
+
+    // State
+    struct {
+        uint32_t heatingStartTime;
+        uint32_t lastActivityTime;
+        uint8_t currentCycle;
+        bool showingSavedConfirmation;
+        uint32_t confirmationStartTime;
+    } state;
+
+    // Constants
+    static constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 30000;
+    static constexpr uint32_t CONFIRMATION_DISPLAY_MS = 2000;
+
+    // Helper methods
+    void drawHeatingTimer(DisplayManager& display);
+    void drawStatus(DisplayManager& display);
+    void drawCycleInfo(DisplayManager& display);
+    void drawSessionStats(DisplayManager& display);
+    void handleCycleChange(bool increment);
+    void checkScreensaverTimeout();
 };
 
 #endif

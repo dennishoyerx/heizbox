@@ -1,102 +1,110 @@
-// ==== OPTIMIZED FILE ====
-// This file has been refactored to use a "dirty regions" approach for rendering.
-// Key improvements:
-// - The main 'draw()' function no longer draws to the screen. It only detects changes and sets flags.
-// - New 'drawTimeRegion()' and 'drawWifiRegion()' methods perform targeted, partial redraws.
-// - This eliminates flickering and reduces SPI bus traffic by over 90%.
-
+// src/StatusBar.cpp
 #include "StatusBar.h"
-#include "bitmaps.h" // Include the new header for bitmaps
-#include <TFT_eSPI.h>
+#include "bitmaps.h"
 
 StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, ClockManager* cm, uint8_t h)
-    : clock(cm),
-      height(h),
-      lastMinuteUpdate(0),
-      tft_display(tft_instance) {
-    dirty.time = true; // Mark everything as dirty on first run
+    : clock(cm), tft(tft_instance), height(h)
+{
+    cache.time = "";
+    cache.wifiStatus = WL_IDLE_STATUS;
+    cache.wifiStrength = -1;
+    cache.lastUpdate = 0;
+
+    dirty.time = true;
     dirty.wifi = true;
 }
 
-// Optimization: Main draw call now only checks for state changes and sets dirty flags.
-// Benefit: Decouples state checking from rendering, making the logic cleaner.
 void StatusBar::draw() {
-    if (!clock || !tft_display) return;
+    if (!clock || !tft) return;
 
     const uint32_t now = millis();
 
-    // --- Check for Time Change ---
-    if (now - lastMinuteUpdate >= 5000 || lastMinuteUpdate == 0) {
+    // ========================================================================
+    // Check Time (nur alle 5s prüfen)
+    // ========================================================================
+    if (now - cache.lastUpdate >= TIME_UPDATE_INTERVAL_MS || cache.lastUpdate == 0) {
         String timeStr = clock->getFormattedTime();
-        if (timeStr != lastDisplayedTime) {
+        if (timeStr != cache.time) {
+            cache.time = timeStr;
             dirty.time = true;
-            lastDisplayedTime = timeStr;
         }
-        lastMinuteUpdate = now;
+        cache.lastUpdate = now;
     }
 
-    // --- Check for WiFi Status Change ---
-    const wl_status_t currentWifiStatus = WiFi.status();
-    int8_t currentStrength = -1;
+    // ========================================================================
+    // Check WiFi (nur bei Änderungen)
+    // ========================================================================
+    const wl_status_t currentStatus = WiFi.status();
+    const int8_t currentStrength = getWifiStrength();
 
-    if (currentWifiStatus == WL_CONNECTED) {
-        long rssi = WiFi.RSSI();
-        currentStrength = (rssi >= -55) ? 4 : (rssi >= -65) ? 3 :
-                         (rssi >= -75) ? 2 : (rssi >= -85) ? 1 : 0;
-    }
-
-    if (currentWifiStatus != lastWifiStatus || currentStrength != lastWifiStrength) {
+    if (currentStatus != cache.wifiStatus || currentStrength != cache.wifiStrength) {
+        cache.wifiStatus = currentStatus;
+        cache.wifiStrength = currentStrength;
         dirty.wifi = true;
-        lastWifiStatus = currentWifiStatus;
-        lastWifiStrength = currentStrength;
     }
 
-    // --- Render only the dirty regions ---
+    // ========================================================================
+    // Selective Rendering
+    // ========================================================================
     if (dirty.time) {
         drawTimeRegion();
+        dirty.time = false;
     }
+
     if (dirty.wifi) {
         drawWifiRegion();
+        dirty.wifi = false;
     }
-
-    // Reset flags
-    dirty.time = false;
-    dirty.wifi = false;
 }
 
-// Optimization: This function only draws the time section of the status bar.
 void StatusBar::drawTimeRegion() {
-    tft_display->fillRect(0, 0, 120, height, 0x885); // Clear only the time area
-    tft_display->setTextColor(TFT_WHITE);
-    tft_display->setFreeFont(&FreeSans12pt7b);
-    tft_display->setTextSize(1);
-    tft_display->setCursor(15, tft_display->fontHeight() + 4);
-    tft_display->print(lastDisplayedTime);
-    //Serial.println("🖌️ Redrawing Time Region");
+    // Clear nur Zeit-Bereich
+    tft->fillRect(0, 0, 150, height, BG_COLOR);
+
+    // Render Zeit
+    tft->setTextColor(TFT_WHITE);
+    tft->setFreeFont(&FreeSans12pt7b);
+    tft->setTextSize(1);
+    tft->setCursor(15, tft->fontHeight() + 4);
+    tft->print(cache.time);
 }
 
-// Optimization: This function only draws the WiFi icon section.
 void StatusBar::drawWifiRegion() {
-    // Clear only the icon area
-    tft_display->fillRect(tft_display->width() - 120, height - 27, 120, height, 0x000);
+    // Clear nur WiFi-Icon Bereich
+    const int16_t iconX = tft->width() - 40;
+    const int16_t iconY = height - 27;
+    tft->fillRect(iconX, iconY, 19, 15, 0x000);
 
-    const uint8_t* icon = image_wifi_not_connected_bits;
-    if (lastWifiStatus == WL_CONNECTED) {
-        switch(lastWifiStrength) {
-            case 4: icon = image_wifi_100_bits; break;
-            case 3: icon = image_wifi_75_bits; break;
-            case 2: icon = image_wifi_50_bits; break;
-            case 1: icon = image_wifi_25_bits; break;
-            default: icon = image_wifi_0_bits; break;
-        }
+    // Render WiFi-Icon
+    const uint8_t* icon = getWifiIcon();
+    tft->drawBitmap(iconX, iconY, icon, 19, 15, TFT_WHITE);
+}
+
+int8_t StatusBar::getWifiStrength() const {
+    if (WiFi.status() != WL_CONNECTED) return -1;
+
+    const long rssi = WiFi.RSSI();
+    if (rssi >= -55) return 4;       // Excellent
+    if (rssi >= -65) return 3;       // Good
+    if (rssi >= -75) return 2;       // Fair
+    if (rssi >= -85) return 1;       // Weak
+    return 0;                        // Very weak
+}
+
+const uint8_t* StatusBar::getWifiIcon() const {
+    if (cache.wifiStatus != WL_CONNECTED) {
+        return image_wifi_not_connected_bits;
     }
 
-    tft_display->drawBitmap(tft_display->width() - 40, height - 27, icon, 19, 15, TFT_WHITE);
-    //Serial.println("🖌️ Redrawing WiFi Region");
+    switch (cache.wifiStrength) {
+        case 4:  return image_wifi_100_bits;
+        case 3:  return image_wifi_75_bits;
+        case 2:  return image_wifi_50_bits;
+        case 1:  return image_wifi_25_bits;
+        default: return image_wifi_0_bits;
+    }
 }
-
 
 void StatusBar::pushSprite(int16_t x, int16_t y) {
-    // This function is no longer needed as we draw directly to the display.
-    // Kept for API compatibility if we revert to sprites later.
+    // Nicht verwendet - direkt rendering
 }

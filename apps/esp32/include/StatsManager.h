@@ -31,7 +31,7 @@ public:
     void update(); // Must be called in the main loop
     void addCycle(unsigned long duration);
     void resetSession();
-    void updateSessionData(const JsonObject& data);
+    void updateSessionData(const JsonObjectConst& data);
     
     unsigned long getTotalCycles() const;
     unsigned long getSessionCycles() const;

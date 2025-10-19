@@ -1,125 +1,119 @@
+// src/screens/MainMenuScreen.cpp
 #include "MainMenuScreen.h"
-#include "ScreenManager.h"
-#include "DisplayManager.h"
-#include "StatusBar.h"
-#include "ScreenType.h"
-#include <Adafruit_GFX.h>
-#include <TFT_eSPI.h>
 #include "TimezoneScreen.h"
+#include <TFT_eSPI.h>
 
 #define TFT_GRAY 0x7BEF
 
-ScreenType MainMenuScreen::getType() const {
-    return ScreenType::MAIN_MENU;
-}
-
 MainMenuScreen::MainMenuScreen(DisplayManager* display, ScreenManager* screenManager)
-    : selectedIndex(0), display(display), screenManager(screenManager) {
-    // Initialize menu items
+    : selectedIndex(0), display(display), screenManager(screenManager),
+      statsScreen(nullptr), timezoneScreen(nullptr)
+{
     items = {
         {"Brightness", [this]() { adjustBrightness(); }},
         {"AutoStop Time", [this]() { configureAutoStop(); }},
         {"Sleep Timeout", [this]() { configureSleepTimeout(); }},
-        {"Timezone", [this]() { 
+        {"Timezone", [this]() {
             if (this->timezoneScreen) {
                 this->timezoneScreen->onEnter();
-                this->screenManager->setScreen(this->timezoneScreen);
+                this->screenManager->setScreen(this->timezoneScreen, ScreenTransition::FADE);
             }
         }},
-        {"Statistics", [this]() { if(this->statsScreen) this->screenManager->setScreen(this->statsScreen); }},
-        {"Dark Mode", [this]() { this->display->toggleDarkMode(); }},
-        {"Hidden Mode", [this]() { enterHiddenMode(); }},
+        {"Statistics", [this]() {
+            if (this->statsScreen) {
+                this->screenManager->setScreen(this->statsScreen, ScreenTransition::FADE);
+            }
+        }},
+        {"Dark Mode", [this]() { this->display->toggleDarkMode(); this->markDirty(); }},
+        {"Hidden Mode", [this]() { this->enterHiddenMode(); }},
     };
 }
 
 void MainMenuScreen::draw(DisplayManager& display) {
     display.clear(TFT_BLACK);
 
-    // Draw title
-    display.drawText(70, 10, "MENU", TFT_WHITE, 2);
+    // Title
+    centerText(display, 10, "MENU", TFT_WHITE, 2);
 
-    // Update dark mode menu item title
+    // Update dark mode label
     items[5].title = display.isDarkMode() ? "Dark Mode: On" : "Dark Mode: Off";
 
-    // Draw menu items
+    // Menu items
     for (size_t i = 0; i < items.size(); i++) {
+        const int16_t y = 50 + i * 30;
+
         if (i == selectedIndex) {
-            display.drawText(30, 50 + i * 30, ">", TFT_WHITE, 2);
-            display.drawText(50, 50 + i * 30, items[i].title, TFT_YELLOW, 2);
-        }
-        else {
-            display.drawText(50, 50 + i * 30, items[i].title, TFT_WHITE, 2);
+            display.drawText(30, y, ">", TFT_WHITE, 2);
+            display.drawText(50, y, items[i].title.c_str(), TFT_YELLOW, 2);
+        } else {
+            display.drawText(50, y, items[i].title.c_str(), TFT_WHITE, 2);
         }
     }
 
-    // Draw instructions
+    // Instructions
     display.drawText(30, 220, "CENTER: Select", TFT_GRAY, 1);
 }
 
 void MainMenuScreen::update() {
-    // Menu doesn't need continuous updates
+    // No continuous updates needed
 }
 
 void MainMenuScreen::handleInput(InputEvent event) {
-    if (event.type == PRESS) {
-        switch (event.button) {
+    if (event.type != PRESS) return;
+
+    switch (event.button) {
         case UP:
-            selectedIndex = (selectedIndex - 1 + items.size()) % items.size();
-            screenManager->setDirty();
+            selectedIndex = (selectedIndex == 0) ? items.size() - 1 : selectedIndex - 1;
+            markDirty();
             break;
+
         case DOWN:
             selectedIndex = (selectedIndex + 1) % items.size();
-            screenManager->setDirty();
+            markDirty();
             break;
+
         case CENTER:
-            if (selectedIndex < items.size()) {
+            if (selectedIndex < items.size() && items[selectedIndex].action) {
                 items[selectedIndex].action();
-				screenManager->setDirty();
-			}
+                markDirty();
+            }
             break;
+
         default:
             break;
-        }
     }
 }
 
 void MainMenuScreen::adjustBrightness() {
-    const uint8_t brightnessLevels[] = {20, 40, 60, 80, 100};
-    const int numLevels = sizeof(brightnessLevels) / sizeof(brightnessLevels[0]);
+    static constexpr uint8_t levels[] = {20, 40, 60, 80, 100};
+    static constexpr size_t numLevels = sizeof(levels) / sizeof(levels[0]);
 
-    uint8_t currentBrightness = display->getBrightness();
-    int newIndex = -1;
+    const uint8_t current = display->getBrightness();
 
-    // Find the current brightness level in the array
-    for (int i = 0; i < numLevels; ++i) {
-        if (currentBrightness == brightnessLevels[i]) {
-            newIndex = i;
+    // Find current level
+    size_t idx = 0;
+    for (size_t i = 0; i < numLevels; i++) {
+        if (current == levels[i]) {
+            idx = i;
             break;
         }
     }
 
-    // If current brightness is not in our defined levels, start from the beginning
-    if (newIndex == -1) {
-        newIndex = 0;
-    } else {
-        newIndex = (newIndex + 1) % numLevels;
-    }
-
-    display->setBrightness(brightnessLevels[newIndex]);
+    // Next level
+    idx = (idx + 1) % numLevels;
+    display->setBrightness(levels[idx]);
 }
 
 void MainMenuScreen::configureAutoStop() {
-    // This would typically open a submenu for setting auto-stop time
-    // For simplicity, we'll just cycle through options
-    // In a real implementation, this would interface with HeaterController
+    // TODO: Implement submenu
 }
 
 void MainMenuScreen::configureSleepTimeout() {
-    // This would typically open a submenu for setting sleep timeout
+    // TODO: Implement submenu
 }
 
 void MainMenuScreen::enterHiddenMode() {
-    // Transition to hidden mode screen
+    // TODO: Implement
 }
 
 void MainMenuScreen::setStatsScreen(Screen* screen) {
@@ -128,4 +122,8 @@ void MainMenuScreen::setStatsScreen(Screen* screen) {
 
 void MainMenuScreen::setTimezoneScreen(TimezoneScreen* screen) {
     timezoneScreen = screen;
+}
+
+ScreenType MainMenuScreen::getType() const {
+    return ScreenType::MAIN_MENU;
 }

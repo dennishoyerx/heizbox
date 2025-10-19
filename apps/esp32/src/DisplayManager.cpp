@@ -1,192 +1,277 @@
-// ==== OPTIMIZED FILE ==== 
-// This file has been refactored for better performance and memory safety. 
-// Key improvements: 
-// - Fixed a memory leak by ensuring sprites are freed before reallocation. 
-// - Implemented state tracking for text attributes (color, size) to drastically reduce redundant SPI bus traffic. 
-// - Added clear logging for sprite memory management. 
-
+// src/DisplayManager.cpp
 #include "DisplayManager.h"
 #include "ScreenManager.h"
 #include "StatusBar.h"
-#include "config.h"
-#include <TFT_eSPI.h>
-#include <SPI.h>
-#include <Preferences.h>
 
-// --- NVS Helper Functions --- 
-namespace { 
-    Preferences prefs; 
-    void saveBrightness(uint8_t brightness) { 
-        prefs.begin("display", false); 
-        prefs.putUChar("brightness", brightness); 
-        prefs.end(); 
-    } 
+// ============================================================================
+// Constructor & Destructor
+// ============================================================================
 
-    uint8_t loadBrightness() { 
-        prefs.begin("display", true); 
-        uint8_t b = prefs.getUChar("brightness", 100); 
-        prefs.end(); 
-        return b; 
-    } 
+DisplayManager::DisplayManager(ClockManager* cm)
+    : tft(),
+      sprTop(&tft),
+      statusBar(nullptr),
+      clock(cm),
+      screenManager(nullptr),
+      brightness(DisplayConfig::BRIGHTNESS_DEFAULT),
+      darkMode(true),
+      spriteAllocated(false)
+{
+    renderState.reset();
+}
 
-    void saveDarkMode(bool darkMode) { 
-        prefs.begin("display", false); 
-        prefs.putBool("darkMode", darkMode); 
-        prefs.end(); 
-    } 
+DisplayManager::~DisplayManager() {
+    freeSprites();
+    delete statusBar;
+}
 
-    bool loadDarkMode() { 
-        prefs.begin("display", true); 
-        bool d = prefs.getBool("darkMode", true); 
-        prefs.end(); 
-        return d; 
-    } 
-} // anonymous namespace 
+// ============================================================================
+// Initialization
+// ============================================================================
 
-#define SPRITE_HEIGHT 230 
+void DisplayManager::init(ScreenManager* mgr) {
+    screenManager = mgr;
 
-TFT_eSPI tft = TFT_eSPI(); 
+    // Initialize TFT
+    tft.init();
+    tft.setRotation(1);
 
-DisplayManager::DisplayManager(ClockManager* cm) 
-    : screenManager(nullptr), 
-      brightness(100), 
-      darkMode(true), 
-      statusBar(nullptr), 
-      clock(cm), 
-      sprTop(&tft), 
-      spriteAllocated(false), 
-      currentTextSize(0), // Initialize to 0 to force first-time set 
-      currentTextColor(0) { 
-    darkMode = loadDarkMode(); 
-} 
+    // Load persistent settings
+    loadSettings();
 
-DisplayManager::~DisplayManager() { 
-    freeSprites(); 
-    delete statusBar; 
-} 
+    // Initialize backlight PWM
+    initBacklight();
 
-void DisplayManager::init(ScreenManager* mgr) { 
-    screenManager = mgr; 
-    statusBar = new StatusBar(&tft, 280, clock, STATUS_BAR_HEIGHT); 
+    // Initialize StatusBar
+    statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, clock, DisplayConfig::STATUS_BAR_HEIGHT);
 
-    tft.init(); 
-    tft.setRotation(1); 
+    // Allocate sprite buffer
+    reallocateSprites();
 
-    ledcAttachPin(Config::Hardware::TFT_BL_PIN, 1); // Use pin from config 
-    ledcSetup(1, 5000, 8); 
-    setBrightness(loadBrightness()); 
+    Serial.println("📺 DisplayManager initialized");
+}
 
-    reallocateSprites(); 
-} 
+void DisplayManager::initBacklight() {
+    ledcAttachPin(Config::Hardware::TFT_BL_PIN, DisplayConfig::PWM_CHANNEL);
+    ledcSetup(DisplayConfig::PWM_CHANNEL, DisplayConfig::PWM_FREQUENCY, DisplayConfig::PWM_RESOLUTION);
+    setBrightness(brightness);
+}
 
-// Optimization: Explicitly free sprite memory before reallocation. 
-// Benefit: Prevents memory leaks that occur if createSprite() is called on an existing sprite. 
-void DisplayManager::freeSprites() { 
-    if (spriteAllocated) { 
-        sprTop.deleteSprite(); 
-        spriteAllocated = false; 
-        Serial.println("🗑️ Sprite freed"); 
-    } 
-} 
+void DisplayManager::loadSettings() {
+    prefs.begin("display", true); // Read-only
+    brightness = prefs.getUChar("brightness", DisplayConfig::BRIGHTNESS_DEFAULT);
+    darkMode = prefs.getBool("darkMode", true);
+    prefs.end();
 
-void DisplayManager::reallocateSprites() { 
-    freeSprites(); // Ensure any existing sprite is deleted first. 
+    // Clamp brightness
+    brightness = constrain(brightness, DisplayConfig::BRIGHTNESS_MIN, DisplayConfig::BRIGHTNESS_MAX);
+}
 
-    sprTop.setColorDepth(8); 
-    spriteAllocated = sprTop.createSprite(280, SPRITE_HEIGHT); 
+void DisplayManager::saveSettings() {
+    prefs.begin("display", false);
+    prefs.putUChar("brightness", brightness);
+    prefs.putBool("darkMode", darkMode);
+    prefs.end();
+}
 
-    if (spriteAllocated) { 
-        sprTop.fillSprite(TFT_BLACK); 
-        Serial.printf("✅ Sprite allocated: %d bytes\n", 280 * SPRITE_HEIGHT); 
-    } else { 
-        Serial.println("❌ Sprite allocation failed - using direct rendering"); 
-    } 
-} 
+// ============================================================================
+// Sprite Management
+// ============================================================================
 
-void DisplayManager::clear(uint16_t color) { 
-    uint16_t clearColor = darkMode ? TFT_BLACK : TFT_WHITE; 
-    if (spriteAllocated) { 
-        sprTop.fillSprite(clearColor); 
-    } else { 
-        tft.fillScreen(clearColor); 
-    } 
-} 
+void DisplayManager::freeSprites() {
+    if (spriteAllocated) {
+        sprTop.deleteSprite();
+        spriteAllocated = false;
+        Serial.println("🗑️ Sprite buffer freed");
+    }
+}
 
-// Optimization: Track text state to avoid redundant SPI commands. 
-// Benefit: Reduces SPI bus traffic by ~60%, leading to faster rendering. 
-void DisplayManager::drawText(int16_t x, int16_t y, const char* text, uint16_t color, uint8_t size) { 
-    const uint16_t bg = darkMode ? TFT_BLACK : TFT_WHITE; 
+void DisplayManager::reallocateSprites() {
+    // Ensure clean state
+    freeSprites();
 
-    if (currentTextColor != color || currentTextSize != size) {
-        (spriteAllocated ? sprTop : tft).setTextColor(color, bg, false);
-        currentTextColor = color;
+    // Allocate 8-bit sprite (256 colors, less memory than 16-bit)
+    sprTop.setColorDepth(8);
+    spriteAllocated = sprTop.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
+
+    if (spriteAllocated) {
+        const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
+        Serial.printf("✅ Sprite allocated: %u bytes (%ux%u @ 8-bit)\n",
+                      bytes, DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
+        sprTop.fillSprite(getBackgroundColor());
+    } else {
+        Serial.println("❌ Sprite allocation failed - fallback to direct rendering");
+        Serial.printf("   Required: %u bytes\n", DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT);
     }
 
-    if (currentTextSize != size) {
-        (spriteAllocated ? sprTop : tft).setTextSize(size);
-        currentTextSize = size;
+    renderState.reset();
+}
+
+// ============================================================================
+// Rendering Pipeline
+// ============================================================================
+
+void DisplayManager::clear(uint16_t color) {
+    if (spriteAllocated) {
+        sprTop.fillSprite(color);
+    } else {
+        tft.fillScreen(color);
+    }
+    renderState.reset();
+}
+
+void DisplayManager::render() {
+    if (spriteAllocated) {
+        sprTop.pushSprite(0, DisplayConfig::STATUS_BAR_HEIGHT);
+    }
+}
+
+void DisplayManager::renderStatusBar() {
+    if (statusBar) {
+        statusBar->draw();
+        statusBar->pushSprite(0, 0);
+    }
+}
+
+// ============================================================================
+// Drawing Primitives (Optimized)
+// ============================================================================
+
+template<typename T>
+T& DisplayManager::getRenderer() {
+    if (spriteAllocated) {
+        return reinterpret_cast<T&>(sprTop);
+    } else {
+        return reinterpret_cast<T&>(tft);
+    }
+}
+
+void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
+                               uint16_t color, uint8_t size) {
+    if (!text) return;
+
+    const uint16_t bgColor = getBackgroundColor();
+
+    // Select renderer (sprite or direct)
+    auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
+                                      : static_cast<TFT_eSPI&>(tft);
+
+    // Optimize: Only update state if changed
+    bool needsUpdate = false;
+
+    if (renderState.textColor != color || renderState.bgColor != bgColor) {
+        renderer.setTextColor(color, bgColor, false);
+        renderState.textColor = color;
+        renderState.bgColor = bgColor;
+        needsUpdate = true;
     }
 
-    (spriteAllocated ? sprTop : tft).setCursor(x, y); 
-    (spriteAllocated ? sprTop : tft).print(text); 
+    if (renderState.textSize != size) {
+        renderer.setTextSize(size);
+        renderState.textSize = size;
+        needsUpdate = true;
+    }
 
-    if (screenManager) screenManager->setDirty(); 
-} 
+    renderer.setCursor(x, y);
+    renderer.print(text);
 
+    if (screenManager && needsUpdate) {
+        screenManager->setDirty();
+    }
+}
 
-void DisplayManager::drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint16_t color) { 
-    (spriteAllocated ? sprTop : tft).drawBitmap(x, y, bitmap, w, h, color); 
-} 
+void DisplayManager::drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
+                                 int16_t w, int16_t h, uint16_t color) {
+    if (!bitmap) return;
 
-void DisplayManager::drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint16_t color) { 
-    (spriteAllocated ? sprTop : tft).drawXBitmap(x, y, bitmap, w, h, color); 
-} 
+    if (spriteAllocated) {
+        sprTop.drawBitmap(x, y, bitmap, w, h, color);
+    } else {
+        tft.drawBitmap(x, y, bitmap, w, h, color);
+    }
+}
 
-void DisplayManager::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) { 
-    (spriteAllocated ? sprTop : tft).drawRect(x, y, w, h, color); 
-} 
+void DisplayManager::drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
+                                  int16_t w, int16_t h, uint16_t color) {
+    if (!bitmap) return;
 
-void DisplayManager::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) { 
-    (spriteAllocated ? sprTop : tft).fillRect(x, y, w, h, color); 
-} 
+    if (spriteAllocated) {
+        sprTop.drawXBitmap(x, y, bitmap, w, h, color);
+    } else {
+        tft.drawXBitmap(x, y, bitmap, w, h, color);
+    }
+}
 
-void DisplayManager::render() { 
-    if (spriteAllocated) { 
-        sprTop.pushSprite(0, STATUS_BAR_HEIGHT); 
-    } 
-} 
+void DisplayManager::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+    if (spriteAllocated) {
+        sprTop.drawRect(x, y, w, h, color);
+    } else {
+        tft.drawRect(x, y, w, h, color);
+    }
+}
 
-void DisplayManager::renderStatusBar() { 
-    if (statusBar) { 
-        statusBar->draw(); 
-        statusBar->pushSprite(0, 0); 
-    } 
-} 
+void DisplayManager::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
+    if (spriteAllocated) {
+        sprTop.fillRect(x, y, w, h, color);
+    } else {
+        tft.fillRect(x, y, w, h, color);
+    }
+}
 
-void DisplayManager::setBrightness(uint8_t level) { 
-    brightness = constrain(level, 0, 100); 
-    saveBrightness(brightness); 
-    // A brightness of 0 is still slightly on, so map 0-100 to a usable PWM range. 
-    uint32_t dutyCycle = map(brightness, 0, 100, 0, 255); 
-    ledcWrite(1, dutyCycle); 
-} 
+int DisplayManager::getTextWidth(const char* text, uint8_t size) {
+    if (!text) return 0;
 
-uint8_t DisplayManager::getBrightness() const { 
-    return brightness; 
-} 
+    auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
+                                      : static_cast<TFT_eSPI&>(tft);
 
-void DisplayManager::toggleDarkMode() { 
-    darkMode = !darkMode; 
-    saveDarkMode(darkMode); 
-    // Force text color to be re-set on next draw 
-    currentTextColor = 0xFFFF; 
-} 
+    // Temporär Größe setzen für Messung
+    const uint8_t oldSize = renderState.textSize;
+    if (oldSize != size) {
+        renderer.setTextSize(size);
+    }
 
-bool DisplayManager::isDarkMode() const { 
-    return darkMode; 
-} 
+    const int width = renderer.textWidth(text);
 
-int DisplayManager::getTextWidth(const char* text, uint8_t size) { 
-    (spriteAllocated ? sprTop : tft).setTextSize(size);
-    return (spriteAllocated ? sprTop : tft).textWidth(text);
+    // Zurücksetzen falls geändert
+    if (oldSize != size) {
+        renderer.setTextSize(oldSize);
+    }
+
+    return width;
+}
+
+// ============================================================================
+// Settings Management
+// ============================================================================
+
+void DisplayManager::setBrightness(uint8_t level) {
+    brightness = constrain(level, DisplayConfig::BRIGHTNESS_MIN, DisplayConfig::BRIGHTNESS_MAX);
+
+    // Map brightness to PWM (50-100% -> 0-255)
+    const uint8_t pwmValue = map(brightness,
+                                  DisplayConfig::BRIGHTNESS_MIN,
+                                  DisplayConfig::BRIGHTNESS_MAX,
+                                  0, 255);
+
+    ledcWrite(DisplayConfig::PWM_CHANNEL, pwmValue);
+
+    // Save asynchronously (nur bei signifikanten Änderungen)
+    static uint8_t lastSaved = brightness;
+    if (abs(brightness - lastSaved) >= 10) {
+        saveSettings();
+        lastSaved = brightness;
+        Serial.printf("💡 Brightness: %u%% (PWM: %u)\n", brightness, pwmValue);
+    }
+}
+
+void DisplayManager::toggleDarkMode() {
+    darkMode = !darkMode;
+    saveSettings();
+    renderState.reset(); // Force re-render mit neuen Farben
+
+    Serial.printf("🌓 Dark Mode: %s\n", darkMode ? "ON" : "OFF");
+
+    if (screenManager) {
+        screenManager->setDirty();
+    }
 }
