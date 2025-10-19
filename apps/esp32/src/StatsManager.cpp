@@ -1,52 +1,81 @@
+// ==== OPTIMIZED FILE ==== 
+// This file has been refactored to reduce flash wear by batching NVS writes.
+// Key improvements:
+// - 'addCycle()' no longer writes to flash on every call. It now only updates RAM and sets a 'dirty' flag.
+// - A new 'update()' method, called from the main loop, checks if it's time to write.
+// - 'flushToNvs()' performs the actual write, but only when necessary.
+
 #include "StatsManager.h"
+#include "config.h"
+#include <Arduino.h>
 
 StatsManager::StatsManager() 
     : totalCycles(0), sessionCycles(0), totalDuration(0), averageDuration(0), 
-      clicks(0), caps(0), lastClick(""), consumption("") {
+      clicks(0), caps(0), lastClick(""), consumption(""), 
+      nvsDirty(false), lastNvsWrite(0) {
 }
 
 void StatsManager::init() {
-    prefs.begin("stats", false);
+    prefs.begin("stats", true); // Read-only is faster
     totalCycles = prefs.getULong("total_cycles", 0);
     totalDuration = prefs.getULong("total_duration", 0);
     prefs.end();
     
-    // Calculate average duration
     if (totalCycles > 0) {
         averageDuration = totalDuration / (float)totalCycles / 1000.0f; // Convert to seconds
     }
     
-    Serial.println("StatsManager initialized");
+    Serial.println("📊 StatsManager initialized");
 }
 
+// Optimization: Defer flash writes by setting a dirty flag.
+// Benefit: Reduces flash writes from potentially hundreds per hour to just a few, extending hardware life.
 void StatsManager::addCycle(unsigned long duration) {
     sessionCycles++;
     totalCycles++;
     totalDuration += duration;
     
-    // Update average
-    averageDuration = totalDuration / (float)totalCycles / 1000.0f;
+    if (totalCycles > 0) {
+        averageDuration = totalDuration / (float)totalCycles / 1000.0f;
+    }
     
-    // Save to NVS
+    nvsDirty = true; // Mark that we have unsaved changes
+    Serial.printf("Cycle added: %lu ms, Total: %lu cycles. NVS write deferred.\n", duration, totalCycles);
+}
+
+// This method should be called in the main device loop.
+void StatsManager::update() {
+    if (nvsDirty && (millis() - lastNvsWrite > Config::Timing::NVS_FLUSH_INTERVAL_MS)) {
+        flushToNvs();
+    }
+}
+
+void StatsManager::flushToNvs() {
+    if (!nvsDirty) return;
+
     prefs.begin("stats", false);
     prefs.putULong("total_cycles", totalCycles);
     prefs.putULong("total_duration", totalDuration);
     prefs.end();
-    
-    Serial.printf("Cycle added: %lu ms, Total: %lu cycles\n", duration, totalCycles);
+
+    nvsDirty = false;
+    lastNvsWrite = millis();
+    Serial.println("💾 Stats saved to NVS");
 }
 
 void StatsManager::updateSessionData(const JsonObject& data) {
+    // Optimization: Use proper null-checking for JSON values.
+    // Benefit: Prevents runtime errors and ensures data is only updated when valid.
     if (data.containsKey("clicks")) {
         clicks = data["clicks"].as<int>();
     }
     if (data.containsKey("caps")) {
         caps = data["caps"].as<int>();
     }
-    if (data.containsKey("lastClick")) {
+    if (data.containsKey("lastClick") && !data["lastClick"].isNull()) {
         lastClick = data["lastClick"].as<String>();
     }
-    if (data.containsKey("consumption")) {
+    if (data.containsKey("consumption") && !data["consumption"].isNull()) {
         consumption = data["consumption"].as<String>();
     }
 
@@ -70,7 +99,6 @@ float StatsManager::getAverageDuration() const {
     return averageDuration;
 }
 
-// Implementation of new getters
 int StatsManager::getClicks() const {
     return clicks;
 }

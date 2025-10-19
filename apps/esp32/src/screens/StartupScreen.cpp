@@ -23,7 +23,7 @@ void StartupScreen::draw(DisplayManager& display) {
     int16_t x = (display.getTFTWidth() - bitmapWidth) / 2;
     int16_t y = (display.getTFTHeight() - bitmapHeight) / 2;
 
-    display.drawBitmap(x, y, catBitmap, bitmapWidth, bitmapHeight, TFT_WHITE);
+    // display.drawBitmap(x, y, catBitmap, bitmapWidth, bitmapHeight, TFT_WHITE);
 }
 
 void StartupScreen::update() {

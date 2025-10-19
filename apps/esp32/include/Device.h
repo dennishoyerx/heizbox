@@ -30,13 +30,10 @@ public:
     void setup();
     void loop();
 
-    // Public methods for WebSocket and static callbacks
+    // Public methods for WebSocket
     void handleWebSocketEvent(WStype_t type, uint8_t * payload, size_t length);
-    static void WiFiEvent(WiFiEvent_t event);
-    static Device* instance; 
     void sendHeatingStatus(bool heatingStatus);
     void setCurrentCycle(int cycle);
-
 
 private:
     // Core components
@@ -59,15 +56,22 @@ private:
     OtaUpdateScreen otaUpdateScreen;
     StatsScreen statsScreen;
     TimezoneScreen timezoneScreen;
-    StartupScreen startupScreen; // Add StartupScreen here
+    StartupScreen startupScreen;
 
+    // --- Private Methods ---
     void handleInput(InputEvent event);
     void handleGlobalScreenSwitching(InputEvent event);
     void initWebSocket();
-    static void sendHeatingDataTask(void* pvParameters); // This can probably be removed later
+    void initWiFi();
+    static void WiFiEvent(WiFiEvent_t event);
 
+    // Optimization: Centralized JSON message sending to reduce code duplication and memory allocation.
+    // Benefit: Reduces flash usage and avoids heap fragmentation from repeated String/JsonDocument creation.
+    void sendJsonMessage(const char* type, bool includeIsOn = false, bool isOnValue = false, bool includeIsHeating = false, bool isHeatingValue = false);
+    void sendHeatCycleCompleted(unsigned long duration, int cycle);
+
+    // --- State Tracking ---
     bool _lastHeatingStatusSent = false; // Track last sent heating status
     unsigned long _lastHeartbeatTime = 0;
-    const unsigned long HEARTBEAT_INTERVAL = 30000; // 30 seconds
     int _lastSetCycle = 1; // Store the last set cycle, default to 1
 };

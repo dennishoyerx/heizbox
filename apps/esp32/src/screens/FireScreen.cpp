@@ -47,9 +47,9 @@ void FireScreen::draw(DisplayManager& display) {
     // Display status
     const char* status = "";
     switch (heater.getState()) {
-        case HEATING:   status = "";         break;
-        case COOLDOWN:  status = "COOLDOWN"; break;
-        case ERROR:     status = "ERROR";    break;
+        case HeaterController::State::HEATING:   status = "";         break;
+        case HeaterController::State::COOLDOWN:  status = "COOLDOWN"; break;
+        case HeaterController::State::ERROR:     status = "ERROR";    break;
         default:        status = "";         break;
     }
     display.drawText(70, 180, status, TFT_WHITE, 2);
@@ -71,7 +71,7 @@ void FireScreen::draw(DisplayManager& display) {
 
 void FireScreen::update() {
     static bool wasActive = false;
-    bool isActive = heater.isHeating() || heater.getState() == COOLDOWN;
+    bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
     unsigned long now = millis();
 
     if (isActive) {

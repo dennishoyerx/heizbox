@@ -18,9 +18,17 @@ private:
     String lastClick;
     String consumption;
 
+    // Optimization: Batch NVS writes to reduce flash wear.
+    // Benefit: Drastically increases the lifespan of the ESP32's flash memory.
+    bool nvsDirty = false;
+    uint32_t lastNvsWrite = 0;
+
+    void flushToNvs();
+
 public:
     StatsManager();
     void init();
+    void update(); // Must be called in the main loop
     void addCycle(unsigned long duration);
     void resetSession();
     void updateSessionData(const JsonObject& data);

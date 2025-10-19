@@ -24,6 +24,11 @@ private:
     TFT_eSprite sprTop;
     bool spriteAllocated = false;
 
+    // Optimization: State tracking for text attributes to reduce redundant SPI calls.
+    // Benefit: Improves rendering performance by avoiding unnecessary hardware state changes.
+    uint8_t currentTextSize = 1;
+    uint16_t currentTextColor = TFT_WHITE;
+
 public:
     DisplayManager(ClockManager* cm);
     ~DisplayManager(); // Destruktor hinzuf�gen
