@@ -1,6 +1,7 @@
 // src/screens/FireScreen.cpp
 #include "FireScreen.h"
 #include "ScreenManager.h"
+#include "bitmaps.h"
 #include <TFT_eSPI.h>
 
 FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
@@ -42,7 +43,7 @@ void FireScreen::drawHeatingTimer(DisplayManager& display) {
     snprintf(timeStr, sizeof(timeStr), "%02lu", seconds % 60);
 
     // Zentrierter großer Timer
-    centerText(display, 80, timeStr, TFT_WHITE, 6);
+    centerText(display, 80, timeStr, TFT_WHITE, 4);
 }
 
 void FireScreen::drawStatus(DisplayManager& display) {
@@ -56,14 +57,15 @@ void FireScreen::drawStatus(DisplayManager& display) {
     }
 
     if (status) {
-        centerText(display, 180, status, TFT_WHITE, 2);
+        //centerText(display, 180, status, TFT_WHITE, 2);
     }
 }
 
 void FireScreen::drawCycleInfo(DisplayManager& display) {
     char text[20];
     snprintf(text, sizeof(text), "Cycle: %d", state.currentCycle);
-    display.drawText(10, 10, text, TFT_WHITE, 3);
+    display.drawBitmap(5, 30, epd_bitmap_fire, 32, 32, TFT_WHITE);
+    display.drawText(15, 30, text, TFT_WHITE, 3);
 }
 
 void FireScreen::drawSessionStats(DisplayManager& display) {
@@ -71,7 +73,7 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
     char line1[50];
     snprintf(line1, sizeof(line1), "Clicks: %d | Caps: %d",
              statsManager->getClicks(), statsManager->getCaps());
-    display.drawText(10, 40, line1, TFT_WHITE, 2);
+    display.drawText(10, 70, line1, TFT_WHITE, 2);
 
     // Zeile 2: Verbrauch
     String consumption = statsManager->getConsumption();

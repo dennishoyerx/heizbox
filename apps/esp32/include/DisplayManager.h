@@ -86,7 +86,7 @@ private:
         void reset() {
             textSize = 0;
             textColor = 0xFFFF;
-            bgColor = 0x0000;
+            bgColor = 1;
         }
     } renderState;
 
@@ -94,7 +94,7 @@ private:
     void loadSettings();
     void saveSettings();
     void initBacklight();
-    uint16_t getBackgroundColor() const { return darkMode ? TFT_BLACK : TFT_WHITE; }
+    uint16_t getBackgroundColor();
 
     // Renderer selection (Sprite vs Direct)
     template<typename T>

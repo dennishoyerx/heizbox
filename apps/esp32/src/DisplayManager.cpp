@@ -48,6 +48,10 @@ void DisplayManager::init(ScreenManager* mgr) {
     // Allocate sprite buffer
     reallocateSprites();
 
+
+    uint16_t orange = tft.color565(255, 107, 43);
+    tft.fillScreen(orange);
+
     Serial.println("📺 DisplayManager initialized");
 }
 
@@ -87,18 +91,19 @@ void DisplayManager::freeSprites() {
 }
 
 void DisplayManager::reallocateSprites() {
-    // Ensure clean state
     freeSprites();
 
-    // Allocate 8-bit sprite (256 colors, less memory than 16-bit)
     sprTop.setColorDepth(8);
     spriteAllocated = sprTop.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
+        // Hintergrundfarbe exakt #FF6B2B
+        uint16_t orange = tft.color565(255, 107, 43);
+        sprTop.fillSprite(orange);
+
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
-        Serial.printf("✅ Sprite allocated: %u bytes (%ux%u @ 8-bit)\n",
+        Serial.printf("✅ Sprite allocated: %u bytes (%ux%u @8-bit, bg #FF6B2B)\n",
                       bytes, DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
-        sprTop.fillSprite(getBackgroundColor());
     } else {
         Serial.println("❌ Sprite allocation failed - fallback to direct rendering");
         Serial.printf("   Required: %u bytes\n", DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT);
@@ -107,18 +112,28 @@ void DisplayManager::reallocateSprites() {
     renderState.reset();
 }
 
+
+uint16_t DisplayManager::getBackgroundColor() {
+    // Fixiert auf #FF6B2B
+    return tft.color565(255, 107, 43);
+}
+
 // ============================================================================
 // Rendering Pipeline
 // ============================================================================
 
 void DisplayManager::clear(uint16_t color) {
+    // Hintergrund bleibt immer #FF6B2B
+    uint16_t orange = tft.color565(255, 107, 43);
+
     if (spriteAllocated) {
-        sprTop.fillSprite(color);
+        sprTop.fillSprite(orange);
     } else {
-        tft.fillScreen(color);
+        tft.fillScreen(orange);
     }
     renderState.reset();
 }
+
 
 void DisplayManager::render() {
     if (spriteAllocated) {
@@ -159,6 +174,8 @@ void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
     // Optimize: Only update state if changed
     bool needsUpdate = false;
 
+    renderer.setFreeFont(&FreeSans9pt7b);
+
     if (renderState.textColor != color || renderState.bgColor != bgColor) {
         renderer.setTextColor(color, bgColor, false);
         renderState.textColor = color;
@@ -167,7 +184,13 @@ void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
     }
 
     if (renderState.textSize != size) {
-        renderer.setTextSize(size);
+        switch (size) {
+            case 1: renderer.setFreeFont(&FreeSans9pt7b);  break;
+            case 2: renderer.setFreeFont(&FreeSans12pt7b); break;
+            case 3: renderer.setFreeFont(&FreeSans18pt7b); break;
+            case 4: renderer.setFreeFont(&FreeSans24pt7b); break;
+            default: renderer.setFreeFont(&FreeSans9pt7b);
+        }
         renderState.textSize = size;
         needsUpdate = true;
     }
@@ -224,21 +247,18 @@ int DisplayManager::getTextWidth(const char* text, uint8_t size) {
     auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
                                       : static_cast<TFT_eSPI&>(tft);
 
-    // Temporär Größe setzen für Messung
-    const uint8_t oldSize = renderState.textSize;
-    if (oldSize != size) {
-        renderer.setTextSize(size);
+    // FreeFont wie in drawText auswählen
+    switch (size) {
+        case 1: renderer.setFreeFont(&FreeSans9pt7b);  break;
+        case 2: renderer.setFreeFont(&FreeSans12pt7b); break;
+        case 3: renderer.setFreeFont(&FreeSans18pt7b); break;
+        case 4: renderer.setFreeFont(&FreeSans24pt7b); break;
+        default: renderer.setFreeFont(&FreeSans9pt7b);
     }
 
-    const int width = renderer.textWidth(text);
-
-    // Zurücksetzen falls geändert
-    if (oldSize != size) {
-        renderer.setTextSize(oldSize);
-    }
-
-    return width;
+    return renderer.textWidth(text);
 }
+
 
 // ============================================================================
 // Settings Management

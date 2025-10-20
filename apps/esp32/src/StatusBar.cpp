@@ -59,7 +59,7 @@ void StatusBar::draw() {
 
 void StatusBar::drawTimeRegion() {
     // Clear nur Zeit-Bereich
-    tft->fillRect(0, 0, 150, height, BG_COLOR);
+    tft->fillRect(0, 0, 150, height, tft->color565(255, 107, 43));
 
     // Render Zeit
     tft->setTextColor(TFT_WHITE);
@@ -73,7 +73,7 @@ void StatusBar::drawWifiRegion() {
     // Clear nur WiFi-Icon Bereich
     const int16_t iconX = tft->width() - 40;
     const int16_t iconY = height - 27;
-    tft->fillRect(iconX, iconY, 19, 15, 0x000);
+    tft->fillRect(iconX, iconY, 19, 15, tft->color565(255, 107, 43));
 
     // Render WiFi-Icon
     const uint8_t* icon = getWifiIcon();

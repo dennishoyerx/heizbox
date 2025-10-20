@@ -99,19 +99,12 @@ bool WebSocketManager::sendHeatCycleCompleted(uint32_t durationSec, uint8_t cycl
 }
 
 bool WebSocketManager::sendSessionUpdate(int clicks, int caps) {
-
     JsonDocument doc;
-
     doc["type"] = "sessionUpdate";
-
     doc["clicks"] = clicks;
-
     doc["caps"] = caps;
 
-
-
     return sendJson(doc);
-
 }
 
 // ============================================================================

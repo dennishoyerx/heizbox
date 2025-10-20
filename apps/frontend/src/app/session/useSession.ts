@@ -18,7 +18,6 @@ export const useSession = () => {
 		queryClient.invalidateQueries({ queryKey: ['runningSession'] })
 	}, [queryClient])
 
-	useWebSocketEvent('heatCycleCompleted', handleCycleUpdate)
-	useWebSocketEvent('heatCycleCreated', handleCycleUpdate)
+	useWebSocketEvent('sessionData', handleCycleUpdate)
 	return query
 }

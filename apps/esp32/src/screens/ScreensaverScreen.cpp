@@ -7,7 +7,6 @@
 #include <Adafruit_GFX.h>
 #include <TFT_eSPI.h>
 #include "InputManager.h"
-#define TFT_GRAY 0x7BEF
 
 ScreenType ScreensaverScreen::getType() const {
     return ScreenType::SCREENSAVER;
@@ -30,7 +29,7 @@ void ScreensaverScreen::draw(DisplayManager& display) {
     String date = clock.getFormattedDate();
     int16_t dateWidth = display.getTextWidth(date.c_str(), 2);
     int16_t dateX = (display.getTFTWidth() - dateWidth) / 2 + 25;
-    display.drawText(dateX, 130, date.c_str(), TFT_GRAY, 2);
+    display.drawText(dateX, 130, date.c_str(), TFT_WHITE, 2);
 }
 
 void ScreensaverScreen::update() {

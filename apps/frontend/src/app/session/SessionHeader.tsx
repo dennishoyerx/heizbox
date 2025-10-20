@@ -16,8 +16,10 @@ const Stat = ({ label, value, suffix }: { label: string; value: number; suffix?:
 		<Text className='opacity-50 text-xl'>{label}</Text>
 	</Flex>
 )
+
 const SessionHeader: React.FC<SessionHeaderProps> = ({ isHeating, consumed }) => {
 	const { data: session, isLoading, isError, error } = useSession()
+
 	return (
 		<Grid columns='4' className='py-4'>
 			<Stat label='Caps' value={session?.caps || 0} />

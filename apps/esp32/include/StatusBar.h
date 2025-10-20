@@ -44,7 +44,7 @@ private:
     const uint8_t* getWifiIcon() const;
 
     static constexpr uint32_t TIME_UPDATE_INTERVAL_MS = 5000;
-    static constexpr uint16_t BG_COLOR = 0x885;
+    static constexpr uint16_t BG_COLOR = 1;
 };
 
 #endif
