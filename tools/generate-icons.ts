@@ -3,11 +3,9 @@ import * as path from 'path'
 import sharp from 'sharp'
 
 // --- Configuration ---
-// TO BE PROVIDED BY THE USER:
-const SVG_INPUT_DIR = './assets/icons/' // Placeholder: Please update with the correct path to your SVG assets.
-// It was found that 'heizbox/apps/esp32/include' is the likely include directory.
+const SVG_INPUT_DIR = './assets/icons/'
 const C_OUTPUT_DIR = './apps/esp32/include/icons/'
-const DEFAULT_ICON_SIZE = 48 // Default size if not specified in SVG filename
+const DEFAULT_ICON_SIZE = 48
 
 // --- Helper Functions ---
 
@@ -28,9 +26,9 @@ function convertBitmapToCByteArray(buffer: Buffer, width: number, height: number
 	for (let i = 0; i < buffer.length; i++) {
 		const pixelValue = buffer[i] // Get the 8-bit grayscale value
 
-		// Apply threshold: if pixel is dark (e.g., < 128), set bit to 1 (black), else 0 (white)
-		if (pixelValue >= 128) {
-			// invertierte Logik
+		// After sharp's threshold(128), dark pixels are 0, light pixels are 255
+		// We want black pixels (0) to be represented as 1 in our bitmap
+		if (pixelValue < 128) {
 			byte |= 1 << (7 - bitCount)
 		}
 
@@ -97,7 +95,7 @@ async function generateIcons() {
 	for (const svgFile of svgFiles) {
 		const svgFilePath = path.join(SVG_INPUT_DIR, svgFile)
 		const { name: iconName, size: iconSize } = parseFilename(svgFile)
-
+		const cppIconname = iconName.replace(/-/g, '_')
 		console.log(`Processing ${svgFile} (Icon: ${iconName}, Size: ${iconSize}x${iconSize})`)
 
 		try {
@@ -107,10 +105,10 @@ async function generateIcons() {
 			// Convert SVG to raw 1-bit monochrome bitmap using sharp
 			const { data, info } = await sharp(Buffer.from(svgContent))
 				.resize(iconSize, iconSize)
-				.flatten({ background: { r: 0, g: 0, b: 0 } }) // Ensure black background for transparent SVGs
-				.threshold(128) // Convert to 1-bit monochrome. Pixels >= 128 become white (1), < 128 become black (0).
-				.toColourspace('b-w') // Ensure it's monochrome
-				.raw({ depth: 'uchar' } as any) // Output raw 8-bit data
+				.flatten({ background: { r: 255, g: 255, b: 255 } }) // White background for transparent SVGs
+				.greyscale()
+				.threshold(128) // Convert to 1-bit: pixels >= 128 become white (255), < 128 become black (0)
+				.raw({ depth: 'uchar' })
 				.toBuffer({ resolveWithObject: true })
 
 			console.log(`Sharp output info for ${svgFile}:`, info)
@@ -126,26 +124,25 @@ async function generateIcons() {
 			const cByteArray = convertBitmapToCByteArray(data, info.width, info.height)
 
 			// Generate the C header file content
-			const headerContent = `
-#ifndef IMAGE_${iconName.toUpperCase()}_${iconSize}_H
-#define IMAGE_${iconName.toUpperCase()}_${iconSize}_H
+			const headerContent = `#ifndef IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
+#define IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
 
 #include <pgmspace.h> // For PROGMEM
 
-// Icon: ${iconName}, Size: ${iconSize}x${iconSize} pixels
+// Icon: ${cppIconname}, Size: ${iconSize}x${iconSize} pixels
 // Raw 1-bit monochrome data (packed, 1 byte = 8 pixels)
 // Black pixels are represented as 1, white as 0.
-static const unsigned char PROGMEM image_${iconName}[] = {
+static const unsigned char PROGMEM image_${cppIconname}[] = {
     ${cByteArray}
 };
 
-#endif // IMAGE_${iconName.toUpperCase()}_${iconSize}_H
+#endif // IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
 `
 
 			const outputFileName = `${iconName}-${iconSize}.h`
 			const outputFilePath = path.join(C_OUTPUT_DIR, outputFileName)
 
-			fs.writeFileSync(outputFilePath, headerContent.trim())
+			fs.writeFileSync(outputFilePath, headerContent)
 			console.log(`Generated ${outputFilePath}`)
 		} catch (error) {
 			console.error(`Error processing ${svgFile}:`, error)
