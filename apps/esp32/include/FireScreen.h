@@ -39,10 +39,6 @@ private:
         uint32_t confirmationStartTime;
     } state;
 
-    // Constants
-    static constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 30000;
-    static constexpr uint32_t CONFIRMATION_DISPLAY_MS = 2000;
-
     // Helper methods
     void drawHeatingTimer(DisplayManager& display);
     void drawStatus(DisplayManager& display);

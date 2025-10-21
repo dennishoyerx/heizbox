@@ -43,7 +43,7 @@ void FireScreen::drawHeatingTimer(DisplayManager& display) {
     snprintf(timeStr, sizeof(timeStr), "%02lu", seconds % 60);
 
     // Zentrierter großer Timer
-    centerText(display, 80, timeStr, TFT_WHITE, 4);
+    centerText(display, 100, timeStr, TFT_WHITE, 5);
 }
 
 void FireScreen::drawStatus(DisplayManager& display) {
@@ -63,23 +63,31 @@ void FireScreen::drawStatus(DisplayManager& display) {
 
 void FireScreen::drawCycleInfo(DisplayManager& display) {
     char text[20];
-    snprintf(text, sizeof(text), "Cycle: %d", state.currentCycle);
-    display.drawBitmap(5, 30, epd_bitmap_fire, 32, 32, TFT_WHITE);
-    display.drawText(15, 30, text, TFT_WHITE, 3);
+    snprintf(text, sizeof(text), "%d", state.currentCycle);
+    display.drawBitmap(10, 116-30, epd_bitmap_fire, 32, 32, TFT_WHITE);
+    display.drawText(52, 116, text, TFT_WHITE, 4);
 }
 
 void FireScreen::drawSessionStats(DisplayManager& display) {
     // Zeile 1: Clicks und Caps
-    char line1[50];
-    snprintf(line1, sizeof(line1), "Clicks: %d | Caps: %d",
-             statsManager->getClicks(), statsManager->getCaps());
-    display.drawText(10, 70, line1, TFT_WHITE, 2);
+    char lineCaps[50];
+    snprintf(lineCaps, sizeof(lineCaps), "%d Caps",
+             statsManager->getCaps());
+    char lineClicks[50];
+    snprintf(lineClicks, sizeof(lineClicks), "%d Clicks",
+             statsManager->getClicks());
 
     // Zeile 2: Verbrauch
     String consumption = statsManager->getConsumption();
-    char line2[40];
-    snprintf(line2, sizeof(line2), "Verbrauch: %sg", consumption.c_str());
-    display.drawText(10, 170, line2, TFT_WHITE, 2);
+    char lineConsumption[40];
+    snprintf(lineConsumption, sizeof(lineConsumption), "%sg", consumption.c_str());
+
+    display.drawBitmap(10, 150 - 16, image_session, 32, 32, TFT_WHITE);
+    display.drawText(152, 155, lineCaps, TFT_WHITE, 2);
+    display.drawText(152, 180, lineClicks, TFT_WHITE, 2);
+    display.drawText(52, 162, lineConsumption, TFT_WHITE, 3);
+    //display.drawText(52, 150, line1, TFT_WHITE, 2);
+    //display.drawText(52, 175, line2, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {
@@ -115,7 +123,7 @@ void FireScreen::handleInput(InputEvent event) {
             } else {
                 const bool updateCycle = heater.isHeating();
                 heater.stopHeating();
-                if (updateCycle) {
+                if (updateCycle && (millis() - state.heatingStartTime > 10000)) {
                     setCycleCallback(state.currentCycle);
                     state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
                 }
@@ -150,7 +158,7 @@ void FireScreen::handleCycleChange(bool increment) {
 void FireScreen::checkScreensaverTimeout() {
     const bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
 
-    if (!isActive && (millis() - state.lastActivityTime > SCREENSAVER_TIMEOUT_MS)) {
+    if (!isActive && (millis() - state.lastActivityTime > Config::Timing::SCREENSAVER_TIMEOUT_MS)) {
         screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
     }
 }

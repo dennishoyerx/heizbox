@@ -1,5 +1,6 @@
 // src/StatusBar.cpp
 #include "StatusBar.h"
+#include "Fonts/GFXFF/gfxfont.h"
 #include "bitmaps.h"
 
 StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, ClockManager* cm, uint8_t h)
@@ -63,7 +64,7 @@ void StatusBar::drawTimeRegion() {
 
     // Render Zeit
     tft->setTextColor(TFT_WHITE);
-    tft->setFreeFont(&FreeSans12pt7b);
+    tft->setFreeFont(&FreeSans18pt7b);
     tft->setTextSize(1);
     tft->setCursor(15, tft->fontHeight() + 4);
     tft->print(cache.time);

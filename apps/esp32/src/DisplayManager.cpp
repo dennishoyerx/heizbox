@@ -174,7 +174,15 @@ void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
     // Optimize: Only update state if changed
     bool needsUpdate = false;
 
-    renderer.setFreeFont(&FreeSans9pt7b);
+    switch (size) {
+        case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
+        case 2: renderer.setFreeFont(&FreeSans12pt7b); renderer.setTextSize(1); break;
+        case 3: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(1); break;
+        case 4: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(1); break;
+        case 5: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(2); break;
+        case 6: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(2); break;
+        default: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);
+    }
 
     if (renderState.textColor != color || renderState.bgColor != bgColor) {
         renderer.setTextColor(color, bgColor, false);
@@ -184,13 +192,6 @@ void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
     }
 
     if (renderState.textSize != size) {
-        switch (size) {
-            case 1: renderer.setFreeFont(&FreeSans9pt7b);  break;
-            case 2: renderer.setFreeFont(&FreeSans12pt7b); break;
-            case 3: renderer.setFreeFont(&FreeSans18pt7b); break;
-            case 4: renderer.setFreeFont(&FreeSans24pt7b); break;
-            default: renderer.setFreeFont(&FreeSans9pt7b);
-        }
         renderState.textSize = size;
         needsUpdate = true;
     }
@@ -247,13 +248,14 @@ int DisplayManager::getTextWidth(const char* text, uint8_t size) {
     auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
                                       : static_cast<TFT_eSPI&>(tft);
 
-    // FreeFont wie in drawText auswählen
     switch (size) {
-        case 1: renderer.setFreeFont(&FreeSans9pt7b);  break;
-        case 2: renderer.setFreeFont(&FreeSans12pt7b); break;
-        case 3: renderer.setFreeFont(&FreeSans18pt7b); break;
-        case 4: renderer.setFreeFont(&FreeSans24pt7b); break;
-        default: renderer.setFreeFont(&FreeSans9pt7b);
+        case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
+        case 2: renderer.setFreeFont(&FreeSans12pt7b); renderer.setTextSize(1); break;
+        case 3: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(1); break;
+        case 4: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(1); break;
+        case 5: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(2); break;
+        case 6: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(2); break;
+        default: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);
     }
 
     return renderer.textWidth(text);
