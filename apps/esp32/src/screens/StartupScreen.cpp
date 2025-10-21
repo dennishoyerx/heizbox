@@ -18,13 +18,12 @@ StartupScreen::StartupScreen() : startTime(millis()), animationComplete(false) {
 void StartupScreen::draw(DisplayManager& display) {
     display.clear(TFT_BLACK);
 
-    // Assuming catBitmap is 24x48 pixels
-    int16_t bitmapWidth = 24;
-    int16_t bitmapHeight = 48;
+    int16_t bitmapWidth = 96;
+    int16_t bitmapHeight = 96;
     int16_t x = (display.getTFTWidth() - bitmapWidth) / 2;
     int16_t y = (display.getTFTHeight() - bitmapHeight) / 2;
 
-    // display.drawBitmap(x, y, catBitmap, bitmapWidth, bitmapHeight, TFT_WHITE);
+    display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
 }
 
 void StartupScreen::update() {

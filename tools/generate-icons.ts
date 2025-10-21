@@ -95,7 +95,7 @@ async function generateIcons() {
 	for (const svgFile of svgFiles) {
 		const svgFilePath = path.join(SVG_INPUT_DIR, svgFile)
 		const { name: iconName, size: iconSize } = parseFilename(svgFile)
-		const cppIconname = iconName.replace(/-/g, '_')
+		const cppIconName = iconName.replace(/-/g, '_') + `_${iconSize}`
 		console.log(`Processing ${svgFile} (Icon: ${iconName}, Size: ${iconSize}x${iconSize})`)
 
 		try {
@@ -124,19 +124,19 @@ async function generateIcons() {
 			const cByteArray = convertBitmapToCByteArray(data, info.width, info.height)
 
 			// Generate the C header file content
-			const headerContent = `#ifndef IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
-#define IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
+			const headerContent = `#ifndef IMAGE_${cppIconName.toUpperCase()}_H
+#define IMAGE_${cppIconName.toUpperCase()}_H
 
 #include <pgmspace.h> // For PROGMEM
 
-// Icon: ${cppIconname}, Size: ${iconSize}x${iconSize} pixels
+// Icon: ${cppIconName}, Size: ${iconSize}x${iconSize} pixels
 // Raw 1-bit monochrome data (packed, 1 byte = 8 pixels)
 // Black pixels are represented as 1, white as 0.
-static const unsigned char PROGMEM image_${cppIconname}[] = {
+static const unsigned char PROGMEM image_${cppIconName}[] = {
     ${cByteArray}
 };
 
-#endif // IMAGE_${cppIconname.toUpperCase()}_${iconSize}_H
+#endif // IMAGE_${cppIconName.toUpperCase()}_H
 `
 
 			const outputFileName = `${iconName}-${iconSize}.h`
@@ -150,6 +150,30 @@ static const unsigned char PROGMEM image_${cppIconname}[] = {
 	}
 
 	console.log('Icon generation complete.')
+
+	// Generate bitmaps.h
+	console.log('Generating bitmaps.h header file...')
+	const bitmapsHeaderPath = path.join(C_OUTPUT_DIR, '../bitmaps.h')
+	let bitmapsContent = `#ifndef BITMAPS_H
+#define BITMAPS_H
+
+#include <pgmspace.h> // For PROGMEM
+
+// Include all generated icon headers
+`
+
+	for (const svgFile of svgFiles) {
+		const { name: iconName, size: iconSize } = parseFilename(svgFile)
+		const outputFileName = `${iconName}-${iconSize}.h`
+		bitmapsContent += `#include "icons/${outputFileName}"\n`
+	}
+
+	bitmapsContent += `
+#endif // BITMAPS_H
+`
+
+	fs.writeFileSync(bitmapsHeaderPath, bitmapsContent)
+	console.log(`Generated ${bitmapsHeaderPath}`)
 }
 
 generateIcons().catch(console.error)

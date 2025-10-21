@@ -72,13 +72,13 @@ void StatusBar::drawTimeRegion() {
 
 void StatusBar::drawWifiRegion() {
     // Clear nur WiFi-Icon Bereich
-    const int16_t iconX = tft->width() - 40;
-    const int16_t iconY = height - 27;
-    tft->fillRect(iconX, iconY, 19, 15, tft->color565(255, 107, 43));
+    const int16_t iconX = tft->width() - 50;
+    const int16_t iconY = height - 40;
+    tft->fillRect(iconX, iconY, 40, 40, tft->color565(255, 107, 43));
 
     // Render WiFi-Icon
     const uint8_t* icon = getWifiIcon();
-    tft->drawBitmap(iconX, iconY, icon, 19, 15, TFT_WHITE);
+    tft->drawBitmap(iconX, iconY, icon, 40, 40, TFT_WHITE);
 }
 
 int8_t StatusBar::getWifiStrength() const {
@@ -94,15 +94,15 @@ int8_t StatusBar::getWifiStrength() const {
 
 const uint8_t* StatusBar::getWifiIcon() const {
     if (cache.wifiStatus != WL_CONNECTED) {
-        return image_wifi_not_connected_bits;
+        return image_wifi_slash_bold_40;
     }
 
     switch (cache.wifiStrength) {
-        case 4:  return image_wifi_100_bits;
-        case 3:  return image_wifi_75_bits;
-        case 2:  return image_wifi_50_bits;
-        case 1:  return image_wifi_25_bits;
-        default: return image_wifi_0_bits;
+        case 4:  return image_wifi_high_bold_40;
+        case 3:  return image_wifi_medium_bold_40;
+        case 2:  return image_wifi_medium_bold_40;
+        case 1:  return image_wifi_low_bold_40;
+        default: return image_wifi_slash_bold_40;
     }
 }
 

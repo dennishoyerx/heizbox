@@ -64,8 +64,8 @@ void FireScreen::drawStatus(DisplayManager& display) {
 void FireScreen::drawCycleInfo(DisplayManager& display) {
     char text[20];
     snprintf(text, sizeof(text), "%d", state.currentCycle);
-    display.drawBitmap(10, 116-30, epd_bitmap_fire, 32, 32, TFT_WHITE);
-    display.drawText(52, 116, text, TFT_WHITE, 4);
+    display.drawBitmap(10, 116-40, image_fire_48, 48, 48, TFT_WHITE);
+    display.drawText(60, 116, text, TFT_WHITE, 4);
 }
 
 void FireScreen::drawSessionStats(DisplayManager& display) {
@@ -82,12 +82,11 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
     char lineConsumption[40];
     snprintf(lineConsumption, sizeof(lineConsumption), "%sg", consumption.c_str());
 
-    display.drawBitmap(10, 150 - 16, image_session, 32, 32, TFT_WHITE);
-    display.drawText(152, 155, lineCaps, TFT_WHITE, 2);
-    display.drawText(152, 180, lineClicks, TFT_WHITE, 2);
-    display.drawText(52, 162, lineConsumption, TFT_WHITE, 3);
-    //display.drawText(52, 150, line1, TFT_WHITE, 2);
-    //display.drawText(52, 175, line2, TFT_WHITE, 2);
+    display.drawBitmap(10, 150 - 16, image_session_48, 48, 48, TFT_WHITE);
+    display.drawText(60, 162, lineConsumption, TFT_WHITE, 3);
+
+    display.drawText(160, 155, lineCaps, TFT_WHITE, 2);
+    display.drawText(160, 180, lineClicks, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {
