@@ -76,8 +76,8 @@ void Device::setup() {
     });
 
     screensaverScreen.onExit([this]() {
-        screenManager.setScreen(&fireScreen);
         fireScreen.resetActivityTimer();
+        screenManager.setScreen(&fireScreen);
     });
 
     // Setup input callback
@@ -117,9 +117,9 @@ void Device::loop() {
     delay(5);
 }
 
-// ============================================================================ 
+// ============================================================================
 // Helper Methods
-// ============================================================================ 
+// ============================================================================
 
 void Device::setupOTA() {
     ArduinoOTA.setHostname("Heizbox");
