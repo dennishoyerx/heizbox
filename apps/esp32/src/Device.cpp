@@ -211,7 +211,7 @@ bool Device::handleGlobalShortcuts(InputEvent event) {
     if (event.button == LEFT && event.type == HOLD) {
         if (currentScreen == ScreenType::FIRE) {
             screenManager.setScreen(&mainMenuScreen, ScreenTransition::FADE);
-        } else if (currentScreen == ScreenType::MAIN_MENU) {
+        } else if (currentScreen != ScreenType::FIRE) {
             screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
         }
         return true;
