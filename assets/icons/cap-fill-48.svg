@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" stroke="currentColor">
+  <!-- Top cap -->
+  <rect x="80" y="40" width="96" height="12" rx="2"/>
+  <!-- Main cylindrical body -->
+  <rect x="80" y="40" width="96" height="110" rx="4"/>
+  <!-- Bottom connecting band -->
+  <!-- Tapered stem -->
+  <polygon points="100,150 105,216 151,216 156,150" />
+</svg>

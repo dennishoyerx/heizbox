@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Top cap (flat) -->
+  <line x1="80" y1="40" x2="176" y2="40"/>
+  <!-- Main cylindrical body - left side -->
+  <line x1="80" y1="40" x2="80" y2="150"/>
+  <!-- Main cylindrical body - right side -->
+  <line x1="176" y1="40" x2="176" y2="150"/>
+  <!-- Bottom connecting band -->
+  <line x1="80" y1="150" x2="100" y2="150"/>
+  <line x1="156" y1="150" x2="176" y2="150"/>
+  <!-- Tapered stem - left -->
+  <line x1="100" y1="150" x2="105" y2="216"/>
+  <!-- Tapered stem - right -->
+  <line x1="156" y1="150" x2="151" y2="216"/>
+  <!-- Stem bottom -->
+  <line x1="105" y1="216" x2="151" y2="216"/>
+</svg>

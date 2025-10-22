@@ -64,14 +64,14 @@ void FireScreen::drawStatus(DisplayManager& display) {
 void FireScreen::drawCycleInfo(DisplayManager& display) {
     char text[20];
     snprintf(text, sizeof(text), "%d", state.currentCycle);
-    display.drawBitmap(10, 116-40, image_fire_48, 48, 48, TFT_WHITE);
-    display.drawText(60, 116, text, TFT_WHITE, 4);
+    display.drawBitmap(10, 76, image_fire_48, 48, 48, TFT_WHITE);
+    display.drawText(60, 114, text, TFT_WHITE, 4);
 }
 
 void FireScreen::drawSessionStats(DisplayManager& display) {
     // Zeile 1: Clicks und Caps
     char lineCaps[50];
-    snprintf(lineCaps, sizeof(lineCaps), "%d Caps",
+    snprintf(lineCaps, sizeof(lineCaps), "%d",
              statsManager->getCaps());
     char lineClicks[50];
     snprintf(lineClicks, sizeof(lineClicks), "%d Clicks",
@@ -82,11 +82,14 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
     char lineConsumption[40];
     snprintf(lineConsumption, sizeof(lineConsumption), "%sg", consumption.c_str());
 
-    display.drawBitmap(10, 150 - 16, image_session_48, 48, 48, TFT_WHITE);
-    display.drawText(60, 162, lineConsumption, TFT_WHITE, 3);
+    display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
+    display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
 
-    display.drawText(160, 155, lineCaps, TFT_WHITE, 2);
-    display.drawText(160, 180, lineClicks, TFT_WHITE, 2);
+    display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
+    display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
+
+    //display.drawText(160, 155, lineCaps, TFT_WHITE, 2);
+    //display.drawText(160, 180, lineClicks, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {

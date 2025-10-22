@@ -2,6 +2,9 @@
 #include "DisplayManager.h"
 #include "ScreenManager.h"
 #include "StatusBar.h"
+#include <FS.h>
+#include <LittleFS.h>
+#include <cstdint>
 
 // ============================================================================
 // Constructor & Destructor
@@ -36,6 +39,7 @@ void DisplayManager::init(ScreenManager* mgr) {
     tft.init();
     tft.setRotation(1);
 
+    tft.loadFont("fonts/josefin_20.vlw", LittleFS);
     // Load persistent settings
     loadSettings();
 
@@ -161,6 +165,18 @@ T& DisplayManager::getRenderer() {
     }
 }
 
+static void setFont(uint16_t size, TFT_eSPI& renderer) {
+    switch (size) {
+        case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
+        case 2: renderer.setFreeFont(&FreeSans12pt7b); renderer.setTextSize(1); break;
+        case 3: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(1); break;
+        case 4: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(1); break;
+        case 5: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(2); break;
+        case 6: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(2); break;
+        default: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);
+    }
+}
+
 void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
                                uint16_t color, uint8_t size) {
     if (!text) return;
@@ -174,15 +190,8 @@ void DisplayManager::drawText(int16_t x, int16_t y, const char* text,
     // Optimize: Only update state if changed
     bool needsUpdate = false;
 
-    switch (size) {
-        case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
-        case 2: renderer.setFreeFont(&FreeSans12pt7b); renderer.setTextSize(1); break;
-        case 3: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(1); break;
-        case 4: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(1); break;
-        case 5: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(2); break;
-        case 6: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(2); break;
-        default: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);
-    }
+
+    setFont(size, renderer);
 
     if (renderState.textColor != color || renderState.bgColor != bgColor) {
         renderer.setTextColor(color, bgColor, false);
@@ -248,15 +257,7 @@ int DisplayManager::getTextWidth(const char* text, uint8_t size) {
     auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
                                       : static_cast<TFT_eSPI&>(tft);
 
-    switch (size) {
-        case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
-        case 2: renderer.setFreeFont(&FreeSans12pt7b); renderer.setTextSize(1); break;
-        case 3: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(1); break;
-        case 4: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(1); break;
-        case 5: renderer.setFreeFont(&FreeSans18pt7b); renderer.setTextSize(2); break;
-        case 6: renderer.setFreeFont(&FreeSans24pt7b); renderer.setTextSize(2); break;
-        default: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);
-    }
+    setFont(size, renderer);
 
     return renderer.textWidth(text);
 }
