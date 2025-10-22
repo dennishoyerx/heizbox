@@ -53,6 +53,7 @@ public:
     uint8_t getBrightness() const { return brightness; }
     void toggleDarkMode();
     bool isDarkMode() const { return darkMode; }
+    void saveSettings();
 
     // Helpers
     int getTFTWidth() const { return DisplayConfig::WIDTH; }
@@ -62,6 +63,7 @@ public:
     // Sprite management
     void freeSprites();
     void reallocateSprites();
+
 
 private:
     // Core components
@@ -92,7 +94,6 @@ private:
 
     // Helper methods
     void loadSettings();
-    void saveSettings();
     void initBacklight();
     uint16_t getBackgroundColor();
 

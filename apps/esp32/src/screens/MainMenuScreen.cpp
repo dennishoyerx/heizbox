@@ -11,7 +11,8 @@ MainMenuScreen::MainMenuScreen(DisplayManager* display, ScreenManager* screenMan
 {
     items = {
         {"Brightness", [this]() { adjustBrightness(); }},
-        {"AutoStop Time", [this]() { configureAutoStop(); }},
+        {"Dark Mode", [this]() { this->display->toggleDarkMode(); this->markDirty(); }},
+        {"Cycle Type", [this]() { this->display->toggleDarkMode(); this->markDirty(); }},
         {"Sleep Timeout", [this]() { configureSleepTimeout(); }},
         {"Timezone", [this]() {
             if (this->timezoneScreen) {
@@ -19,13 +20,11 @@ MainMenuScreen::MainMenuScreen(DisplayManager* display, ScreenManager* screenMan
                 this->screenManager->setScreen(this->timezoneScreen, ScreenTransition::FADE);
             }
         }},
-        {"Statistics", [this]() {
+        /*{"Statistics", [this]() {
             if (this->statsScreen) {
                 this->screenManager->setScreen(this->statsScreen, ScreenTransition::FADE);
             }
-        }},
-        {"Dark Mode", [this]() { this->display->toggleDarkMode(); this->markDirty(); }},
-        {"Hidden Mode", [this]() { this->enterHiddenMode(); }},
+            }},*/
     };
 }
 
@@ -102,6 +101,7 @@ void MainMenuScreen::adjustBrightness() {
     // Next level
     idx = (idx + 1) % numLevels;
     display->setBrightness(levels[idx]);
+    display->saveSettings();
 }
 
 void MainMenuScreen::configureAutoStop() {

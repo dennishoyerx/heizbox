@@ -100,42 +100,6 @@ export class DeviceStatus {
 				isHeating: this.isHeating,
 			})
 		})
-
-		this.app.post('/publish', async (c) => {
-			const message = await c.req.json()
-			console.log('DeviceStatus: Received message for publish:', message)
-
-			if (
-				message.type === 'statusUpdate' &&
-				typeof message.isOn === 'boolean' &&
-				typeof message.isHeating === 'boolean'
-			) {
-				let statusChanged = false
-				if (this.isOn !== message.isOn) {
-					this.isOn = message.isOn
-					await this.state.storage.put('isOn', this.isOn)
-					statusChanged = true
-				}
-				if (this.isHeating !== message.isHeating) {
-					this.isHeating = message.isHeating
-					await this.state.storage.put('isHeating', this.isHeating)
-					statusChanged = true
-				}
-				if (statusChanged) {
-					console.log('DeviceStatus: State updated from WebSocket message.', {
-						isOn: this.isOn,
-						isHeating: this.isHeating,
-					})
-				}
-			} else if (message.type === 'heatCycleCompleted' && typeof message.duration === 'number') {
-				console.log('DeviceStatus: Processing heatCycleCompleted message.', message)
-				const heatCycleService = new HeatCycleService(this.env.db)
-				await heatCycleService.createHeatCycle(message.duration, message.cycle || 1) // Use this.env.db
-			}
-
-			this.publish(message)
-			return c.json({ success: true })
-		})
 	}
 
 	async initialize() {
@@ -304,50 +268,47 @@ export class DeviceStatus {
 
 				const { 0: client, 1: server } = new WebSocketPair()
 
-				                                                this.webSockets.push({
+				this.webSockets.push({
+					ws: server,
+					type: type as 'frontend' | 'device',
+					deviceId,
+				})
 
-				                                                    ws: server,
+				this.subscribers.set(server, { type: type as 'frontend' | 'device' }) // Add to subscribers with type
 
-				                                                    type: type as 'frontend' | 'device',
+				server.accept()
 
-				                                                    deviceId,
+				this.sendInitialStatus(server)
 
-				                                                }); // Added semicolon here
+				this.sendHeartbeat(server)
 
-				                                                this.subscribers.set(server, { type: type as 'frontend' | 'device' }) // Add to subscribers with type
-				
-				                                                                server.accept()
-				
-				                                                                this.sendInitialStatus(server)
-				
-				                                                                this.sendHeartbeat(server)
-				
-				                                                                if (type === 'device') {
-				
-				                                                                    this.sendSessionData(server)
-				
-				                                                                }				                server.addEventListener('message', async (event) => {
-				                    try {
-				                                                const message = JSON.parse(event.data as string)
-				                                                await this.processDeviceMessage(server, message)				                    } catch (err) {
-				                        console.error('Error processing device message:', err)
-				                    }
-				                })
-				
-				                server.addEventListener('close', () => {
-				                    console.log('WebSocket closed')
-				                    this.webSockets = this.webSockets.filter(ws => ws.ws !== server)
-				                    this.subscribers.delete(server)
-				                })
-				
-				                server.addEventListener('error', (err) => {
-				                    console.error('WebSocket error:', err)
-				                    this.webSockets = this.webSockets.filter(ws => ws.ws !== server)
-				                    this.subscribers.delete(server)
-				                })
-				
-				                return new Response(null, { status: 101, webSocket: client })
-				            }			case '/status': {
+				if (type === 'device') {
+					this.sendSessionData(server)
+				}
+				server.addEventListener('message', async (event) => {
+					try {
+						const message = JSON.parse(event.data as string)
+						await this.processDeviceMessage(server, message)
+					} catch (err) {
+						console.error('Error processing device message:', err)
+					}
+				})
+
+				server.addEventListener('close', () => {
+					console.log('WebSocket closed')
+					this.webSockets = this.webSockets.filter((ws) => ws.ws !== server)
+					this.subscribers.delete(server)
+				})
+
+				server.addEventListener('error', (err) => {
+					console.error('WebSocket error:', err)
+					this.webSockets = this.webSockets.filter((ws) => ws.ws !== server)
+					this.subscribers.delete(server)
+				})
+
+				return new Response(null, { status: 101, webSocket: client })
+			}
+			case '/status': {
 				return new Response(
 					JSON.stringify({
 						isOn: this.isOn,
@@ -394,7 +355,7 @@ export class DeviceStatus {
 
 	// New method to process messages coming from devices
 	async processDeviceMessage(ws: WebSocket, message: any): Promise<void> {
-		console.log('!!!!!DeviceStatus: Processing device message:', message)
+		console.log('DeviceStatus: Processing device message:', message)
 		if (message.type === 'statusUpdate') {
 			let statusChanged = false
 
