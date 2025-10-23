@@ -15,6 +15,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.26.1",
+    "@reduxjs/toolkit": "^2.2.6",
     "recharts": "^3.2.1",
     "tailwindcss-radix-colors": "^2.1.0"
   },
