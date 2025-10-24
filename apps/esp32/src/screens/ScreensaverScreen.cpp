@@ -1,20 +1,12 @@
 // src/screens/ScreensaverScreen.cpp
 #include "ScreensaverScreen.h"
 #include "ScreenManager.h"
-#include "DisplayManager.h"
-#include "StatusBar.h"
-#include "ScreenType.h"
-#include <Adafruit_GFX.h>
 #include <TFT_eSPI.h>
-#include "InputManager.h"
-
-ScreenType ScreensaverScreen::getType() const {
-    return ScreenType::SCREENSAVER;
-}
+#include "ScreenBase.h"
 
 ScreensaverScreen::ScreensaverScreen(ClockManager& cm, unsigned long timeout, DisplayManager* dm)
-    : clock(cm), lastActivity(millis()), sleepTimeout(timeout), displayManager(dm) {
-}
+    : TimedScreen(ScreenType::SCREENSAVER, timeout),
+      clock(cm), displayManager(dm) {}
 
 void ScreensaverScreen::draw(DisplayManager& display) {
     display.clear(TFT_BLACK);
@@ -33,6 +25,10 @@ void ScreensaverScreen::draw(DisplayManager& display) {
 }
 
 void ScreensaverScreen::update() {
+    // Base-Update (Timeout-Handling)
+    TimedScreen::update();
+    
+    // Sekunden-Update für Uhr
     static unsigned long lastSecond = 0;
     if (millis() - lastSecond > 1000) {
         if (manager) manager->setDirty();
@@ -41,23 +37,14 @@ void ScreensaverScreen::update() {
 }
 
 void ScreensaverScreen::handleInput(InputEvent event) {
-    // Any input wakes up the screen
-    lastActivity = millis();
+    // Jede Eingabe weckt auf
+    resetTimeout();
     displayManager->setBrightness(100);
 
-    // Specific inputs might exit screensaver
     if (event.type == PRESS) {
-        if (exitCallback) {
-            // Only exit screensaver, do not immediately start heating if FIRE button was pressed
-            if (event.button == FIRE) {
-                exitCallback();
-                return; // Consume the event
-            }
-            exitCallback();
+        // FIRE-Button nicht sofort Heizen starten
+        if (hasCallback()) {
+            invokeCallback();
         }
     }
-}
-
-void ScreensaverScreen::onExit(std::function<void()> callback) {
-    exitCallback = callback;
 }

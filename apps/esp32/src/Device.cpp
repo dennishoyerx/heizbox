@@ -4,6 +4,10 @@
 #include "credentials.h"
 #include "config.h"
 #include <ArduinoOTA.h>
+#include "MenuBuilder.h"
+#include "ScreenRegistry.h"
+#include "ScreenBase.h"
+#include <utility> // For std::move and std::make_unique
 
 Device::Device()
     : input(),
@@ -16,15 +20,17 @@ Device::Device()
       screenManager(display, input),
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
-      mainMenuScreen(&display, &screenManager),
       hiddenModeScreen(&display),
       screensaverScreen(clockManager, 30000, &display),
       otaUpdateScreen(&display),
       statsScreen(statsManager),
       timezoneScreen(clockManager, &screenManager),
       startupScreen(),
-      lastSetCycle(1)
+      lastSetCycle(1),
+      mainMenuScreen(nullptr) // Wird später initialisiert
 {}
+
+Device::~Device() = default; // Destructor definition
 
 void Device::setup() {
     Serial.begin(115200);
@@ -43,7 +49,12 @@ void Device::setup() {
     display.init(&screenManager);
     clockManager.init();
 
+    // Screen-Registry aufsetzen
+    setupScreenRegistry();
+
     // Setup WiFi
+    // WICHTIG: Menu erst nach Init der Manager erstellen!
+    setupMainMenu();
     wifiManager.init(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
     wifiManager.onConnectionChange([this](bool connected) {
         if (connected) {
@@ -64,23 +75,15 @@ void Device::setup() {
     // Setup screens
     screenManager.setScreen(&startupScreen);
 
-    startupScreen.setOnAnimationCompleteCallback([this]() {
-        screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
+    startupScreen.setCallback([this]() {
+        NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::FIRE, ScreenTransition::FADE);
     });
 
-    mainMenuScreen.setStatsScreen(&statsScreen);
-    mainMenuScreen.setTimezoneScreen(&timezoneScreen);
-
-    timezoneScreen.onExit([this]() {
-        screenManager.setScreen(&mainMenuScreen);
-    });
-
-    screensaverScreen.onExit([this]() {
+    screensaverScreen.setCallback([this]() {
         fireScreen.resetActivityTimer();
-        screenManager.setScreen(&fireScreen);
+        NAVIGATE_TO(&screenManager, ScreenType::FIRE);
     });
 
-    // Setup input callback
     input.setCallback([this](InputEvent event) {
         this->handleInput(event);
     });
@@ -89,6 +92,63 @@ void Device::setup() {
     setupOTA();
 
     Serial.println("✅ Device initialized");
+}
+
+void Device::setupScreenRegistry() {
+    // Alle Screens registrieren
+    REGISTER_SCREEN(ScreenType::STARTUP, startupScreen);
+    REGISTER_SCREEN(ScreenType::FIRE, fireScreen);
+    REGISTER_SCREEN(ScreenType::STATS, statsScreen);
+    REGISTER_SCREEN(ScreenType::TIMEZONE, timezoneScreen);
+    REGISTER_SCREEN(ScreenType::SCREENSAVER, screensaverScreen);
+    REGISTER_SCREEN(ScreenType::OTA_UPDATE, otaUpdateScreen);
+    REGISTER_SCREEN(ScreenType::HIDDEN_MODE, hiddenModeScreen);
+    
+    // Main menu wird später registriert (nach Erstellung)
+}
+
+void Device::setupMainMenu() {
+    // Brightness als int für Range-Item
+    static int brightnessValue = display.getBrightness();
+
+    // Temporäre Variable für Dark Mode, da isDarkMode() const ist
+    static bool darkModeEnabled = display.isDarkMode();
+    
+    auto menuItems = MenuBuilder()
+        .addRange("Brightness", &brightnessValue, 20, 100, 10, "%",
+                 [this](int val) {
+                     display.setBrightness(val);
+                     display.saveSettings();
+                 })
+        
+        .addToggle("Dark Mode", 
+                  &darkModeEnabled, // Pass address of temporary variable
+                  [this](bool enabled) {
+                      display.toggleDarkMode(); // Call the actual toggle function
+                  })
+        
+        .addAction("Timezone", [this]() {
+            NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::TIMEZONE, ScreenTransition::FADE);
+        })
+        
+        .addAction("Statistics", [this]() {
+            NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::STATS, ScreenTransition::FADE);
+        })
+        
+        .addAction("Reset Session", [this]() {
+            statsManager.resetSession();
+            Serial.println("📊 Session reset");
+        })
+        
+        .build();
+    
+    mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
+    REGISTER_SCREEN(ScreenType::MAIN_MENU, *mainMenuScreen);
+    
+    // Setup timezone exit callback
+    timezoneScreen.onExit([this]() {
+        screenManager.setScreen(mainMenuScreen.get(), ScreenTransition::FADE);
+    });
 }
 
 void Device::loop() {
@@ -209,11 +269,9 @@ bool Device::handleGlobalShortcuts(InputEvent event) {
 
     // HOLD LEFT: Toggle between Fire <-> MainMenu
     if (event.button == LEFT && event.type == HOLD) {
-        if (currentScreen == ScreenType::FIRE) {
-            screenManager.setScreen(&mainMenuScreen, ScreenTransition::FADE);
-        } else if (currentScreen != ScreenType::FIRE) {
-            screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
-        }
+        ScreenType targetType = (currentScreen == ScreenType::FIRE) 
+            ? ScreenType::MAIN_MENU : ScreenType::FIRE;
+        NAVIGATE_TO_WITH_TRANSITION(&screenManager, targetType, ScreenTransition::FADE);
         return true;
     }
 

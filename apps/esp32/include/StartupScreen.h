@@ -2,25 +2,17 @@
 #ifndef STARTUPSCREEN_H
 #define STARTUPSCREEN_H
 
-#include "Screen.h"
-#include "DisplayManager.h"
-#include "ScreenType.h"
-#include "InputManager.h"
-#include <functional> // Include for std::function
+#include "ScreenBase.h"
 
-class StartupScreen : public Screen {
-private:
-    unsigned long startTime;
-    bool animationComplete;
-    std::function<void()> onAnimationCompleteCallback; // Callback function
-
+class StartupScreen : public AnimatedScreen {
 public:
     StartupScreen();
+    
     void draw(DisplayManager& display) override;
-    void update() override;
     void handleInput(InputEvent event) override;
-    ScreenType getType() const override;
-    void setOnAnimationCompleteCallback(std::function<void()> callback); // Setter for the callback
+    
+    // Nutzt AnimatedScreen::setCallback statt eigener Methode
+    using AnimatedScreen::setCallback;
 };
 
 #endif

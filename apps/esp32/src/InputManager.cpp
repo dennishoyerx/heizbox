@@ -1,20 +1,12 @@
-// ==== OPTIMIZED FILE ====
-// This file has been refactored to use a memory-efficient, bitmask-based approach for input handling.
-// Key improvements:
-// - Replaced the RAM-intensive array of structs with compact bitmasks and arrays.
-// - Simplified the update loop with clear, fast bitwise operations.
-// - Centralized button configuration in the header file.
-
 #include "InputManager.h"
 #include <Arduino.h>
 
-// Definition for the static button configuration array declared in the header
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
-    {Config::Hardware::JOY_UP_PIN, UP}, 
-    {Config::Hardware::JOY_DOWN_PIN, DOWN}, 
+    {Config::Hardware::JOY_UP_PIN, UP},
+    {Config::Hardware::JOY_DOWN_PIN, DOWN},
     {Config::Hardware::JOY_LEFT_PIN, LEFT},
-    {Config::Hardware::JOY_RIGHT_PIN, RIGHT}, 
-    {Config::Hardware::JOY_PRESS_PIN, CENTER}, 
+    {Config::Hardware::JOY_RIGHT_PIN, RIGHT},
+    {Config::Hardware::JOY_PRESS_PIN, CENTER},
     {Config::Hardware::FIRE_BUTTON_PIN, FIRE}
 };
 
@@ -29,8 +21,6 @@ void InputManager::init() {
     Serial.println("🎮 InputManager initialized");
 }
 
-// Optimization: Replaced a 144-byte struct array with a ~42-byte collection of arrays and bitmasks.
-// Benefit: Saves ~100 bytes of RAM and uses faster bitwise operations instead of iterating over structs.
 void InputManager::update() {
     const uint32_t now = millis();
 
@@ -41,7 +31,7 @@ void InputManager::update() {
 
         // --- State Change Detection ---
         if (isLow && !wasPressed && (now - lastDebounce[i] > DEBOUNCE_MS)) {
-            // --- PRESS --- 
+            // --- PRESS ---
             setPressed(i, true);
             setHoldSent(i, false);
             pressTimes[i] = now;
