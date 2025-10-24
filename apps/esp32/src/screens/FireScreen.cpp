@@ -3,6 +3,7 @@
 #include "ScreenManager.h"
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
+#include "StateManager.h"
 
 FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
                        ScreensaverScreen* ss, StatsManager* stm,
@@ -11,8 +12,21 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
       screenManager(sm),
       screensaverScreen(ss),
       statsManager(stm),
-      setCycleCallback(std::move(setCycleCb))
+      setCycleCallback(std::move(setCycleCb)),
+      cachedClicks(0),
+      cachedCaps(0)
 {
+    // State-Listener registrieren
+    STATE.sessionClicks.addListener([this](int clicks) {
+        cachedClicks = clicks;
+        markDirty();
+    });
+    
+    STATE.sessionCaps.addListener([this](int caps) {
+        cachedCaps = caps;
+        markDirty();
+    });
+
     state.heatingStartTime = 0;
     state.lastActivityTime = millis();
     state.currentCycle = 1;
@@ -69,27 +83,17 @@ void FireScreen::drawCycleInfo(DisplayManager& display) {
 }
 
 void FireScreen::drawSessionStats(DisplayManager& display) {
-    // Zeile 1: Clicks und Caps
-    char lineCaps[50];
-    snprintf(lineCaps, sizeof(lineCaps), "%d",
-             statsManager->getCaps());
-    char lineClicks[50];
-    snprintf(lineClicks, sizeof(lineClicks), "%d Clicks",
-             statsManager->getClicks());
-
-    // Zeile 2: Verbrauch
-    String consumption = statsManager->getConsumption();
-    char lineConsumption[40];
-    snprintf(lineConsumption, sizeof(lineConsumption), "%sg", consumption.c_str());
+    char lineCaps[20];
+    snprintf(lineCaps, sizeof(lineCaps), "%d", cachedCaps);
+    
+    char lineConsumption[20];
+    snprintf(lineConsumption, sizeof(lineConsumption), "%dg", cachedClicks * 10); // Beispiel
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
     display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
 
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
     display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
-
-    //display.drawText(160, 155, lineCaps, TFT_WHITE, 2);
-    //display.drawText(160, 180, lineClicks, TFT_WHITE, 2);
 }
 
 void FireScreen::update() {

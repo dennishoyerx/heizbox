@@ -4,8 +4,8 @@
 #include <TFT_eSPI.h>
 #include "ScreenBase.h"
 
-ScreensaverScreen::ScreensaverScreen(ClockManager& cm, unsigned long timeout, DisplayManager* dm)
-    : TimedScreen(ScreenType::SCREENSAVER, timeout),
+ScreensaverScreen::ScreensaverScreen(ClockManager& cm, unsigned long timeout, DisplayManager* dm, std::function<void()> callback)
+    : TimedScreen(ScreenType::SCREENSAVER, timeout, callback),
       clock(cm), displayManager(dm) {}
 
 void ScreensaverScreen::draw(DisplayManager& display) {
@@ -38,13 +38,13 @@ void ScreensaverScreen::update() {
 
 void ScreensaverScreen::handleInput(InputEvent event) {
     // Jede Eingabe weckt auf
-    resetTimeout();
+    this->resetTimeout();
     displayManager->setBrightness(100);
 
     if (event.type == PRESS) {
         // FIRE-Button nicht sofort Heizen starten
-        if (hasCallback()) {
-            invokeCallback();
+        if (this->callback_) {
+            this->callback_();
         }
     }
 }

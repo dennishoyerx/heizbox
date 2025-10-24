@@ -39,9 +39,13 @@ private:
         uint32_t confirmationStartTime;
     } state;
 
-    // Helper methods
-    void drawHeatingTimer(DisplayManager& display);
-    void drawStatus(DisplayManager& display);
+         // Cached values from state
+         int cachedClicks;
+         int cachedCaps;
+    
+         // Helper methods
+         void drawHeatingTimer(DisplayManager& display);
+         void drawStatus(DisplayManager& display);
     void drawCycleInfo(DisplayManager& display);
     void drawSessionStats(DisplayManager& display);
     void handleCycleChange(bool increment);

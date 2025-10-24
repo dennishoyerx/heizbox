@@ -4,7 +4,6 @@
 
 #include "Screen.h"
 #include "DisplayManager.h"
-#include <functional>
 
 // ============================================================================
 // Screen Mixins - Wiederverwendbare Funktionalität
@@ -58,26 +57,6 @@ private:
     bool complete_;
 };
 
-// Mixin für Callback-Support
-template<typename... Args>
-class CallbackMixin {
-protected:
-    using Callback = std::function<void(Args...)>;
-    
-    void setCallback(Callback callback) {
-        callback_ = std::move(callback);
-    }
-    
-    void invokeCallback(Args... args) {
-        if (callback_) callback_(args...);
-    }
-    
-    bool hasCallback() const { return callback_ != nullptr; }
-
-private:
-    Callback callback_;
-};
-
 // ============================================================================
 // Base Screen Templates
 // ============================================================================
@@ -95,14 +74,14 @@ protected:
 };
 
 // Screen mit Timeout (z.B. Screensaver, Confirmation)
-class TimedScreen : public Screen, protected TimeoutMixin, protected CallbackMixin<> {
+class TimedScreen : public Screen, protected TimeoutMixin {
 public:
-    TimedScreen(ScreenType type, uint32_t timeoutMs)
-        : type_(type), TimeoutMixin(timeoutMs) {}
+    TimedScreen(ScreenType type, uint32_t timeoutMs, std::function<void()> callback = nullptr)
+        : type_(type), TimeoutMixin(timeoutMs), callback_(callback) {}
     
     void update() override {
-        if (isTimedOut() && hasCallback()) {
-            invokeCallback();
+        if (isTimedOut() && callback_) {
+            callback_();
         }
     }
     
@@ -112,17 +91,18 @@ public:
 
 protected:
     ScreenType type_;
+    std::function<void()> callback_;
 };
 
 // Screen mit Animation (z.B. Startup, Loading)
-class AnimatedScreen : public Screen, protected AnimationMixin, protected CallbackMixin<> {
+class AnimatedScreen : public Screen, protected AnimationMixin {
 public:
-    AnimatedScreen(ScreenType type, uint32_t durationMs)
-        : type_(type), AnimationMixin(durationMs) {}
+    AnimatedScreen(ScreenType type, uint32_t durationMs, std::function<void()> callback = nullptr)
+        : type_(type), AnimationMixin(durationMs), callback_(callback) {}
     
     void update() override {
-        if (isAnimationComplete() && hasCallback()) {
-            invokeCallback();
+        if (isAnimationComplete() && callback_) {
+            callback_();
         }
     }
     
@@ -130,6 +110,7 @@ public:
 
 protected:
     ScreenType type_;
+    std::function<void()> callback_;
 };
 
 #endif // SCREENBASE_H

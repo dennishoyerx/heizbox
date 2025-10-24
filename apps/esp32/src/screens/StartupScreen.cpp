@@ -9,8 +9,8 @@
 // Modernisierte Implementation mit AnimatedScreen
 // ============================================================================
 
-StartupScreen::StartupScreen() 
-    : AnimatedScreen(ScreenType::STARTUP, 3000) {}
+StartupScreen::StartupScreen(std::function<void()> callback) 
+    : AnimatedScreen(ScreenType::STARTUP, 3000, callback) {}
 
 void StartupScreen::draw(DisplayManager& display) {
     display.clear(TFT_BLACK);
@@ -25,7 +25,7 @@ void StartupScreen::draw(DisplayManager& display) {
     display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
     
     // Optional: Progress-Bar
-    const float progress = getProgress();
+    const float progress = this->getProgress();
     if (progress < 1.0f) {
         const int16_t barWidth = 200;
         const int16_t barHeight = 4;
@@ -42,6 +42,6 @@ void StartupScreen::draw(DisplayManager& display) {
 void StartupScreen::handleInput(InputEvent event) {
     // Beliebige Eingabe überspringt Animation
     if (event.type == PRESS) {
-        completeAnimation();
+        this->completeAnimation();
     }
 }

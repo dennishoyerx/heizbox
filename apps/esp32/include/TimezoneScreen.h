@@ -2,30 +2,27 @@
 #ifndef TIMEZONESCREEN_H
 #define TIMEZONESCREEN_H
 
-#include "Screen.h"
-#include "DisplayManager.h"
+#include "ScreenBase.h"
 #include "ScreenManager.h"
 #include "ClockManager.h"
-#include "InputManager.h"
-#include <functional>
+#include "CallbackMixin.h"
 
-class TimezoneScreen : public Screen {
+class TimezoneScreen : public Screen, protected CallbackMixin<> {
 private:
     ClockManager& clockManager;
     ScreenManager* screenManager;
-    Screen* mainMenuScreen;
     int timezoneOffsetHours;
-    std::function<void()> exitCallback;
 
 public:
     TimezoneScreen(ClockManager& cm, ScreenManager* sm);
+
     void draw(DisplayManager& display) override;
     void update() override;
     void handleInput(InputEvent event) override;
     ScreenType getType() const override;
     void onEnter();
-    void setMainMenuScreen(Screen* screen);
-    void onExit(std::function<void()> callback);
+    
+    using CallbackMixin::setCallback;
 };
 
 #endif

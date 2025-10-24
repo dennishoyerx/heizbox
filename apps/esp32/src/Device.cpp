@@ -7,6 +7,7 @@
 #include "MenuBuilder.h"
 #include "ScreenRegistry.h"
 #include "ScreenBase.h"
+#include "StateManager.h"
 #include <utility> // For std::move and std::make_unique
 
 Device::Device()
@@ -21,11 +22,16 @@ Device::Device()
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
       hiddenModeScreen(&display),
-      screensaverScreen(clockManager, 30000, &display),
+      screensaverScreen(clockManager, 30000, &display, [this]() {
+          fireScreen.resetActivityTimer();
+          NAVIGATE_TO(&screenManager, ScreenType::FIRE);
+      }),
       otaUpdateScreen(&display),
       statsScreen(statsManager),
       timezoneScreen(clockManager, &screenManager),
-      startupScreen(),
+      startupScreen([this]() {
+          NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::FIRE, ScreenTransition::FADE);
+      }),
       lastSetCycle(1),
       mainMenuScreen(nullptr) // Wird später initialisiert
 {}
@@ -52,6 +58,9 @@ void Device::setup() {
     // Screen-Registry aufsetzen
     setupScreenRegistry();
 
+    // State-Bindings erstellen
+    StateBinding::bindAll(&display, &clockManager, &heater);
+
     // Setup WiFi
     // WICHTIG: Menu erst nach Init der Manager erstellen!
     setupMainMenu();
@@ -74,15 +83,6 @@ void Device::setup() {
 
     // Setup screens
     screenManager.setScreen(&startupScreen);
-
-    startupScreen.setCallback([this]() {
-        NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::FIRE, ScreenTransition::FADE);
-    });
-
-    screensaverScreen.setCallback([this]() {
-        fireScreen.resetActivityTimer();
-        NAVIGATE_TO(&screenManager, ScreenType::FIRE);
-    });
 
     input.setCallback([this](InputEvent event) {
         this->handleInput(event);
@@ -108,36 +108,33 @@ void Device::setupScreenRegistry() {
 }
 
 void Device::setupMainMenu() {
-    // Brightness als int für Range-Item
-    static int brightnessValue = display.getBrightness();
-
-    // Temporäre Variable für Dark Mode, da isDarkMode() const ist
-    static bool darkModeEnabled = display.isDarkMode();
+    auto& state = STATE;
     
     auto menuItems = MenuBuilder()
-        .addRange("Brightness", &brightnessValue, 20, 100, 10, "%",
-                 [this](int val) {
-                     display.setBrightness(val);
-                     display.saveSettings();
-                 })
+        .addRange("Brightness", 
+                 reinterpret_cast<int*>(&state.brightness), 20, 100, 10, "%",
+                  [this](int val) {
+                     STATE.brightness.set(val);
+                  })
         
         .addToggle("Dark Mode", 
-                  &darkModeEnabled, // Pass address of temporary variable
-                  [this](bool enabled) {
-                      display.toggleDarkMode(); // Call the actual toggle function
+                  reinterpret_cast<bool*>(&state.darkMode),
+                  [](bool enabled) {
+                      STATE.darkMode.set(enabled);
                   })
         
         .addAction("Timezone", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::TIMEZONE, ScreenTransition::FADE);
         })
         
-        .addAction("Statistics", [this]() {
+        .addAction("Stats", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::STATS, ScreenTransition::FADE);
         })
         
         .addAction("Reset Session", [this]() {
-            statsManager.resetSession();
-            Serial.println("📊 Session reset");
+            STATE.sessionCycles.set(0);
+            STATE.sessionClicks.set(0);
+            STATE.sessionCaps.set(0);
         })
         
         .build();
@@ -146,8 +143,8 @@ void Device::setupMainMenu() {
     REGISTER_SCREEN(ScreenType::MAIN_MENU, *mainMenuScreen);
     
     // Setup timezone exit callback
-    timezoneScreen.onExit([this]() {
-        screenManager.setScreen(mainMenuScreen.get(), ScreenTransition::FADE);
+    timezoneScreen.setCallback([this]() {
+        NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::MAIN_MENU, ScreenTransition::FADE);
     });
 }
 
@@ -214,6 +211,7 @@ void Device::checkHeatingStatus() {
     const bool currentHeatingStatus = heater.isHeating();
 
     if (currentHeatingStatus != lastHeatingStatusSent) {
+        STATE.isHeating.set(currentHeatingStatus);
         webSocketManager.sendStatusUpdate(true, currentHeatingStatus);
         lastHeatingStatusSent = currentHeatingStatus;
     }
@@ -227,6 +225,11 @@ void Device::checkHeatCycle() {
         // Add to stats
         statsManager.addCycle(durationMs);
 
+        // Update state
+        STATE.totalCycles.update([](uint32_t val) { return val + 1; });
+        STATE.sessionCycles.update([](uint32_t val) { return val + 1; });
+        STATE.totalDuration.update([durationMs](uint32_t val) { return val + durationMs; });
+
         // Send to backend
         webSocketManager.sendHeatCycleCompleted(durationSec, lastSetCycle);
 
@@ -239,7 +242,12 @@ void Device::checkHeatCycle() {
 
 void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
     if (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0) {
-        statsManager.updateSessionData(doc.as<JsonObjectConst>());
+        if (!doc["clicks"].isNull()) {
+            STATE.sessionClicks.set(doc["clicks"].as<int>());
+        }
+        if (!doc["caps"].isNull()) {
+            STATE.sessionCaps.set(doc["caps"].as<int>());
+        }
         screenManager.setDirty();
     }
 }

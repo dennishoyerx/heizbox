@@ -1,13 +1,13 @@
 // src/screens/TimezoneScreen.cpp
 #include "TimezoneScreen.h"
 #include <TFT_eSPI.h>
+#include "StateManager.h"
 
 // Define missing color
 #define TFT_GRAY 0x7BEF
 
 TimezoneScreen::TimezoneScreen(ClockManager& cm, ScreenManager* sm)
-    : clockManager(cm), screenManager(sm), mainMenuScreen(nullptr), timezoneOffsetHours(0) {
-}
+    : clockManager(cm), screenManager(sm), timezoneOffsetHours(0) {}
 
 ScreenType TimezoneScreen::getType() const {
     return ScreenType::TIMEZONE;
@@ -15,7 +15,7 @@ ScreenType TimezoneScreen::getType() const {
 
 void TimezoneScreen::onEnter() {
     // Load current offset when screen is entered
-    timezoneOffsetHours = clockManager.getTimezoneOffset() / 3600;
+    timezoneOffsetHours = STATE.timezoneOffset.get() / 3600;
     if (screenManager) screenManager->setDirty();
 }
 
@@ -53,21 +53,13 @@ void TimezoneScreen::handleInput(InputEvent event) {
             if (screenManager) screenManager->setDirty();
             break;
         case CENTER:
-            clockManager.setTimezoneOffset(timezoneOffsetHours * 3600);
-            if (exitCallback) {
-                exitCallback();
+            STATE.timezoneOffset.set(timezoneOffsetHours * 3600);
+            if (hasCallback()) {
+                invokeCallback();
             }
             break;
         default:
             break;
         }
     }
-}
-
-void TimezoneScreen::setMainMenuScreen(Screen* screen) {
-    mainMenuScreen = screen;
-}
-
-void TimezoneScreen::onExit(std::function<void()> callback) {
-    exitCallback = callback;
 }
