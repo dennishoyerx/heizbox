@@ -31,7 +31,7 @@ namespace Config {
         constexpr uint8_t JOY_DOWN_PIN = 33;
         constexpr uint8_t JOY_LEFT_PIN = 27;
         constexpr uint8_t JOY_RIGHT_PIN = 14;
-        constexpr uint8_t JOY_PRESS_PIN = 25;
+        constexpr uint8_t JOY_PRESS_PIN = 26;
 
         // Fire button
         constexpr uint8_t FIRE_BUTTON_PIN = 25;

@@ -35,7 +35,7 @@ void MainMenuScreen::draw(DisplayManager& display) {
     centerText(display, 10, "MENU", TFT_WHITE, 2);
 
     // Update dark mode label
-    items[5].title = display.isDarkMode() ? "Dark Mode: On" : "Dark Mode: Off";
+    //items[5].title = display.isDarkMode() ? "Dark Mode: On" : "Dark Mode: Off";
 
     // Menu items
     for (size_t i = 0; i < items.size(); i++) {
