@@ -21,7 +21,7 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
         cachedClicks = clicks;
         markDirty();
     });
-    
+
     STATE.sessionCaps.addListener([this](int caps) {
         cachedCaps = caps;
         markDirty();
@@ -85,9 +85,11 @@ void FireScreen::drawCycleInfo(DisplayManager& display) {
 void FireScreen::drawSessionStats(DisplayManager& display) {
     char lineCaps[20];
     snprintf(lineCaps, sizeof(lineCaps), "%d", cachedCaps);
-    
+
     char lineConsumption[20];
-    snprintf(lineConsumption, sizeof(lineConsumption), "%dg", cachedClicks * 10); // Beispiel
+    snprintf(lineConsumption, sizeof(lineConsumption), "%.2fg", cachedCaps * 0.05);
+    if (lineConsumption[0] == '0' && lineConsumption[1] == '.')
+        memmove(lineConsumption, lineConsumption + 1, strlen(lineConsumption));
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
     display.drawText(213, 168, lineCaps, TFT_WHITE, 3);

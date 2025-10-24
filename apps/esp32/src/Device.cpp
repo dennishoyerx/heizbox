@@ -111,17 +111,13 @@ void Device::setupMainMenu() {
     auto& state = STATE;
     
     auto menuItems = MenuBuilder()
-        .addRange("Brightness", 
-                 reinterpret_cast<int*>(&state.brightness), 20, 100, 10, "%",
-                  [this](int val) {
-                     STATE.brightness.set(val);
-                  })
+        // Observable-Integration: Kein Cast, kein Callback nötig!
+        .addObservableRange("Brightness", state.brightness, 
+                           static_cast<uint8_t>(20), 
+                           static_cast<uint8_t>(100), 
+                           static_cast<uint8_t>(10), "%")
         
-        .addToggle("Dark Mode", 
-                  reinterpret_cast<bool*>(&state.darkMode),
-                  [](bool enabled) {
-                      STATE.darkMode.set(enabled);
-                  })
+        .addObservableToggle("Dark Mode", state.darkMode)
         
         .addAction("Timezone", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::TIMEZONE, ScreenTransition::FADE);
@@ -130,6 +126,12 @@ void Device::setupMainMenu() {
         .addAction("Stats", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::STATS, ScreenTransition::FADE);
         })
+        
+        // Sleep Timeout: Intern Millisekunden, angezeigt als Sekunden
+        .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
+                             60000,    // 1 Minute min
+                             1800000,  // 30 Minuten max
+                             60000)    // 1 Minute step
         
         .addAction("Reset Session", [this]() {
             STATE.sessionCycles.set(0);

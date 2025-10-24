@@ -1,6 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import { HeatCycleService } from './heatCycleService.js'
 import { groupSessions, calculateConsumption } from '../utils/session.js'
+import { getBerlinTimeRange } from '../utils/time.js'
 
 export class SessionService {
 	private heatCycleService: HeatCycleService
@@ -10,7 +11,9 @@ export class SessionService {
 	}
 
 	async getCurrentSessionData() {
+		const { start, end } = getBerlinTimeRange()
 		const results = await this.heatCycleService.getRecentSession(7200) // 2 hours
+		const today = await this.heatCycleService.getHeatCyclesInRange(start, end)
 
 		if (!results || results.length === 0) {
 			return {
@@ -18,7 +21,8 @@ export class SessionService {
 				caps: 0,
 				lastClick: null,
 				heat_cycles: [],
-				consumption: '0.00',
+				consumption: 0,
+				consumptionTotal: 0,
 			}
 		}
 
@@ -27,7 +31,8 @@ export class SessionService {
 		const lastClick = results[results.length - 1].created_at
 		const heat_cycles = groupSessions(results)
 		const consumption = calculateConsumption(caps)
+		const consumptionTotal = calculateConsumption(today.filter((x) => x.cycle === 1).length)
 
-		return { clicks, caps, lastClick, heat_cycles, consumption }
+		return { clicks, caps, lastClick, heat_cycles, consumption, consumptionTotal }
 	}
 }

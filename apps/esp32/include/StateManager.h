@@ -35,6 +35,9 @@ public:
     
     // Wert abrufen
     const T& get() const { return value_; }
+    
+    // Non-const get für Menu-Integration
+    T& getRef() { return value_; }
     operator const T&() const { return value_; }
     
     // Listener registrieren
@@ -72,7 +75,7 @@ public:
         load();
     }
     
-    void set(T newValue) override {
+    void set(T newValue) {
         Observable<T>::set(newValue);
         save();
     }

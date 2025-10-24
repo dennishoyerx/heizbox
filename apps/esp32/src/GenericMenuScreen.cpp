@@ -2,6 +2,56 @@
 #include "MenuBuilder.h"
 #include "InputManager.h" // For InputEvent and its enums
 #include "ScreenManager.h" // For ScreenTransition
+#include "DisplayManager.h"
+
+namespace {
+    void centerText(DisplayManager& display, int16_t y, const char* text, uint16_t color, uint8_t size) {
+        int16_t x = (display.getTFTWidth() - display.getTextWidth(text, size)) / 2;
+        display.drawText(x, y, text, color, size);
+    }
+}
+
+void GenericMenuScreen::draw(DisplayManager& display) {
+    display.clear();
+    
+    // Title
+    centerText(display, 10, title_, TFT_WHITE, 2);
+    
+    // Items (with scrolling support)
+    const int itemsPerPage = 5;
+    const int startIdx = (selectedIndex_ / itemsPerPage) * itemsPerPage;
+    const int endIdx = std::min(startIdx + itemsPerPage, static_cast<int>(items_.size()));
+    
+    for (int i = startIdx; i < endIdx; i++) {
+        const int displayIdx = i - startIdx;
+        const int16_t y = 50 + displayIdx * 30;
+        
+        const auto& item = items_[i];
+        const bool isSelected = (i == selectedIndex_);
+        const uint16_t color = isSelected ? TFT_YELLOW : TFT_WHITE;
+        
+        // Selection indicator
+        if (isSelected) {
+            display.drawText(10, y, adjustMode_ ? ">" : "*", color, 2);
+        }
+        
+        // Item title
+        display.drawText(30, y, item->getTitle(), color, 2);
+        
+        // Item value (if any)
+        const char* value = item->getValue();
+        if (value) {
+            const int16_t valueX = 200;
+            display.drawText(valueX, y, value, color, 2);
+        }
+    }
+    
+    // Footer
+    const char* footer = adjustMode_ 
+        ? "L/R: Adjust  OK: Done"
+        : "OK: Select  HOLD L: Back";
+    display.drawText(10, 210, footer, TFT_GRAY, 1);
+}
 
 void GenericMenuScreen::handleInput(InputEvent event) {
     if (event.type != PRESS) return;

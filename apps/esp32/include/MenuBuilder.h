@@ -11,6 +11,7 @@
 #include "ScreenManager.h" // For ScreenTransition
 #include "DisplayManager.h" // For DisplayManager and TFT_ colors
 #include "InputManager.h" // For InputEvent
+#include "StateManager.h" // For Observable
 
 // Custom make_unique for C++11 compatibility if needed
 #if __cplusplus < 201402L
@@ -128,6 +129,70 @@ private:
     mutable char valueBuffer_[16];
 };
 
+// ============================================================================
+// Observable Range Menu Item - Direkte Observable-Integration
+// ============================================================================
+
+template<typename T>
+class ObservableRangeMenuItem : public MenuItem {
+public:
+    ObservableRangeMenuItem(const char* title, Observable<T>& observable,
+                           T minVal, T maxVal, T step,
+                           const char* unit = nullptr)
+        : title_(title), observable_(observable),
+          minVal_(minVal), maxVal_(maxVal), step_(step), unit_(unit) {
+        valueBuffer_[0] = '\0';
+    }
+    
+    const char* getTitle() const override { return title_; }
+    
+    const char* getValue() const override {
+        snprintf(const_cast<char*>(valueBuffer_), sizeof(valueBuffer_),
+                 "%d%s", static_cast<int>(observable_.get()), 
+                 unit_ ? unit_ : "");
+        return valueBuffer_;
+    }
+    
+    MenuItemType getType() const override { return MenuItemType::RANGE; }
+    
+    void execute() override {}
+    
+    void adjust(int delta) override {
+        T current = observable_.get();
+        T newVal = current + (delta * step_);
+        newVal = constrain(newVal, minVal_, maxVal_);
+        observable_.set(newVal);
+    }
+
+private:
+    const char* title_;
+    Observable<T>& observable_;
+    T minVal_, maxVal_, step_;
+    const char* unit_;
+    mutable char valueBuffer_[16];
+};
+
+// Observable Toggle Menu Item
+class ObservableToggleMenuItem : public MenuItem {
+public:
+    ObservableToggleMenuItem(const char* title, Observable<bool>& observable)
+        : title_(title), observable_(observable) {}
+    
+    const char* getTitle() const override { return title_; }
+    const char* getValue() const override { 
+        return observable_.get() ? "ON" : "OFF"; 
+    }
+    MenuItemType getType() const override { return MenuItemType::TOGGLE; }
+    
+    void execute() override {
+        observable_.set(!observable_.get());
+    }
+
+private:
+    const char* title_;
+    Observable<bool>& observable_;
+};
+
 class NavigationMenuItem : public MenuItem {
 public:
     NavigationMenuItem(const char* title, Screen* targetScreen, ScreenManager* manager)
@@ -146,6 +211,54 @@ private:
     const char* title_;
     Screen* targetScreen_;
     ScreenManager* manager_;
+};
+
+// ============================================================================
+// Observable Range mit Display-Converter (z.B. ms → s)
+// ============================================================================
+
+template<typename T>
+class ObservableRangeMenuItemWithConverter : public MenuItem {
+public:
+    using DisplayConverter = std::function<int(T)>;
+    using StoreConverter = std::function<T(int)>;
+    
+    ObservableRangeMenuItemWithConverter(const char* title, Observable<T>& observable,
+                                        T minVal, T maxVal, T step,
+                                        const char* unit,
+                                        DisplayConverter displayConv,
+                                        StoreConverter storeConv)
+        : title_(title), observable_(observable),
+          minVal_(minVal), maxVal_(maxVal), step_(step), unit_(unit),
+          displayConv_(displayConv), storeConv_(storeConv) {}
+    
+    const char* getTitle() const override { return title_; }
+    
+    const char* getValue() const override {
+        int displayValue = displayConv_(observable_.get());
+        snprintf(const_cast<char*>(valueBuffer_), sizeof(valueBuffer_),
+                 "%d%s", displayValue, unit_ ? unit_ : "");
+        return valueBuffer_;
+    }
+    
+    MenuItemType getType() const override { return MenuItemType::RANGE; }
+    void execute() override {}
+    
+    void adjust(int delta) override {
+        T current = observable_.get();
+        T newVal = current + (delta * step_);
+        newVal = constrain(newVal, minVal_, maxVal_);
+        observable_.set(newVal);
+    }
+
+private:
+    const char* title_;
+    Observable<T>& observable_;
+    T minVal_, maxVal_, step_;
+    const char* unit_;
+    DisplayConverter displayConv_;
+    StoreConverter storeConv_;
+    mutable char valueBuffer_[16];
 };
 
 // ============================================================================
@@ -175,6 +288,34 @@ public:
             title, valuePtr, minVal, maxVal, step, unit, std::move(onChange)));
         return *this;
     }
+
+    // Observable-Varianten
+    template<typename T>
+    MenuBuilder& addObservableRange(const char* title, Observable<T>& observable,
+                                    T minVal, T maxVal, T step = 1,
+                                    const char* unit = nullptr) {
+        items_.emplace_back(std::make_unique<ObservableRangeMenuItem<T>>(
+            title, observable, minVal, maxVal, step, unit));
+        return *this;
+    }
+    
+    MenuBuilder& addObservableToggle(const char* title, Observable<bool>& observable) {
+        items_.emplace_back(std::make_unique<ObservableToggleMenuItem>(
+            title, observable));
+        return *this;
+    }
+    
+    // Helper für PersistedObservable mit automatischer Unit-Konvertierung
+    MenuBuilder& addObservableRangeMs(const char* title, Observable<uint32_t>& observable,
+                                      uint32_t minMs, uint32_t maxMs, uint32_t stepMs) {
+        // Wrapper der Millisekunden in Sekunden anzeigt
+        items_.emplace_back(std::make_unique<ObservableRangeMenuItemWithConverter<uint32_t>>(
+            title, observable, minMs, maxMs, stepMs, "s",
+            [](uint32_t ms) { return ms / 1000; },  // Display converter
+            [](uint32_t s) { return s * 1000; }     // Store converter, not used here but good practice
+        ));
+        return *this;
+    }
     
     MenuBuilder& addNavigation(const char* title, Screen* screen, ScreenManager* manager) {
         items_.emplace_back(std::make_unique<NavigationMenuItem>(title, screen, manager));
@@ -199,47 +340,7 @@ public:
         : title_(title), items_(std::move(items)), selectedIndex_(0), 
           adjustMode_(false) {}
     
-    void draw(DisplayManager& display) override {
-        display.clear();
-        
-        // Title
-        centerText(display, 10, title_, TFT_WHITE, 2);
-        
-        // Items (with scrolling support)
-        const int itemsPerPage = 5;
-        const int startIdx = (selectedIndex_ / itemsPerPage) * itemsPerPage;
-        const int endIdx = std::min(startIdx + itemsPerPage, static_cast<int>(items_.size()));
-        
-        for (int i = startIdx; i < endIdx; i++) {
-            const int displayIdx = i - startIdx;
-            const int16_t y = 50 + displayIdx * 30;
-            
-            const auto& item = items_[i];
-            const bool isSelected = (i == selectedIndex_);
-            const uint16_t color = isSelected ? TFT_YELLOW : TFT_WHITE;
-            
-            // Selection indicator
-            if (isSelected) {
-                display.drawText(10, y, adjustMode_ ? ">" : "*", color, 2);
-            }
-            
-            // Item title
-            display.drawText(30, y, item->getTitle(), color, 2);
-            
-            // Item value (if any)
-            const char* value = item->getValue();
-            if (value) {
-                const int16_t valueX = 200;
-                display.drawText(valueX, y, value, color, 2);
-            }
-        }
-        
-        // Footer
-        const char* footer = adjustMode_ 
-            ? "L/R: Adjust  OK: Done"
-            : "OK: Select  HOLD L: Back";
-        display.drawText(10, 210, footer, TFT_GRAY, 1);
-    }
+    void draw(DisplayManager& display) override;
     
     void update() override {}
     
