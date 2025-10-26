@@ -103,47 +103,47 @@ void Device::setupScreenRegistry() {
     REGISTER_SCREEN(ScreenType::SCREENSAVER, screensaverScreen);
     REGISTER_SCREEN(ScreenType::OTA_UPDATE, otaUpdateScreen);
     REGISTER_SCREEN(ScreenType::HIDDEN_MODE, hiddenModeScreen);
-    
+
     // Main menu wird später registriert (nach Erstellung)
 }
 
 void Device::setupMainMenu() {
     auto& state = STATE;
-    
+
     auto menuItems = MenuBuilder()
         // Observable-Integration: Kein Cast, kein Callback nötig!
-        .addObservableRange("Brightness", state.brightness, 
-                           static_cast<uint8_t>(20), 
-                           static_cast<uint8_t>(100), 
+        .addObservableRange("Brightness", state.brightness,
+                           static_cast<uint8_t>(20),
+                           static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
-        
+
         .addObservableToggle("Dark Mode", state.darkMode)
-        
+
         .addAction("Timezone", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::TIMEZONE, ScreenTransition::FADE);
         })
-        
+
         .addAction("Stats", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::STATS, ScreenTransition::FADE);
         })
-        
+
         // Sleep Timeout: Intern Millisekunden, angezeigt als Sekunden
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
                              60000,    // 1 Minute min
                              1800000,  // 30 Minuten max
                              60000)    // 1 Minute step
-        
+
         .addAction("Reset Session", [this]() {
             STATE.sessionCycles.set(0);
             STATE.sessionClicks.set(0);
             STATE.sessionCaps.set(0);
         })
-        
+
         .build();
-    
+
     mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
     REGISTER_SCREEN(ScreenType::MAIN_MENU, *mainMenuScreen);
-    
+
     // Setup timezone exit callback
     timezoneScreen.setCallback([this]() {
         NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::MAIN_MENU, ScreenTransition::FADE);
@@ -250,6 +250,12 @@ void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
         if (!doc["caps"].isNull()) {
             STATE.sessionCaps.set(doc["caps"].as<int>());
         }
+        if (!doc["consumption"].isNull()) {
+            STATE.sessionConsumption.set(doc["consumption"].as<float>());
+        }
+        if (!doc["consumptionTotal"].isNull()) {
+            STATE.todayConsumption.set(doc["consumptionTotal"].as<float>());
+        }
         screenManager.setDirty();
     }
 }
@@ -279,7 +285,7 @@ bool Device::handleGlobalShortcuts(InputEvent event) {
 
     // HOLD LEFT: Toggle between Fire <-> MainMenu
     if (event.button == LEFT && event.type == HOLD) {
-        ScreenType targetType = (currentScreen == ScreenType::FIRE) 
+        ScreenType targetType = (currentScreen == ScreenType::FIRE)
             ? ScreenType::MAIN_MENU : ScreenType::FIRE;
         NAVIGATE_TO_WITH_TRANSITION(&screenManager, targetType, ScreenTransition::FADE);
         return true;

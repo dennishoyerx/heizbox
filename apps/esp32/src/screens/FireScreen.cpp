@@ -14,6 +14,8 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
       statsManager(stm),
       setCycleCallback(std::move(setCycleCb)),
       cachedClicks(0),
+      cachedConsumption(0),
+      cachedTodayConsumption(0),
       cachedCaps(0)
 {
     // State-Listener registrieren
@@ -24,6 +26,16 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
 
     STATE.sessionCaps.addListener([this](int caps) {
         cachedCaps = caps;
+        markDirty();
+    });
+
+    STATE.sessionConsumption.addListener([this](int consumption) {
+        cachedConsumption = consumption;
+        markDirty();
+    });
+
+    STATE.todayConsumption.addListener([this](int todayConsumption) {
+        cachedTodayConsumption = todayConsumption;
         markDirty();
     });
 
@@ -87,15 +99,21 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
     snprintf(lineCaps, sizeof(lineCaps), "%d", cachedCaps);
 
     char lineConsumption[20];
-    snprintf(lineConsumption, sizeof(lineConsumption), "%.2fg", cachedCaps * 0.05);
+    snprintf(lineConsumption, sizeof(lineConsumption), "%.2fg", cachedConsumption);
     if (lineConsumption[0] == '0' && lineConsumption[1] == '.')
         memmove(lineConsumption, lineConsumption + 1, strlen(lineConsumption));
+
+    char lineTodayConsumption[20];
+    snprintf(lineTodayConsumption, sizeof(lineTodayConsumption), "%.2fg", cachedTodayConsumption);
+    if (lineTodayConsumption[0] == '0' && lineTodayConsumption[1] == '.')
+        memmove(lineTodayConsumption, lineTodayConsumption + 1, strlen(lineTodayConsumption));
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
     display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
 
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
     display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
+    display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);
 }
 
 void FireScreen::update() {

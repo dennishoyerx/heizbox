@@ -42,7 +42,9 @@ private:
          // Cached values from state
          int cachedClicks;
          int cachedCaps;
-    
+         float cachedConsumption;
+         float cachedTodayConsumption;
+
          // Helper methods
          void drawHeatingTimer(DisplayManager& display);
          void drawStatus(DisplayManager& display);
