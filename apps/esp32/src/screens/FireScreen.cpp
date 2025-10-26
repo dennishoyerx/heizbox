@@ -29,12 +29,12 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
         markDirty();
     });
 
-    STATE.sessionConsumption.addListener([this](int consumption) {
+    STATE.sessionConsumption.addListener([this](float consumption) {
         cachedConsumption = consumption;
         markDirty();
     });
 
-    STATE.todayConsumption.addListener([this](int todayConsumption) {
+    STATE.todayConsumption.addListener([this](float todayConsumption) {
         cachedTodayConsumption = todayConsumption;
         markDirty();
     });
