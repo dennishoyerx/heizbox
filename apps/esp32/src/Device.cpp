@@ -232,10 +232,10 @@ void Device::checkHeatCycle() {
         STATE.sessionCycles.update([](uint32_t val) { return val + 1; });
         STATE.totalDuration.update([durationMs](uint32_t val) { return val + durationMs; });
 
+        heater.clearCycleFinishedFlag();
+
         // Send to backend
         webSocketManager.sendHeatCycleCompleted(durationSec, lastSetCycle);
-
-        heater.clearCycleFinishedFlag();
 
         Serial.printf("✅ Heat cycle completed: %lu seconds (cycle %d)\n",
                      durationSec, lastSetCycle);
