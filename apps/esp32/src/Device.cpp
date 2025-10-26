@@ -201,6 +201,11 @@ void Device::setupMainMenu() {
             STATE.sessionCaps.set(0);
         })
 
+        .addAction("FACTORY RESET", [this]() {
+            nvs_flash_erase();
+            esp_restart();
+        })
+
         .build();
 
     mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
