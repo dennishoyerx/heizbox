@@ -20,11 +20,6 @@ HeaterController::HeaterController()
 }
 
 void HeaterController::init() {
-    prefs.begin("heater", false);
-    cycleCounter = prefs.getULong("cycles", 0);
-    autoStopTime = prefs.getULong("autostop", 120000);
-    prefs.end();
-
     pinMode(Config::Hardware::STATUS_LED_PIN, OUTPUT);
     pinMode(Config::Hardware::HEATER_MOSFET_PIN, OUTPUT);
     digitalWrite(Config::Hardware::HEATER_MOSFET_PIN, LOW);
@@ -63,9 +58,6 @@ void HeaterController::stopHeating() {
     // Only count cycles longer than a minimum threshold
     if (duration >= MIN_CYCLE_DURATION_MS) {
         cycleCounter++;
-        prefs.begin("heater", false);
-        prefs.putULong("cycles", cycleCounter);
-        prefs.end();
         cycleFinishedFlag = true; // Notify Device.cpp to send data
     }
 
@@ -120,9 +112,6 @@ uint32_t HeaterController::getCycleCount() const {
 
 void HeaterController::setAutoStopTime(uint32_t time) {
     autoStopTime = time;
-    prefs.begin("heater", false);
-    prefs.putULong("autostop", autoStopTime);
-    prefs.end();
 }
 
 uint32_t HeaterController::getAutoStopTime() const {

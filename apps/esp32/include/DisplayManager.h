@@ -4,7 +4,6 @@
 
 #include <TFT_eSPI.h>
 #include <SPI.h>
-#include <Preferences.h>
 #include "ClockManager.h"
 
 // Forward declarations
@@ -72,7 +71,6 @@ private:
     StatusBar* statusBar;
     ClockManager* clock;
     ScreenManager* screenManager;
-    Preferences prefs;
 
     // State
     uint8_t brightness;

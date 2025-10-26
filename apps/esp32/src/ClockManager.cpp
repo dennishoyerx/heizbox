@@ -6,11 +6,6 @@ ClockManager::ClockManager() : timeSynced(false), daylightOffset_sec(0), gmtOffs
 }
 
 void ClockManager::init() {
-    prefs.begin("clock", false);
-    // Load timezone offset from NVS, default to 7200  seconds (GMT+1)
-    gmtOffset_sec = prefs.getLong("gmtOffset", 7200);
-    prefs.end();
-
     reconfigureTime();
 }
 
@@ -60,9 +55,6 @@ bool ClockManager::isTimeSynced() const {
 
 void ClockManager::setTimezoneOffset(long offset_sec) {
     gmtOffset_sec = offset_sec;
-    prefs.begin("clock", false);
-    prefs.putLong("gmtOffset", gmtOffset_sec);
-    prefs.end();
     reconfigureTime(); // Re-apply the time configuration
 }
 

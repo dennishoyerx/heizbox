@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <memory>
-#include <Preferences.h>
 
 #include "HeaterController.h"
 #include "InputManager.h"
@@ -51,7 +50,6 @@ private:
     StatsManager statsManager;
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;
-    Preferences preferences;
 
     // Screen management
     ScreenManager screenManager;

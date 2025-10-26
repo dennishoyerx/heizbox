@@ -8,6 +8,7 @@
 #include "StatsManager.h"
 #include "config.h"
 #include <Arduino.h>
+#include "StateManager.h"
 
 StatsManager::StatsManager() 
     : totalCycles(0), sessionCycles(0), totalDuration(0), averageDuration(0), 
@@ -16,10 +17,8 @@ StatsManager::StatsManager()
 }
 
 void StatsManager::init() {
-    prefs.begin("stats", true); // Read-only is faster
-    totalCycles = prefs.getULong("total_cycles", 0);
-    totalDuration = prefs.getULong("total_duration", 0);
-    prefs.end();
+    totalCycles = STATE.totalCycles.get();
+    totalDuration = STATE.totalDuration.get();
     
     if (totalCycles > 0) {
         averageDuration = totalDuration / (float)totalCycles / 1000.0f; // Convert to seconds
@@ -53,10 +52,8 @@ void StatsManager::update() {
 void StatsManager::flushToNvs() {
     if (!nvsDirty) return;
 
-    prefs.begin("stats", false);
-    prefs.putULong("total_cycles", totalCycles);
-    prefs.putULong("total_duration", totalDuration);
-    prefs.end();
+    STATE.totalCycles.set(totalCycles);
+    STATE.totalDuration.set(totalDuration);
 
     nvsDirty = false;
     lastNvsWrite = millis();

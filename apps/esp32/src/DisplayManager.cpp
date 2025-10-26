@@ -6,9 +6,9 @@
 #include <LittleFS.h>
 #include <cstdint>
 
-// ============================================================================
+// ============================================================================ 
 // Constructor & Destructor
-// ============================================================================
+// ============================================================================ 
 
 DisplayManager::DisplayManager(ClockManager* cm)
     : tft(),
@@ -28,9 +28,9 @@ DisplayManager::~DisplayManager() {
     delete statusBar;
 }
 
-// ============================================================================
+// ============================================================================ 
 // Initialization
-// ============================================================================
+// ============================================================================ 
 
 void DisplayManager::init(ScreenManager* mgr) {
     screenManager = mgr;
@@ -40,8 +40,6 @@ void DisplayManager::init(ScreenManager* mgr) {
     tft.setRotation(1);
 
     tft.loadFont("fonts/josefin_20.vlw", LittleFS);
-    // Load persistent settings
-    loadSettings();
 
     // Initialize backlight PWM
     initBacklight();
@@ -65,26 +63,9 @@ void DisplayManager::initBacklight() {
     setBrightness(brightness);
 }
 
-void DisplayManager::loadSettings() {
-    prefs.begin("display", true); // Read-only
-    brightness = prefs.getUChar("brightness", DisplayConfig::BRIGHTNESS_DEFAULT);
-    darkMode = prefs.getBool("darkMode", true);
-    prefs.end();
-
-    // Clamp brightness
-    brightness = constrain(brightness, DisplayConfig::BRIGHTNESS_MIN, DisplayConfig::BRIGHTNESS_MAX);
-}
-
-void DisplayManager::saveSettings() {
-    prefs.begin("display", false);
-    prefs.putUChar("brightness", brightness);
-    prefs.putBool("darkMode", darkMode);
-    prefs.end();
-}
-
-// ============================================================================
+// ============================================================================ 
 // Sprite Management
-// ============================================================================
+// ============================================================================ 
 
 void DisplayManager::freeSprites() {
     if (spriteAllocated) {
@@ -122,9 +103,9 @@ uint16_t DisplayManager::getBackgroundColor() {
     return tft.color565(255, 107, 43);
 }
 
-// ============================================================================
+// ============================================================================ 
 // Rendering Pipeline
-// ============================================================================
+// ============================================================================ 
 
 void DisplayManager::clear(uint16_t color) {
     // Hintergrund bleibt immer #FF6B2B
@@ -152,9 +133,9 @@ void DisplayManager::renderStatusBar() {
     }
 }
 
-// ============================================================================
+// ============================================================================ 
 // Drawing Primitives (Optimized)
-// ============================================================================
+// ============================================================================ 
 
 template<typename T>
 T& DisplayManager::getRenderer() {
@@ -263,9 +244,9 @@ int DisplayManager::getTextWidth(const char* text, uint8_t size) {
 }
 
 
-// ============================================================================
+// ============================================================================ 
 // Settings Management
-// ============================================================================
+// ============================================================================ 
 
 void DisplayManager::setBrightness(uint8_t level) {
     brightness = constrain(level, DisplayConfig::BRIGHTNESS_MIN, DisplayConfig::BRIGHTNESS_MAX);
@@ -278,18 +259,11 @@ void DisplayManager::setBrightness(uint8_t level) {
 
     ledcWrite(DisplayConfig::PWM_CHANNEL, pwmValue);
 
-    // Save asynchronously (nur bei signifikanten Änderungen)
-    static uint8_t lastSaved = brightness;
-    if (abs(brightness - lastSaved) >= 10) {
-        saveSettings();
-        lastSaved = brightness;
-        Serial.printf("💡 Brightness: %u%% (PWM: %u)\n", brightness, pwmValue);
-    }
+    Serial.printf("💡 Brightness: %u%% (PWM: %u)\n", brightness, pwmValue);
 }
 
 void DisplayManager::toggleDarkMode() {
     darkMode = !darkMode;
-    saveSettings();
     renderState.reset(); // Force re-render mit neuen Farben
 
     Serial.printf("🌓 Dark Mode: %s\n", darkMode ? "ON" : "OFF");

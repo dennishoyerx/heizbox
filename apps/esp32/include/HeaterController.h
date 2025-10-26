@@ -1,7 +1,6 @@
 #ifndef HEATERCONTROLLER_H
 #define HEATERCONTROLLER_H
 
-#include <Preferences.h>
 #include <cstdint>
 
 class HeaterController {
@@ -39,7 +38,6 @@ private:
 
     void transitionTo(State newState);
 
-    Preferences prefs;
     State state = State::IDLE;
     uint32_t startTime = 0;
     uint32_t autoStopTime = 60000; // Default 60 seconds

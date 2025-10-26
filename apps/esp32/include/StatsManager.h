@@ -1,12 +1,10 @@
 #ifndef STATSMANAGER_H
 #define STATSMANAGER_H
 
-#include <Preferences.h>
 #include <ArduinoJson.h>
 
 class StatsManager {
 private:
-    Preferences prefs;
     unsigned long totalCycles;
     unsigned long sessionCycles;
     unsigned long totalDuration;

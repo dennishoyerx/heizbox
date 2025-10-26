@@ -2,6 +2,9 @@
 #ifndef STATEMANAGER_H
 #define STATEMANAGER_H
 
+class DisplayManager;
+class ClockManager;
+
 #include <functional>
 #include <vector>
 #include <Preferences.h>
@@ -164,67 +167,5 @@ private:
 
 // Globaler Zugriff (optional, für Convenience)
 #define STATE DeviceState::instance()
-
-// ============================================================================
-// State Bindings - UI ↔ State Synchronisation
-// ============================================================================
-
-class StateBinding {
-public:
-    // Display Brightness binden
-    static void bindBrightness(DisplayManager* display) {
-        auto& state = STATE;
-
-        // Initial sync
-        display->setBrightness(state.brightness.get());
-
-        // Listen to state changes
-        state.brightness.addListener([display](uint8_t value) {
-            display->setBrightness(value);
-        });
-    }
-
-    // Dark Mode binden
-    static void bindDarkMode(DisplayManager* display) {
-        auto& state = STATE;
-
-        state.darkMode.addListener([display](bool enabled) {
-            if (display->isDarkMode() != enabled) {
-                display->toggleDarkMode();
-            }
-        });
-    }
-
-    // Timezone binden
-    static void bindTimezone(ClockManager* clock) {
-        auto& state = STATE;
-
-        clock->setTimezoneOffset(state.timezoneOffset.get());
-
-        state.timezoneOffset.addListener([clock](int32_t offset) {
-            clock->setTimezoneOffset(offset);
-        });
-    }
-
-    // Auto-Stop Time binden
-    static void bindAutoStopTime(HeaterController* heater) {
-        auto& state = STATE;
-
-        heater->setAutoStopTime(state.autoStopTime.get());
-
-        state.autoStopTime.addListener([heater](uint32_t time) {
-            heater->setAutoStopTime(time);
-        });
-    }
-
-    // Alle Bindings auf einmal
-    static void bindAll(DisplayManager* display, ClockManager* clock,
-                       HeaterController* heater) {
-        bindBrightness(display);
-        bindDarkMode(display);
-        bindTimezone(clock);
-        bindAutoStopTime(heater);
-    }
-};
 
 #endif // STATEMANAGER_H
