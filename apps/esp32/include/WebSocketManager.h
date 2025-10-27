@@ -28,8 +28,12 @@ public:
     void onMessage(MessageCallback callback);
     void onConnectionChange(ConnectionCallback callback);
 
-private:
+    static WebSocketManager* getInstance();
+
+public:
     WebSocketsClient webSocket;
+
+private:
 
     struct State {
         bool connected;

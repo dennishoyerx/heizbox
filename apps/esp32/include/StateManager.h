@@ -10,6 +10,7 @@ class ClockManager;
 #include <Preferences.h>
 #include <type_traits>
 #include "HeaterController.h"
+#include "Logger.h"
 
 // ============================================================================
 // Observable Pattern - Automatische Benachrichtigungen
@@ -79,7 +80,7 @@ public:
     }
 
     void set(T newValue) {
-        Serial.printf("PersistedObservable::set() for %s::%s\n", namespace_, key_);
+        logPrint("PersistedObservable::set() for %s::%s\n", namespace_, key_);
         Observable<T>::set(newValue);
         save();
     }

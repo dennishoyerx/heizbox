@@ -3,6 +3,10 @@
 
 WebSocketManager* WebSocketManager::instance = nullptr;
 
+WebSocketManager* WebSocketManager::getInstance() {
+    return instance;
+}
+
 WebSocketManager::WebSocketManager()
     : messageCallback(nullptr),
       connectionCallback(nullptr),
