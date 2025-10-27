@@ -18,7 +18,9 @@ void vlogPrint(const char* type, const char* format, va_list args) {
     int web_len = vsnprintf(web_buf, sizeof(web_buf), format, args_copy);
     if (web_len > 0) {
         if (WebSocketManager::getInstance() && WebSocketManager::getInstance()->isConnected()) {
-            String jsonPayload = "{\"t\":\"" + String(type) + "\",\"m\":\"" + String(web_buf) + "\"}";
+            String escaped_web_buf = web_buf;
+            escaped_web_buf.replace("\n", "\\n"); // Escape newline characters
+            String jsonPayload = "{\"t\":\"" + String(type) + "\",\"m\":\"" + escaped_web_buf + "\"}";
             WebSocketManager::getInstance()->webSocket.sendTXT(jsonPayload);
         }
     }

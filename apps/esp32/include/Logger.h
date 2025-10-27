@@ -12,6 +12,6 @@ void vlogPrint(const char* type, const char* format, va_list args);
 void logPrint(const char* type, const char* format, ...) __attribute__((format(printf, 2, 3)));
 
 // Function to log messages to Serial and WebSocket with default type "log"
-void logPrint(const char* format, ...) __attribute__((format(printf, 1, 2)));
+void logPrint(const char* format, ...);
 
 #endif // LOGGER_H

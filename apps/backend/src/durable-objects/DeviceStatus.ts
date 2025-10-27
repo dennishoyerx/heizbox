@@ -3,7 +3,6 @@ import { SessionService } from '../services/sessionService.js' // Import Session
 import type { SessionData } from '@heizbox/types'
 import { HeatCycleService } from '../services/heatCycleService.js'
 
-
 export class DeviceStatus {
 	state: DurableObjectState
 	app: Hono
@@ -17,7 +16,6 @@ export class DeviceStatus {
 	subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
 	private webSockets: { ws: WebSocket; type: 'frontend' | 'device'; deviceId: string }[] = [] // Initialize webSockets array
 
-	
 	private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
 
 	// Cache für Session-Daten (TTL 5 Sekunden)
@@ -266,7 +264,8 @@ export class DeviceStatus {
 						const message = JSON.parse(event.data as string)
 						await this.processDeviceMessage(server, message)
 					} catch (err) {
-						console.error('Error processing device message:', err)
+						console.error('MSG ERROR: >', err)
+						console.error('     DATA: >', event.data)
 					}
 				})
 
@@ -332,7 +331,7 @@ export class DeviceStatus {
 	// New method to store log data
 	async storeLog(data: any, deviceId: string): Promise<void> {
 		try {
-			const { log: logType, m: message } = data
+			const { t: logType, m: message } = data
 			const id = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}` // Simple unique ID
 			const timestamp = Date.now()
 			const finalDeviceId = deviceId || 'unknown-device'
@@ -343,9 +342,7 @@ export class DeviceStatus {
 			}
 
 			await this.env.db
-				.prepare(
-					'INSERT INTO logs (id, device_id, log_type, message, timestamp) VALUES (?, ?, ?, ?, ?)',
-				)
+				.prepare('INSERT INTO logs (id, device_id, log_type, message, timestamp) VALUES (?, ?, ?, ?, ?)')
 				.bind(id, finalDeviceId, logType, message, timestamp)
 				.run()
 			console.log('DeviceStatus: Log stored successfully.', { id, finalDeviceId, logType, message, timestamp })
@@ -356,10 +353,13 @@ export class DeviceStatus {
 
 	// New method to process messages coming from devices
 	async processDeviceMessage(ws: WebSocket, message: any): Promise<void> {
-		console.log('DeviceStatus: Processing device message:', message)
+		console.log('DeviceStatus: MSG:', message)
 		const deviceId = this.webSockets.find((socket) => socket.ws === ws)?.deviceId || 'unknown-device'
 
-		if (message.type === 'statusUpdate') {
+		if (message.t != undefined) {
+			console.log('DeviceStatus: Processing log message.', message)
+			await this.storeLog(message, deviceId)
+		} else if (message.type === 'statusUpdate') {
 			let statusChanged = false
 
 			if (typeof message.isOn === 'boolean' && this.isOn !== message.isOn) {
@@ -405,7 +405,6 @@ export class DeviceStatus {
 
 			if (success) {
 				// Füge zu Cache hinzu
-				
 
 				// Invalidiere Session-Cache
 				this.sessionDataCache = null
@@ -421,16 +420,12 @@ export class DeviceStatus {
 		} else if (message.type === 'stashUpdated') {
 			console.log('DeviceStatus: Processing stashUpdated message.', message)
 			this.publish(message) // Broadcast to all subscribers
-		} else if (message.type === 'log') {
-			console.log('DeviceStatus: Processing log message.', message)
-			await this.storeLog(message, deviceId)
 		}
 
 		ws.send(JSON.stringify({ success: true })) // Default success response
 	}
 
 	async alarm() {
-		console.log('DeviceStatus: Alarm triggered.')
 		const now = Date.now()
 		const timeSinceLastSeen = now - this.lastSeen
 

@@ -80,7 +80,7 @@ public:
     }
 
     void set(T newValue) {
-        logPrint("PersistedObservable::set() for %s::%s\n", namespace_, key_);
+        logPrint("StateManager", "PersistedObservable::set() for %s::%s\n", namespace_, key_);
         Observable<T>::set(newValue);
         save();
     }
@@ -102,7 +102,7 @@ public:
 
         this->setSilent(value);
         prefs.end();
-        Serial.printf("PersistedObservable::load() for %s::%s -> loaded value %d\n", namespace_, key_, static_cast<int>(value));
+        logPrint("StateManager", "PersistedObservable::load() for %s::%s -> loaded value %d\n", namespace_, key_, static_cast<int>(value));
     }
 
     void save() {
@@ -121,7 +121,7 @@ public:
         }
 
         prefs.end();
-        Serial.printf("PersistedObservable::save() for %s::%s -> saved value %d\n", namespace_, key_, static_cast<int>(value));
+        logPrint("StateManager", "PersistedObservable::save() for %s::%s -> saved value %d\n", namespace_, key_, static_cast<int>(value));
     }
 
 private:
