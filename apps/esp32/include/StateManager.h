@@ -79,6 +79,7 @@ public:
     }
 
     void set(T newValue) {
+        Serial.printf("PersistedObservable::set() for %s::%s\n", namespace_, key_);
         Observable<T>::set(newValue);
         save();
     }
@@ -87,34 +88,39 @@ public:
         Preferences prefs;
         prefs.begin(namespace_, true);
 
+        T value;
         if (std::is_same<T, bool>::value) {
-            this->setSilent(prefs.getBool(key_, this->get()));
+            value = prefs.getBool(key_, this->get());
         } else if (std::is_same<T, int>::value || std::is_same<T, uint8_t>::value) {
-            this->setSilent(prefs.getInt(key_, this->get()));
+            value = prefs.getInt(key_, this->get());
         } else if (std::is_same<T, uint32_t>::value) {
-            this->setSilent(prefs.getUInt(key_, this->get()));
+            value = prefs.getUInt(key_, this->get());
         } else if (std::is_same<T, float>::value) {
-            this->setSilent(prefs.getFloat(key_, this->get()));
+            value = prefs.getFloat(key_, this->get());
         }
 
+        this->setSilent(value);
         prefs.end();
+        Serial.printf("PersistedObservable::load() for %s::%s -> loaded value %d\n", namespace_, key_, static_cast<int>(value));
     }
 
     void save() {
         Preferences prefs;
         prefs.begin(namespace_, false);
 
+        T value = this->get();
         if (std::is_same<T, bool>::value) {
-            prefs.putBool(key_, this->get());
+            prefs.putBool(key_, value);
         } else if (std::is_same<T, int>::value || std::is_same<T, uint8_t>::value) {
-            prefs.putInt(key_, this->get());
+            prefs.putInt(key_, value);
         } else if (std::is_same<T, uint32_t>::value) {
-            prefs.putUInt(key_, this->get());
+            prefs.putUInt(key_, value);
         } else if (std::is_same<T, float>::value) {
-            prefs.putFloat(key_, this->get());
+            prefs.putFloat(key_, value);
         }
 
         prefs.end();
+        Serial.printf("PersistedObservable::save() for %s::%s -> saved value %d\n", namespace_, key_, static_cast<int>(value));
     }
 
 private:
@@ -132,12 +138,12 @@ struct DeviceState {
     PersistedObservable<bool> darkMode{"display", "darkMode", true};
 
     // Heater Settings
-    PersistedObservable<uint32_t> autoStopTime{"heater", "autostop", 120000};
+    PersistedObservable<uint32_t> autoStopTime{"heater", "autostop", 90000};
     PersistedObservable<uint32_t> currentCycle{"heater", "cycle", 1};
 
     // System Settings
     PersistedObservable<uint32_t> sleepTimeout{"system", "sleepTimeout", 600000};
-    PersistedObservable<int32_t> timezoneOffset{"clock", "gmtOffset", 7200};
+    PersistedObservable<int32_t> timezoneOffset{"clock", "gmtOffset", 3600};
 
     // Runtime State (nicht persistiert)
     Observable<bool> isHeating{false};
