@@ -3,30 +3,6 @@ import { SessionService } from '../services/sessionService.js' // Import Session
 import type { SessionData } from '@heizbox/types'
 import { HeatCycleService } from '../services/heatCycleService.js'
 
-/**
- * Einfacher In-Memory-Cache für kürzlich gesehene Heat-Cycle-IDs
- * Verhindert doppelte DB-Queries zur Duplikaterkennung
- */
-class RecentCycleCache {
-	private cache: Set<string> = new Set()
-	private readonly maxSize = 100
-
-	has(duration: number, cycle: number): boolean {
-		const key = `${duration}-${cycle}`
-		return this.cache.has(key)
-	}
-
-	add(duration: number, cycle: number): void {
-		const key = `${duration}-${cycle}`
-		this.cache.add(key)
-
-		// FIFO: Entferne ältesten Eintrag bei Überlauf
-		if (this.cache.size > this.maxSize) {
-			const firstKey = this.cache.values().next().value
-			this.cache.delete(firstKey)
-		}
-	}
-}
 
 export class DeviceStatus {
 	state: DurableObjectState
@@ -41,7 +17,7 @@ export class DeviceStatus {
 	subscribers: Map<WebSocket, { type: string | null }> = new Map() // Store connected WebSocket clients and their type
 	private webSockets: { ws: WebSocket; type: 'frontend' | 'device'; deviceId: string }[] = [] // Initialize webSockets array
 
-	private recentCycleCache = new RecentCycleCache()
+	
 	private readonly OFFLINE_THRESHOLD = 90 * 1000 // 90 seconds
 
 	// Cache für Session-Daten (TTL 5 Sekunden)
@@ -396,18 +372,13 @@ export class DeviceStatus {
 			console.log('DeviceStatus: Processing heatCycleCompleted message.', message)
 
 			// Schneller Cache-Check vor DB-Abfrage
-			if (this.recentCycleCache.has(message.duration, message.cycle || 1)) {
-				console.log('DeviceStatus: Duplicate detected in cache, skipping')
-				ws.send(JSON.stringify({ success: false, reason: 'duplicate' }))
-				return
-			}
 
 			const heatCycleService = new HeatCycleService(this.env.db)
 			const success = await heatCycleService.createHeatCycle(message.duration, message.cycle || 1)
 
 			if (success) {
 				// Füge zu Cache hinzu
-				this.recentCycleCache.add(message.duration, message.cycle || 1)
+				
 
 				// Invalidiere Session-Cache
 				this.sessionDataCache = null
