@@ -31,6 +31,7 @@ export default defineConfig(() => ({
       "@heizbox/types": fileURLToPath(
         new URL("../../libs/types/src/index.ts", import.meta.url),
       ),
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
   plugins: [

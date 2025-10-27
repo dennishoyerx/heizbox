@@ -13,6 +13,7 @@ import deviceStatusRoute from "./routes/deviceStatus.js";
 import websocketRoute from "./routes/websocket.js";
 import sessionRoute from "./routes/session.js";
 import stashRoute from "./routes/stash.js";
+import stashWithdrawalsRoute from "./routes/stashWithdrawals.js";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -31,6 +32,7 @@ app.route("/api/device-status", deviceStatusRoute);
 app.route("/ws", websocketRoute);
 app.route("/api/session", sessionRoute);
 app.route("/api/stash", stashRoute);
+app.route("/api/stash_withdrawals", stashWithdrawalsRoute);
 
 export default Sentry.withSentry(
   (env: Env) => ({

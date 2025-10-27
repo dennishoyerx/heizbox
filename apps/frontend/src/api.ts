@@ -2,6 +2,10 @@ import type {
   HeatCyclesApiResponse,
   SessionApiResponse,
   StatisticsApiResponse,
+  StashItemWithHistory,
+  StashApiResponse,
+  CreateStashItemRequest,
+  WithdrawStashItemRequest
 } from "@heizbox/types";
 
 const API_BASE_URL = import.meta.env.VITE_PUBLIC_API_URL;
@@ -40,3 +44,27 @@ export const fetchStatistics = (range: string) =>
   apiFetch<StatisticsApiResponse>(`/api/statistics?range=${range}`);
 
 export const fetchSession = () => apiFetch<SessionApiResponse>("/api/session");
+
+export const fetchRecentWithdrawals = () =>
+  apiFetch<{ name: string; amount: number; withdrawn_at: string }[]>("/api/stash_withdrawals/recent");
+
+export const fetchStashItems = () => apiFetch<StashApiResponse>("/api/stash");
+
+export const createStashItem = (data: CreateStashItemRequest) =>
+  apiFetch<StashItemWithHistory>("/api/stash", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+export const withdrawStashItem = (itemId: string, data: WithdrawStashItemRequest) =>
+  apiFetch<StashItemWithHistory>(`/api/stash/${itemId}/withdraw`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+export const deleteStashItem = (itemId: string) =>
+  apiFetch<void>(`/api/stash/${itemId}`, {
+    method: "DELETE",
+  });

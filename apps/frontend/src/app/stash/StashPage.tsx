@@ -5,6 +5,7 @@ import { Plus, Minus, Trash } from '@phosphor-icons/react'
 import { useStash } from '../hooks/useStash'
 import { AddStashItemDialog } from './AddStashItemDialog'
 import { WithdrawDialog } from './WithdrawDialog'
+import { StashHistory } from './StashHistory'
 import type { StashItemWithHistory } from '@heizbox/types'
 
 function StashPage() {
@@ -128,6 +129,8 @@ function StashPage() {
 					</Table.Body>
 				</Table.Root>
 			)}
+
+			<StashHistory />
 
 			<AddStashItemDialog isOpen={isAddDialogOpen} onClose={() => setIsAddDialogOpen(false)} />
 

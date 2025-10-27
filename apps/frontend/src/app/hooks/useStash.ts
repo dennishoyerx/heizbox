@@ -5,7 +5,7 @@ import {
   createStashItem,
   withdrawStashItem,
   deleteStashItem,
-} from "../api/stash";
+} from "@/api";
 import { useWebSocketEvent } from "../WebSocketContext";
 import { useCallback } from "react";
 import type {
