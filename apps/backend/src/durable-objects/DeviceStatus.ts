@@ -329,9 +329,36 @@ export class DeviceStatus {
 		}
 	}
 
+	// New method to store log data
+	async storeLog(data: any, deviceId: string): Promise<void> {
+		try {
+			const { log: logType, m: message } = data
+			const id = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}` // Simple unique ID
+			const timestamp = Date.now()
+			const finalDeviceId = deviceId || 'unknown-device'
+
+			if (!message) {
+				console.warn('DeviceStatus: Received log message without content.', data)
+				return
+			}
+
+			await this.env.db
+				.prepare(
+					'INSERT INTO logs (id, device_id, log_type, message, timestamp) VALUES (?, ?, ?, ?, ?)',
+				)
+				.bind(id, finalDeviceId, logType, message, timestamp)
+				.run()
+			console.log('DeviceStatus: Log stored successfully.', { id, finalDeviceId, logType, message, timestamp })
+		} catch (error) {
+			console.error('DeviceStatus: Error storing log:', error, data)
+		}
+	}
+
 	// New method to process messages coming from devices
 	async processDeviceMessage(ws: WebSocket, message: any): Promise<void> {
 		console.log('DeviceStatus: Processing device message:', message)
+		const deviceId = this.webSockets.find((socket) => socket.ws === ws)?.deviceId || 'unknown-device'
+
 		if (message.type === 'statusUpdate') {
 			let statusChanged = false
 
@@ -394,6 +421,9 @@ export class DeviceStatus {
 		} else if (message.type === 'stashUpdated') {
 			console.log('DeviceStatus: Processing stashUpdated message.', message)
 			this.publish(message) // Broadcast to all subscribers
+		} else if (message.type === 'log') {
+			console.log('DeviceStatus: Processing log message.', message)
+			await this.storeLog(message, deviceId)
 		}
 
 		ws.send(JSON.stringify({ success: true })) // Default success response

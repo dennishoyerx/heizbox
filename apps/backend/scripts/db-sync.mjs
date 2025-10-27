@@ -5,7 +5,7 @@ const dbName = 'heizbox'
 const dumpFile = './heizbox-backup.sql'
 const localDb = './.wrangler/state/v3/d1/heizbox.db'
 
-const tables = ['heat_cycles', 'stash_items', 'stash_withdrawals', 'd1_migrations']
+const tables = ['heat_cycles', 'stash_items', 'stash_withdrawals', 'd1_migrations', 'logs']
 
 function fixDump() {
 	const dump = fs.readFileSync(dumpFile, 'utf-8')

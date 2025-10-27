@@ -1,31 +1,43 @@
 #include "Logger.h"
-#include <stdarg.h>
 
-void logPrint(const char* format, ...) {
+// Helper function for variadic arguments
+void vlogPrint(const char* type, const char* format, va_list args) {
     char loc_buf[256];
     char web_buf[256];
 
-    va_list arg;
-    va_list arg_copy;
-
-    va_start(arg, format);
-    va_copy(arg_copy, arg);
+    va_list args_copy;
+    va_copy(args_copy, args);
 
     // For Serial output
-    int len = vsnprintf(loc_buf, sizeof(loc_buf), format, arg);
+    int len = vsnprintf(loc_buf, sizeof(loc_buf), format, args);
     if (len > 0) {
         Serial.println(loc_buf);
     }
 
     // For WebSocket output
-    int web_len = vsnprintf(web_buf, sizeof(web_buf), format, arg_copy);
+    int web_len = vsnprintf(web_buf, sizeof(web_buf), format, args_copy);
     if (web_len > 0) {
         if (WebSocketManager::getInstance() && WebSocketManager::getInstance()->isConnected()) {
-            String jsonPayload = "{\"type\":\"log\",\"message\":\"" + String(web_buf) + "\"}";
+            String jsonPayload = "{\"t\":\"" + String(type) + "\",\"m\":\"" + String(web_buf) + "\"}";
             WebSocketManager::getInstance()->webSocket.sendTXT(jsonPayload);
         }
     }
 
-    va_end(arg_copy);
-    va_end(arg);
+    va_end(args_copy);
+}
+
+// Function to log messages to Serial and WebSocket with explicit type
+void logPrint(const char* type, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vlogPrint(type, format, args);
+    va_end(args);
+}
+
+// Function to log messages to Serial and WebSocket with default type "log"
+void logPrint(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vlogPrint("log", format, args);
+    va_end(args);
 }

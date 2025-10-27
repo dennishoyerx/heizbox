@@ -8,6 +8,7 @@
 #include "ScreenRegistry.h"
 #include "ScreenBase.h"
 #include "StateManager.h"
+#include "Logger.h"
 #include <utility> // For std::move and std::make_unique
 
 // ============================================================================
@@ -115,21 +116,29 @@ void Device::setup() {
     heater.init();
     statsManager.init();
     display.init(&screenManager);
-    clockManager.init();
+
 
     // Screen-Registry aufsetzen
     setupScreenRegistry();
+
+
+        // Setup screens
+        screenManager.setScreen(&startupScreen);
+
+        input.setCallback([this](InputEvent event) {
+            this->handleInput(event);
+        });
+
+    clockManager.init();
 
     // State-Bindings erstellen
     StateBinding::bindAll(&display, &clockManager, &heater);
 
     // Setup WiFi
-    // WICHTIG: Menu erst nach Init der Manager erstellen!
     setupMainMenu();
     wifiManager.init(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
     wifiManager.onConnectionChange([this](bool connected) {
         if (connected) {
-            // WiFi connected - initialize WebSocket
             webSocketManager.init(Config::BACKEND_WS_URL, Config::DEVICE_ID, "device");
         }
     });
@@ -143,15 +152,10 @@ void Device::setup() {
         Serial.printf("🔌 WebSocket %s\n", connected ? "connected" : "disconnected");
     });
 
-    // Setup screens
-    screenManager.setScreen(&startupScreen);
-
-    input.setCallback([this](InputEvent event) {
-        this->handleInput(event);
-    });
-
     // Setup OTA
     setupOTA();
+
+    logPrint("test");
 
     Serial.println("✅ Device initialized");
 }
@@ -251,12 +255,12 @@ void Device::setupOTA() {
     ArduinoOTA.setHostname("Heizbox");
 
     ArduinoOTA.onStart([this]() {
-        Serial.println("📲 OTA Update started");
+        logPrint("📲 OTA Update started");
         screenManager.setScreen(&otaUpdateScreen);
     });
 
     ArduinoOTA.onEnd([this]() {
-        Serial.println("📲 OTA Update completed");
+        logPrint("📲 OTA Update completed");
         screenManager.setScreen(&fireScreen);
     });
 

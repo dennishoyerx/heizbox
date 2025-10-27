@@ -24,3 +24,11 @@ CREATE TABLE IF NOT EXISTS stash_withdrawals (
     withdrawn_at TEXT DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (stash_item_id) REFERENCES stash_items(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS logs (
+  id TEXT PRIMARY KEY,
+  device_id TEXT NOT NULL,
+  log_type TEXT,
+  message TEXT NOT NULL,
+  timestamp INTEGER NOT NULL
+);
