@@ -68,3 +68,8 @@ export const deleteStashItem = (itemId: string) =>
   apiFetch<void>(`/api/stash/${itemId}`, {
     method: "DELETE",
   });
+
+export const fetchLogs = (limit?: number) => {
+  const url = limit ? `/api/logs?limit=${limit}` : "/api/logs";
+  return apiFetch<{ timestamp: number; log_type: string; message: string }[]>(url);
+};

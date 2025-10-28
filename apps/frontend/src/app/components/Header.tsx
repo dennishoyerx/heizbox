@@ -1,8 +1,9 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Flex, Heading, DropdownMenu, Button, Text } from '@radix-ui/themes'
+import { Flex, Heading, DropdownMenu, Button } from '@radix-ui/themes'
 import { List, Sun, Moon, Circle, CircleNotch, Fire } from '@phosphor-icons/react'
 import { Box } from '@radix-ui/themes/src/index.js'
+import { LogPopover } from './LogPopover'
 
 interface HeaderProps {
 	deviceName: string
@@ -25,6 +26,8 @@ const Header: React.FC<HeaderProps> = ({ deviceName, deviceStatus, heatingStatus
 
 						{deviceStatus === 'Online' && <Circle weight='bold' size={20} color='green' />}
 						{deviceStatus === 'Offline' && <CircleNotch weight='bold' size={20} color='red' />}
+
+            <LogPopover />
 
 						<DropdownMenu.Root>
 							<DropdownMenu.Trigger>

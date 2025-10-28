@@ -71,5 +71,6 @@
 		"build:esp": "pnpm nx build esp32",
 		"upload:esp": "pnpm nx upload esp32",
 		"monitor:esp": "pnpm nx monitor esp32",
-		    "icons": "tsc --project tools/tsconfig.json && node tools/dist/generate-icons.js && rm -rf tools/dist"	}
+		"icons": "tsc --project tools/tsconfig.json && node tools/dist/generate-icons.js && rm -rf tools/dist"
+	}
 }
