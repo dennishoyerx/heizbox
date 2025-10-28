@@ -113,6 +113,7 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
 
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
     display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
+    display.drawText(63, 168, "lineConsumption", TFT_WHITE, 3);
     display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);
 }
 

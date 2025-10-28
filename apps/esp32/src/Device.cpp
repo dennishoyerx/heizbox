@@ -109,13 +109,9 @@ void Device::setup() {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        logPrint("NVS", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        logPrint("NVS", "!! NVS full or version mismatch. Consider factory reset. !!");
-        logPrint("NVS", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        // Forcing a re-init after a version mismatch or full NVS can be destructive.
-        // It's better to log and let the user decide on a factory reset.
-        // nvs_flash_erase();
-        // nvs_flash_init();
+        logPrint("NVS", "flash erased");
+        nvs_flash_erase();
+        nvs_flash_init();
     }
 
     // Initialize core components
