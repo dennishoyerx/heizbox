@@ -11,6 +11,7 @@ class ClockManager;
 #include <type_traits>
 #include "HeaterController.h"
 #include "Logger.h"
+#include <nvs_flash.h> // Added for nvs_flash_init()
 
 // ============================================================================
 // Observable Pattern - Automatische Benachrichtigungen
@@ -180,6 +181,11 @@ struct DeviceState {
 
     // Singleton Access
     static DeviceState& instance() {
+        static bool nvsReady = false;
+        if (!nvsReady) {
+            nvs_flash_init();
+            nvsReady = true;
+        }
         static DeviceState state;
         return state;
     }
