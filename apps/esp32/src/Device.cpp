@@ -34,10 +34,12 @@ public:
     static void bindDarkMode(DisplayManager* display) {
         auto& state = STATE;
 
+        // Initial sync
+        display->setDarkMode(state.darkMode.get());
+
+        // Listen to state changes
         state.darkMode.addListener([display](bool enabled) {
-            if (display->isDarkMode() != enabled) {
-                display->toggleDarkMode();
-            }
+            display->setDarkMode(enabled);
         });
     }
 
@@ -107,9 +109,13 @@ void Device::setup() {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        logPrint("NVS", "flash erased");
-        nvs_flash_erase();
-        nvs_flash_init();
+        logPrint("NVS", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        logPrint("NVS", "!! NVS full or version mismatch. Consider factory reset. !!");
+        logPrint("NVS", "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        // Forcing a re-init after a version mismatch or full NVS can be destructive.
+        // It's better to log and let the user decide on a factory reset.
+        // nvs_flash_erase();
+        // nvs_flash_init();
     }
 
     // Initialize core components

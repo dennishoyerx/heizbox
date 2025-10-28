@@ -50,9 +50,8 @@ public:
     // Settings
     void setBrightness(uint8_t level);
     uint8_t getBrightness() const { return brightness; }
-    void toggleDarkMode();
+    void setDarkMode(bool enabled);
     bool isDarkMode() const { return darkMode; }
-    void saveSettings();
 
     // Helpers
     int getTFTWidth() const { return DisplayConfig::WIDTH; }

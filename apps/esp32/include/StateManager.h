@@ -87,41 +87,56 @@ public:
 
     void load() {
         Preferences prefs;
-        prefs.begin(namespace_, true);
+        if (!prefs.begin(namespace_, true)) {
+            logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-only.", namespace_);
+            return;
+        }
 
-        T value;
+        T value = this->get(); // Initialize with current (default) value
+
         if (std::is_same<T, bool>::value) {
-            value = prefs.getBool(key_, this->get());
-        } else if (std::is_same<T, int>::value || std::is_same<T, uint8_t>::value) {
-            value = prefs.getInt(key_, this->get());
+            value = prefs.getBool(key_, value);
+        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, uint8_t>::value) {
+            value = prefs.getInt(key_, value);
         } else if (std::is_same<T, uint32_t>::value) {
-            value = prefs.getUInt(key_, this->get());
+            value = prefs.getUInt(key_, value);
         } else if (std::is_same<T, float>::value) {
-            value = prefs.getFloat(key_, this->get());
+            value = prefs.getFloat(key_, value);
+        } else {
+            logPrint("StateManager", "WARNING: No NVS handler for key '%s'", key_);
         }
 
         this->setSilent(value);
         prefs.end();
-        logPrint("StateManager", "PersistedObservable::load() for %s::%s -> loaded value %d\n", namespace_, key_, static_cast<int>(value));
+        logPrint("StateManager", "[NVS] LOAD %s::%s -> %d", namespace_, key_, static_cast<int>(value));
     }
 
     void save() {
         Preferences prefs;
-        prefs.begin(namespace_, false);
-
-        T value = this->get();
-        if (std::is_same<T, bool>::value) {
-            prefs.putBool(key_, value);
-        } else if (std::is_same<T, int>::value || std::is_same<T, uint8_t>::value) {
-            prefs.putInt(key_, value);
-        } else if (std::is_same<T, uint32_t>::value) {
-            prefs.putUInt(key_, value);
-        } else if (std::is_same<T, float>::value) {
-            prefs.putFloat(key_, value);
+        if (!prefs.begin(namespace_, false)) {
+            logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-write.", namespace_);
+            return;
         }
 
-        prefs.end();
-        logPrint("StateManager", "PersistedObservable::save() for %s::%s -> saved value %d\n", namespace_, key_, static_cast<int>(value));
+        T value = this->get();
+        size_t bytesWritten = 0;
+        if (std::is_same<T, bool>::value) {
+            bytesWritten = prefs.putBool(key_, value);
+        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, uint8_t>::value) {
+            bytesWritten = prefs.putInt(key_, value);
+        } else if (std::is_same<T, uint32_t>::value) {
+            bytesWritten = prefs.putUInt(key_, value);
+        } else if (std::is_same<T, float>::value) {
+            bytesWritten = prefs.putFloat(key_, value);
+        }
+
+        prefs.end(); // end() must be called to commit.
+
+        if (bytesWritten > 0) {
+            logPrint("StateManager", "[NVS] SAVE %s::%s -> %d", namespace_, key_, static_cast<int>(value));
+        } else {
+            logPrint("StateManager", "ERROR: Failed to write to NVS for key '%s'", key_);
+        }
     }
 
 private:

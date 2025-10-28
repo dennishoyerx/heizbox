@@ -17,7 +17,6 @@ DisplayManager::DisplayManager(ClockManager* cm)
       clock(cm),
       screenManager(nullptr),
       brightness(DisplayConfig::BRIGHTNESS_DEFAULT),
-      darkMode(true),
       spriteAllocated(false)
 {
     renderState.reset();
@@ -262,13 +261,15 @@ void DisplayManager::setBrightness(uint8_t level) {
     Serial.printf("💡 Brightness: %u%% (PWM: %u)\n", brightness, pwmValue);
 }
 
-void DisplayManager::toggleDarkMode() {
-    darkMode = !darkMode;
-    renderState.reset(); // Force re-render mit neuen Farben
+void DisplayManager::setDarkMode(bool enabled) {
+    if (darkMode != enabled) {
+        darkMode = enabled;
+        renderState.reset(); // Force re-render mit neuen Farben
 
-    Serial.printf("🌓 Dark Mode: %s\n", darkMode ? "ON" : "OFF");
+        Serial.printf("🌓 Dark Mode set to: %s\n", darkMode ? "ON" : "OFF");
 
-    if (screenManager) {
-        screenManager->setDirty();
+        if (screenManager) {
+            screenManager->setDirty();
+        }
     }
 }
