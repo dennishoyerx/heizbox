@@ -1,5 +1,4 @@
 #include "Logger.h"
-#include "StateManager.h"
 
 // Helper function for variadic arguments
 void vlogPrint(const char* type, const char* format, va_list args) {
@@ -18,7 +17,7 @@ void vlogPrint(const char* type, const char* format, va_list args) {
     // For WebSocket output
     int web_len = vsnprintf(web_buf, sizeof(web_buf), format, args_copy);
     if (web_len > 0) {
-        if (STATE.webSocketLogging.get() && WebSocketManager::getInstance() && WebSocketManager::getInstance()->isConnected()) {
+        if (WebSocketManager::getInstance() && WebSocketManager::getInstance()->isConnected()) {
             String escaped_web_buf = web_buf;
             escaped_web_buf.replace("\n", "\\n"); // Escape newline characters
             String jsonPayload = "{\"t\":\"" + String(type) + "\",\"m\":\"" + escaped_web_buf + "\"}";
