@@ -145,6 +145,7 @@ struct DeviceState {
     // System Settings
     PersistedObservable<uint32_t> sleepTimeout{"system", "sleepTimeout", 600000};
     PersistedObservable<int32_t> timezoneOffset{"clock", "gmtOffset", 3600};
+    PersistedObservable<bool> webSocketLogging{"system", "wsLogging", true};
 
     // Runtime State (nicht persistiert)
     Observable<bool> isHeating{false};
