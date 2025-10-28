@@ -30,7 +30,8 @@
       "exclude": [
         "apps/backend/*",
         "libs/types/*",
-        "libs/utils/*"
+        "libs/utils/*",
+        "apps/esp32/*"
       ]
     },
     {
