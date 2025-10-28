@@ -187,6 +187,8 @@ void Device::setupMainMenu() {
 
         .addObservableToggle("Dark Mode", state.darkMode)
 
+        .addObservableToggle("Center Heat", state.enableCenterButtonForHeating)
+
         .addAction("Timezone", [this]() {
             NAVIGATE_TO_WITH_TRANSITION(&screenManager, ScreenType::TIMEZONE, ScreenTransition::FADE);
         })

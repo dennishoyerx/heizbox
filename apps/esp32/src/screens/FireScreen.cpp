@@ -4,6 +4,7 @@
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
 #include "StateManager.h"
+#include "StateManager.h"
 
 FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
                        ScreensaverScreen* ss, StatsManager* stm,
@@ -113,7 +114,6 @@ void FireScreen::drawSessionStats(DisplayManager& display) {
 
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
     display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
-    display.drawText(63, 168, "lineConsumption", TFT_WHITE, 3);
     display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);
 }
 
@@ -142,22 +142,32 @@ void FireScreen::handleInput(InputEvent event) {
 
     resetActivityTimer();
 
-    switch (event.button) {
-        case FIRE:
-            if (!heater.isHeating()) {
-                heater.startHeating();
-                state.heatingStartTime = millis();
-            } else {
-                const bool updateCycle = heater.isHeating();
-                heater.stopHeating();
-                if (updateCycle && (millis() - state.heatingStartTime > 10000)) {
-                    setCycleCallback(state.currentCycle);
-                    state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-                }
-            }
-            markDirty();
-            break;
+    // Determine if heating should be triggered
+    bool triggerHeating = false;
+    if (event.button == FIRE) {
+        triggerHeating = true; // FIRE button always triggers heating
+    } else if (event.button == CENTER && STATE.enableCenterButtonForHeating.get()) {
+        triggerHeating = true; // CENTER button triggers heating if enabled
+    }
 
+    if (triggerHeating) {
+        if (!heater.isHeating()) {
+            heater.startHeating();
+            state.heatingStartTime = millis();
+        } else {
+            const bool updateCycle = heater.isHeating();
+            heater.stopHeating();
+            if (updateCycle && (millis() - state.heatingStartTime > 10000)) {
+                setCycleCallback(state.currentCycle);
+                state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
+            }
+        }
+        markDirty();
+        return; // Consume the event if it triggered heating
+    }
+
+    // Handle other inputs (UP/DOWN for cycle change)
+    switch (event.button) {
         case UP:
             handleCycleChange(true);
             break;
