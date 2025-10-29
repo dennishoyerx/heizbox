@@ -50,3 +50,5 @@ apps/esp32/compile_commands.json
 
 !apps/backend/migrations/
 !apps/backend/migrations/*.sql
+
+.geminiignore
