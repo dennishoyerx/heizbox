@@ -1,12 +1,34 @@
 CompileFlags:
+  CompilationDatabase: apps/esp32
+  Remove:
+    - -mlongcalls
+    - -mtext-section-literals
+    - -ffunction-sections
+    - -fdata-sections
+    - -fstrict-volatile-bitfields
+    - -nostdlib
+    - -fno-jump-tables
+    - -fno-tree-switch-conversion
   Add:
-    - -Iapps/esp32/include
-    - -Iapps/esp32/src
-    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\cores\arduino
-    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\variants\esp32
-    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\variants\esp32
-    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\libraries
-    - -IC:\Users\Administrator\.platformio\packages\framework-arduinoespressif32\tools\sdk\include
     - -DARDUINO=10813
     - -DPLATFORMIO=1
-    - -std=gnu++17
+    - -DIRAM_ATTR=
+    - -DICACHE_RAM_ATTR=
+    - -DportMUX_TYPE=int
+    - -DportMUX_INITIALIZER_UNLOCKED=0
+    # Projektinterne Includes
+    - -Iapps/esp32/include
+    - -Iapps/esp32/src
+    # Arduino Core
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/cores/arduino
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/variants/esp32
+    # Libraries (nur src-Ordner)
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src
+    # ESP32 SDK
+    - -IC:/Users/Administrator/.platformio/packages/framework-arduinoespressif32/tools/sdk/include
+    # Toolchain libc / newlib / sys
+    - -IC:/Users/Administrator/.platformio/packages/toolchain-xtensa-esp32/xtensa-esp32-elf/include
+    - -IC:/Users/Administrator/.platformio/packages/toolchain-xtensa-esp32/xtensa-esp32-elf/include/newlib
+    - -IC:/Users/Administrator/.platformio/packages/toolchain-xtensa-esp32/xtensa-esp32-elf/include/sys

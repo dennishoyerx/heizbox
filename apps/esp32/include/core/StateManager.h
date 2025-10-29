@@ -1,4 +1,3 @@
-// include/StateManager.h
 #ifndef STATEMANAGER_H
 #define STATEMANAGER_H
 

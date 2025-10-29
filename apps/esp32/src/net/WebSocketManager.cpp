@@ -1,4 +1,3 @@
-// src/WebSocketManager.cpp
 #include "net/WebSocketManager.h"
 
 
@@ -176,5 +175,3 @@ void WebSocketManager::onWebSocketEvent(WStype_t type, uint8_t* payload, size_t 
         instance->handleEvent(type, payload, length);
     }
 }
-
-

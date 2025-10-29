@@ -1,9 +1,7 @@
-// src/screens/FireScreen.cpp
 #include "ui/screens/FireScreen.h"
 #include "ui/base/ScreenManager.h"
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
-#include "StateManager.h"
 #include "StateManager.h"
 
 FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,

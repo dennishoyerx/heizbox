@@ -1,0 +1,7 @@
+{
+	"lsp": {
+		"clangd": {
+			"compileCommands": "apps/esp32/compile_commands.json"
+		}
+	}
+}
