@@ -81,7 +81,7 @@ public:
     }
 
     void set(T newValue) {
-        logPrint("StateManager", "PersistedObservable::set() for %s::%s\n", namespace_, key_);
+        //logPrint("StateManager", "PersistedObservable::set() for %s::%s\n", namespace_, key_);
         Observable<T>::set(newValue);
         save();
     }
@@ -89,7 +89,7 @@ public:
     void load() {
         Preferences prefs;
         if (!prefs.begin(namespace_, true)) {
-            logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-only.", namespace_);
+            //logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-only.", namespace_);
             return;
         }
 
@@ -109,7 +109,7 @@ public:
 
         this->setSilent(value);
         prefs.end();
-        logPrint("StateManager", "[NVS] LOAD %s::%s -> %d", namespace_, key_, static_cast<int>(value));
+        //logPrint("StateManager", "[NVS] LOAD %s::%s -> %d", namespace_, key_, static_cast<int>(value));
     }
 
     void save() {
@@ -134,7 +134,7 @@ public:
         prefs.end(); // end() must be called to commit.
 
         if (bytesWritten > 0) {
-            logPrint("StateManager", "[NVS] SAVE %s::%s -> %d", namespace_, key_, static_cast<int>(value));
+            //logPrint("StateManager", "[NVS] SAVE %s::%s -> %d", namespace_, key_, static_cast<int>(value));
         } else {
             logPrint("StateManager", "ERROR: Failed to write to NVS for key '%s'", key_);
         }

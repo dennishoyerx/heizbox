@@ -74,6 +74,9 @@ Device::~Device() = default; // Destructor definition
 
 void Device::setup() {
     Serial.begin(115200);
+    char firmwareInfo[64];
+    snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
+    logPrint("Firmware", firmwareInfo);
 
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -137,8 +140,6 @@ void Device::loop() {
 
     // OTA handling
     otaSetup->handleOTA();
-
-    delay(5);
 }
 
 // ============================================================================
@@ -167,4 +168,3 @@ void Device::setCurrentCycle(int cycle) {
     lastSetCycle = cycle;
     Serial.printf("📊 Current cycle set to: %d\n", lastSetCycle);
 }
-
