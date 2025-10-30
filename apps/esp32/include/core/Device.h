@@ -3,6 +3,11 @@
 
 #include <Arduino.h>
 #include <memory>
+#include <functional> // For std::function
+
+#include "core/StateManager.h"
+#include "core/StateBinder.h"
+#include "core/Types.h"
 
 #include "hardware/HeaterController.h"
 #include "hardware/InputManager.h"
@@ -11,6 +16,10 @@
 #include "core/StatsManager.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
+#include "net/NetworkSetup.h"
+#include "hardware/OTASetup.h"
+#include "hardware/HeaterMonitor.h"
+#include "hardware/InputHandler.h"
 
 // UI
 #include "ui/base/ScreenManager.h"
@@ -21,10 +30,8 @@
 #include "ui/screens/StatsScreen.h"
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
-#include "ui/base/ScreenTransition.h" // New include
+#include "ui/UISetup.h"
 
-// Forward declarations
-class GenericMenuScreen;
 
 class Device {
 
@@ -65,17 +72,24 @@ private:
     TimezoneScreen timezoneScreen;
     StartupScreen startupScreen;
 
+    // UI Setup
+    std::unique_ptr<UISetup> uiSetup;
+
+    // Network Setup
+    std::unique_ptr<NetworkSetup> networkSetup;
+
+    // OTA Setup
+    std::unique_ptr<OTASetup> otaSetup;
+
+    // Heater Monitor
+    std::unique_ptr<HeaterMonitor> heaterMonitor;
+
+    // Input Handler
+    std::unique_ptr<InputHandler> inputHandler;
+
     // State
-    bool lastHeatingStatusSent = false;
     int lastSetCycle = 1;
 
     // Helper methods
-    void setupScreenRegistry();
-    void setupMainMenu();
-    void setupOTA();
-    void handleInput(InputEvent event);
-    bool handleGlobalShortcuts(InputEvent event);
-    void checkHeatingStatus();
-    void checkHeatCycle();
     void handleWebSocketMessage(const char* type, const JsonDocument& doc);
 };

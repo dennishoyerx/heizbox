@@ -334,28 +334,6 @@ private:
 // Generic Menu Screen
 // ============================================================================
 
-class GenericMenuScreen : public Screen {
-public:
-    GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items)
-        : title_(title), items_(std::move(items)), selectedIndex_(0), 
-          adjustMode_(false) {}
-    
-    void draw(DisplayDriver& display) override;
-    
-    void update() override {}
-    
-    void handleInput(InputEvent event) override;
-    
-    ScreenType getType() const override { return ScreenType::MAIN_MENU; }
-
-private:
-    void handleNavigationMode(InputEvent event);
-    void handleAdjustMode(InputEvent event);
-    
-    const char* title_;
-    std::vector<std::unique_ptr<MenuItem>> items_;
-    size_t selectedIndex_;
-    bool adjustMode_;
-};
+#include "ui/base/GenericMenuScreen.h"
 
 #endif // MENUBUILDER_H

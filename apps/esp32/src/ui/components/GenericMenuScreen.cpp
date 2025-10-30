@@ -1,8 +1,9 @@
 // src/GenericMenuScreen.cpp
-#include "ui/components/MenuBuilder.h"
+#include "ui/base/GenericMenuScreen.h" // New include
 #include "hardware/InputManager.h" // For InputEvent and its enums
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "hardware/DisplayDriver.h"
+#include <algorithm> // For std::min
 
 namespace {
     void centerText(DisplayDriver& display, int16_t y, const char* text, uint16_t color, uint8_t size) {
@@ -11,6 +12,7 @@ namespace {
     }
 }
 
+// Implementations of methods declared in GenericMenuScreen.h
 void GenericMenuScreen::draw(DisplayDriver& display) {
     display.clear();
     

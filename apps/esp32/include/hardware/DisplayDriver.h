@@ -101,6 +101,7 @@ private:
     uint16_t getBackgroundColor();
 
     // Renderer selection (Sprite vs Direct)
+    TFT_eSPI& getRenderer();
     template<typename T>
     T& getRenderer();
 };

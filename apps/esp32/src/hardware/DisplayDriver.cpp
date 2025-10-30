@@ -101,7 +101,6 @@ void DisplayDriver::reallocateSprites() {
 
 
 uint16_t DisplayDriver::getBackgroundColor() {
-    // Fixiert auf #FF6B2B
     return tft.color565(255, 107, 43);
 }
 
@@ -148,6 +147,14 @@ T& DisplayDriver::getRenderer() {
     }
 }
 
+TFT_eSPI& DisplayDriver::getRenderer() {
+    if (spriteAllocated) {
+        return sprTop;
+    } else {
+        return tft;
+    }
+}
+
 static void setFont(uint16_t size, TFT_eSPI& renderer) {
     switch (size) {
         case 1: renderer.setFreeFont(&FreeSans9pt7b); renderer.setTextSize(1);  break;
@@ -166,9 +173,7 @@ void DisplayDriver::drawText(int16_t x, int16_t y, const char* text,
 
     const uint16_t bgColor = getBackgroundColor();
 
-    // Select renderer (sprite or direct)
-    auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
-                                      : static_cast<TFT_eSPI&>(tft);
+    auto& renderer = getRenderer();
 
     // Optimize: Only update state if changed
     bool needsUpdate = false;
@@ -237,8 +242,7 @@ void DisplayDriver::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_
 int DisplayDriver::getTextWidth(const char* text, uint8_t size) {
     if (!text) return 0;
 
-    auto& renderer = spriteAllocated ? static_cast<TFT_eSPI&>(sprTop)
-                                      : static_cast<TFT_eSPI&>(tft);
+    auto& renderer = getRenderer();
 
     setFont(size, renderer);
 
@@ -276,3 +280,6 @@ void DisplayDriver::setDarkMode(bool enabled) {
         }
     }
 }
+
+
+extern DisplayDriver Display;

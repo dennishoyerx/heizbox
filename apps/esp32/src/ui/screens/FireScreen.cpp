@@ -130,7 +130,6 @@ void FireScreen::update() {
         }
     }
 
-    // Check screensaver timeout
     checkScreensaverTimeout();
 }
 
