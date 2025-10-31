@@ -76,7 +76,6 @@ void DisplayDriver::reallocateSprites() {
     spriteAllocated = sprTop.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
-        // Hintergrundfarbe exakt #FF6B2B
         uint16_t orange = tft.color565(255, 107, 43);
         sprTop.fillSprite(orange);
 

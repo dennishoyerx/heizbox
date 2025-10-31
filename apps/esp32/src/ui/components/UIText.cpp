@@ -1,5 +1,4 @@
 #include "ui/components/UIText.h"
-#include "hardware/DisplayDriver.h"
 #include "core/StateManager.h"
 
 UIText::UIText(int16_t x, int16_t y, const char* text, uint8_t size, uint16_t color)
