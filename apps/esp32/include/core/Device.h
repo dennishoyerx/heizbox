@@ -36,17 +36,10 @@
 class Device {
 
 public:
-
     Device();
-
     ~Device(); // Declare destructor
-
     void setup();
-
     void loop();
-
-
-
     void setCurrentCycle(int cycle);
 
 private:

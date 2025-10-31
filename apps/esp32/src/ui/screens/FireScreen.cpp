@@ -1,5 +1,6 @@
 #include "ui/screens/FireScreen.h"
 #include "ui/base/ScreenManager.h"
+#include "ui/components/UIText.h"
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
 #include "StateManager.h"
@@ -108,7 +109,8 @@ void FireScreen::drawSessionStats(DisplayDriver& display) {
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
     display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
-
+    UIText capsText = UIText(213, 168, "lineCaps", 3);
+    capsText.draw();
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
     display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
     display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);

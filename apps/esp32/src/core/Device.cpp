@@ -74,9 +74,6 @@ Device::~Device() = default; // Destructor definition
 
 void Device::setup() {
     Serial.begin(115200);
-    char firmwareInfo[64];
-    snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
-    logPrint("Firmware", firmwareInfo);
 
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -86,10 +83,10 @@ void Device::setup() {
     }
 
     // Initialize core components
+    display.init(&screenManager);
     input.init();
     heater.init();
     statsManager.init();
-    display.init(&screenManager);
 
     // Setup screens
     uiSetup->setupScreenRegistry();
@@ -104,6 +101,8 @@ void Device::setup() {
     // State-Bindings erstellen
     StateBinder::bindAll(&display, &clockManager, &heater);
 
+    DeviceState::instance().display = &display;
+
     // Setup Main Menu
     mainMenuScreen = uiSetup->setupMainMenu();
 
@@ -112,8 +111,6 @@ void Device::setup() {
 
     // Setup OTA
     otaSetup->setupOTA();
-
-    logPrint("test");
 
     Serial.println("✅ Device initialized");
 }

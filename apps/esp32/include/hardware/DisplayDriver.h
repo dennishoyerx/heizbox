@@ -106,6 +106,5 @@ private:
     T& getRenderer();
 };
 
-
-
+extern DisplayDriver Display;
 #endif

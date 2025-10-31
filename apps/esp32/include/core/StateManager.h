@@ -11,6 +11,8 @@
 #include "utils/Logger.h"
 #include <nvs_flash.h> // Added for nvs_flash_init()
 
+class DisplayDriver; // Forward declaration
+
 
 
 // ============================================================================
@@ -178,6 +180,8 @@ struct DeviceState {
     // Statistics
     PersistedObservable<uint32_t> totalCycles{"stats", "total_cycles", 0};
     PersistedObservable<uint32_t> totalDuration{"stats", "total_duration", 0};
+
+    DisplayDriver* display = nullptr;
 
     // Singleton Access
     static DeviceState& instance() {

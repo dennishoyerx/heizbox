@@ -7,7 +7,7 @@
 #include <LittleFS.h>
 #include <cstdint>
 
-
+//DisplayDriver Display(nullptr);
 
 // ============================================================================
 // Constructor & Destructor
@@ -36,22 +36,14 @@ DisplayDriver::~DisplayDriver() {
 
 void DisplayDriver::init(ScreenManager* mgr) {
     screenManager = mgr;
-
-    // Initialize TFT
     tft.init();
     tft.setRotation(1);
 
-    tft.loadFont("fonts/josefin_20.vlw", LittleFS);
+    //tft.loadFont("fonts/josefin_20.vlw", LittleFS);
 
-    // Initialize backlight PWM
     initBacklight();
-
-    // Initialize StatusBar
     statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, clock, DisplayConfig::STATUS_BAR_HEIGHT);
-
-    // Allocate sprite buffer
     reallocateSprites();
-
 
     uint16_t orange = tft.color565(255, 107, 43);
     tft.fillScreen(orange);
@@ -109,7 +101,6 @@ uint16_t DisplayDriver::getBackgroundColor() {
 // ============================================================================
 
 void DisplayDriver::clear(uint16_t color) {
-    // Hintergrund bleibt immer #FF6B2B
     uint16_t orange = tft.color565(255, 107, 43);
 
     if (spriteAllocated) {
@@ -280,6 +271,3 @@ void DisplayDriver::setDarkMode(bool enabled) {
         }
     }
 }
-
-
-extern DisplayDriver Display;
