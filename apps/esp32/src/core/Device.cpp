@@ -4,6 +4,7 @@
 #include <ArduinoOTA.h>
 #include "core/StateManager.h"
 #include "utils/Logger.h"
+#include "utils/Logs.h"
 #include <utility> // For std::move and std::make_unique
 
 // Network
@@ -91,7 +92,6 @@ void Device::setup() {
 
     mainMenuScreen = uiSetup->setupMainMenu();
 
-    // Setup Network
     network->setup(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
     network->onReady([]() {
         static bool firmware_logged = false;
@@ -99,10 +99,11 @@ void Device::setup() {
             char firmwareInfo[64];
             snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
             logPrint("Firmware", firmwareInfo);
+            //logPrint("Firmware", Log::Firmware());
             firmware_logged = true;
         }
     });
-    // Setup OTA
+
     otaSetup->setupOTA();
 
     Serial.println("✅ Device initialized");

@@ -1,4 +1,5 @@
 #include "net/Network.h"
+#include "core/StateManager.h"
 #include "utils/Logger.h"
 #include "core/Config.h"
 #include <time.h>
@@ -18,7 +19,8 @@ void Network::setup(const char* ssid, const char* password, const char* hostname
     wifiManager.init(ssid, password, hostname);
     wifiManager.onConnectionChange([this](bool connected) {
         if (!initialized && connected) {
-            configTime(7200, 0, NetworkConfig::NTP_SERVER);
+
+            configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
             webSocketManager.init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
             initialized = true;
         }
