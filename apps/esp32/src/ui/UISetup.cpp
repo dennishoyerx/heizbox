@@ -22,7 +22,7 @@ UISetup::UISetup(
       statsScreen(statsScreen),
       timezoneScreen(timezoneScreen),
       startupScreen(startupScreen),
-      setCurrentCycleCallback(setCurrentCycleCallback)
+      setCurrentCycleCallback(std::move(setCurrentCycleCallback))
 {}
 
 void UISetup::setupScreenRegistry() {

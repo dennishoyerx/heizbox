@@ -2,7 +2,6 @@
 #pragma once
 
 #include "hardware/DisplayDriver.h"
-#include "hardware/ClockManager.h"
 #include "hardware/HeaterController.h"
 #include "core/StateManager.h" // For DeviceState
 
@@ -28,12 +27,6 @@ public:
     static void bindDarkMode(DisplayDriver* display);
 
     /**
-     * @brief Binds the timezone offset state to the ClockManager.
-     * @param clock Pointer to the ClockManager instance.
-     */
-    static void bindTimezone(ClockManager* clock);
-
-    /**
      * @brief Binds the auto-stop time state to the HeaterController.
      * @param heater Pointer to the HeaterController instance.
      */
@@ -45,5 +38,5 @@ public:
      * @param clock Pointer to the ClockManager instance.
      * @param heater Pointer to the HeaterController instance.
      */
-    static void bindAll(DisplayDriver* display, ClockManager* clock, HeaterController* heater);
+    static void bindAll(DisplayDriver* display, HeaterController* heater);
 };

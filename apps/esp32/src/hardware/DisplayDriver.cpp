@@ -13,11 +13,10 @@
 // Constructor & Destructor
 // ============================================================================
 
-DisplayDriver::DisplayDriver(ClockManager* cm)
+DisplayDriver::DisplayDriver()
     : tft(),
       sprTop(&tft),
       statusBar(nullptr),
-      clock(cm),
       screenManager(nullptr),
       brightness(DisplayConfig::BRIGHTNESS_DEFAULT),
       spriteAllocated(false)
@@ -42,7 +41,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
     //tft.loadFont("fonts/josefin_20.vlw", LittleFS);
 
     initBacklight();
-    statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, clock, DisplayConfig::STATUS_BAR_HEIGHT);
+    statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     reallocateSprites();
 
     uint16_t orange = tft.color565(255, 107, 43);

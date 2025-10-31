@@ -6,19 +6,10 @@
 #include "utils/Logger.h"
 #include <utility> // For std::move and std::make_unique
 
-// Hardware
-#include "hardware/HeaterController.h"
-#include "hardware/InputManager.h"
-#include "hardware/DisplayDriver.h"
-#include "hardware/ClockManager.h"
-#include "hardware/OTASetup.h" // New include
-#include "hardware/HeaterMonitor.h" // New include
-#include "hardware/InputHandler.h" // New include
-
 // Network
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
-#include "net/NetworkSetup.h" // New include
+#include "net/Network.h" // New include
 
 // UI
 #include "ui/base/ScreenManager.h"
@@ -35,8 +26,7 @@
 Device::Device()
     : input(),
       heater(),
-      display(&clockManager),
-      clockManager(),
+      display(),
       statsManager(),
       wifiManager(),
       webSocketManager(),
@@ -44,13 +34,13 @@ Device::Device()
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
       hiddenModeScreen(&display),
-      screensaverScreen(clockManager, DeviceState::instance().sleepTimeout.get(), &display, [this]() {
+      screensaverScreen(DeviceState::instance().sleepTimeout.get(), &display, [this]() {
           fireScreen.resetActivityTimer();
           screenManager.setScreen(&fireScreen);
       }),
-      otaUpdateScreen(&display),
+      otaUpdateScreen(otaUpdateScreen),
       statsScreen(statsManager),
-      timezoneScreen(clockManager, &screenManager),
+      timezoneScreen(&screenManager),
       startupScreen([this]() {
           screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
       }),
@@ -61,7 +51,7 @@ Device::Device()
           otaUpdateScreen, statsScreen, timezoneScreen, startupScreen,
           [this](int cycle) { this->setCurrentCycle(cycle); }
       )),
-      networkSetup(std::make_unique<NetworkSetup>(
+      network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
       )),
@@ -96,19 +86,22 @@ void Device::setup() {
         inputHandler->handleInput(event);
     });
 
-    clockManager.init();
-
-    // State-Bindings erstellen
-    StateBinder::bindAll(&display, &clockManager, &heater);
-
+    StateBinder::bindAll(&display, &heater);
     DeviceState::instance().display = &display;
 
-    // Setup Main Menu
     mainMenuScreen = uiSetup->setupMainMenu();
 
     // Setup Network
-    networkSetup->setupNetwork(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
-
+    network->setup(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
+    network->onReady([]() {
+        static bool firmware_logged = false;
+        if (!firmware_logged) {
+            char firmwareInfo[64];
+            snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
+            logPrint("Firmware", firmwareInfo);
+            firmware_logged = true;
+        }
+    });
     // Setup OTA
     otaSetup->setupOTA();
 
@@ -121,7 +114,6 @@ void Device::loop() {
     webSocketManager.update();
     input.update();
     heater.update();
-    clockManager.update();
     statsManager.update();
 
     // Update UI
@@ -129,13 +121,9 @@ void Device::loop() {
     screenManager.draw();
     display.renderStatusBar();
 
-    // Check heating status and send updates
     heaterMonitor->checkHeatingStatus();
-
-    // Check for completed heat cycles
     heaterMonitor->checkHeatCycle();
 
-    // OTA handling
     otaSetup->handleOTA();
 }
 

@@ -6,8 +6,8 @@
 // Define missing color
 #define TFT_GRAY 0x7BEF
 
-TimezoneScreen::TimezoneScreen(ClockManager& cm, ScreenManager* sm)
-    : clockManager(cm), screenManager(sm), timezoneOffsetHours(0) {}
+TimezoneScreen::TimezoneScreen(ScreenManager* sm)
+    : screenManager(sm), timezoneOffsetHours(0) {}
 
 ScreenType TimezoneScreen::getType() const {
     return ScreenType::TIMEZONE;

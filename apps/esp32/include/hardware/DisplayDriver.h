@@ -6,8 +6,6 @@
 
 #include <SPI.h>
 
-#include "hardware/ClockManager.h"
-
 
 
 class ScreenManager;
@@ -37,7 +35,7 @@ namespace DisplayConfig {
 
 class DisplayDriver {
 public:
-    explicit DisplayDriver(ClockManager* cm);
+    explicit DisplayDriver();
     ~DisplayDriver();
 
     // Lifecycle
@@ -74,7 +72,6 @@ private:
     TFT_eSPI tft;
     TFT_eSprite sprTop;
     StatusBar* statusBar;
-    ClockManager* clock;
     ScreenManager* screenManager;
 
     // State

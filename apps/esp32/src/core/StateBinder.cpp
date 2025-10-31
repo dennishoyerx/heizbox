@@ -29,15 +29,7 @@ void StateBinder::bindDarkMode(DisplayDriver* display) {
     });
 }
 
-void StateBinder::bindTimezone(ClockManager* clock) {
-    auto& state = DeviceState::instance();
 
-    clock->setTimezoneOffset(state.timezoneOffset.get());
-
-    state.timezoneOffset.addListener([clock](int32_t offset) {
-        clock->setTimezoneOffset(offset);
-    });
-}
 
 void StateBinder::bindAutoStopTime(HeaterController* heater) {
     auto& state = DeviceState::instance();
@@ -49,10 +41,8 @@ void StateBinder::bindAutoStopTime(HeaterController* heater) {
     });
 }
 
-void StateBinder::bindAll(DisplayDriver* display, ClockManager* clock,
-                       HeaterController* heater) {
+void StateBinder::bindAll(DisplayDriver* display, HeaterController* heater) {
     bindBrightness(display);
     bindDarkMode(display);
-    bindTimezone(clock);
     bindAutoStopTime(heater);
 }

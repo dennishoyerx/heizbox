@@ -2,11 +2,11 @@
 #include "ui/components/StatusBar.h"
 #include "Fonts/GFXFF/gfxfont.h"
 #include "assets/bitmaps.h"
-#include "hardware/ClockManager.h"
 #include "net/WiFiManager.h"
+#include "utils/clock.h"
 
-StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, ClockManager* cm, uint8_t h)
-    : clock(cm), tft(tft_instance), height(h)
+StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, uint8_t h)
+    : tft(tft_instance), height(h)
 {
     cache.time = "";
     cache.wifiStatus = WL_IDLE_STATUS;
@@ -26,7 +26,7 @@ void StatusBar::draw() {
     // Check Time (nur alle 5s prüfen)
     // ========================================================================
     if (now - cache.lastUpdate >= TIME_UPDATE_INTERVAL_MS || cache.lastUpdate == 0) {
-        String timeStr = clock->getFormattedTime();
+        String timeStr = Utils::getFormattedTime();
         if (timeStr != cache.time) {
             cache.time = timeStr;
             dirty.time = true;

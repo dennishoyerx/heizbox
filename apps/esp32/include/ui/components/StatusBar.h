@@ -5,11 +5,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <TFT_eSPI.h>
-#include "hardware/ClockManager.h"
+#include "utils/clock.h"
 
 class StatusBar {
 public:
-    StatusBar(TFT_eSPI* tft, uint16_t width, ClockManager* cm, uint8_t height);
+    StatusBar(TFT_eSPI* tft, uint16_t width, uint8_t height);
     ~StatusBar() = default;
 
     void draw();
@@ -17,7 +17,6 @@ public:
 
 private:
     // Components
-    ClockManager* clock;
     TFT_eSPI* tft;
 
     // Dimensions

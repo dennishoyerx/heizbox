@@ -12,11 +12,10 @@
 #include "hardware/HeaterController.h"
 #include "hardware/InputManager.h"
 #include "hardware/DisplayDriver.h"
-#include "hardware/ClockManager.h"
 #include "core/StatsManager.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
-#include "net/NetworkSetup.h"
+#include "net/Network.h"
 #include "hardware/OTASetup.h"
 #include "hardware/HeaterMonitor.h"
 #include "hardware/InputHandler.h"
@@ -47,7 +46,6 @@ private:
     InputManager input;
     HeaterController heater;
     DisplayDriver display;
-    ClockManager clockManager;
     StatsManager statsManager;
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;
@@ -69,7 +67,7 @@ private:
     std::unique_ptr<UISetup> uiSetup;
 
     // Network Setup
-    std::unique_ptr<NetworkSetup> networkSetup;
+    std::unique_ptr<Network> network;
 
     // OTA Setup
     std::unique_ptr<OTASetup> otaSetup;
@@ -85,4 +83,5 @@ private:
 
     // Helper methods
     void handleWebSocketMessage(const char* type, const JsonDocument& doc);
+
 };

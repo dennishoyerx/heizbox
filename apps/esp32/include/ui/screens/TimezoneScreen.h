@@ -4,17 +4,15 @@
 
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenManager.h"
-#include "ClockManager.h"
 #include "CallbackMixin.h"
 
 class TimezoneScreen : public Screen, protected CallbackMixin<> {
 private:
-    ClockManager& clockManager;
     ScreenManager* screenManager;
     int timezoneOffsetHours;
 
 public:
-    TimezoneScreen(ClockManager& cm, ScreenManager* sm);
+    TimezoneScreen(ScreenManager* sm);
 
     void draw(DisplayDriver& display) override;
     void update() override;
