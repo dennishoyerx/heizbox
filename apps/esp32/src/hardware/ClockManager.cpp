@@ -4,7 +4,7 @@
 
 
 
-ClockManager::ClockManager() : timeSynced(false), daylightOffset_sec(0), gmtOffset_sec(7200) { // Default to GMT+1
+ClockManager::ClockManager() : timeSynced(false), daylightOffset_sec(0), gmtOffset_sec(7200) {
 }
 
 void ClockManager::init() {
