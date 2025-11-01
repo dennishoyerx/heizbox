@@ -35,7 +35,8 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
     });
 
     DeviceState::instance().todayConsumption.addListener([this](float consumption) {
-                 this->cachedTodayConsumption = consumption;        markDirty();
+        this->cachedTodayConsumption = consumption;
+        markDirty();
     });
 
     state.heatingStartTime = 0;

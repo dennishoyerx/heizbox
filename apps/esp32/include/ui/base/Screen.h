@@ -12,6 +12,7 @@ class DisplayManager;
 class ScreenManager;
 class DisplayDriver;
 
+
 // Base Screen mit Common Functionality
 class Screen {
 public:

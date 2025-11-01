@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
     struct HardwareConfig {
-        static constexpr uint8_t TFT_BL_PIN = 22;
+        static constexpr uint8_t TFT_BL_PIN = 4;
         static constexpr uint8_t STATUS_LED_PIN = 2;
         static constexpr uint8_t HEATER_MOSFET_PIN = 25;
         static constexpr uint8_t JOY_UP_PIN = 12;

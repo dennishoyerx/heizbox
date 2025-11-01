@@ -19,7 +19,6 @@ void Network::setup(const char* ssid, const char* password, const char* hostname
     wifiManager.init(ssid, password, hostname);
     wifiManager.onConnectionChange([this](bool connected) {
         if (!initialized && connected) {
-
             configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
             webSocketManager.init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
             initialized = true;

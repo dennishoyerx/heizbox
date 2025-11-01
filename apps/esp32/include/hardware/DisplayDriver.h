@@ -3,18 +3,11 @@
 #define DISPLAYDRIVER_H
 
 #include <TFT_eSPI.h>
-
 #include <SPI.h>
 
-
-
 class ScreenManager;
-
 class StatusBar;
 
-
-
-// Display-Konstanten
 namespace DisplayConfig {
     constexpr uint16_t WIDTH = 280;
     constexpr uint16_t HEIGHT = 240;
