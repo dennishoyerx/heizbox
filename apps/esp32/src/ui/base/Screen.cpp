@@ -4,10 +4,13 @@
 #include "hardware/DisplayDriver.h"
 
 Screen::Screen() : manager(nullptr) {
+    components = new Components();
     initState();
 }
 
-Screen::~Screen() {}
+Screen::~Screen() {
+    delete components;
+}
 
 void Screen::setState(const std::string& key, int value) {
     auto it = state_.find(key);

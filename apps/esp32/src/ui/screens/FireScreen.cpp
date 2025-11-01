@@ -44,6 +44,10 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
     state.currentCycle = 1;
     state.showingSavedConfirmation = false;
     state.confirmationStartTime = 0;
+
+    components->addComponent("caps", std::unique_ptr<UIText>(new UIText(213, 168, "", 3)));
+    components->addComponent("consumption", std::unique_ptr<UIText>(new UIText(63, 168, "", 3)));
+    components->addComponent("todayConsumption", std::unique_ptr<UIText>(new UIText(160, 108, "", 3)));
 }
 
 void FireScreen::onEnter() {
@@ -51,7 +55,7 @@ void FireScreen::onEnter() {
 }
 
 void FireScreen::draw(DisplayDriver& display) {
-    display.clear(0x885);  // Dark gray background
+    display.clear();  // Dark gray background
 
     drawHeatingTimer(display);
     drawStatus(display);
@@ -109,12 +113,16 @@ void FireScreen::drawSessionStats(DisplayDriver& display) {
         memmove(lineTodayConsumption, lineTodayConsumption + 1, strlen(lineTodayConsumption));
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
-    display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
-    UIText capsText = UIText(213, 168, "lineCaps", 3);
-    capsText.draw();
+
+    ((UIText*)components->getComponent("caps"))->setText(lineCaps);
+    ((UIText*)components->getComponent("consumption"))->setText(lineConsumption);
+    ((UIText*)components->getComponent("todayConsumption"))->setText(lineTodayConsumption);
+
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
-    display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
-    display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);
+
+    components->forEach([&](UIComponent& c, DisplayDriver& d) {
+        c.draw(d);
+    }, display);
 }
 
 void FireScreen::update() {

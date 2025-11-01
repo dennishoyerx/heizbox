@@ -5,12 +5,38 @@
 #include <unordered_map>
 #include <string>
 #include "ui/base/ScreenTransition.h"
+#include "ui/base/UIComponent.h"
 #include "hardware/InputManager.h"
 #include "utils/CallbackMixin.h" // For TimeoutMixin
 
 class DisplayManager;
 class ScreenManager;
 class DisplayDriver;
+
+class Components {
+public:
+    void addComponent(const std::string& id, std::unique_ptr<UIComponent> c) {
+        components_[id] = std::move(c);
+    }
+
+    void removeComponent(const std::string& id) {
+        components_.erase(id);
+    }
+
+    UIComponent* getComponent(const std::string& id) const {
+        auto it = components_.find(id);
+        return it != components_.end() ? it->second.get() : nullptr;
+    }
+
+    void forEach(const std::function<void(UIComponent&, DisplayDriver&)>& fn, DisplayDriver& display) {
+        for (auto it = components_.begin(); it != components_.end(); ++it) {
+            fn(*it->second, display);
+        }
+    }
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<UIComponent>> components_;
+};
 
 
 // Base Screen mit Common Functionality
@@ -36,6 +62,8 @@ public:
 
     // Manager access
     void setManager(ScreenManager* mgr);
+
+    Components* components;
 
 protected:
     virtual void initState() {}

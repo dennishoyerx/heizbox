@@ -77,6 +77,9 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
             esp_restart();
         })
 
+        .addAction(BUILD_TIME, [this]() {
+        })
+
         .build();
 
     std::unique_ptr<GenericMenuScreen> mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));

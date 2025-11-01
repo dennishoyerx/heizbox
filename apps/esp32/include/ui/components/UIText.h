@@ -8,7 +8,7 @@ class UIText : public UIComponent {
 public:
     UIText(int16_t x, int16_t y, const char* text, uint8_t size = 1, uint16_t color = TFT_WHITE);
 
-    void draw() override;
+    void draw(DisplayDriver& display) override;
     void setText(const char* text);
     void setSize(uint8_t size);
 

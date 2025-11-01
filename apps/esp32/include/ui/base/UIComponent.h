@@ -6,12 +6,14 @@
 
 
 
+class DisplayDriver;
+
 class UIComponent {
 public:
     UIComponent(int16_t x, int16_t y, uint16_t color = TFT_WHITE);
     virtual ~UIComponent() = default;
 
-    virtual void draw() = 0; // Pure virtual
+    virtual void draw(DisplayDriver& display) = 0; // Pure virtual
 
     void setPosition(int16_t x, int16_t y);
     void setColor(uint16_t color);
