@@ -24,8 +24,8 @@ export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) =
 			return
 		}
 
-		if (quantityNum > item.current_amount) {
-			setError(`Nur ${item.current_amount.toFixed(1)}g verfügbar`)
+		if (Number(quantityNum) > Number(item.current_amount)) {
+			setError(`Nur ${Number(item.current_amount).toFixed(1)}g verfügbar`)
 			return
 		}
 
@@ -81,7 +81,7 @@ export const WithdrawDialog = ({ item, isOpen, onClose }: WithdrawDialogProps) =
 								{amount}g
 							</Button>
 						))}
-						<Button size='1' variant='soft' color='orange' onClick={() => setQuantity(item.current_amount.toFixed(1))}>
+						<Button size='1' variant='soft' color='orange' onClick={() => setQuantity(item.current_amount.toFixed(2))}>
 							Alles
 						</Button>
 					</Flex>

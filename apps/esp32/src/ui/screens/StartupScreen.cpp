@@ -15,7 +15,7 @@ StartupScreen::StartupScreen(std::function<void()> callback) {
 
 void StartupScreen::draw(DisplayDriver& display) {
     display.clear(TFT_BLACK);
-    
+
     // Zentrale Position berechnen
     constexpr int16_t bitmapWidth = 96;
     constexpr int16_t bitmapHeight = 96;
@@ -24,7 +24,8 @@ void StartupScreen::draw(DisplayDriver& display) {
 
     // Bitmap zeichnen
     display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
-    
+    display.drawText(200, 20, BUILD_DATE, TFT_WHITE, 1);
+
     // Optional: Progress-Bar
     const float progress = this->getProgress();
     if (progress < 1.0f) {
@@ -32,7 +33,7 @@ void StartupScreen::draw(DisplayDriver& display) {
         const int16_t barHeight = 4;
         const int16_t barX = (display.getTFTWidth() - barWidth) / 2;
         const int16_t barY = y + bitmapHeight + 20;
-        
+
         display.drawRect(barX, barY, barWidth, barHeight, TFT_WHITE);
         display.fillRect(barX, barY, barWidth * progress, barHeight, TFT_WHITE);
     }

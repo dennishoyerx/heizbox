@@ -1,28 +1,24 @@
 import { config } from '../config/index.js';
 
-// Pre-compile allowlist als Set für O(1) Lookup
-const allowedOriginsSet = new Set(
-  config.cors.allowedOrigins.flatMap(origin => {
-    if (origin.startsWith('.')) {
-      // Wildcard-Domains: Speichere nur Suffix
-      return [origin.substring(1)];
-    }
-    // Exakte Domains: Beide Protokolle
-    return [`https://${origin}`, `http://${origin}`];
-  })
-);
-
 export const isOriginAllowed = (origin: string): boolean => {
-  // Exakter Match
-  if (allowedOriginsSet.has(origin)) {
-    return true;
-  }
+  const allowedOrigins = config.cors.allowedOrigins;
+  const originUrl = new URL(origin);
 
-  // Wildcard-Match (nur Subdomain-Suffixe)
-  for (const allowed of config.cors.allowedOrigins) {
-    if (allowed.startsWith('.')) {
-      const suffix = allowed.substring(1);
-      if (origin.endsWith(suffix) || origin === `https://${suffix}` || origin === `http://${suffix}`) {
+  for (const allowedOrigin of allowedOrigins) {
+    if (allowedOrigin.startsWith('.')) {
+      // Wildcard: e.g., .hzbx.de
+      const domain = allowedOrigin.substring(1);
+      if (originUrl.hostname === domain || originUrl.hostname.endsWith('.' + domain)) {
+        return true;
+      }
+    } else if (allowedOrigin.includes(':')) {
+      // Exact match with port: e.g., localhost:5173
+      if (originUrl.host === allowedOrigin) {
+        return true;
+      }
+    } else {
+      // Exact match without port: e.g., hzbx.de
+      if (originUrl.hostname === allowedOrigin) {
         return true;
       }
     }
