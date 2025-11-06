@@ -4,6 +4,7 @@
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
 #include "StateManager.h"
+#include <utility>
 
 FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
                        ScreensaverScreen* ss, StatsManager* stm,
@@ -44,6 +45,7 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
     state.currentCycle = 1;
     state.showingSavedConfirmation = false;
     state.confirmationStartTime = 0;
+
 
     components->addComponent("caps", std::unique_ptr<UIText>(new UIText(213, 168, "", 3)));
     components->addComponent("consumption", std::unique_ptr<UIText>(new UIText(63, 168, "", 3)));
@@ -123,6 +125,7 @@ void FireScreen::drawSessionStats(DisplayDriver& display) {
     components->forEach([&](UIComponent& c, DisplayDriver& d) {
         c.draw(d);
     }, display);
+
 }
 
 void FireScreen::update() {

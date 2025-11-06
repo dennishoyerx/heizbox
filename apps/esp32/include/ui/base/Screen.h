@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include <string>
+#include "ui/base/UIManager.h"
 #include "ui/base/ScreenTransition.h"
 #include "ui/base/UIComponent.h"
 #include "hardware/InputManager.h"
@@ -63,11 +64,13 @@ public:
     // Manager access
     void setManager(ScreenManager* mgr);
 
-    Components* components;
+
 
 protected:
     virtual void initState() {}
     ScreenManager* manager;
+    Components* components;
+    UIManager* ui;
 
     // Helper für häufige Operationen
     void markDirty();

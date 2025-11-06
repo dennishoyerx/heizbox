@@ -39,15 +39,15 @@ private:
         uint32_t confirmationStartTime;
     } state;
 
-         // Cached values from state
-         int cachedClicks;
-         int cachedCaps;
-         float cachedConsumption;
-         float cachedTodayConsumption;
+    // Cached values from state
+    int cachedClicks;
+    int cachedCaps;
+    float cachedConsumption;
+    float cachedTodayConsumption;
 
-         // Helper methods
-         void drawHeatingTimer(DisplayDriver& display);
-         void drawStatus(DisplayDriver& display);
+    // Helper methods
+    void drawHeatingTimer(DisplayDriver& display);
+    void drawStatus(DisplayDriver& display);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);
     void handleCycleChange(bool increment);
