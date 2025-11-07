@@ -31,6 +31,7 @@ Device::Device()
       statsManager(),
       wifiManager(),
       webSocketManager(),
+      capacitiveSensor(heater, [this](bool start) { fireScreen._handleHeatingTrigger(start); }),
       screenManager(display, input),
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
@@ -116,6 +117,7 @@ void Device::loop() {
     input.update();
     heater.update();
     statsManager.update();
+    capacitiveSensor.update();
 
     // Update UI
     screenManager.update();

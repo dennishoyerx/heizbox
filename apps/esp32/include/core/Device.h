@@ -19,6 +19,7 @@
 #include "hardware/OTASetup.h"
 #include "hardware/HeaterMonitor.h"
 #include "hardware/InputHandler.h"
+#include "hardware/CapacitiveSensor.h"
 
 // UI
 #include "ui/base/ScreenManager.h"
@@ -49,6 +50,7 @@ private:
     StatsManager statsManager;
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;
+    CapacitiveSensor capacitiveSensor;
 
     // Screen management
     ScreenManager screenManager;
