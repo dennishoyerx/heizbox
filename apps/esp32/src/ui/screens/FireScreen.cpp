@@ -61,6 +61,9 @@ void FireScreen::draw(DisplayDriver& display) {
     drawSessionStats(display);
 
     display.drawText(10, 50, state.touchActive ? "X" : "_", TFT_WHITE, 1);
+    char touchValStr[10];
+    snprintf(touchValStr, sizeof(touchValStr), "Val: %d", state.currentTouchValue);
+    display.drawText(80, 50, touchValStr, TFT_WHITE, 1);
 }
 
 void FireScreen::drawHeatingTimer(DisplayDriver& display) {
@@ -139,22 +142,71 @@ void FireScreen::update() {
 
     checkScreensaverTimeout();
 
-    // Handle touch input
+    // Handle touch input with debouncing
     int val = touchRead(32);
-    if (val < 50) { // Schwellenwert empirisch anpassen
-        if (!state.touchActive) {
-            state.touchActive = true;
-            markDirty();
-            logPrint("Touch", "aktiviert");
-        }
-        Serial.println("Cap erkannt → ZVS EIN");
-    } else {
-        if (state.touchActive) {
-            state.touchActive = false;
-            markDirty();
-        }
-        Serial.println("val: " + String(val));
+    state.currentTouchValue = val; // Store the raw touch value
+
+    bool rawTouchActive;
+    int effectiveTouchOnThreshold = state.touchOnThreshold;
+    int effectiveTouchOffThreshold = state.touchOffThreshold;
+
+    if (heater.isHeating()) {
+        effectiveTouchOnThreshold += state.heaterInterferenceOffset;
+        effectiveTouchOffThreshold += state.heaterInterferenceOffset;
     }
+
+    // Hysteresis logic for rawTouchActive
+    if (val < effectiveTouchOnThreshold) {
+        rawTouchActive = true; // Definitely touched
+    } else if (val > effectiveTouchOffThreshold) {
+        rawTouchActive = false; // Definitely not touched
+    } else {
+        // In the ambiguous zone, maintain the previous raw state
+        rawTouchActive = state.lastRawTouchActive;
+    }
+
+    if (rawTouchActive != state.lastRawTouchActive) {
+        // Raw state has changed, reset the timer
+        state.lastTouchChangeTime = millis();
+    }
+
+        if ((millis() - state.lastTouchChangeTime) > state.debounceDelay) {
+
+            // Debounce time has passed, now check if the debounced state needs to change
+
+            if (rawTouchActive != state.touchActive) {
+
+                state.touchActive = rawTouchActive; // Update the debounced state
+
+                markDirty(); // Mark dirty to redraw the 'X' or '_'
+
+    
+
+                if (DeviceState::instance().smart.get()) { // Only trigger heating if 'smart' mode is enabled
+
+                    _handleHeatingTrigger(state.touchActive); // Start or stop heating based on touch state
+
+                }
+
+    
+
+                if (state.touchActive) {
+
+                    logPrint("Touch", "aktiviert");
+
+                    Serial.println("Cap erkannt → ZVS EIN");
+
+                } else {
+
+                    Serial.println("val: " + String(val)); // Log value when touch deactivates
+
+                }
+
+            }
+
+        }
+
+        state.lastRawTouchActive = rawTouchActive; // Store the raw state for the next iteration
 }
 
 void FireScreen::handleInput(InputEvent event) {
@@ -171,18 +223,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (triggerHeating) {
-        if (!heater.isHeating()) {
-            heater.startHeating();
-            state.heatingStartTime = millis();
-        } else {
-            const bool updateCycle = heater.isHeating();
-            heater.stopHeating();
-            if (updateCycle && (millis() - state.heatingStartTime > 10000)) {
-                setCycleCallback(state.currentCycle);
-                state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-            }
-        }
-        markDirty();
+        _handleHeatingTrigger(!heater.isHeating()); // Toggle heating state
         return; // Consume the event if it triggered heating
     }
 
@@ -218,6 +259,25 @@ void FireScreen::checkScreensaverTimeout() {
     if (!isActive && (millis() - state.lastActivityTime > Timing::SCREENSAVER_TIMEOUT_MS)) {
         screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
     }
+}
+
+void FireScreen::_handleHeatingTrigger(bool shouldStartHeating) {
+    if (shouldStartHeating) {
+        if (!heater.isHeating()) {
+            heater.startHeating();
+            state.heatingStartTime = millis();
+        }
+    } else {
+        if (heater.isHeating()) {
+            const bool updateCycle = heater.isHeating(); // This will always be true here
+            heater.stopHeating();
+            if (updateCycle && (millis() - state.heatingStartTime > 10000)) {
+                setCycleCallback(state.currentCycle);
+                state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
+            }
+        }
+    }
+    markDirty(); // Always mark dirty when heating state changes
 }
 
 void FireScreen::resetActivityTimer() {

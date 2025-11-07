@@ -159,6 +159,7 @@ struct DeviceState {
     // Heater Settings
     PersistedObservable<uint32_t> autoStopTime{"heater", "autostop", 90000};
     PersistedObservable<uint32_t> currentCycle{"heater", "cycle", 1};
+    PersistedObservable<bool> smart{"heater", "smart", false};
 
     // System Settings
     PersistedObservable<uint32_t> sleepTimeout{"system", "sleepTimeout", 600000};

@@ -50,6 +50,8 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
 
         .addObservableToggle("Dark Mode", state.darkMode)
 
+        .addObservableToggle("Smart Mode", state.smart)
+
         .addObservableToggle("Center Heat", state.enableCenterButtonForHeating)
 
         .addAction("Timezone", [this]() {

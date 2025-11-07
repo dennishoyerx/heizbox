@@ -38,6 +38,15 @@ private:
         bool showingSavedConfirmation;
         uint32_t confirmationStartTime;
         bool touchActive = false;
+        uint32_t lastTouchStateChangeTime = 0;
+        const uint32_t debounceDelay = 150; // milliseconds
+        bool lastRawTouchActive = false;
+        uint32_t lastTouchChangeTime = 0;
+        int currentTouchValue = 0;
+        const int baseTouchThreshold = 50; // This will be the base for touchOnThreshold
+        int heaterInterferenceOffset = 150; // Empirically determined offset when heater is active
+        const int touchOnThreshold = 50; // Value below which a touch is registered
+        const int touchOffThreshold = 70; // Value above which a touch is considered released
     } state;
 
     // Cached values from state
@@ -53,6 +62,7 @@ private:
     void drawSessionStats(DisplayDriver& display);
     void handleCycleChange();
     void checkScreensaverTimeout();
+    void _handleHeatingTrigger(bool shouldStartHeating);
 };
 
 #endif
