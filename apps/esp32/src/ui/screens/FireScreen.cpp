@@ -60,25 +60,7 @@ void FireScreen::draw(DisplayDriver& display) {
     drawCycleInfo(display);
     drawSessionStats(display);
 
-        display.drawText(10, 50, "_", TFT_WHITE, 1);
-    
-  int val = touchRead(32);
-  if (val < 40) {  // Schwellenwert empirisch anpassen
-      if (!state.touchActive) {
-	    state.touchActive = true;
-		markDirty();
-        display.drawText(10, 50, "X", TFT_WHITE, 1);
-		logPrint("Touch", "aktiviert");
-      }
-    Serial.println("Cap erkannt → ZVS EIN");
-  } else {
-      if (state.touchActive) {
-	    state.touchActive = false;
-		markDirty();
-        display.drawText(10, 50, "0", TFT_WHITE, 1);
-      }
-    Serial.println("val: " + String(val));
-  }
+    display.drawText(10, 50, state.touchActive ? "X" : "_", TFT_WHITE, 1);
 }
 
 void FireScreen::drawHeatingTimer(DisplayDriver& display) {
@@ -156,6 +138,23 @@ void FireScreen::update() {
     }
 
     checkScreensaverTimeout();
+
+    // Handle touch input
+    int val = touchRead(32);
+    if (val < 50) { // Schwellenwert empirisch anpassen
+        if (!state.touchActive) {
+            state.touchActive = true;
+            markDirty();
+            logPrint("Touch", "aktiviert");
+        }
+        Serial.println("Cap erkannt → ZVS EIN");
+    } else {
+        if (state.touchActive) {
+            state.touchActive = false;
+            markDirty();
+        }
+        Serial.println("val: " + String(val));
+    }
 }
 
 void FireScreen::handleInput(InputEvent event) {
