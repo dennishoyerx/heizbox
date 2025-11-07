@@ -1,17 +1,16 @@
 #include "core/Config.h"
-#include "core/Device.h" // Include Device.h
-#include "core/DeviceState.h"
-#include "credentials.h" // Include credentials for WiFi
+#include "core/Device.h" 
+#include "credentials.h"
 #include <ArduinoOTA.h>
 #include "core/StateManager.h"
 #include "utils/Logger.h"
 #include "utils/Logs.h"
-#include <utility> // For std::move and std::make_unique
+#include <utility> 
 
 // Network
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
-#include "net/Network.h" // New include
+#include "net/Network.h"
 
 // UI
 #include "ui/base/ScreenManager.h"
@@ -23,7 +22,7 @@
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
 #include "ui/base/ScreenTransition.h"
-#include "ui/UISetup.h" // New include
+#include "ui/UISetup.h"
 
 Device::Device()
     : input(),
