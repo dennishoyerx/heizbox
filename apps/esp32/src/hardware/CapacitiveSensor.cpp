@@ -11,22 +11,26 @@ CapacitiveSensor::CapacitiveSensor(HeaterController& h, std::function<void(bool)
 
 void CapacitiveSensor::update() {
     state.currentValue = touchRead(32);
-
     bool rawState;
-    int effectiveOnThreshold = state.onThreshold;
-    int effectiveOffThreshold = state.offThreshold;
 
     if (heater.isHeating()) {
-        effectiveOnThreshold += state.interferenceOffset;
-        effectiveOffThreshold += state.interferenceOffset;
-    }
-
-    if (state.currentValue < effectiveOnThreshold) {
-        rawState = true;
-    } else if (state.currentValue > effectiveOffThreshold) {
-        rawState = false;
+        // Heater is ON: value > 200 is active
+        if (state.currentValue > state.onThreshold_HeaterOn) {
+            rawState = true;
+        } else if (state.currentValue < state.offThreshold_HeaterOn) {
+            rawState = false;
+        } else {
+            rawState = state.lastRawState;
+        }
     } else {
-        rawState = state.lastRawState;
+        // Heater is OFF: value < 45 is active
+        if (state.currentValue < state.onThreshold_HeaterOff) {
+            rawState = true;
+        } else if (state.currentValue > state.offThreshold_HeaterOff) {
+            rawState = false;
+        } else {
+            rawState = state.lastRawState;
+        }
     }
 
     if (rawState != state.lastRawState) {

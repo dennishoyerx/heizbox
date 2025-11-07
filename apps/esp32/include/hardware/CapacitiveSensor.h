@@ -25,10 +25,10 @@ private:
         const uint32_t debounceDelay = 150;
         bool lastRawState = false;
         int currentValue = 0;
-        const int baseThreshold = 50;
-        int interferenceOffset = 150;
-        const int onThreshold = 50;
-        const int offThreshold = 70;
+        const int onThreshold_HeaterOff = 45;
+        const int offThreshold_HeaterOff = 50;
+        const int onThreshold_HeaterOn = 200;
+        const int offThreshold_HeaterOn = 195;
     } state;
 };
 
