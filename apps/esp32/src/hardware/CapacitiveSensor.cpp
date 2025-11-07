@@ -1,9 +1,9 @@
 // src/hardware/CapacitiveSensor.cpp
 #include "hardware/CapacitiveSensor.h"
+#include "core/DeviceState.h"
 #include "core/Device.h"
 #include "core/StateManager.h"
 #include "hardware/HeaterController.h"
-#include "utils/Logger.h"
 #include <Arduino.h>
 
 CapacitiveSensor::CapacitiveSensor(HeaterController& h, std::function<void(bool)> heatingCb)
@@ -43,12 +43,6 @@ void CapacitiveSensor::update() {
 
             if (DeviceState::instance().smart.get()) {
                 onHeatingTrigger(state.capDetected);
-            }
-
-            if (state.capDetected) {
-                logPrint("CapSensor", "Cap detected");
-            } else {
-                logPrint("CapSensor", "Cap released");
             }
         }
     }

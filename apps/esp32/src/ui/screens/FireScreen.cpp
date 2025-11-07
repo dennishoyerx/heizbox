@@ -1,4 +1,5 @@
 #include "ui/screens/FireScreen.h"
+#include "core/DeviceState.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/components/UIText.h"
 #include "bitmaps.h"

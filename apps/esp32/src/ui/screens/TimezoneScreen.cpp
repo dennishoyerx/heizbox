@@ -1,5 +1,6 @@
 // src/screens/TimezoneScreen.cpp
 #include "ui/screens/TimezoneScreen.h"
+#include "core/DeviceState.h"
 #include <TFT_eSPI.h>
 #include "StateManager.h"
 

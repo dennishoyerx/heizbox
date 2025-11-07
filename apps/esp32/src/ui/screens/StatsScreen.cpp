@@ -1,5 +1,6 @@
 // src/screens/StatsScreen.cpp
 #include "ui/screens/StatsScreen.h"
+#include "core/DeviceState.h"
 #include "DisplayDriver.h"
 #include "InputManager.h"
 #include <TFT_eSPI.h>

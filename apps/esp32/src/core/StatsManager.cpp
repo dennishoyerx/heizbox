@@ -6,6 +6,7 @@
 // - 'flushToNvs()' performs the actual write, but only when necessary.
 
 #include "core/StatsManager.h"
+#include "core/DeviceState.h"
 #include "core/Config.h"
 #include <Arduino.h>
 #include "core/StateManager.h"

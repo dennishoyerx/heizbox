@@ -1,5 +1,6 @@
 // src/core/StateBinder.cpp
 #include "core/StateBinder.h"
+#include "core/DeviceState.h"
 
 // ============================================================================
 // State Bindings - UI ↔ State Synchronisation

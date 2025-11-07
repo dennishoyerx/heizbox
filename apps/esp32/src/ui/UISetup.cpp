@@ -1,5 +1,6 @@
 // src/ui/UISetup.cpp
 #include "ui/UISetup.h"
+#include "core/DeviceState.h"
 #include "utils/Logger.h"
 #include <utility> // For std::move and std::make_unique
 
