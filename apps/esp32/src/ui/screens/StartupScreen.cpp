@@ -24,7 +24,18 @@ void StartupScreen::draw(DisplayDriver& display) {
 
     // Bitmap zeichnen
     display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
-    display.drawText(20, 20, BUILD_DATE, TFT_WHITE, 1);
+
+
+    // Build Info
+    char short_date[6];
+    snprintf(short_date, sizeof(short_date), "%.2s.%.2s", BUILD_DATE + 4, BUILD_DATE + 9);
+
+    char short_time[6];
+    memcpy(short_time, BUILD_TIME, 5);
+    short_time[5] = '\0';
+
+    display.drawText(20, 20, short_date, TFT_WHITE, 1);
+    display.drawText(20, 40, short_time, TFT_WHITE, 1);
 
     // Optional: Progress-Bar
     const float progress = this->getProgress();

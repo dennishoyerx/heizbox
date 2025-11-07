@@ -81,6 +81,7 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
         })
 
         .addAction(BUILD_TIME, [this]() {
+            esp_restart();
         })
 
         .build();
