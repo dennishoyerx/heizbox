@@ -1,4 +1,4 @@
-#include "core/Device.h"
+﻿#include "core/Device.h"
 
 Device device;
 

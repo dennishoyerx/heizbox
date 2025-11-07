@@ -24,7 +24,7 @@ void StartupScreen::draw(DisplayDriver& display) {
 
     // Bitmap zeichnen
     display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
-    display.drawText(200, 20, BUILD_DATE, TFT_WHITE, 1);
+    display.drawText(20, 20, BUILD_DATE, TFT_WHITE, 1);
 
     // Optional: Progress-Bar
     const float progress = this->getProgress();

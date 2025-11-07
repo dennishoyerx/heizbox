@@ -24,20 +24,6 @@ UICText UIManager::Text(const std::string& text, int x, int y) {
     return component;
 }
 
-UICText* UIManager::Text(const std::string& id, const std::string& text) {
-    if (auto existing = getComponent(id)) {
-        if (auto textComp = dynamic_cast<UICText*>(existing)) {
-            textComp->setText(text);
-            return textComp;
-        }
-    }
-    auto component = std::make_unique<UICText>();
-    component->setText(text);
-    auto ptr = component.get();
-    components[id] = std::move(component);
-    return ptr;
-}
-
 void UIManager::registerUIComponent(const std::string& id, std::unique_ptr<UIBaseComponent> component) {
     components[id] = std::move(component);
 }

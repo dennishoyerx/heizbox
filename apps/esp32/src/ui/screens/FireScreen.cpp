@@ -3,6 +3,7 @@
 #include "ui/components/UIText.h"
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
+#include "utils/Logger.h"
 #include "StateManager.h"
 #include <utility>
 
@@ -45,11 +46,6 @@ FireScreen::FireScreen(HeaterController& hc, ScreenManager* sm,
     state.currentCycle = 1;
     state.showingSavedConfirmation = false;
     state.confirmationStartTime = 0;
-
-
-    components->addComponent("caps", std::unique_ptr<UIText>(new UIText(213, 168, "", 3)));
-    components->addComponent("consumption", std::unique_ptr<UIText>(new UIText(63, 168, "", 3)));
-    components->addComponent("todayConsumption", std::unique_ptr<UIText>(new UIText(160, 108, "", 3)));
 }
 
 void FireScreen::onEnter() {
@@ -63,6 +59,26 @@ void FireScreen::draw(DisplayDriver& display) {
     drawStatus(display);
     drawCycleInfo(display);
     drawSessionStats(display);
+
+        display.drawText(10, 50, "_", TFT_WHITE, 1);
+    
+  int val = touchRead(32);
+  if (val < 40) {  // Schwellenwert empirisch anpassen
+      if (!state.touchActive) {
+	    state.touchActive = true;
+		markDirty();
+        display.drawText(10, 50, "X", TFT_WHITE, 1);
+		logPrint("Touch", "aktiviert");
+      }
+    Serial.println("Cap erkannt → ZVS EIN");
+  } else {
+      if (state.touchActive) {
+	    state.touchActive = false;
+		markDirty();
+        display.drawText(10, 50, "0", TFT_WHITE, 1);
+      }
+    Serial.println("val: " + String(val));
+  }
 }
 
 void FireScreen::drawHeatingTimer(DisplayDriver& display) {
@@ -115,17 +131,12 @@ void FireScreen::drawSessionStats(DisplayDriver& display) {
         memmove(lineTodayConsumption, lineTodayConsumption + 1, strlen(lineTodayConsumption));
 
     display.drawBitmap(160, 134,  (state.currentCycle == 1) ? image_cap_fill_48 : image_cap_48, 48, 48, TFT_WHITE);
-
-    ((UIText*)components->getComponent("caps"))->setText(lineCaps);
-    ((UIText*)components->getComponent("consumption"))->setText(lineConsumption);
-    ((UIText*)components->getComponent("todayConsumption"))->setText(lineTodayConsumption);
-
     display.drawBitmap(10, 134, image_session_48, 48, 48, TFT_WHITE);
 
-    components->forEach([&](UIComponent& c, DisplayDriver& d) {
-        c.draw(d);
-    }, display);
 
+	display.drawText(213, 168, lineCaps, TFT_WHITE, 3);
+	display.drawText(63, 168, lineConsumption, TFT_WHITE, 3);
+	display.drawText(160, 108, lineTodayConsumption, TFT_WHITE, 3);
 }
 
 void FireScreen::update() {
@@ -179,11 +190,11 @@ void FireScreen::handleInput(InputEvent event) {
     // Handle other inputs (UP/DOWN for cycle change)
     switch (event.button) {
         case UP:
-            handleCycleChange(true);
+            handleCycleChange();
             break;
 
         case DOWN:
-            handleCycleChange(false);
+            handleCycleChange();
             break;
 
         default:
@@ -191,11 +202,11 @@ void FireScreen::handleInput(InputEvent event) {
     }
 }
 
-void FireScreen::handleCycleChange(bool increment) {
-    if (increment) {
-        state.currentCycle = (state.currentCycle % 4) + 1;
+void FireScreen::handleCycleChange() {
+    if (state.currentCycle == 1) {
+        state.currentCycle = 2;
     } else {
-        state.currentCycle = (state.currentCycle == 1) ? 4 : state.currentCycle - 1;
+        state.currentCycle = 1;
     }
 
     setCycleCallback(state.currentCycle);

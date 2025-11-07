@@ -37,6 +37,7 @@ private:
         uint8_t currentCycle;
         bool showingSavedConfirmation;
         uint32_t confirmationStartTime;
+        bool touchActive = false;
     } state;
 
     // Cached values from state
@@ -50,7 +51,7 @@ private:
     void drawStatus(DisplayDriver& display);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);
-    void handleCycleChange(bool increment);
+    void handleCycleChange();
     void checkScreensaverTimeout();
 };
 
