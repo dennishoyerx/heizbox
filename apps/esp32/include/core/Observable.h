@@ -1,4 +1,3 @@
-// include/core/Observable.h
 #ifndef OBSERVABLE_H
 #define OBSERVABLE_H
 

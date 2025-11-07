@@ -1,4 +1,3 @@
-// src/hardware/CapacitiveSensor.cpp
 #include "hardware/CapacitiveSensor.h"
 #include "core/DeviceState.h"
 #include "core/Device.h"

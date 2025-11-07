@@ -48,7 +48,7 @@ Device::Device()
           screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
       }),
       lastSetCycle(1),
-      mainMenuScreen(nullptr), // Wird später initialisiert
+      mainMenuScreen(nullptr),
       uiSetup(std::make_unique<UISetup>(
           screenManager, fireScreen, hiddenModeScreen, screensaverScreen,
           otaUpdateScreen, statsScreen, timezoneScreen, startupScreen,
@@ -63,7 +63,7 @@ Device::Device()
       inputHandler(std::make_unique<InputHandler>(screenManager))
 {}
 
-Device::~Device() = default; // Destructor definition
+Device::~Device() = default;
 
 void Device::setup() {
     Serial.begin(115200);
