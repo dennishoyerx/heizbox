@@ -243,7 +243,7 @@ void FireScreen::draw(DisplayDriver &display)
     drawSessionRow(display, "Heute", cachedTodayConsumption, 65);
     drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 120);
 
-    if (heater.isHeating() || heater.isPaused()) {
+    if (heater.isHeating()) {
         drawHeatingTimer(display);
     }
 }
@@ -332,9 +332,11 @@ void FireScreen::drawStatus(DisplayDriver &display)
     switch (heater.getState())
     {
     case HeaterController::State::HEATING:
-    case HeaterController::State::PAUSED:
         status = nullptr;
         break; // Timer zeigt Status
+    case HeaterController::State::PAUSED:
+        status = "PAUSED";
+        break;
     case HeaterController::State::COOLDOWN:
         status = "COOLDOWN";
         break;
