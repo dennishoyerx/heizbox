@@ -15,6 +15,7 @@
 HeaterController::HeaterController()
     : state(State::IDLE), 
       startTime(0), 
+      pauseTime(0),
       autoStopTime(60000), 
       cycleCounter(0), 
       lastCycleDuration(0), 
@@ -35,41 +36,55 @@ void HeaterController::transitionTo(State newState) {
 
     Serial.printf("🔥 State: %d -> %d\n", static_cast<int>(state), static_cast<int>(newState));
     state = newState;
-    startTime = millis(); // Reset timer on every state transition
 }
 
 void HeaterController::startHeating() {
     if (state == State::IDLE || state == State::COOLDOWN) {
         digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
         digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
+        startTime = millis();
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
+    } else if (state == State::PAUSED) {
+        digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
+        digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
+        // Adjust startTime to account for the pause duration
+        startTime = millis() - (pauseTime - startTime);
+        transitionTo(State::HEATING);
+        Serial.println("🔥 Heating resumed");
     }
 }
 
-void HeaterController::stopHeating() {
+void HeaterController::stopHeating(bool finalize) {
     if (state != State::HEATING) return;
 
     digitalWrite(HardwareConfig::STATUS_LED_PIN, LOW);
     digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
 
-    const uint32_t duration = millis() - startTime;
-    lastCycleDuration = duration;
+    if (finalize) {
+        const uint32_t duration = millis() - startTime;
+        lastCycleDuration = duration;
 
-    // Only count cycles longer than a minimum threshold
-    if (duration >= MIN_CYCLE_DURATION_MS) {
-        cycleCounter++;
-        cycleFinishedFlag = true; // Notify Device.cpp to send data
+        // Only count cycles longer than a minimum threshold
+        if (duration >= MIN_CYCLE_DURATION_MS) {
+            cycleCounter++;
+            cycleFinishedFlag = true; // Notify Device.cpp to send data
+        }
+
+        startTime = millis();
+        transitionTo(State::COOLDOWN);
+        Serial.println("🔥 Heating stopped (finalized)");
+    } else {
+        pauseTime = millis();
+        transitionTo(State::PAUSED);
+        Serial.println("🔥 Heating paused");
     }
-
-    transitionTo(State::COOLDOWN);
-    Serial.println("🔥 Heating stopped");
 }
 
 // Optimization: Replaced multiple if-statements with a clear switch-case state machine.
 // Benefit: Improves readability and maintainability of the heater logic.
 void HeaterController::update() {
-    const uint32_t elapsed = millis() - startTime;
+    const uint32_t elapsed = getElapsedTime();
 
     switch (state) {
         case State::HEATING:
@@ -79,8 +94,23 @@ void HeaterController::update() {
             }
             break;
 
+        case State::PAUSED:
+            if (millis() - pauseTime >= PAUSE_TIMEOUT_MS) {
+                Serial.println("Pause timeout, finalizing cycle.");
+                const uint32_t duration = pauseTime - startTime;
+                lastCycleDuration = duration;
+
+                if (duration >= MIN_CYCLE_DURATION_MS) {
+                    cycleCounter++;
+                    cycleFinishedFlag = true;
+                }
+                startTime = millis();
+                transitionTo(State::COOLDOWN);
+            }
+            break;
+
         case State::COOLDOWN:
-            if (elapsed >= COOLDOWN_DURATION_MS) {
+            if (millis() - startTime >= COOLDOWN_DURATION_MS) {
                 transitionTo(State::IDLE);
             }
             break;
@@ -100,9 +130,16 @@ bool HeaterController::isHeating() const {
     return state == State::HEATING;
 }
 
+bool HeaterController::isPaused() const {
+    return state == State::PAUSED;
+}
+
 uint32_t HeaterController::getElapsedTime() const {
     if (state == State::HEATING) {
         return millis() - startTime;
+    }
+    if (state == State::PAUSED) {
+        return pauseTime - startTime;
     }
     return 0;
 }

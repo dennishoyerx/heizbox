@@ -21,6 +21,7 @@ public:
 
     void onEnter() override;
     void resetActivityTimer();
+    void onCycleFinalized();
 
 private:
     // Dependencies
@@ -32,7 +33,6 @@ private:
 
     // State
     struct {
-        uint32_t heatingStartTime;
         uint32_t lastActivityTime;
         uint8_t currentCycle;
         bool showingSavedConfirmation;

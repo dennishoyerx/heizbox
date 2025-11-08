@@ -48,7 +48,6 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
         this->cachedYesterdayConsumption = consumption;
         markDirty(); });
 
-    state.heatingStartTime = 0;
     state.lastActivityTime = millis();
     state.currentCycle = 1;
     state.showingSavedConfirmation = false;
@@ -58,6 +57,13 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
 void FireScreen::onEnter()
 {
     resetActivityTimer();
+}
+
+void FireScreen::onCycleFinalized() {
+    if (heater.getLastCycleDuration() > 10000) {
+        setCycleCallback(state.currentCycle);
+        state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
+    }
 }
 
 void drawSessionRow(DisplayDriver &display, String label, float consumption, int y, bool highlight = false)
@@ -237,23 +243,21 @@ void FireScreen::draw(DisplayDriver &display)
     drawSessionRow(display, "Heute", cachedTodayConsumption, 65);
     drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 120);
 
-    drawHeatingTimer(display);
+    if (heater.isHeating() || heater.isPaused()) {
+        drawHeatingTimer(display);
+    }
 }
 
 void FireScreen::drawHeatingTimer(DisplayDriver &display)
 {
-
-    if (!heater.isHeating())
-        return;
-
     auto &renderer = display.getRenderer();
     
-    const uint32_t elapsed = millis() - state.heatingStartTime;
+    const uint32_t elapsed = heater.getElapsedTime();
     const uint32_t seconds = elapsed / 1000;
     
     // Nur neu zeichnen bei Sekundenwechsel
     static uint32_t lastSeconds = 999;
-    if (seconds == lastSeconds) {
+    if (seconds == lastSeconds && heater.isHeating()) { // Only skip redraw if actively heating and second hasn't changed
         return;
     }
     lastSeconds = seconds;
@@ -303,12 +307,14 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     renderer.drawString(timeStr, centerX, centerY, 1);
     
     
-    // "HEIZT" Badge
+    // "HEIZT" or "PAUSE" Badge
+    const char* badgeText = heater.isPaused() ? "PAUSE" : "HEIZT";
+    uint16_t badgeColor = heater.isPaused() ? TFT_YELLOW : timerColor;
     renderer.fillRoundRect(centerX - 35, centerY + 50, 70, 20, 10, 0x8410);
-    renderer.fillCircle(centerX - 20, centerY + 60, 3, timerColor);
+    renderer.fillCircle(centerX - 20, centerY + 60, 3, badgeColor);
     renderer.setFreeFont(&FreeSans18pt7b);
     renderer.setTextSize(1);
-    renderer.drawString("HEIZT", centerX + 5, centerY + 60, 2);
+    renderer.drawString(badgeText, centerX + 5, centerY + 60, 2);
     
     // Click Zone
     if (seconds >= 30 && seconds <= 50) {
@@ -326,6 +332,7 @@ void FireScreen::drawStatus(DisplayDriver &display)
     switch (heater.getState())
     {
     case HeaterController::State::HEATING:
+    case HeaterController::State::PAUSED:
         status = nullptr;
         break; // Timer zeigt Status
     case HeaterController::State::COOLDOWN:
@@ -378,7 +385,7 @@ void FireScreen::drawSessionStats(DisplayDriver &display)
 
 void FireScreen::update()
 {
-    const bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
+    const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
 
     // Update heating timer
     if (isActive)
@@ -387,13 +394,21 @@ void FireScreen::update()
 
         // Redraw timer jede Sekunde
         static uint32_t lastSecond = 0;
-        const uint32_t currentSecond = (millis() - state.heatingStartTime) / 1000;
+        const uint32_t currentSecond = heater.getElapsedTime() / 1000;
         if (currentSecond != lastSecond)
         {
             markDirty();
             lastSecond = currentSecond;
         }
     }
+
+    // If the heater just became paused, force a redraw to show "PAUSE" text
+    static bool wasPaused = false;
+    if (heater.isPaused() && !wasPaused) {
+        markDirty();
+    }
+    wasPaused = heater.isPaused();
+
 
     checkScreensaverTimeout();
 }
@@ -418,8 +433,9 @@ void FireScreen::handleInput(InputEvent event)
 
     if (triggerHeating)
     {
-        _handleHeatingTrigger(!heater.isHeating()); // Toggle heating state
-        return;                                     // Consume the event if it triggered heating
+        // If we are in any state other than active heating, start. Otherwise, pause.
+        _handleHeatingTrigger(!heater.isHeating());
+        return;
     }
 
     // Handle other inputs (UP/DOWN for cycle change)
@@ -455,7 +471,7 @@ void FireScreen::handleCycleChange()
 
 void FireScreen::checkScreensaverTimeout()
 {
-    const bool isActive = heater.isHeating() || heater.getState() == HeaterController::State::COOLDOWN;
+    const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
 
     if (!isActive && (millis() - state.lastActivityTime > Timing::SCREENSAVER_TIMEOUT_MS))
     {
@@ -467,23 +483,14 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
 {
     if (shouldStartHeating)
     {
-        if (!heater.isHeating())
-        {
-            heater.startHeating();
-            state.heatingStartTime = millis();
-        }
+        // This will either start a new cycle or resume from a pause.
+        heater.startHeating();
     }
     else
     {
-        if (heater.isHeating())
-        {
-            const bool updateCycle = heater.isHeating(); // This will always be true here
-            heater.stopHeating();
-            if (updateCycle && (millis() - state.heatingStartTime > 10000))
-            {
-                setCycleCallback(state.currentCycle);
-                state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-            }
+        // This will pause the current cycle if it's heating.
+        if (heater.isHeating()) {
+            heater.stopHeating(false);
         }
     }
     markDirty(); // Always mark dirty when heating state changes

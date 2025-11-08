@@ -41,6 +41,7 @@ public:
     void setup();
     void loop();
     void setCurrentCycle(int cycle);
+    void onHeatCycleFinalized();
 
 private:
     // Core components

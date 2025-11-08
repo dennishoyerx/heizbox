@@ -7,12 +7,14 @@ HeaterMonitor::HeaterMonitor(
     HeaterController& heater,
     WebSocketManager& webSocketManager,
     StatsManager& statsManager,
-    int& lastSetCycle
+    int& lastSetCycle,
+    std::function<void()> onFinalizedCallback
 )
     : heater(heater),
       webSocketManager(webSocketManager),
       statsManager(statsManager),
-      lastSetCycle(lastSetCycle)
+      lastSetCycle(lastSetCycle),
+      onFinalizedCallback(onFinalizedCallback)
 {}
 
 void HeaterMonitor::checkHeatingStatus() {
@@ -37,6 +39,11 @@ void HeaterMonitor::checkHeatCycle() {
         DeviceState::instance().totalCycles.update([](uint32_t val) { return val + 1; });
         DeviceState::instance().sessionCycles.update([](uint32_t val) { return val + 1; });
         DeviceState::instance().totalDuration.update([durationMs](uint32_t val) { return val + durationMs; });
+
+        // Invoke the callback to notify other components (e.g., UI)
+        if (onFinalizedCallback) {
+            onFinalizedCallback();
+        }
 
         heater.clearCycleFinishedFlag();
 

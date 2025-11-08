@@ -12,6 +12,7 @@ public:
     enum class State : uint8_t {
         IDLE,
         HEATING,
+        PAUSED,
         COOLDOWN,
         ERROR
     };
@@ -19,11 +20,12 @@ public:
     HeaterController();
     void init();
     void startHeating();
-    void stopHeating();
+    void stopHeating(bool finalize = true);
     void update();
 
     State getState() const;
     bool isHeating() const;
+    bool isPaused() const;
     uint32_t getElapsedTime() const;
     uint32_t getCycleCount() const;
     uint32_t getLastCycleDuration() const;
@@ -37,11 +39,13 @@ private:
     // Benefit: Improves readability and makes tuning easier.
     static constexpr uint32_t COOLDOWN_DURATION_MS = 3000;
     static constexpr uint32_t MIN_CYCLE_DURATION_MS = 10000;
+    static constexpr uint32_t PAUSE_TIMEOUT_MS = 5000;
 
     void transitionTo(State newState);
 
     State state = State::IDLE;
     uint32_t startTime = 0;
+    uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000; // Default 60 seconds
     uint32_t cycleCounter = 0;
     uint32_t lastCycleDuration = 0;

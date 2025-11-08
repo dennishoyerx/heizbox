@@ -59,7 +59,10 @@ Device::Device()
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
       )),
       otaSetup(std::make_unique<OTASetup>(screenManager, otaUpdateScreen, fireScreen)),
-      heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocketManager, statsManager, lastSetCycle)),
+      heaterMonitor(std::make_unique<HeaterMonitor>(
+          heater, webSocketManager, statsManager, lastSetCycle,
+          [this]() { this->onHeatCycleFinalized(); }
+      )),
       inputHandler(std::make_unique<InputHandler>(screenManager))
 {}
 
@@ -134,6 +137,10 @@ void Device::loop() {
 // ============================================================================
 // Helper Methods
 // ============================================================================
+
+void Device::onHeatCycleFinalized() {
+    fireScreen.onCycleFinalized();
+}
 
 void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
     if (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0) {

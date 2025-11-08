@@ -21,12 +21,14 @@ public:
      * @param webSocketManager Reference to the WebSocketManager instance.
      * @param statsManager Reference to the StatsManager instance.
      * @param lastSetCycle Reference to the last set heat cycle.
+     * @param onFinalizedCallback Callback function to be invoked when a cycle is finalized.
      */
     HeaterMonitor(
         HeaterController& heater,
         WebSocketManager& webSocketManager,
         StatsManager& statsManager,
-        int& lastSetCycle
+        int& lastSetCycle,
+        std::function<void()> onFinalizedCallback
     );
 
     /**
@@ -45,4 +47,5 @@ private:
     StatsManager& statsManager;
     int& lastSetCycle;
     bool lastHeatingStatusSent = false;
+    std::function<void()> onFinalizedCallback;
 };
