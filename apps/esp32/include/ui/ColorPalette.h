@@ -249,7 +249,7 @@ const uint16_t heizbox_palette[256] PROGMEM = {
     rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
     rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
     rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
+    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0)
 };
 
 // Hilfsfunktionen für Farbinterpolation

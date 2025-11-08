@@ -102,11 +102,11 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     }
     lastSeconds = seconds;
 
-    uint8_t timerColorIndex;
-    if (seconds < 20) timerColorIndex = COLOR_SUCCESS;
-    else if (seconds < 35) timerColorIndex = COLOR_WARNING;
-    else if (seconds < 50) timerColorIndex = COLOR_ACCENT;
-    else timerColorIndex = COLOR_ERROR;
+    uint8_t timerColor;
+    if (seconds < 20) timerColor = COLOR_SUCCESS;
+    else if (seconds < 35) timerColor = COLOR_WARNING;
+    else if (seconds < 50) timerColor = COLOR_ACCENT;
+    else timerColor = COLOR_ERROR;
     
     int centerX = 140;
     int centerY = 96;

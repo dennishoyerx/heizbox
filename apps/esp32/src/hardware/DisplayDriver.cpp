@@ -77,7 +77,7 @@ void DisplayDriver::reallocateSprites() {
     spriteAllocated = mainSprite.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
-        mainSprite.createPalette(heizbox_palette, 256);
+        mainSprite.createPalette(heizbox_palette, 0);
         mainSprite.fillSprite(COLOR_BG_DARK);
 
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
