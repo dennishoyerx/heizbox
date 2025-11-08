@@ -2,7 +2,7 @@
 
 namespace Log {
     char* Firmware() {
-        char firmwareInfox[64];
+        static char firmwareInfox[64];
         snprintf(firmwareInfox, sizeof(firmwareInfox), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
         return firmwareInfox;
     }

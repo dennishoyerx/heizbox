@@ -1,11 +1,8 @@
-// ColorPalette.h - Definiere deine eigene Farbpalette
 #ifndef COLOR_PALETTE_H
 #define COLOR_PALETTE_H
 
 #include <Arduino.h>
 
-// Deine benutzerdefinierten Farb-Indizes (0-255)
-// Diese kannst du wie normale Farben verwenden
 enum CustomColors : uint8_t {
     // UI Basis-Farben (0-9)
     COLOR_BG_DARK = 0,
@@ -17,8 +14,9 @@ enum CustomColors : uint8_t {
     COLOR_WARNING = 6,
     COLOR_ERROR = 7,
     COLOR_BORDER = 8,
+    COLOR_TEST = 9,
     
-    // Fire/Heat Farben (10-49) - Gradient von schwarz zu weiß
+    // Fire/Heat Farben (10-19) - Gradient von schwarz zu weiß
     COLOR_FIRE_BLACK = 10,
     COLOR_FIRE_DARK_RED = 11,
     COLOR_FIRE_RED = 12,
@@ -28,7 +26,7 @@ enum CustomColors : uint8_t {
     COLOR_FIRE_YELLOW = 16,
     COLOR_FIRE_BRIGHT_YELLOW = 17,
     COLOR_FIRE_WHITE = 18,
-    
+
     // Status-LEDs (50-59)
     COLOR_LED_OFF = 50,
     COLOR_LED_GREEN = 51,
@@ -54,16 +52,14 @@ enum CustomColors : uint8_t {
     COLOR_GRAY_90 = 78,   // Sehr hell
     
     // Temperatur-Gradient (100-139) - Blau zu Rot
-    COLOR_TEMP_COLD_START = 100,
-    COLOR_TEMP_COLD_END = 109,
-    COLOR_TEMP_WARM_START = 110,
-    COLOR_TEMP_WARM_END = 119,
-    COLOR_TEMP_HOT_START = 120,
-    COLOR_TEMP_HOT_END = 129,
-    COLOR_TEMP_EXTREME_START = 130,
-    COLOR_TEMP_EXTREME_END = 139,
-    
-    // Reserve für weitere Farben (140-255)
+    COLOR_TEMP_COLD_START = 1,
+    COLOR_TEMP_COLD_END = 1,
+    COLOR_TEMP_WARM_START = 1,
+    COLOR_TEMP_WARM_END = 1,
+    COLOR_TEMP_HOT_START = 1,
+    COLOR_TEMP_HOT_END = 1,
+    COLOR_TEMP_EXTREME_START = 1,
+    COLOR_TEMP_EXTREME_END = 1,
 };
 
 // Hilfsfunktion: RGB888 zu RGB565 Konvertierung
@@ -72,18 +68,18 @@ inline uint16_t rgb888to565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 // Die komplette Palette mit 256 Farben (RGB565 Format)
-const uint16_t heizbox_palette[256] PROGMEM = {
+const uint16_t heizbox_palette[16] = {
     // UI Basis-Farben (0-9)
-    rgb888to565(15, 15, 20),      // 0: COLOR_BG_DARK - Fast schwarz mit Blaustich
+    0xFB40,    // 0: COLOR_BG_DARK
     rgb888to565(30, 30, 35),      // 1: COLOR_BG_MEDIUM
     rgb888to565(240, 240, 245),   // 2: COLOR_TEXT_PRIMARY - Fast weiß
     rgb888to565(180, 180, 190),   // 3: COLOR_TEXT_SECONDARY - Helles Grau
-    rgb888to565(255, 100, 50),    // 4: COLOR_ACCENT - Orange/Rot Akzent
+    0xFB40,    // 4: COLOR_ACCENT - Orange/Rot Akzent
     rgb888to565(50, 200, 100),    // 5: COLOR_SUCCESS - Grün
     rgb888to565(255, 180, 50),    // 6: COLOR_WARNING - Gelb/Orange
     rgb888to565(255, 50, 50),     // 7: COLOR_ERROR - Rot
     rgb888to565(60, 60, 70),      // 8: COLOR_BORDER - Dunkles Grau
-    rgb888to565(0, 0, 0),         // 9: Reserve
+    0xFB40,         // 9: Reserve
     
     // Fire/Heat Gradient (10-49) - 40 Farbstufen für Flammen-Animation
     rgb888to565(0, 0, 0),         // 10: Schwarz
@@ -92,164 +88,6 @@ const uint16_t heizbox_palette[256] PROGMEM = {
     rgb888to565(60, 5, 0),        // 13
     rgb888to565(80, 10, 0),       // 14
     rgb888to565(100, 15, 0),      // 15
-    rgb888to565(120, 20, 0),      // 16
-    rgb888to565(140, 25, 0),      // 17
-    rgb888to565(160, 30, 0),      // 18
-    rgb888to565(180, 40, 0),      // 19
-    rgb888to565(200, 50, 0),      // 20: Rot
-    rgb888to565(220, 60, 0),      // 21
-    rgb888to565(240, 70, 0),      // 22
-    rgb888to565(255, 80, 0),      // 23
-    rgb888to565(255, 100, 0),     // 24: Orange-Rot
-    rgb888to565(255, 120, 0),     // 25
-    rgb888to565(255, 140, 0),     // 26
-    rgb888to565(255, 160, 0),     // 27: Orange
-    rgb888to565(255, 180, 0),     // 28
-    rgb888to565(255, 200, 0),     // 29
-    rgb888to565(255, 220, 0),     // 30: Gelb-Orange
-    rgb888to565(255, 240, 0),     // 31
-    rgb888to565(255, 255, 0),     // 32: Gelb
-    rgb888to565(255, 255, 40),    // 33
-    rgb888to565(255, 255, 80),    // 34
-    rgb888to565(255, 255, 120),   // 35
-    rgb888to565(255, 255, 160),   // 36
-    rgb888to565(255, 255, 200),   // 37
-    rgb888to565(255, 255, 240),   // 38: Fast Weiß
-    rgb888to565(255, 255, 255),   // 39: Weiß
-    // 40-49: Reserve für weitere Fire-Farben
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0),
-    
-    // Status-LEDs (50-59)
-    rgb888to565(30, 30, 30),      // 50: LED aus (dunkelgrau)
-    rgb888to565(0, 255, 100),     // 51: Grün (online)
-    rgb888to565(255, 220, 0),     // 52: Gelb (warning)
-    rgb888to565(255, 50, 50),     // 53: Rot (error)
-    rgb888to565(0, 150, 255),     // 54: Blau
-    rgb888to565(200, 0, 255),     // 55: Lila
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), 
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    
-    // Battery Levels (60-69)
-    rgb888to565(0, 255, 100),     // 60: Voll (Grün)
-    rgb888to565(100, 255, 50),    // 61: Hoch (Hellgrün)
-    rgb888to565(255, 200, 0),     // 62: Mittel (Gelb)
-    rgb888to565(255, 100, 0),     // 63: Niedrig (Orange)
-    rgb888to565(255, 0, 0),       // 64: Kritisch (Rot)
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), 
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), 
-    rgb888to565(0, 0, 0),
-    
-    // Graustufen (70-99) - 30 Stufen
-    rgb888to565(26, 26, 26),      // 70: 10%
-    rgb888to565(51, 51, 51),      // 71: 20%
-    rgb888to565(77, 77, 77),      // 72: 30%
-    rgb888to565(102, 102, 102),   // 73: 40%
-    rgb888to565(128, 128, 128),   // 74: 50%
-    rgb888to565(153, 153, 153),   // 75: 60%
-    rgb888to565(179, 179, 179),   // 76: 70%
-    rgb888to565(204, 204, 204),   // 77: 80%
-    rgb888to565(230, 230, 230),   // 78: 90%
-    // 79-99: Weitere Graustufen und Reserve
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    
-    // Temperatur-Gradient (100-139) - Blau → Cyan → Grün → Gelb → Rot
-    // Kalt (100-109): Blautöne
-    rgb888to565(0, 50, 150),      // 100: Kalt Start (Dunkelblau)
-    rgb888to565(0, 80, 180),
-    rgb888to565(0, 110, 210),
-    rgb888to565(0, 140, 240),
-    rgb888to565(30, 170, 255),
-    rgb888to565(60, 200, 255),
-    rgb888to565(90, 220, 255),
-    rgb888to565(120, 235, 255),
-    rgb888to565(150, 245, 255),
-    rgb888to565(180, 250, 255),   // 109: Kalt Ende (Hellblau)
-    
-    // Warm (110-119): Cyan → Grün
-    rgb888to565(150, 255, 230),   // 110
-    rgb888to565(120, 255, 200),
-    rgb888to565(90, 255, 170),
-    rgb888to565(60, 255, 140),
-    rgb888to565(50, 255, 100),
-    rgb888to565(60, 240, 70),
-    rgb888to565(80, 220, 50),
-    rgb888to565(100, 200, 40),
-    rgb888to565(130, 180, 30),
-    rgb888to565(160, 160, 20),    // 119
-    
-    // Heiß (120-129): Gelb → Orange
-    rgb888to565(200, 200, 0),     // 120
-    rgb888to565(220, 190, 0),
-    rgb888to565(240, 180, 0),
-    rgb888to565(255, 170, 0),
-    rgb888to565(255, 150, 0),
-    rgb888to565(255, 130, 0),
-    rgb888to565(255, 110, 0),
-    rgb888to565(255, 90, 0),
-    rgb888to565(255, 70, 0),
-    rgb888to565(255, 50, 0),      // 129
-    
-    // Extrem (130-139): Rot → Weiß
-    rgb888to565(255, 30, 0),      // 130
-    rgb888to565(255, 20, 20),
-    rgb888to565(255, 30, 40),
-    rgb888to565(255, 50, 60),
-    rgb888to565(255, 80, 80),
-    rgb888to565(255, 110, 110),
-    rgb888to565(255, 150, 150),
-    rgb888to565(255, 190, 190),
-    rgb888to565(255, 220, 220),
-    rgb888to565(255, 240, 240),   // 139: Extrem Ende
-    
-    // Rest mit Schwarz auffüllen (140-255)
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0), rgb888to565(0, 0, 0),
-    rgb888to565(0, 0, 0), rgb888to565(0, 0, 0)
 };
 
 // Hilfsfunktionen für Farbinterpolation

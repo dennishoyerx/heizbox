@@ -3,7 +3,6 @@
 #include "ui/base/ScreenManager.h"
 #include "hardware/DisplayDriver.h"
 #include "InputManager.h"
-#include <Adafruit_GFX.h>
 #include <TFT_eSPI.h>
 
 ScreenType HiddenModeScreen::getType() const {

@@ -48,7 +48,6 @@ private:
 
     // Helper methods
     void drawHeatingTimer(DisplayDriver& display);
-    void drawStatus(DisplayDriver& display);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);
     void handleCycleChange();

@@ -104,7 +104,6 @@ void Device::setup() {
             char firmwareInfo[64];
             snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
             logPrint("Firmware", firmwareInfo);
-            //logPrint("Firmware", Log::Firmware());
             firmware_logged = true;
         }
     });

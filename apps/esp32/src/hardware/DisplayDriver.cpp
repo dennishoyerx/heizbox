@@ -73,12 +73,19 @@ void DisplayDriver::freeSprites() {
 void DisplayDriver::reallocateSprites() {
     freeSprites();
 
-    mainSprite.setColorDepth(8);
+    mainSprite.setColorDepth(4);
     spriteAllocated = mainSprite.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
-        mainSprite.createPalette(heizbox_palette, 0);
-        mainSprite.fillSprite(COLOR_BG_DARK);
+        
+  mainSprite.createPalette(heizbox_palette, 16);
+  
+
+        /*uint16_t paletteRAM[140];
+        memcpy_P(paletteRAM, heizbox_palette, sizeof(heizbox_palette));
+        mainSprite.createPalette(paletteRAM, 140);*/
+
+        mainSprite.fillSprite(9);
 
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
         Serial.printf("✅ Sprite allocated with custom palette: %u bytes (%ux%u @8-bit)\n",
@@ -102,7 +109,7 @@ uint16_t DisplayDriver::getBackgroundColor() {
 
 void DisplayDriver::clear() {
     if (spriteAllocated) {
-        mainSprite.fillSprite(COLOR_BG_DARK);
+        mainSprite.fillSprite(4);
     } else {
         tft.fillScreen(heizbox_palette[COLOR_BG_DARK]);
     }
@@ -112,6 +119,9 @@ void DisplayDriver::clear() {
 
 void DisplayDriver::render() {
     if (spriteAllocated) {
+  for (uint8_t i = 0; i < 16; i++) {
+      //mainSprite.fillRect(i * 5, 0, 5, 80, i); // Index = Palette
+  }
         mainSprite.pushSprite(0, DisplayConfig::STATUS_BAR_HEIGHT);
     }
 }
@@ -167,7 +177,7 @@ void DisplayDriver::drawText(int16_t x, int16_t y, const char* text,
 
     if (spriteAllocated) {
         if (renderState.textColor != color || renderState.bgColor != COLOR_BG_DARK) {
-            renderer.setTextColor(color, COLOR_BG_DARK);
+            renderer.setTextColor(color, COLOR_TEXT_PRIMARY);
             renderState.textColor = color;
             renderState.bgColor = COLOR_BG_DARK;
             needsUpdate = true;
