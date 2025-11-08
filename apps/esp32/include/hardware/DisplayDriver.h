@@ -59,11 +59,15 @@ public:
     void freeSprites();
     void reallocateSprites();
 
+    // Renderer selection (Sprite vs Direct)
+    TFT_eSPI& getRenderer();
+    template<typename T>
+    T& getRenderer();
 
 private:
     // Core components
     TFT_eSPI tft;
-    TFT_eSprite sprTop;
+    TFT_eSprite mainSprite;
     StatusBar* statusBar;
     ScreenManager* screenManager;
 
@@ -90,10 +94,6 @@ private:
     void initBacklight();
     uint16_t getBackgroundColor();
 
-    // Renderer selection (Sprite vs Direct)
-    TFT_eSPI& getRenderer();
-    template<typename T>
-    T& getRenderer();
 };
 
 extern DisplayDriver Display;

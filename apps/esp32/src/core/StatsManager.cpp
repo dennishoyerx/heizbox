@@ -62,23 +62,27 @@ void StatsManager::flushToNvs() {
 }
 
 void StatsManager::updateSessionData(const JsonObjectConst& data) {
-    // Optimization: Use proper null-checking for JSON values.
-    // Benefit: Prevents runtime errors and ensures data is only updated when valid.
+    DeviceState& state = DeviceState::instance();
+
     if (!data["clicks"].isNull()) {
-        clicks = data["clicks"].as<int>();
+        state.sessionClicks.set(data["clicks"].as<int>());
     }
     if (!data["caps"].isNull()) {
-        caps = data["caps"].as<int>();
+        state.sessionCaps.set(data["caps"].as<int>());
     }
     if (!data["consumption"].isNull()) {
-        consumption = data["consumption"].as<String>();
+        state.sessionConsumption.set(data["consumption"].as<double>());
     }
     if (!data["consumptionTotal"].isNull()) {
-        consumption = data["consumptionTotal"].as<String>();
+        state.todayConsumption.set(data["consumptionTotal"].as<double>());
+    }
+    if (!data["consumptionYesterday"].isNull()) {
+        state.yesterdayConsumption.set(data["consumptionYesterday"].as<double>());
     }
 
-    Serial.printf("[Stats] Session updated: Clicks=%d, Caps=%d, LastClick=%s, Consumption=%s\n",
-                  clicks, caps, lastClick.c_str(), consumption.c_str());
+    Serial.printf("[Stats] Session updated: Clicks=%d, Caps=%d, Consumption=%.2f, Today=%.2f, Yesterday=%.2f\n",
+                  state.sessionClicks.get(), state.sessionCaps.get(), state.sessionConsumption.get(), 
+                  state.todayConsumption.get(), state.yesterdayConsumption.get());
 }
 
 void StatsManager::resetSession() {

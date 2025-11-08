@@ -353,7 +353,7 @@ export class DeviceStatus {
 
 	// New method to process messages coming from devices
 	async processDeviceMessage(ws: WebSocket, message: any): Promise<void> {
-		console.log('DeviceStatus: MSG:', message)
+		console.log('DeviceStatus: MSG:', JSON.stringify(message))
 		const deviceId = this.webSockets.find((socket) => socket.ws === ws)?.deviceId || 'unknown-device'
 
 		if (message.t != undefined) {

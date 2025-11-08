@@ -15,7 +15,7 @@
 
 DisplayDriver::DisplayDriver()
     : tft(),
-      sprTop(&tft),
+      mainSprite(&tft),
       statusBar(nullptr),
       screenManager(nullptr),
       brightness(DisplayConfig::BRIGHTNESS_DEFAULT),
@@ -62,7 +62,7 @@ void DisplayDriver::initBacklight() {
 
 void DisplayDriver::freeSprites() {
     if (spriteAllocated) {
-        sprTop.deleteSprite();
+        mainSprite.deleteSprite();
         spriteAllocated = false;
         Serial.println("🗑️ Sprite buffer freed");
     }
@@ -71,12 +71,20 @@ void DisplayDriver::freeSprites() {
 void DisplayDriver::reallocateSprites() {
     freeSprites();
 
-    sprTop.setColorDepth(8);
-    spriteAllocated = sprTop.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
+    mainSprite.setColorDepth(8);
+    spriteAllocated = mainSprite.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
+        mainSprite.setPaletteColor(200, 0xFB40);   // BG Orange #FF6A00
+        mainSprite.setPaletteColor(201, tft.color565(0, 255, 0));     // Grün
+        mainSprite.setPaletteColor(202, tft.color565(255, 255, 0));   // Gelb
+        mainSprite.setPaletteColor(203, tft.color565(255, 165, 0));   // Orange
+        mainSprite.setPaletteColor(204, tft.color565(255, 0, 0));     // Rot
+        mainSprite.setPaletteColor(205, tft.color565(128, 128, 128)); // Grau
+        mainSprite.setPaletteColor(206, tft.color565(255, 255, 255)); // Weiß (falls du TFT_WHITE ersetzt)
+
         uint16_t orange = tft.color565(255, 107, 43);
-        sprTop.fillSprite(orange);
+        mainSprite.fillSprite(orange);
 
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
         Serial.printf("✅ Sprite allocated: %u bytes (%ux%u @8-bit, bg #FF6B2B)\n",
@@ -102,7 +110,7 @@ void DisplayDriver::clear(uint16_t color) {
     uint16_t orange = tft.color565(255, 107, 43);
 
     if (spriteAllocated) {
-        sprTop.fillSprite(orange);
+        mainSprite.fillSprite(orange);
     } else {
         tft.fillScreen(orange);
     }
@@ -112,7 +120,7 @@ void DisplayDriver::clear(uint16_t color) {
 
 void DisplayDriver::render() {
     if (spriteAllocated) {
-        sprTop.pushSprite(0, DisplayConfig::STATUS_BAR_HEIGHT);
+        mainSprite.pushSprite(0, DisplayConfig::STATUS_BAR_HEIGHT);
     }
 }
 
@@ -130,7 +138,7 @@ void DisplayDriver::renderStatusBar() {
 template<typename T>
 T& DisplayDriver::getRenderer() {
     if (spriteAllocated) {
-        return reinterpret_cast<T&>(sprTop);
+        return reinterpret_cast<T&>(mainSprite);
     } else {
         return reinterpret_cast<T&>(tft);
     }
@@ -138,7 +146,7 @@ T& DisplayDriver::getRenderer() {
 
 TFT_eSPI& DisplayDriver::getRenderer() {
     if (spriteAllocated) {
-        return sprTop;
+        return mainSprite;
     } else {
         return tft;
     }
@@ -195,7 +203,7 @@ void DisplayDriver::drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
     if (!bitmap) return;
 
     if (spriteAllocated) {
-        sprTop.drawBitmap(x, y, bitmap, w, h, color);
+        mainSprite.drawBitmap(x, y, bitmap, w, h, color);
     } else {
         tft.drawBitmap(x, y, bitmap, w, h, color);
     }
@@ -206,7 +214,7 @@ void DisplayDriver::drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
     if (!bitmap) return;
 
     if (spriteAllocated) {
-        sprTop.drawXBitmap(x, y, bitmap, w, h, color);
+        mainSprite.drawXBitmap(x, y, bitmap, w, h, color);
     } else {
         tft.drawXBitmap(x, y, bitmap, w, h, color);
     }
@@ -214,7 +222,7 @@ void DisplayDriver::drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
 
 void DisplayDriver::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
     if (spriteAllocated) {
-        sprTop.drawRect(x, y, w, h, color);
+        mainSprite.drawRect(x, y, w, h, color);
     } else {
         tft.drawRect(x, y, w, h, color);
     }
@@ -222,7 +230,7 @@ void DisplayDriver::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_
 
 void DisplayDriver::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
     if (spriteAllocated) {
-        sprTop.fillRect(x, y, w, h, color);
+        mainSprite.fillRect(x, y, w, h, color);
     } else {
         tft.fillRect(x, y, w, h, color);
     }

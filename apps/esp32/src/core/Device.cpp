@@ -1,5 +1,6 @@
 #include "core/Config.h"
 #include "core/Device.h" 
+#include "core/DeviceState.h" 
 #include "credentials.h"
 #include <ArduinoOTA.h>
 #include "core/StateManager.h"

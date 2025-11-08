@@ -32,6 +32,7 @@ struct DeviceState {
     Observable<uint32_t> sessionCycles{0};
     Observable<double> sessionConsumption{0};
     Observable<double> todayConsumption{0};
+    Observable<double> yesterdayConsumption{0};
 
     // Statistics
     PersistedObservable<uint32_t> totalCycles{"stats", "total_cycles", 0};

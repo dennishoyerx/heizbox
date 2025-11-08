@@ -44,6 +44,7 @@ private:
     int cachedCaps;
     float cachedConsumption;
     float cachedTodayConsumption;
+    float cachedYesterdayConsumption;
 
     // Helper methods
     void drawHeatingTimer(DisplayDriver& display);

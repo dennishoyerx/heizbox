@@ -12,8 +12,10 @@ export class SessionService {
 
 	async getCurrentSessionData() {
 		const { start, end } = getBerlinTimeRange()
+		const yesterdayTimeRange = getBerlinTimeRange(-1)
 		const results = await this.heatCycleService.getRecentSession(7200) // 2 hours
 		const today = await this.heatCycleService.getHeatCyclesInRange(start, end)
+		const yesterday = await this.heatCycleService.getHeatCyclesInRange(yesterdayTimeRange.start, yesterdayTimeRange.end)
 
 		if (!results || results.length === 0) {
 			return {
@@ -23,6 +25,7 @@ export class SessionService {
 				heat_cycles: [],
 				consumption: 0,
 				consumptionTotal: 0,
+				consumptionYesterday: 0,
 			}
 		}
 
@@ -32,7 +35,8 @@ export class SessionService {
 		const heat_cycles = groupSessions(results)
 		const consumption = calculateConsumption(caps)
 		const consumptionTotal = calculateConsumption(today.filter((x) => x.cycle === 1).length)
+		const consumptionYesterday = calculateConsumption(yesterday.filter((x) => x.cycle === 1).length)
 
-		return { clicks, caps, lastClick, heat_cycles, consumption, consumptionTotal }
+		return { clicks, caps, lastClick, heat_cycles, consumption, consumptionTotal, consumptionYesterday }
 	}
 }
