@@ -4,6 +4,7 @@
 #include "assets/bitmaps.h"
 #include "net/WiFiManager.h"
 #include "utils/clock.h"
+#include "ui/ColorPalette.h"
 
 StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, uint8_t h)
     : tft(tft_instance), height(h)
@@ -62,10 +63,10 @@ void StatusBar::draw() {
 
 void StatusBar::drawTimeRegion() {
     // Clear nur Zeit-Bereich
-    tft->fillRect(0, 0, 150, height, tft->color565(255, 107, 43));
+    tft->fillRect(0, 0, 150, height, heizbox_palette[COLOR_ACCENT]);
 
     // Render Zeit
-    tft->setTextColor(TFT_WHITE);
+    tft->setTextColor(heizbox_palette[COLOR_TEXT_PRIMARY]);
     tft->setFreeFont(&FreeSans18pt7b);
     tft->setTextSize(1);
     tft->setCursor(15, tft->fontHeight() + 4);
@@ -76,11 +77,11 @@ void StatusBar::drawWifiRegion() {
     // Clear nur WiFi-Icon Bereich
     const int16_t iconX = tft->width() - 50;
     const int16_t iconY = height - 40;
-    tft->fillRect(iconX, iconY, 40, 40, tft->color565(255, 107, 43));
+    tft->fillRect(iconX, iconY, 40, 40, heizbox_palette[COLOR_ACCENT]);
 
     // Render WiFi-Icon
     const uint8_t* icon = getWifiIcon();
-    tft->drawBitmap(iconX, iconY, icon, 40, 40, TFT_WHITE);
+    tft->drawBitmap(iconX, iconY, icon, 40, 40, heizbox_palette[COLOR_TEXT_PRIMARY]);
 }
 
 int8_t StatusBar::getWifiStrength() const {

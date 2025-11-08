@@ -1,8 +1,8 @@
 // src/screens/ScreensaverScreen.cpp
-#include "ui/base/Screen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/base/ScreenManager.h"
 #include "StateManager.h"
+#include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>
 
 ScreensaverScreen::ScreensaverScreen(unsigned long timeout, DisplayDriver* dm, std::function<void()> callback)
@@ -11,19 +11,19 @@ ScreensaverScreen::ScreensaverScreen(unsigned long timeout, DisplayDriver* dm, s
 }
 
 void ScreensaverScreen::draw(DisplayDriver& display) {
-    display.clear(TFT_BLACK);
+    display.clear();
 
     // Display time
     String time = Utils::getFormattedTime();
     int16_t timeWidth = display.getTextWidth(time.c_str(), 3);
     int16_t timeX = (display.getTFTWidth() - timeWidth) / 2 + 25;
-    display.drawText(timeX, 90, time.c_str(), TFT_WHITE, 3);
+    display.drawText(timeX, 90, time.c_str(), COLOR_TEXT_PRIMARY, 3);
 
     // Display date
     String date = Utils::getFormattedDate();
     int16_t dateWidth = display.getTextWidth(date.c_str(), 2);
     int16_t dateX = (display.getTFTWidth() - dateWidth) / 2 + 25;
-    display.drawText(dateX, 130, date.c_str(), TFT_WHITE, 2);
+    display.drawText(dateX, 130, date.c_str(), COLOR_TEXT_PRIMARY, 2);
 }
 
 void ScreensaverScreen::update() {

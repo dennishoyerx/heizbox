@@ -1,7 +1,7 @@
 // src/screens/StartupScreen.cpp
-#include "ui/base/Screen.h"
 #include "ui/screens/StartupScreen.h"
 #include "StateManager.h"
+#include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>
 #include "bitmaps.h"
 
@@ -14,7 +14,7 @@ StartupScreen::StartupScreen(std::function<void()> callback) {
 }
 
 void StartupScreen::draw(DisplayDriver& display) {
-    display.clear(TFT_BLACK);
+    display.clear();
 
     // Zentrale Position berechnen
     constexpr int16_t bitmapWidth = 96;
@@ -23,7 +23,7 @@ void StartupScreen::draw(DisplayDriver& display) {
     const int16_t y = (display.getTFTHeight() - bitmapHeight) / 2;
 
     // Bitmap zeichnen
-    display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, TFT_WHITE);
+    display.drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, COLOR_TEXT_PRIMARY);
 
 
     // Build Info
@@ -34,8 +34,8 @@ void StartupScreen::draw(DisplayDriver& display) {
     memcpy(short_time, BUILD_TIME, 5);
     short_time[5] = '\0';
 
-    display.drawText(20, 20, short_date, TFT_WHITE, 1);
-    display.drawText(20, 40, short_time, TFT_WHITE, 1);
+    display.drawText(20, 20, short_date, COLOR_TEXT_PRIMARY, 1);
+    display.drawText(20, 40, short_time, COLOR_TEXT_PRIMARY, 1);
 
     // Optional: Progress-Bar
     const float progress = this->getProgress();
@@ -45,8 +45,8 @@ void StartupScreen::draw(DisplayDriver& display) {
         const int16_t barX = (display.getTFTWidth() - barWidth) / 2;
         const int16_t barY = y + bitmapHeight + 20;
 
-        display.drawRect(barX, barY, barWidth, barHeight, TFT_WHITE);
-        display.fillRect(barX, barY, barWidth * progress, barHeight, TFT_WHITE);
+        display.drawRect(barX, barY, barWidth, barHeight, COLOR_TEXT_PRIMARY);
+        display.fillRect(barX, barY, barWidth * progress, barHeight, COLOR_TEXT_PRIMARY);
     }
 }
 

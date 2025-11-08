@@ -3,10 +3,11 @@
 #include "hardware/InputManager.h" // For InputEvent and its enums
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "hardware/DisplayDriver.h"
+#include "ui/ColorPalette.h"
 #include <algorithm> // For std::min
 
 namespace {
-    void centerText(DisplayDriver& display, int16_t y, const char* text, uint16_t color, uint8_t size) {
+    void centerText(DisplayDriver& display, int16_t y, const char* text, uint8_t color, uint8_t size) {
         int16_t x = (display.getTFTWidth() - display.getTextWidth(text, size)) / 2;
         display.drawText(x, y, text, color, size);
     }
@@ -17,7 +18,7 @@ void GenericMenuScreen::draw(DisplayDriver& display) {
     display.clear();
     
     // Title
-    centerText(display, 10, title_, TFT_WHITE, 2);
+    centerText(display, 10, title_, COLOR_TEXT_PRIMARY, 2);
     
     // Items (with scrolling support)
     const int itemsPerPage = 5;
@@ -30,7 +31,7 @@ void GenericMenuScreen::draw(DisplayDriver& display) {
         
         const auto& item = items_[i];
         const bool isSelected = (i == selectedIndex_);
-        const uint16_t color = isSelected ? TFT_YELLOW : TFT_WHITE;
+        const uint8_t color = isSelected ? COLOR_ACCENT : COLOR_TEXT_PRIMARY;
         
         // Selection indicator
         if (isSelected) {
@@ -52,7 +53,7 @@ void GenericMenuScreen::draw(DisplayDriver& display) {
     const char* footer = adjustMode_ 
         ? "L/R: Adjust  OK: Done"
         : "OK: Select  HOLD L: Back";
-    display.drawText(10, 210, footer, TFT_GRAY, 1);
+    display.drawText(10, 210, footer, COLOR_TEXT_SECONDARY, 1);
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {

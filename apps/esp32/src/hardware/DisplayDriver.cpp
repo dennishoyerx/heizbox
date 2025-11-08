@@ -3,6 +3,7 @@
 #include "ui/base/ScreenManager.h"
 #include "ui/components/StatusBar.h"
 #include "core/Config.h"
+#include "ui/ColorPalette.h"
 #include <FS.h>
 #include <LittleFS.h>
 #include <cstdint>
@@ -44,8 +45,9 @@ void DisplayDriver::init(ScreenManager* mgr) {
     statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     reallocateSprites();
 
-    uint16_t orange = tft.color565(255, 107, 43);
-    tft.fillScreen(orange);
+    if (!spriteAllocated) {
+        tft.fillScreen(heizbox_palette[COLOR_BG_DARK]);
+    }
 
     Serial.println("📺 DisplayDriver initialized");
 }
@@ -75,19 +77,11 @@ void DisplayDriver::reallocateSprites() {
     spriteAllocated = mainSprite.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
-        mainSprite.setPaletteColor(200, 0xFB40);   // BG Orange #FF6A00
-        mainSprite.setPaletteColor(201, tft.color565(0, 255, 0));     // Grün
-        mainSprite.setPaletteColor(202, tft.color565(255, 255, 0));   // Gelb
-        mainSprite.setPaletteColor(203, tft.color565(255, 165, 0));   // Orange
-        mainSprite.setPaletteColor(204, tft.color565(255, 0, 0));     // Rot
-        mainSprite.setPaletteColor(205, tft.color565(128, 128, 128)); // Grau
-        mainSprite.setPaletteColor(206, tft.color565(255, 255, 255)); // Weiß (falls du TFT_WHITE ersetzt)
-
-        uint16_t orange = tft.color565(255, 107, 43);
-        mainSprite.fillSprite(orange);
+        mainSprite.createPalette(heizbox_palette, 256);
+        mainSprite.fillSprite(COLOR_BG_DARK);
 
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
-        Serial.printf("✅ Sprite allocated: %u bytes (%ux%u @8-bit, bg #FF6B2B)\n",
+        Serial.printf("✅ Sprite allocated with custom palette: %u bytes (%ux%u @8-bit)\n",
                       bytes, DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
     } else {
         Serial.println("❌ Sprite allocation failed - fallback to direct rendering");
@@ -99,20 +93,18 @@ void DisplayDriver::reallocateSprites() {
 
 
 uint16_t DisplayDriver::getBackgroundColor() {
-    return tft.color565(255, 107, 43);
+    return heizbox_palette[COLOR_BG_DARK];
 }
 
 // ============================================================================
 // Rendering Pipeline
 // ============================================================================
 
-void DisplayDriver::clear(uint16_t color) {
-    uint16_t orange = tft.color565(255, 107, 43);
-
+void DisplayDriver::clear() {
     if (spriteAllocated) {
-        mainSprite.fillSprite(orange);
+        mainSprite.fillSprite(COLOR_BG_DARK);
     } else {
-        tft.fillScreen(orange);
+        tft.fillScreen(heizbox_palette[COLOR_BG_DARK]);
     }
     renderState.reset();
 }
@@ -165,23 +157,26 @@ static void setFont(uint16_t size, TFT_eSPI& renderer) {
 }
 
 void DisplayDriver::drawText(int16_t x, int16_t y, const char* text,
-                               uint16_t color, uint8_t size) {
+                               uint8_t color, uint8_t size) {
     if (!text) return;
 
-    const uint16_t bgColor = getBackgroundColor();
-
     auto& renderer = getRenderer();
-
-    // Optimize: Only update state if changed
     bool needsUpdate = false;
-
 
     setFont(size, renderer);
 
-    if (renderState.textColor != color || renderState.bgColor != bgColor) {
-        renderer.setTextColor(color, bgColor, false);
-        renderState.textColor = color;
-        renderState.bgColor = bgColor;
+    if (spriteAllocated) {
+        if (renderState.textColor != color || renderState.bgColor != COLOR_BG_DARK) {
+            renderer.setTextColor(color, COLOR_BG_DARK);
+            renderState.textColor = color;
+            renderState.bgColor = COLOR_BG_DARK;
+            needsUpdate = true;
+        }
+    } else {
+        uint16_t color16 = heizbox_palette[color];
+        uint16_t bgColor16 = heizbox_palette[COLOR_BG_DARK];
+        // This comparison is tricky because state is uint8_t. We'll just update.
+        renderer.setTextColor(color16, bgColor16);
         needsUpdate = true;
     }
 
@@ -199,41 +194,27 @@ void DisplayDriver::drawText(int16_t x, int16_t y, const char* text,
 }
 
 void DisplayDriver::drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
-                                 int16_t w, int16_t h, uint16_t color) {
+                                 int16_t w, int16_t h, uint8_t color) {
     if (!bitmap) return;
-
-    if (spriteAllocated) {
-        mainSprite.drawBitmap(x, y, bitmap, w, h, color);
-    } else {
-        tft.drawBitmap(x, y, bitmap, w, h, color);
-    }
+    uint16_t color16 = spriteAllocated ? color : heizbox_palette[color];
+    getRenderer().drawBitmap(x, y, bitmap, w, h, color16);
 }
 
 void DisplayDriver::drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap,
-                                  int16_t w, int16_t h, uint16_t color) {
+                                  int16_t w, int16_t h, uint8_t color) {
     if (!bitmap) return;
-
-    if (spriteAllocated) {
-        mainSprite.drawXBitmap(x, y, bitmap, w, h, color);
-    } else {
-        tft.drawXBitmap(x, y, bitmap, w, h, color);
-    }
+    uint16_t color16 = spriteAllocated ? color : heizbox_palette[color];
+    getRenderer().drawXBitmap(x, y, bitmap, w, h, color16);
 }
 
-void DisplayDriver::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-    if (spriteAllocated) {
-        mainSprite.drawRect(x, y, w, h, color);
-    } else {
-        tft.drawRect(x, y, w, h, color);
-    }
+void DisplayDriver::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color) {
+    uint16_t color16 = spriteAllocated ? color : heizbox_palette[color];
+    getRenderer().drawRect(x, y, w, h, color16);
 }
 
-void DisplayDriver::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color) {
-    if (spriteAllocated) {
-        mainSprite.fillRect(x, y, w, h, color);
-    } else {
-        tft.fillRect(x, y, w, h, color);
-    }
+void DisplayDriver::fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color) {
+    uint16_t color16 = spriteAllocated ? color : heizbox_palette[color];
+    getRenderer().fillRect(x, y, w, h, color16);
 }
 
 int DisplayDriver::getTextWidth(const char* text, uint8_t size) {

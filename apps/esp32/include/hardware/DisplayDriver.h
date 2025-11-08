@@ -23,9 +23,6 @@ namespace DisplayConfig {
     constexpr uint8_t PWM_RESOLUTION = 8;
 }
 
-// Custom colors
-#define TFT_GRAY 0x7BEF
-
 class DisplayDriver {
 public:
     explicit DisplayDriver();
@@ -33,16 +30,16 @@ public:
 
     // Lifecycle
     void init(ScreenManager* mgr);
-    void clear(uint16_t color = TFT_BLACK);
+    void clear();
     void render();
     void renderStatusBar();
 
     // Drawing primitives
-    void drawText(int16_t x, int16_t y, const char* text, uint16_t color, uint8_t size = 1);
-    void drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint16_t color);
-    void drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint16_t color);
-    void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
-    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+    void drawText(int16_t x, int16_t y, const char* text, uint8_t color, uint8_t size = 1);
+    void drawBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint8_t color);
+    void drawXBitmap(int16_t x, int16_t y, const uint8_t* bitmap, int16_t w, int16_t h, uint8_t color);
+    void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color);
+    void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint8_t color);
 
     // Settings
     void setBrightness(uint8_t level);
@@ -79,13 +76,13 @@ private:
     // Rendering state cache (eliminiert redundante Aufrufe)
     struct RenderState {
         uint8_t textSize;
-        uint16_t textColor;
-        uint16_t bgColor;
+        uint8_t textColor;
+        uint8_t bgColor;
 
         void reset() {
             textSize = 0;
-            textColor = 0xFFFF;
-            bgColor = 1;
+            textColor = 255; // Invalid index
+            bgColor = 255;   // Invalid index
         }
     } renderState;
 
