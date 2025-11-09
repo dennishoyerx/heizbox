@@ -47,7 +47,7 @@ private:
     // Core components
     InputManager input;
     HeaterController heater;
-    DisplayDriver display;
+    std::unique_ptr<DisplayDriver> display;
     StatsManager statsManager;
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;

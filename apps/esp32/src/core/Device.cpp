@@ -26,21 +26,27 @@
 #include "ui/base/ScreenTransition.h"
 #include "ui/UISetup.h"
 
+#include "hardware/drivers/TFT_eSPI_Driver.h"
+#include "hardware/display/BacklightController.h"
+
 WebServer server(80);
 
 Device::Device()
     : input(),
       heater(),
-      display(),
+      display(std::make_unique<DisplayDriver>(
+          std::make_unique<TFT_eSPI_Driver>(),
+          std::make_unique<BacklightController>()
+      )),
       statsManager(),
       wifiManager(),
       webSocketManager(),
       capacitiveSensor(heater, [this](bool start) { fireScreen._handleHeatingTrigger(start); }),
-      screenManager(display, input),
+      screenManager(display.get(), input),
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
-      hiddenModeScreen(&display),
-      screensaverScreen(DeviceState::instance().sleepTimeout.get(), &display, [this]() {
+      hiddenModeScreen(display.get()),
+      screensaverScreen(DeviceState::instance().sleepTimeout.get(), display.get(), [this]() {
           fireScreen.resetActivityTimer();
           screenManager.setScreen(&fireScreen);
       }),
@@ -82,7 +88,7 @@ void Device::setup() {
     }
 
     // Initialize core components
-    display.init(&screenManager);
+    display->init(&screenManager);
     input.init();
     heater.init();
     statsManager.init();
@@ -95,8 +101,8 @@ void Device::setup() {
         inputHandler->handleInput(event);
     });
 
-    StateBinder::bindAll(&display, &heater);
-    DeviceState::instance().display = &display;
+    StateBinder::bindAll(display.get(), &heater);
+    DeviceState::instance().display = display.get();
 
     mainMenuScreen = uiSetup->setupMainMenu();
 
@@ -135,7 +141,7 @@ void Device::loop() {
     // Update UI
     screenManager.update();
     screenManager.draw();
-    display.renderStatusBar();
+    display->renderStatusBar();
 
     heaterMonitor->checkHeatingStatus();
     heaterMonitor->checkHeatCycle();
