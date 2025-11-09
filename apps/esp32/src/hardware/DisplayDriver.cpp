@@ -42,12 +42,9 @@ void DisplayDriver::init(ScreenManager* mgr) {
     //tft.loadFont("fonts/josefin_20.vlw", LittleFS);
 
     initBacklight();
+        tft.fillScreen(heizbox_palette[COLOR_ACCENT]);
     statusBar = new StatusBar(&tft, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     reallocateSprites();
-
-    if (!spriteAllocated) {
-        tft.fillScreen(heizbox_palette[COLOR_BG_DARK]);
-    }
 
     Serial.println("📺 DisplayDriver initialized");
 }
@@ -77,15 +74,8 @@ void DisplayDriver::reallocateSprites() {
     spriteAllocated = mainSprite.createSprite(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT);
 
     if (spriteAllocated) {
-        
-  mainSprite.createPalette(heizbox_palette, 16);
-  
-
-        /*uint16_t paletteRAM[140];
-        memcpy_P(paletteRAM, heizbox_palette, sizeof(heizbox_palette));
-        mainSprite.createPalette(paletteRAM, 140);*/
-
-        mainSprite.fillSprite(9);
+        mainSprite.createPalette(heizbox_palette, 16);
+        mainSprite.fillSprite(COLOR_ACCENT);
 
         const size_t bytes = DisplayConfig::WIDTH * DisplayConfig::SPRITE_HEIGHT;
         Serial.printf("✅ Sprite allocated with custom palette: %u bytes (%ux%u @8-bit)\n",
@@ -100,7 +90,7 @@ void DisplayDriver::reallocateSprites() {
 
 
 uint16_t DisplayDriver::getBackgroundColor() {
-    return heizbox_palette[COLOR_BG_DARK];
+    return heizbox_palette[COLOR_BG];
 }
 
 // ============================================================================
@@ -109,9 +99,9 @@ uint16_t DisplayDriver::getBackgroundColor() {
 
 void DisplayDriver::clear() {
     if (spriteAllocated) {
-        mainSprite.fillSprite(4);
+        mainSprite.fillSprite(COLOR_ACCENT);
     } else {
-        tft.fillScreen(heizbox_palette[COLOR_BG_DARK]);
+        tft.fillScreen(COLOR_ACCENT);
     }
     renderState.reset();
 }
@@ -119,9 +109,6 @@ void DisplayDriver::clear() {
 
 void DisplayDriver::render() {
     if (spriteAllocated) {
-  for (uint8_t i = 0; i < 16; i++) {
-      //mainSprite.fillRect(i * 5, 0, 5, 80, i); // Index = Palette
-  }
         mainSprite.pushSprite(0, DisplayConfig::STATUS_BAR_HEIGHT);
     }
 }
@@ -176,15 +163,15 @@ void DisplayDriver::drawText(int16_t x, int16_t y, const char* text,
     setFont(size, renderer);
 
     if (spriteAllocated) {
-        if (renderState.textColor != color || renderState.bgColor != COLOR_BG_DARK) {
+        if (renderState.textColor != color || renderState.bgColor != COLOR_BG) {
             renderer.setTextColor(color, COLOR_TEXT_PRIMARY);
             renderState.textColor = color;
-            renderState.bgColor = COLOR_BG_DARK;
+            renderState.bgColor = COLOR_BG;
             needsUpdate = true;
         }
     } else {
         uint16_t color16 = heizbox_palette[color];
-        uint16_t bgColor16 = heizbox_palette[COLOR_BG_DARK];
+        uint16_t bgColor16 = heizbox_palette[COLOR_BG];
         // This comparison is tricky because state is uint8_t. We'll just update.
         renderer.setTextColor(color16, bgColor16);
         needsUpdate = true;

@@ -5,16 +5,20 @@
 
 enum CustomColors : uint8_t {
     // UI Basis-Farben (0-9)
-    COLOR_BG_DARK = 0,
-    COLOR_BG_MEDIUM = 1,
-    COLOR_TEXT_PRIMARY = 2,
-    COLOR_TEXT_SECONDARY = 3,
-    COLOR_ACCENT = 4,
-    COLOR_SUCCESS = 5,
-    COLOR_WARNING = 6,
-    COLOR_ERROR = 7,
-    COLOR_BORDER = 8,
-    COLOR_TEST = 9,
+    COLOR_PRIMARY= 0,
+    COLOR_BG = 0,
+    COLOR_BG_2 = 1,
+    COLOR_BG_3 = 2,
+    COLOR_TEXT_PRIMARY = 3,
+    COLOR_TEXT_SECONDARY = 4,
+    COLOR_ACCENT = 5,
+    COLOR_SUCCESS = 6,
+    COLOR_WARNING = 7,
+    COLOR_ERROR = 8,
+    COLOR_BORDER = 9,
+    COLOR_TEST = 15,
+    COLOR_PURPLE = 12,
+    COLOR_BLUE = 13,
     
     // Fire/Heat Farben (10-19) - Gradient von schwarz zu weiß
     COLOR_FIRE_BLACK = 10,
@@ -26,12 +30,6 @@ enum CustomColors : uint8_t {
     COLOR_FIRE_YELLOW = 16,
     COLOR_FIRE_BRIGHT_YELLOW = 17,
     COLOR_FIRE_WHITE = 18,
-
-    // Status-LEDs (50-59)
-    COLOR_LED_OFF = 50,
-    COLOR_LED_GREEN = 51,
-    COLOR_LED_YELLOW = 52,
-    COLOR_LED_RED = 53,
     
     // Battery Level Indicator (60-69)
     COLOR_BATTERY_FULL = 60,
@@ -40,16 +38,6 @@ enum CustomColors : uint8_t {
     COLOR_BATTERY_LOW = 63,
     COLOR_BATTERY_CRITICAL = 64,
     
-    // Graustufen (70-99) - für Schatten, Verläufe etc.
-    COLOR_GRAY_10 = 70,   // Sehr dunkel
-    COLOR_GRAY_20 = 71,
-    COLOR_GRAY_30 = 72,
-    COLOR_GRAY_40 = 73,
-    COLOR_GRAY_50 = 74,   // Mittelgrau
-    COLOR_GRAY_60 = 75,
-    COLOR_GRAY_70 = 76,
-    COLOR_GRAY_80 = 77,
-    COLOR_GRAY_90 = 78,   // Sehr hell
     
     // Temperatur-Gradient (100-139) - Blau zu Rot
     COLOR_TEMP_COLD_START = 1,
@@ -67,27 +55,26 @@ inline uint16_t rgb888to565(uint8_t r, uint8_t g, uint8_t b) {
     return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
 }
 
-// Die komplette Palette mit 256 Farben (RGB565 Format)
 const uint16_t heizbox_palette[16] = {
-    // UI Basis-Farben (0-9)
-    0xFB40,    // 0: COLOR_BG_DARK
-    rgb888to565(30, 30, 35),      // 1: COLOR_BG_MEDIUM
-    rgb888to565(240, 240, 245),   // 2: COLOR_TEXT_PRIMARY - Fast weiß
-    rgb888to565(180, 180, 190),   // 3: COLOR_TEXT_SECONDARY - Helles Grau
-    0xFB40,    // 4: COLOR_ACCENT - Orange/Rot Akzent
-    rgb888to565(50, 200, 100),    // 5: COLOR_SUCCESS - Grün
-    rgb888to565(255, 180, 50),    // 6: COLOR_WARNING - Gelb/Orange
-    rgb888to565(255, 50, 50),     // 7: COLOR_ERROR - Rot
-    rgb888to565(60, 60, 70),      // 8: COLOR_BORDER - Dunkles Grau
-    0xFB40,         // 9: Reserve
-    
-    // Fire/Heat Gradient (10-49) - 40 Farbstufen für Flammen-Animation
-    rgb888to565(0, 0, 0),         // 10: Schwarz
-    rgb888to565(20, 0, 0),        // 11: Sehr dunkles Rot
-    rgb888to565(40, 0, 0),        // 12
-    rgb888to565(60, 5, 0),        // 13
-    rgb888to565(80, 10, 0),       // 14
-    rgb888to565(100, 15, 0),      // 15
+    rgb888to565(255, 105, 0),   //  0: COLOR_PRIMARY COLOR_BG
+    rgb888to565(255, 143, 64),  //  1: COLOR_BG_2
+    rgb888to565(255, 128, 38),  //  2: COLOR_BG_3
+
+    rgb888to565(240, 240, 245), //  3: COLOR_TEXT_PRIMARY - Fast weiß
+    rgb888to565(180, 180, 190), //  4: COLOR_TEXT_SECONDARY - Helles Grau
+
+    rgb888to565(255, 105, 0),   //  5: COLOR_ACCENT - Orange/Rot Akzent
+    rgb888to565(50, 200, 100),  //  6: COLOR_SUCCESS - Grün
+    rgb888to565(255, 180, 50),  //  7: COLOR_WARNING - Gelb/Orange
+    rgb888to565(255, 50, 50),   //  8: COLOR_ERROR - Rot
+    rgb888to565(60, 60, 70),    //  9: COLOR_BORDER - Dunkles Grau
+
+    0xFB40,                     // 10: Reserve
+    rgb888to565(0, 0, 0),       // 11: Schwarz
+    rgb888to565(255, 50, 50),      // 12: Purple
+    rgb888to565(45, 104, 196),      // 13: Blue
+    rgb888to565(60, 5, 0),      // 14
+    rgb888to565(230, 95, 0),     // 15
 };
 
 // Hilfsfunktionen für Farbinterpolation

@@ -63,7 +63,7 @@ void StatusBar::draw() {
 
 void StatusBar::drawTimeRegion() {
     // Clear nur Zeit-Bereich
-    tft->fillRect(0, 0, 150, height, heizbox_palette[COLOR_ACCENT]);
+    tft->fillRect(0, 0, 180, height, heizbox_palette[COLOR_ACCENT]);
 
     // Render Zeit
     tft->setTextColor(heizbox_palette[COLOR_TEXT_PRIMARY]);
@@ -105,7 +105,7 @@ const uint8_t* StatusBar::getWifiIcon() const {
         case 3:  return image_wifi_medium_bold_40;
         case 2:  return image_wifi_medium_bold_40;
         case 1:  return image_wifi_low_bold_40;
-        default: return image_wifi_slash_bold_40;
+        default: return image_wifi_low_bold_40;
     }
 }
 

@@ -14,7 +14,7 @@ void OtaUpdateScreen::draw(DisplayDriver& display)
     display.drawBitmap(
         (display.getTFTWidth() - 102) / 2,
         (display.getTFTHeight() - 128) / 2 - 30,
-        ota_icon, 102, 128, heizbox_palette[COLOR_TEXT_PRIMARY]);
+        ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
     //display.getTft()->setTextDatum(MC_DATUM);
     //display.drawText((display.getTFTWidth()/2) - 40, display.getTFTHeight() / 2 + 30, "Update lädt...", COLOR_TEXT_PRIMARY, 2);
 }

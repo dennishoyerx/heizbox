@@ -10,40 +10,41 @@
 #include <utility>
 
 namespace {
-    void drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, bool highlight = false)
+    void drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, uint8_t bgColor, uint8_t textColor, bool invert = false, bool thin = false)
     {    
-        int x = 10;
-        int width = 260; 
-        int height = 50;
-        int radius = 8;
-        uint8_t bgColor = highlight ? CustomColors::COLOR_TEXT_PRIMARY : heizbox_palette[CustomColors::COLOR_ACCENT];
-        uint8_t textColor = highlight ? heizbox_palette[CustomColors::COLOR_ACCENT] : CustomColors::COLOR_TEXT_PRIMARY;
-        uint8_t shadowColor = highlight ? heizbox_palette[CustomColors::COLOR_BORDER] : CustomColors::COLOR_TEXT_PRIMARY;
+        int x = 15;
+        int width = 250; 
+        int height = thin ? 40 : 50;
+        int radius = 16;
+        uint8_t _bgColor;
+        uint8_t _textColor;
 
+        if (!invert) {
+            _bgColor = bgColor;
+            _textColor = textColor;
+        } else {
+            _bgColor = textColor;
+            _textColor = bgColor;
+        }
 
         auto &renderer = display.getRenderer();
 
-        if (highlight)
-        {
-            renderer.fillSmoothRoundRect(x, y, width, height, radius, bgColor, textColor);
+
+        if (!thin) {
+            renderer.fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
         }
-        else
-        {
-            renderer.fillSmoothRoundRect(x, y, width, height, radius, shadowColor, shadowColor);
-            renderer.fillSmoothRoundRect(x + 2, y + 2, width - 4, height - 4, radius, bgColor, bgColor);
-        }
-        
+
         // "Session" Text
         renderer.setTextSize(1);
-        renderer.setTextColor(textColor);
+        renderer.setTextColor(_textColor);
         renderer.setTextDatum(ML_DATUM);
-        renderer.setFreeFont(&FreeSans12pt7b);
-        renderer.drawString(label, 10, y + height / 2);
+        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
+        renderer.drawString(label, 30, y + height / 2);
 
         // Verbrauchswert formatieren und anzeigen
         char consumptionStr[10];
         int integer = (int)consumption;
-        int decimal = (int)(consumption * 100) % 100;
+        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
         if (integer > 0)
         {
             sprintf(consumptionStr, "%d.%02dg", integer, decimal);
@@ -55,7 +56,7 @@ namespace {
 
         // Verbrauchswert rechts ausgerichtet
         renderer.setTextDatum(MR_DATUM);
-        renderer.setFreeFont(&FreeSansBold18pt7b);
+        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
         renderer.drawString(consumptionStr, x + width - 12, y + height / 2);
     }
 }
@@ -102,9 +103,10 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
     
-    drawSessionRow(display, "Session", cachedConsumption, 10, (state.currentCycle == 1));
-    drawSessionRow(display, "Heute", cachedTodayConsumption, 65, false);
-    drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 120, false);
+
+    drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_TEXT_PRIMARY, COLOR_BG_2, (state.currentCycle != 1));
+    drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_TEXT_PRIMARY, false);
+    drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
 
     if (heater.isHeating()) {
         drawHeatingTimer(display);
@@ -125,10 +127,10 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     lastSeconds = seconds;
 
     uint8_t timerColor;
-    if (seconds < 20) timerColor = heizbox_palette[CustomColors::COLOR_SUCCESS];
-    else if (seconds < 35) timerColor = heizbox_palette[CustomColors::COLOR_WARNING];
-    else if (seconds < 50) timerColor = heizbox_palette[CustomColors::COLOR_ACCENT];
-    else timerColor = heizbox_palette[CustomColors::COLOR_ERROR];
+    if (seconds < 20) timerColor = COLOR_SUCCESS;
+    else if (seconds < 35) timerColor = COLOR_WARNING;
+    else if (seconds < 50) timerColor = COLOR_BLUE;
+    else timerColor = COLOR_PURPLE;
     
     int centerX = 140;
     int centerY = 96;
@@ -136,11 +138,9 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     // === Vereinfachter Progress Ring ===
     int radius = 70;
 
-    renderer.fillCircle(centerX, centerY, radius, 0xFB40);
     // Hintergrund-Ring
-    renderer.drawCircle(centerX, centerY, radius, 0x8410);
-    renderer.drawCircle(centerX, centerY, radius-1, 0x8410);
-    renderer.drawCircle(centerX, centerY, radius-2, 0x8410);
+    renderer.fillCircle(centerX, centerY, radius, COLOR_BG);
+    renderer.drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
 
     float progress = (float)seconds / 60.0f;
     int endAngle = (int)(progress * 360);
@@ -148,15 +148,15 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     int stopAngle = startAngle + endAngle;
 
     renderer.drawArc(centerX, centerY,
-                    radius + 3, radius - 3,
+                    radius + 7, radius - 7,
                     startAngle, stopAngle,
-                    timerColor, heizbox_palette[CustomColors::COLOR_ACCENT], true);
+                    timerColor, COLOR_ACCENT, true);
 
     // === TIMER ===
     char timeStr[4];
     snprintf(timeStr, sizeof(timeStr), "%lu", seconds % 60);
     
-    renderer.setTextColor(heizbox_palette[CustomColors::COLOR_TEXT_PRIMARY]);
+    renderer.setTextColor(COLOR_TEXT_PRIMARY);
     renderer.setTextDatum(MC_DATUM);
     renderer.setTextSize(2);
     renderer.setFreeFont(&FreeSansBold18pt7b);
@@ -165,7 +165,7 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     
     // "HEIZT" or "PAUSE" Badge
     const char* badgeText = heater.isPaused() ? "PAUSE" : "HEIZT";
-    uint16_t badgeColor = heater.isPaused() ? heizbox_palette[CustomColors::COLOR_WARNING] : timerColor;
+    uint16_t badgeColor = heater.isPaused() ? COLOR_WARNING : timerColor;
     renderer.fillRoundRect(centerX - 35, centerY + 50, 70, 20, 10, 0x8410);
     renderer.fillCircle(centerX - 20, centerY + 60, 3, badgeColor);
     renderer.setFreeFont(&FreeSans18pt7b);
@@ -176,7 +176,7 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     if (seconds >= 30 && seconds <= 50) {
     renderer.setFreeFont(&FreeSans18pt7b);
         renderer.setTextSize(1);
-        renderer.setTextColor(heizbox_palette[CustomColors::COLOR_BG_DARK]);
+        renderer.setTextColor(COLOR_BG);
         renderer.drawString("CLICK ZONE", centerX, centerY + 80, 2);
     }
 }
