@@ -1,4 +1,5 @@
 #include "ui/components/UIText.h"
+#include "hardware/display/DisplayDriver.h"
 #include "core/StateManager.h"
 #include "hardware/DisplayDriver.h"
 

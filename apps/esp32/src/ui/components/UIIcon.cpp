@@ -1,4 +1,5 @@
 #include "ui/components/UIIcon.h"
+#include "hardware/display/DisplayDriver.h"
 #include "hardware/DisplayDriver.h"
 #include "core/StateManager.h"
 

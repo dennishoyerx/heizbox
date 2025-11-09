@@ -1,5 +1,7 @@
 // src/screens/ScreensaverScreen.cpp
+#include "utils/Logger.h"
 #include "ui/screens/ScreensaverScreen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
 #include "StateManager.h"
 #include "ui/ColorPalette.h"

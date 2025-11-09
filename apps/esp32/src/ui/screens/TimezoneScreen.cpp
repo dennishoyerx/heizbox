@@ -1,4 +1,5 @@
 #include "ui/screens/TimezoneScreen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>

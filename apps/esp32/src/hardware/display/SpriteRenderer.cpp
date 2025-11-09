@@ -1,12 +1,7 @@
 // apps/esp32/src/hardware/display/SpriteRenderer.cpp
 #include "hardware/display/SpriteRenderer.h"
 #include "ui/ColorPalette.h"
-
-namespace DisplayConfig {
-    extern const uint16_t WIDTH;
-    extern const uint16_t SPRITE_HEIGHT;
-    extern const uint8_t STATUS_BAR_HEIGHT;
-}
+#include "hardware/display/DisplayDriver.h" // Include the header that defines DisplayConfig
 
 SpriteRenderer::SpriteRenderer(TFT_eSPI* tft)
     : tft(tft), mainSprite(tft), spriteAllocated(false) {}

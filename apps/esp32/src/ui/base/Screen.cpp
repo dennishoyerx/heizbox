@@ -1,5 +1,6 @@
 // src/Screen.cpp
 #include "ui/base/Screen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
 #include "hardware/DisplayDriver.h"
 

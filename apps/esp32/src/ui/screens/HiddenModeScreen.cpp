@@ -1,5 +1,7 @@
 // src/screens/HiddenModeScreen.cpp
+#include "utils/Logger.h"
 #include "ui/screens/HiddenModeScreen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
 #include "hardware/DisplayDriver.h"
 #include "InputManager.h"

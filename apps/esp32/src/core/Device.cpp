@@ -1,6 +1,7 @@
 #include "core/Config.h"
 #include "core/Device.h" 
 #include "core/DeviceState.h" 
+#include "hardware/display/DisplayDriver.h" // Explicit include to resolve incomplete type
 #include "credentials.h"
 #include <ArduinoOTA.h>
 #include "core/StateManager.h"
@@ -42,7 +43,7 @@ Device::Device()
       wifiManager(),
       webSocketManager(),
       capacitiveSensor(heater, [this](bool start) { fireScreen._handleHeatingTrigger(start); }),
-      screenManager(display.get(), input),
+      screenManager(*display, input),
       fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
                  [this](int cycle) { this->setCurrentCycle(cycle); }),
       hiddenModeScreen(display.get()),

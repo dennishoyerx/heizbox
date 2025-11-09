@@ -1,5 +1,7 @@
 // src/screens/StartupScreen.cpp
+#include "utils/Logger.h"
 #include "ui/screens/StartupScreen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "StateManager.h"
 #include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>

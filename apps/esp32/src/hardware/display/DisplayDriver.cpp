@@ -1,4 +1,5 @@
 // apps/esp32/src/hardware/display/DisplayDriver.cpp
+#include <memory>
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/components/StatusBar.h"
@@ -32,7 +33,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
     TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTft();
     statusBar = new StatusBar(&tft_spi, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     
-    spriteRenderer = std::make_unique<SpriteRenderer>(&tft_spi);
+    spriteRenderer.reset(new SpriteRenderer(&tft_spi));
     reallocateSprites();
 
     Serial.println("📺 DisplayDriver initialized");
@@ -42,7 +43,9 @@ void DisplayDriver::reallocateSprites() {
     if (spriteRenderer) {
         spriteRenderer->reallocateSprites(DisplayConfig::WIDTH, DisplayConfig::SPRITE_HEIGHT, 4);
     }
-    renderState.reset();
+    if (screenManager) {
+        screenManager->setDirty();
+    }
 }
 
 void DisplayDriver::clear() {
@@ -51,7 +54,9 @@ void DisplayDriver::clear() {
     } else {
         tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
     }
-    renderState.reset();
+    if (screenManager) {
+        screenManager->setDirty();
+    }
 }
 
 void DisplayDriver::render() {
@@ -129,7 +134,6 @@ uint8_t DisplayDriver::getBrightness() const {
 void DisplayDriver::setDarkMode(bool enabled) {
     if (darkMode != enabled) {
         darkMode = enabled;
-        renderState.reset();
 
         Serial.printf("🌓 Dark Mode set to: %s\n", darkMode ? "ON" : "OFF");
 

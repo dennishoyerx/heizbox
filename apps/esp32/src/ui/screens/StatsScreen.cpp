@@ -1,6 +1,7 @@
 // src/screens/StatsScreen.cpp
-#include "ui/screens/StatsScreen.h"
 #include "core/DeviceState.h"
+#include "ui/screens/StatsScreen.h"
+#include "hardware/display/DisplayDriver.h"
 #include "DisplayDriver.h"
 #include "InputManager.h"
 #include "ui/ColorPalette.h"
