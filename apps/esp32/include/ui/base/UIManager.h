@@ -4,7 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include "hardware/DisplayDriver.h"
+#include "hardware/display/DisplayDriver.h"
 
 class DisplayDriver;
 
@@ -12,7 +12,7 @@ class DisplayDriver;
 
 class UIBaseComponent {
 public:
-    virtual ~UIBaseComponent() = default; // notwendig für dynamic_cast
+    virtual ~UIBaseComponent() = default; // notwendig fï¿½r dynamic_cast
     int x = 0;
     int y = 0;
     uint16_t color = 0xFFFF;

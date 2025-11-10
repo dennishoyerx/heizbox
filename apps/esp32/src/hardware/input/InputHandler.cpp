@@ -1,5 +1,5 @@
 // src/hardware/InputHandler.cpp
-#include "hardware/InputHandler.h"
+#include "hardware/input/InputHandler.h"
 #include "utils/Logger.h"
 
 InputHandler::InputHandler(ScreenManager& screenManager)

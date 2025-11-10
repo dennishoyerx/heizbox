@@ -1,5 +1,5 @@
 #include "ui/base/UIComponent.h"
-#include "hardware/DisplayDriver.h" // For DisplayDriver definition
+#include "hardware/display/DisplayDriver.h" // For DisplayDriver definition
 
 UIComponent::UIComponent(int16_t x, int16_t y, uint16_t color)
     : _x(x), _y(y), _color(color) {}

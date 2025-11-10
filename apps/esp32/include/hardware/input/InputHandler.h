@@ -1,7 +1,7 @@
 // include/hardware/InputHandler.h
 #pragma once
 
-#include "hardware/InputManager.h"
+#include "hardware/input/InputManager.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenTransition.h"

@@ -1,5 +1,5 @@
 // src/hardware/OTASetup.cpp
-#include "hardware/OTASetup.h"
+#include "net/OTASetup.h"
 #include "utils/Logger.h"
 
 OTASetup::OTASetup(ScreenManager& screenManager, OtaUpdateScreen& otaUpdateScreen, FireScreen& fireScreen)

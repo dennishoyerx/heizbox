@@ -2,8 +2,8 @@
 #include "utils/Logger.h"
 #include "ui/base/ScreenManager.h"
 #include "hardware/display/DisplayDriver.h"
-#include "hardware/DisplayDriver.h"
-#include "hardware/InputManager.h"
+
+#include "hardware/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"
 ScreenManager::ScreenManager(DisplayDriver& disp, InputManager& inp)
     : display(disp),

@@ -1,7 +1,7 @@
 // src/GenericMenuScreen.cpp
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/GenericMenuScreen.h" // New include
-#include "hardware/InputManager.h" // For InputEvent and its enums
+#include "hardware/input/InputManager.h" // For InputEvent and its enums
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "ui/ColorPalette.h"
 #include <algorithm> // For std::min

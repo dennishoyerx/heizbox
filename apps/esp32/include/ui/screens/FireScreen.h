@@ -3,7 +3,7 @@
 #define FIRESCREEN_H
 
 #include "ui/base/Screen.h"
-#include "HeaterController.h"
+#include "hardware/heater/HeaterController.h"
 #include "ScreensaverScreen.h"
 #include "StatsManager.h"
 #include <functional>

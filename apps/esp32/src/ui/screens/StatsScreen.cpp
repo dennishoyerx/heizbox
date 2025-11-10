@@ -2,8 +2,8 @@
 #include "core/DeviceState.h"
 #include "ui/screens/StatsScreen.h"
 #include "hardware/display/DisplayDriver.h"
-#include "DisplayDriver.h"
-#include "InputManager.h"
+
+#include "hardware/input/InputManager.h"
 #include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>
 #include "StateManager.h"

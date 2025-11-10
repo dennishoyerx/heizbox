@@ -1,7 +1,7 @@
 #include "ui/components/UIText.h"
 #include "hardware/display/DisplayDriver.h"
 #include "core/StateManager.h"
-#include "hardware/DisplayDriver.h"
+
 
 UIText::UIText(int16_t x, int16_t y, const char* text, uint8_t size, uint16_t color)
     : UIComponent(x, y, color), _text(text), _size(size) {}

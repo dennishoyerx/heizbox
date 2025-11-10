@@ -1,1 +1,0 @@
-// This file has been moved to apps/esp32/include/hardware/display/DisplayDriver.h

@@ -9,8 +9,8 @@
 #include <Arduino.h> // For constrain
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenManager.h" // For ScreenTransition
-#include "hardware/DisplayDriver.h" // For DisplayManager and TFT_ colors
-#include "InputManager.h" // For InputEvent
+#include "hardware/display/DisplayDriver.h" // For DisplayManager and TFT_ colors
+#include "hardware/input/InputManager.h" // For InputEvent
 #include "StateManager.h" // For Observable
 
 // Custom make_unique for C++11 compatibility if needed

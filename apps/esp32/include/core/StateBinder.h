@@ -1,8 +1,8 @@
 // include/core/StateBinder.h
 #pragma once
 
-#include "hardware/DisplayDriver.h"
-#include "hardware/HeaterController.h"
+#include "hardware/display/DisplayDriver.h"
+#include "hardware/heater/HeaterController.h"
 #include "core/StateManager.h" // For DeviceState
 
 /**

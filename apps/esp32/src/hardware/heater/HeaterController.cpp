@@ -6,7 +6,7 @@
 // - Rewrote the 'update()' method with a clear switch-case structure.
 // - Replaced magic numbers with named constants (e.g., COOLDOWN_DURATION_MS).
 
-#include "hardware/HeaterController.h"
+#include "hardware/heater/HeaterController.h"
 #include "core/Config.h"
 #include <Arduino.h>
 

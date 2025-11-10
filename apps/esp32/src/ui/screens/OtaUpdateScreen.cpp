@@ -1,6 +1,6 @@
 #include "ui/screens/OtaUpdateScreen.h"
 #include "hardware/display/DisplayDriver.h"
-#include "InputManager.h"
+#include "hardware/input/InputManager.h"
 #include "bitmaps.h"
 #include "ui/ColorPalette.h"
 

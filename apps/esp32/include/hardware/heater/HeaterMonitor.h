@@ -1,7 +1,7 @@
 // include/hardware/HeaterMonitor.h
 #pragma once
 
-#include "hardware/HeaterController.h"
+#include "hardware/heater/HeaterController.h"
 #include "net/WebSocketManager.h"
 #include "core/StatsManager.h"
 #include "core/StateManager.h"

@@ -1,6 +1,6 @@
 #include "ui/components/UIIcon.h"
 #include "hardware/display/DisplayDriver.h"
-#include "hardware/DisplayDriver.h"
+
 #include "core/StateManager.h"
 
 UIIcon::UIIcon(int16_t x, int16_t y, const uint8_t* bitmap, int16_t width, int16_t height, uint16_t color)

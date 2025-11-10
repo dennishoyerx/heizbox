@@ -3,8 +3,8 @@
 #include "ui/screens/HiddenModeScreen.h"
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
-#include "hardware/DisplayDriver.h"
-#include "InputManager.h"
+
+#include "hardware/input/InputManager.h"
 #include <TFT_eSPI.h>
 
 ScreenType HiddenModeScreen::getType() const {

@@ -6,7 +6,7 @@
 #include <string>
 #include "ui/base/ScreenTransition.h"
 #include "ui/base/UIComponent.h"
-#include "hardware/InputManager.h"
+#include "hardware/input/InputManager.h"
 #include "utils/CallbackMixin.h" // For TimeoutMixin
 
 class DisplayManager;

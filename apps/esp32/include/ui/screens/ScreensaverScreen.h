@@ -4,7 +4,7 @@
 
 #include "ui/base/Screen.h"
 #include "StateManager.h"
-#include "hardware/DisplayDriver.h"
+#include "hardware/display/DisplayDriver.h"
 #include "utils/clock.h"
 
 class ScreensaverScreen : public TimedScreen {

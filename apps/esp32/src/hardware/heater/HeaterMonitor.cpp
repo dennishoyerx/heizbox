@@ -1,5 +1,5 @@
 // src/hardware/HeaterMonitor.cpp
-#include "hardware/HeaterMonitor.h"
+#include "hardware/heater/HeaterMonitor.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 

@@ -5,8 +5,8 @@
 #include <memory>
 #include "ui/base/Screen.h"
 #include "ui/components/MenuBuilder.h"
-#include "hardware/DisplayDriver.h"
-#include "hardware/InputManager.h"
+#include "hardware/display/DisplayDriver.h"
+#include "hardware/input/InputManager.h"
 
 class GenericMenuScreen : public Screen {
 public:
