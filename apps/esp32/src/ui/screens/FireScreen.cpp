@@ -10,7 +10,17 @@
 #include "StateManager.h"
 #include <utility>
 
-void FireScreen::drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, uint8_t bgColor, uint8_t textColor, bool invert, bool thin)
+//#enum SessionRowStyle {};
+
+void FireScreen::drawSessionRow(DisplayDriver &display, 
+    const char* label, 
+    float consumption, 
+    int y, 
+    uint8_t bgColor, 
+    uint8_t borderColor, 
+    uint8_t textColor, 
+    bool invert, 
+    bool thin)
 {    
     int x = 15;
     int width = 250; 
@@ -32,30 +42,30 @@ void FireScreen::drawSessionRow(DisplayDriver &display, const char* label, float
         auto &renderer = *static_cast<TFT_eSprite*>(renderer_ptr);
         renderer.fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
 
-    // "Session" Text
-    renderer.setTextSize(1);
-    renderer.setTextColor(_textColor);
-    renderer.setTextDatum(ML_DATUM);
-    renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
-    renderer.drawString(label, 30, y + height / 2);
+        // "Session" Text
+        renderer.setTextSize(1);
+        renderer.setTextColor(_textColor);
+        renderer.setTextDatum(ML_DATUM);
+        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
+        renderer.drawString(label, 30, y + height / 2);
 
-    // Verbrauchswert formatieren und anzeigen
-    char consumptionStr[10];
-    int integer = (int)consumption;
-    int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
-    if (integer > 0)
-    {
-        sprintf(consumptionStr, "%d.%02dg", integer, decimal);
-    }
-    else
-    {
-        sprintf(consumptionStr, ".%02dg", decimal);
-    }
+        // Verbrauchswert formatieren und anzeigen
+        char consumptionStr[10];
+        int integer = (int)consumption;
+        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
+        if (integer > 0)
+        {
+            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
+        }
+        else
+        {
+            sprintf(consumptionStr, ".%02dg", decimal);
+        }
 
-    // Verbrauchswert rechts ausgerichtet
-    renderer.setTextDatum(MR_DATUM);
-    renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
-    renderer.drawString(consumptionStr, x + width - 12, y + height / 2);
+        // Verbrauchswert rechts ausgerichtet
+        renderer.setTextDatum(MR_DATUM);
+        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
+        renderer.drawString(consumptionStr, x + width - 12, y + height / 2);
     } // Close the if (renderer_ptr) block
 }
 
@@ -104,10 +114,9 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
     
-
-    FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_TEXT_PRIMARY, COLOR_BG_2, (state.currentCycle != 1));
-    FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_TEXT_PRIMARY, false);
-    FireScreen::drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
+    FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
+    FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY, false);
+    FireScreen::drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
 
     if (heater.isHeating()) {
         drawHeatingTimer(display);

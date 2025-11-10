@@ -48,7 +48,7 @@ private:
 
     // Helper methods
     void drawHeatingTimer(DisplayDriver& display);
-    static void drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, uint8_t bgColor, uint8_t textColor, bool invert = false, bool thin = false);
+    static void drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, uint8_t bgColor, uint8_t borderColor, uint8_t textColor, bool invert = false, bool thin = false);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);
     void handleCycleChange();
