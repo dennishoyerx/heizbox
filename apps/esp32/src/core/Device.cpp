@@ -8,7 +8,6 @@
 #include "utils/Logger.h"
 #include "utils/Logs.h"
 #include <utility> 
-#include <WebServer.h>
 
 // Network
 #include "net/WiFiManager.h"
@@ -29,8 +28,6 @@
 
 #include "hardware/drivers/TFT_eSPI_Driver.h"
 #include "hardware/display/BacklightController.h"
-
-WebServer server(80);
 
 Device::Device()
     : input(),
@@ -117,11 +114,6 @@ void Device::setup() {
             firmware_logged = true;
         }
     });
-
-    server.on("/log", [](){
-        server.send(200, "text/plain", "Serial Log über WiFi!");
-    });
-    server.begin();
     
     otaSetup->setupOTA();
 
@@ -129,8 +121,6 @@ void Device::setup() {
 }
 
 void Device::loop() {
-    server.handleClient();
-
     // Update managers
     wifiManager.update();
     webSocketManager.update();
