@@ -80,6 +80,10 @@ void* DisplayDriver::getRenderer() {
     }
 }
 
+TFT_eSprite& DisplayDriver::getSprite() {
+    return spriteRenderer->getSprite();
+}
+
 void DisplayDriver::drawText(int16_t x, int16_t y, const char* text, uint8_t color, uint8_t size) {
     if (!text) return;
 
