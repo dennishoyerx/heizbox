@@ -9,17 +9,17 @@
 #include "core/StateBinder.h"
 #include "core/Types.h"
 
-#include "hardware/HeaterController.h"
-#include "hardware/InputManager.h"
+#include "hardware/heater/HeaterController.h"
+#include "hardware/input/InputManager.h"
 #include "hardware/DisplayDriver.h"
 #include "core/StatsManager.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"
-#include "hardware/OTASetup.h"
-#include "hardware/HeaterMonitor.h"
-#include "hardware/InputHandler.h"
-#include "hardware/CapacitiveSensor.h"
+#include "net/OTASetup.h"
+#include "hardware/heater/HeaterMonitor.h"
+#include "hardware/input/InputHandler.h"
+#include "hardware/sensor/CapacitiveSensor.h"
 
 // UI
 #include "ui/base/ScreenManager.h"
