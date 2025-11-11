@@ -70,7 +70,8 @@ protected:
     ScreenManager* manager;
     Components* components;
 
-    // Helper für häufige Operationen
+    TFT_eSprite* createSprite(DisplayDriver& display, int16_t width, int16_t height);
+
     void markDirty();
     void centerText(DisplayDriver& display, int16_t y, const char* text,
                     uint16_t color, uint8_t size = 2);

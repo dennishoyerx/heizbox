@@ -42,7 +42,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
             transition.inProgress = true;
             transition.startTime = millis();
             transition.progress = 0;
-            transition.originalBrightness = display.getBrightness(); // Store original brightness
+            transition.originalBrightness = display.getBrightness();
         } else {
             // Direkter Wechsel
             display.clear();
@@ -63,7 +63,7 @@ Screen* ScreenManager::getScreen(ScreenType type) {
     if (it != screens_.end()) {
         return it->second;
     }
-    return nullptr; // Or throw an exception, depending on desired error handling
+    return nullptr;
 }
 
 // ============================================================================

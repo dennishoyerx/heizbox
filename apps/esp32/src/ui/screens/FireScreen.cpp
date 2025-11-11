@@ -113,6 +113,14 @@ void FireScreen::onCycleFinalized() {
 void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
+
+    /*TFT_eSprite* sprite = display.createSprite(10, 10);
+    sprite->fillSprite(TFT_RED);       // Hintergrund setzen
+    sprite->setTextColor(TFT_WHITE);     // Textfarbe
+    sprite->drawString("xxx", 0, 0);
+    sprite->pushSprite(0, 0);
+    sprite->deleteSprite();              // Speicher freigeben
+    delete sprite;   */ 
     
     FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
     FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY, false);

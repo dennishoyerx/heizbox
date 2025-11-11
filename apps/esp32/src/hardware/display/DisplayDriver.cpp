@@ -84,6 +84,16 @@ TFT_eSprite& DisplayDriver::getSprite() {
     return spriteRenderer->getSprite();
 }
 
+TFT_eSprite* DisplayDriver::createSprite(int16_t width, int16_t height) {
+    // Zugriff auf konkreten TFT_eSPI
+    TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTft();
+
+    // Sprite erzeugen
+    auto* sprite = new TFT_eSprite(&tft_spi);
+    sprite->createSprite(width, height);
+    return sprite;
+}
+
 void DisplayDriver::drawText(int16_t x, int16_t y, const char* text, uint8_t color, uint8_t size) {
     if (!text) return;
 
