@@ -34,6 +34,7 @@ public:
      * @param hostname The device hostname for WiFi.
      */
     void setup(const char* ssid, const char* password, const char* hostname);
+    void setupWifi(const char* ssid, const char* password, const char* hostname);
     void onReady(std::function<void()> callback);
 
 private:

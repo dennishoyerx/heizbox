@@ -16,7 +16,7 @@ Network::Network(
       initialized(false)
 {}
 
-void Network::setup(const char* ssid, const char* password, const char* hostname) {
+void Network::setupWifi(const char* ssid, const char* password, const char* hostname) {
     wifiManager.init(ssid, password, hostname);
     wifiManager.onConnectionChange([this](bool connected) {
         if (!initialized && connected) {
@@ -25,6 +25,10 @@ void Network::setup(const char* ssid, const char* password, const char* hostname
             initialized = true;
         }
     });
+}
+
+void Network::setup(const char* ssid, const char* password, const char* hostname) {
+    setupWifi(ssid, password, hostname);
 
     // Setup WebSocket
     webSocketManager.onMessage([this](const char* type, const JsonDocument& doc) {
