@@ -52,6 +52,10 @@ public:
      */
     void setupScreenRegistry();
 
+    void setup();
+    void loop();
+
+
     /**
      * @brief Sets up the main menu, including its items and actions.
      * @return A unique_ptr to the created GenericMenuScreen.

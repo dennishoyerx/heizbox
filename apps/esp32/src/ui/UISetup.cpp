@@ -26,8 +26,13 @@ UISetup::UISetup(
       setCurrentCycleCallback(std::move(setCurrentCycleCallback))
 {}
 
+void UISetup::setup() {
+}
+
+void UISetup::loop() {
+}
+
 void UISetup::setupScreenRegistry() {
-    // Alle Screens registrieren
     screenManager.registerScreen(ScreenType::STARTUP, &startupScreen);
     screenManager.registerScreen(ScreenType::FIRE, &fireScreen);
     screenManager.registerScreen(ScreenType::STATS, &statsScreen);
@@ -35,15 +40,12 @@ void UISetup::setupScreenRegistry() {
     screenManager.registerScreen(ScreenType::SCREENSAVER, &screensaverScreen);
     screenManager.registerScreen(ScreenType::OTA_UPDATE, &otaUpdateScreen);
     screenManager.registerScreen(ScreenType::HIDDEN_MODE, &hiddenModeScreen);
-
-    // Main menu wird später registriert (nach Erstellung)
 }
 
 std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
-        // Observable-Integration: Kein Cast, kein Callback nötig!
         .addObservableRange("Brightness", state.brightness,
                            static_cast<uint8_t>(20),
                            static_cast<uint8_t>(100),
@@ -63,7 +65,6 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
             screenManager.setScreen(&statsScreen, ScreenTransition::FADE);
         })
 
-        // Sleep Timeout: Intern Millisekunden, angezeigt als Sekunden
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
                              60000,    // 1 Minute min
                              1800000,  // 30 Minuten max
