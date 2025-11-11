@@ -35,10 +35,8 @@ public:
     void setCallback(EventCallback cb);
 
 private:
-    // Optimization: Use bitmasks and arrays instead of a struct array.
-    // Benefit: Reduces RAM usage by ~70% (from 24 bytes per button to ~7 bytes).
     static constexpr uint8_t NUM_BUTTONS = 6;
-    static constexpr uint32_t HOLD_THRESHOLD_MS = 1000;
+    static constexpr uint32_t HOLD_THRESHOLD_MS = 400;
     static constexpr uint32_t DEBOUNCE_MS = 50;
 
     struct ButtonConfig {
@@ -50,8 +48,8 @@ private:
 
     EventCallback callback = nullptr;
 
-    uint8_t pressedMask = 0;      // Bitmask for pressed states
-    uint8_t holdSentMask = 0;     // Bitmask for whether a HOLD event has been sent
+    uint8_t pressedMask = 0;
+    uint8_t holdSentMask = 0;
     uint32_t pressTimes[NUM_BUTTONS] = {0};
     uint32_t lastDebounce[NUM_BUTTONS] = {0};
 
