@@ -7,8 +7,6 @@
 
 class HeaterController {
 public:
-    // Optimization: Use a scoped enum for type-safe state representation.
-    // Benefit: Prevents bugs from implicit conversions and name clashes.
     enum class State : uint8_t {
         IDLE,
         HEATING,

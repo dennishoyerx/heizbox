@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <functional>
 
-class HeaterController; // Forward declaration
+class HeaterController;
 
 class CapacitiveSensor {
 public:
