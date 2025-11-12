@@ -39,33 +39,18 @@ Device::Device()
       statsManager(),
       wifiManager(),
       webSocketManager(),
-      capacitiveSensor(heater, [this](bool start) { fireScreen._handleHeatingTrigger(start); }),
       screenManager(*display, input),
-      fireScreen(heater, &screenManager, &screensaverScreen, &statsManager,
-                 [this](int cycle) { this->setCurrentCycle(cycle); }),
-      hiddenModeScreen(display.get()),
-      screensaverScreen(DeviceState::instance().sleepTimeout.get(), display.get(), [this]() {
-          fireScreen.resetActivityTimer();
-          screenManager.setScreen(&fireScreen);
-      }),
-      otaUpdateScreen(otaUpdateScreen),
-      statsScreen(statsManager),
-      timezoneScreen(&screenManager),
-      startupScreen([this]() {
-          screenManager.setScreen(&fireScreen, ScreenTransition::FADE);
-      }),
-      lastSetCycle(1),
-      mainMenuScreen(nullptr),
       uiSetup(std::make_unique<UISetup>(
-          screenManager, fireScreen, hiddenModeScreen, screensaverScreen,
-          otaUpdateScreen, statsScreen, timezoneScreen, startupScreen,
+          screenManager, heater, display.get(), statsManager, input,
           [this](int cycle) { this->setCurrentCycle(cycle); }
       )),
+      capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
+      lastSetCycle(1),
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
       )),
-      otaSetup(std::make_unique<OTASetup>(screenManager, otaUpdateScreen, fireScreen)),
+      otaSetup(std::make_unique<OTASetup>(screenManager, *uiSetup->getOtaUpdateScreen(), *uiSetup->getFireScreen())),
       heaterMonitor(std::make_unique<HeaterMonitor>(
           heater, webSocketManager, statsManager, lastSetCycle,
           [this]() { this->onHeatCycleFinalized(); }
@@ -92,8 +77,8 @@ void Device::setup() {
     statsManager.init();
 
     // Setup screens
-    uiSetup->setupScreenRegistry();
-    screenManager.setScreen(&startupScreen);
+    uiSetup->setupScreens();
+    screenManager.setScreen(uiSetup->getStartupScreen());
 
     input.setCallback([this](InputEvent event) {
         inputHandler->handleInput(event);
@@ -102,7 +87,7 @@ void Device::setup() {
     StateBinder::bindAll(display.get(), &heater);
     DeviceState::instance().display = display.get();
 
-    mainMenuScreen = uiSetup->setupMainMenu();
+    uiSetup->setupMainMenu();
 
     network->setup(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
     network->onReady([]() {
@@ -145,7 +130,7 @@ void Device::loop() {
 // ============================================================================
 
 void Device::onHeatCycleFinalized() {
-    fireScreen.onCycleFinalized();
+    uiSetup->getFireScreen()->onCycleFinalized();
 }
 
 void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {

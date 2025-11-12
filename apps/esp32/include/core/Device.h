@@ -56,15 +56,7 @@ private:
     // Screen management
     ScreenManager screenManager;
 
-    // Screens
-    FireScreen fireScreen;
-    std::unique_ptr<GenericMenuScreen> mainMenuScreen;
-    HiddenModeScreen hiddenModeScreen;
-    ScreensaverScreen screensaverScreen;
-    OtaUpdateScreen otaUpdateScreen;
-    StatsScreen statsScreen;
-    TimezoneScreen timezoneScreen;
-    StartupScreen startupScreen;
+
 
     // UI Setup
     std::unique_ptr<UISetup> uiSetup;

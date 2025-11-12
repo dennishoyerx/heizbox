@@ -37,39 +37,40 @@ public:
      */
     UISetup(
         ScreenManager& screenManager,
-        FireScreen& fireScreen,
-        HiddenModeScreen& hiddenModeScreen,
-        ScreensaverScreen& screensaverScreen,
-        OtaUpdateScreen& otaUpdateScreen,
-        StatsScreen& statsScreen,
-        TimezoneScreen& timezoneScreen,
-        StartupScreen& startupScreen,
+        HeaterController& heater,
+        DisplayDriver* displayDriver,
+        StatsManager& statsManager,
+        InputManager& inputManager,
         std::function<void(int)> setCurrentCycleCallback
     );
 
-    /**
-     * @brief Sets up and registers all screens with the ScreenManager.
-     */
-    void setupScreenRegistry();
+    void setupScreens();
 
-    void setup();
-    void loop();
+    FireScreen* getFireScreen() const { return fireScreen.get(); }
+    ScreensaverScreen* getScreensaverScreen() const { return screensaverScreen.get(); }
+    OtaUpdateScreen* getOtaUpdateScreen() const { return otaUpdateScreen.get(); }
+    StartupScreen* getStartupScreen() const { return startupScreen.get(); }
+    HiddenModeScreen* getHiddenModeScreen() const { return hiddenModeScreen.get(); }
+    TimezoneScreen* getTimezoneScreen() const { return timezoneScreen.get(); }
+    StatsScreen* getStatsScreen() const { return statsScreen.get(); }
 
-
-    /**
-     * @brief Sets up the main menu, including its items and actions.
-     * @return A unique_ptr to the created GenericMenuScreen.
-     */
-    std::unique_ptr<GenericMenuScreen> setupMainMenu();
+    void setupMainMenu();
 
 private:
     ScreenManager& screenManager;
-    FireScreen& fireScreen;
-    HiddenModeScreen& hiddenModeScreen;
-    ScreensaverScreen& screensaverScreen;
-    OtaUpdateScreen& otaUpdateScreen;
-    StatsScreen& statsScreen;
-    TimezoneScreen& timezoneScreen;
-    StartupScreen& startupScreen;
+    HeaterController& heater;
+    DisplayDriver* displayDriver;
+    StatsManager& statsManager;
+    InputManager& inputManager;
     std::function<void(int)> setCurrentCycleCallback;
+
+    std::unique_ptr<GenericMenuScreen> mainMenuScreen;
+
+    std::unique_ptr<FireScreen> fireScreen;
+    std::unique_ptr<HiddenModeScreen> hiddenModeScreen;
+    std::unique_ptr<ScreensaverScreen> screensaverScreen;
+    std::unique_ptr<OtaUpdateScreen> otaUpdateScreen;
+    std::unique_ptr<StatsScreen> statsScreen;
+    std::unique_ptr<TimezoneScreen> timezoneScreen;
+    std::unique_ptr<StartupScreen> startupScreen;
 };

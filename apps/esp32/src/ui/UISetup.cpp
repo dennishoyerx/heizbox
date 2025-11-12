@@ -6,43 +6,46 @@
 
 UISetup::UISetup(
     ScreenManager& screenManager,
-    FireScreen& fireScreen,
-    HiddenModeScreen& hiddenModeScreen,
-    ScreensaverScreen& screensaverScreen,
-    OtaUpdateScreen& otaUpdateScreen,
-    StatsScreen& statsScreen,
-    TimezoneScreen& timezoneScreen,
-    StartupScreen& startupScreen,
+    HeaterController& heater,
+    DisplayDriver* displayDriver,
+    StatsManager& statsManager,
+    InputManager& inputManager,
     std::function<void(int)> setCurrentCycleCallback
 )
     : screenManager(screenManager),
-      fireScreen(fireScreen),
-      hiddenModeScreen(hiddenModeScreen),
-      screensaverScreen(screensaverScreen),
-      otaUpdateScreen(otaUpdateScreen),
-      statsScreen(statsScreen),
-      timezoneScreen(timezoneScreen),
-      startupScreen(startupScreen),
+      heater(heater),
+      displayDriver(displayDriver),
+      statsManager(statsManager),
+      inputManager(inputManager),
       setCurrentCycleCallback(std::move(setCurrentCycleCallback))
 {}
 
-void UISetup::setup() {
+void UISetup::setupScreens() {
+    // Create screens
+    fireScreen = std::make_unique<FireScreen>(heater, &screenManager, screensaverScreen.get(), &statsManager, setCurrentCycleCallback);
+    hiddenModeScreen = std::make_unique<HiddenModeScreen>(displayDriver);
+    screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
+        fireScreen->resetActivityTimer();
+        screenManager.setScreen(fireScreen.get());
+    });
+    otaUpdateScreen = std::make_unique<OtaUpdateScreen>(displayDriver);
+    statsScreen = std::make_unique<StatsScreen>(statsManager);
+    timezoneScreen = std::make_unique<TimezoneScreen>(&screenManager);
+    startupScreen = std::make_unique<StartupScreen>([this]() {
+        screenManager.setScreen(fireScreen.get(), ScreenTransition::FADE);
+    });
+
+    // Register screens
+    screenManager.registerScreen(ScreenType::STARTUP, startupScreen.get());
+    screenManager.registerScreen(ScreenType::FIRE, fireScreen.get());
+    screenManager.registerScreen(ScreenType::STATS, statsScreen.get());
+    screenManager.registerScreen(ScreenType::TIMEZONE, timezoneScreen.get());
+    screenManager.registerScreen(ScreenType::SCREENSAVER, screensaverScreen.get());
+    screenManager.registerScreen(ScreenType::OTA_UPDATE, otaUpdateScreen.get());
+    screenManager.registerScreen(ScreenType::HIDDEN_MODE, hiddenModeScreen.get());
 }
 
-void UISetup::loop() {
-}
-
-void UISetup::setupScreenRegistry() {
-    screenManager.registerScreen(ScreenType::STARTUP, &startupScreen);
-    screenManager.registerScreen(ScreenType::FIRE, &fireScreen);
-    screenManager.registerScreen(ScreenType::STATS, &statsScreen);
-    screenManager.registerScreen(ScreenType::TIMEZONE, &timezoneScreen);
-    screenManager.registerScreen(ScreenType::SCREENSAVER, &screensaverScreen);
-    screenManager.registerScreen(ScreenType::OTA_UPDATE, &otaUpdateScreen);
-    screenManager.registerScreen(ScreenType::HIDDEN_MODE, &hiddenModeScreen);
-}
-
-std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
+void UISetup::setupMainMenu() {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
@@ -58,11 +61,11 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
         .addObservableToggle("Center Heat", state.enableCenterButtonForHeating)
 
         .addAction("Timezone", [this]() {
-            screenManager.setScreen(&timezoneScreen, ScreenTransition::FADE);
+            screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
         })
 
         .addAction("Stats", [this]() {
-            screenManager.setScreen(&statsScreen, ScreenTransition::FADE);
+            screenManager.setScreen(statsScreen.get(), ScreenTransition::FADE);
         })
 
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
@@ -87,13 +90,11 @@ std::unique_ptr<GenericMenuScreen> UISetup::setupMainMenu() {
 
         .build();
 
-    std::unique_ptr<GenericMenuScreen> mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
-    screenManager.registerScreen(ScreenType::MAIN_MENU, mainMenuScreen.get());
+    this->mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
+    screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     // Setup timezone exit callback
-    timezoneScreen.setCallback([this, &mainMenuScreen]() {
-        screenManager.setScreen(mainMenuScreen.get(), ScreenTransition::FADE);
+    timezoneScreen->setCallback([this]() {
+        screenManager.setScreen(this->mainMenuScreen.get(), ScreenTransition::FADE);
     });
-
-    return mainMenuScreen;
 }
