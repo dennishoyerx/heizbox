@@ -27,7 +27,7 @@ public:
         HeaterController& heater,
         WebSocketManager& webSocketManager,
         StatsManager& statsManager,
-        int& lastSetCycle,
+        const PersistedObservable<unsigned int>& currentCycleObservable,
         std::function<void()> onFinalizedCallback
     );
 
@@ -45,7 +45,7 @@ private:
     HeaterController& heater;
     WebSocketManager& webSocketManager;
     StatsManager& statsManager;
-    int& lastSetCycle;
+    const PersistedObservable<unsigned int>& currentCycleObservable;
     bool lastHeatingStatusSent = false;
     std::function<void()> onFinalizedCallback;
 };

@@ -41,18 +41,17 @@ Device::Device()
       webSocketManager(),
       screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(
-          screenManager, heater, display.get(), statsManager, input,
-          [this](int cycle) { this->setCurrentCycle(cycle); }
+          screenManager, heater, display.get(), statsManager, input
       )),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
-      lastSetCycle(1),
+
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
       )),
       otaSetup(std::make_unique<OTASetup>(screenManager, *uiSetup->getOtaUpdateScreen(), *uiSetup->getFireScreen())),
       heaterMonitor(std::make_unique<HeaterMonitor>(
-          heater, webSocketManager, statsManager, lastSetCycle,
+          heater, webSocketManager, statsManager, DeviceState::instance().currentCycle,
           [this]() { this->onHeatCycleFinalized(); }
       )),
       inputHandler(std::make_unique<InputHandler>(screenManager))
@@ -151,7 +150,4 @@ void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
     }
 }
 
-void Device::setCurrentCycle(int cycle) {
-    lastSetCycle = cycle;
-    Serial.printf("📊 Current cycle set to: %d\n", lastSetCycle);
-}
+

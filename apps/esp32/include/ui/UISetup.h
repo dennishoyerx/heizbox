@@ -40,8 +40,7 @@ public:
         HeaterController& heater,
         DisplayDriver* displayDriver,
         StatsManager& statsManager,
-        InputManager& inputManager,
-        std::function<void(int)> setCurrentCycleCallback
+        InputManager& inputManager
     );
 
     void setupScreens();
@@ -62,7 +61,6 @@ private:
     DisplayDriver* displayDriver;
     StatsManager& statsManager;
     InputManager& inputManager;
-    std::function<void(int)> setCurrentCycleCallback;
 
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
 

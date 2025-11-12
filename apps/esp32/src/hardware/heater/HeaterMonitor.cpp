@@ -7,13 +7,13 @@ HeaterMonitor::HeaterMonitor(
     HeaterController& heater,
     WebSocketManager& webSocketManager,
     StatsManager& statsManager,
-    int& lastSetCycle,
+    const PersistedObservable<unsigned int>& currentCycleObservable,
     std::function<void()> onFinalizedCallback
 )
     : heater(heater),
       webSocketManager(webSocketManager),
       statsManager(statsManager),
-      lastSetCycle(lastSetCycle),
+      currentCycleObservable(currentCycleObservable),
       onFinalizedCallback(onFinalizedCallback)
 {}
 
@@ -48,10 +48,10 @@ void HeaterMonitor::checkHeatCycle() {
         heater.clearCycleFinishedFlag();
 
         // Send to backend
-        webSocketManager.sendHeatCycleCompleted(durationSec, lastSetCycle);
+        webSocketManager.sendHeatCycleCompleted(durationSec, currentCycleObservable.get());
 
         Serial.printf("✅ Heat cycle completed: %lu seconds (cycle %d)\n",
-                     durationSec, lastSetCycle);
+                     durationSec, currentCycleObservable.get());
     }
 }
 

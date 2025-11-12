@@ -40,7 +40,7 @@ public:
     ~Device(); // Declare destructor
     void setup();
     void loop();
-    void setCurrentCycle(int cycle);
+
     void onHeatCycleFinalized();
 
 private:
@@ -74,7 +74,7 @@ private:
     std::unique_ptr<InputHandler> inputHandler;
 
     // State
-    int lastSetCycle = 1;
+
 
     // Helper methods
     void handleWebSocketMessage(const char* type, const JsonDocument& doc);

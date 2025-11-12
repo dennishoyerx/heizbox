@@ -11,8 +11,7 @@
 class FireScreen : public Screen {
 public:
     FireScreen(HeaterController& hc, ScreenManager* sm,
-               ScreensaverScreen* ss, StatsManager* stm,
-               std::function<void(int)> setCycleCb);
+               ScreensaverScreen* ss, StatsManager* stm);
 
     void draw(DisplayDriver& display) override;
     void update() override;
@@ -29,7 +28,6 @@ private:
     ScreenManager* screenManager;
     ScreensaverScreen* screensaverScreen;
     StatsManager* statsManager;
-    std::function<void(int)> setCycleCallback;
 
     // State
     struct {

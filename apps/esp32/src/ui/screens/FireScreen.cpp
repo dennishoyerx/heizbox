@@ -73,13 +73,11 @@ void FireScreen::drawSessionRow(DisplayDriver &display,
 
  
 FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
-                       ScreensaverScreen *ss, StatsManager *stm,
-                       std::function<void(int)> setCycleCb)
+                       ScreensaverScreen *ss, StatsManager *stm)
     : heater(hc),
       screenManager(sm),
       screensaverScreen(ss),
       statsManager(stm),
-      setCycleCallback(std::move(setCycleCb)),
       cachedClicks(0),
       cachedConsumption(0),
       cachedTodayConsumption(0),
@@ -105,7 +103,7 @@ void FireScreen::onEnter()
 
 void FireScreen::onCycleFinalized() {
     if (heater.getLastCycleDuration() > 10000) {
-        setCycleCallback(state.currentCycle);
+        DeviceState::instance().currentCycle.set(state.currentCycle);
         state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
     }
 }
@@ -248,7 +246,7 @@ void FireScreen::handleInput(InputEvent event)
 void FireScreen::handleCycleChange()
 {
     state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-    setCycleCallback(state.currentCycle);
+    DeviceState::instance().currentCycle.set(state.currentCycle);
     markDirty();
 }
 
