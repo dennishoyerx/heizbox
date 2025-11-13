@@ -91,7 +91,8 @@ TFT_eSprite* DisplayDriver::createSprite(int16_t width, int16_t height) {
     // Sprite erzeugen
     auto* sprite = new TFT_eSprite(&tft_spi);
     sprite->createSprite(width, height);
-
+    sprite->setColorDepth(4);
+    sprite->createPalette(heizbox_palette, 16);
     return sprite;
 }
 

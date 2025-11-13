@@ -129,8 +129,6 @@ void FireScreen::draw(DisplayDriver &display)
     //sprite->deleteSprite();              // Speicher freigeben
     //delete sprite;
     FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
-    //FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY, false);
-    //FireScreen::drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
 
     if (heater.isHeating()) {
         drawHeatingTimer(display);
@@ -139,15 +137,15 @@ void FireScreen::draw(DisplayDriver &display)
 
 void FireScreen::drawHeatingTimer(DisplayDriver &display)
 {
-    void* renderer_ptr = display.getRenderer();
-    if (!renderer_ptr) return;
-    auto &renderer = *static_cast<TFT_eSprite*>(renderer_ptr);
-    
+    TFT_eSprite* sprite = _ui->createSprite(140, 140);
+    if (!sprite) return;
+
     const uint32_t elapsed = heater.getElapsedTime();
     const uint32_t seconds = elapsed / 1000;
     
     static uint32_t lastSeconds = 999;
     if (seconds == lastSeconds && heater.isHeating()) { // Only skip redraw if actively heating and second hasn't changed
+        sprite->deleteSprite();
         return;
     }
     lastSeconds = seconds;
@@ -158,22 +156,22 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     else if (seconds < 50) timerColor = COLOR_BLUE;
     else timerColor = COLOR_PURPLE;
     
-    int centerX = 140;
-    int centerY = 96;
+    int centerX = 70;
+    int centerY = 70;
     
     // === Vereinfachter Progress Ring ===
     int radius = 70;
 
     // Hintergrund-Ring
-    renderer.fillCircle(centerX, centerY, radius, COLOR_BG);
-    renderer.drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
+    sprite->fillCircle(centerX, centerY, radius, COLOR_BG);
+    sprite->drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
 
     float progress = (float)seconds / 60.0f;
     int endAngle = (int)(progress * 360);
     int startAngle = 180; 
     int stopAngle = startAngle + endAngle;
 
-    renderer.drawArc(centerX, centerY,
+    sprite->drawArc(centerX, centerY,
                     radius + 7, radius - 7,
                     startAngle, stopAngle,
                     timerColor, COLOR_ACCENT, true);
@@ -182,29 +180,32 @@ void FireScreen::drawHeatingTimer(DisplayDriver &display)
     char timeStr[4];
     snprintf(timeStr, sizeof(timeStr), "%lu", seconds % 60);
     
-    renderer.setTextColor(COLOR_TEXT_PRIMARY);
-    renderer.setTextDatum(MC_DATUM);
-    renderer.setTextSize(2);
-    renderer.setFreeFont(&FreeSansBold18pt7b);
-    renderer.drawString(timeStr, centerX, centerY, 1);
+    sprite->setTextColor(COLOR_TEXT_PRIMARY);
+    sprite->setTextDatum(MC_DATUM);
+    sprite->setTextSize(2);
+    sprite->setFreeFont(&FreeSansBold18pt7b);
+    sprite->drawString(timeStr, centerX, centerY, 1);
     
     
     // "HEIZT" or "PAUSE" Badge
     const char* badgeText = heater.isPaused() ? "PAUSE" : "HEIZT";
     uint16_t badgeColor = heater.isPaused() ? COLOR_WARNING : timerColor;
-    renderer.fillRoundRect(centerX - 35, centerY + 50, 70, 20, 10, 0x8410);
-    renderer.fillCircle(centerX - 20, centerY + 60, 3, badgeColor);
-    renderer.setFreeFont(&FreeSans18pt7b);
-    renderer.setTextSize(1);
-    renderer.drawString(badgeText, centerX + 5, centerY + 60, 2);
+    sprite->fillRoundRect(centerX - 35, centerY + 50, 70, 20, 10, 0x8410);
+    sprite->fillCircle(centerX - 20, centerY + 60, 3, badgeColor);
+    sprite->setFreeFont(&FreeSans18pt7b);
+    sprite->setTextSize(1);
+    sprite->drawString(badgeText, centerX + 5, centerY + 60, 2);
     
     // Click Zone
     if (seconds >= 30 && seconds <= 50) {
-    renderer.setFreeFont(&FreeSans18pt7b);
-        renderer.setTextSize(1);
-        renderer.setTextColor(COLOR_BG);
-        renderer.drawString("CLICK ZONE", centerX, centerY + 80, 2);
+    sprite->setFreeFont(&FreeSans18pt7b);
+        sprite->setTextSize(1);
+        sprite->setTextColor(COLOR_BG);
+        sprite->drawString("CLICK ZONE", centerX, centerY + 80, 2);
     }
+
+    sprite->pushSprite(70, 75);
+    sprite->deleteSprite();
 }
 
 void FireScreen::update()
