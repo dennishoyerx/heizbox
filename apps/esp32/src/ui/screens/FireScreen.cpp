@@ -114,6 +114,12 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
 
+    TFT_eSprite* sprite = display.createSprite(40, 40);
+    sprite->pushSprite(150, 150);
+    sprite->deleteSprite();
+
+
+
     /*TFT_eSprite* sprite = display.createSprite(40, 40);
     sprite->fillSprite(TFT_RED);       // Hintergrund setzen
     sprite->setTextColor(TFT_WHITE);     // Textfarbe
