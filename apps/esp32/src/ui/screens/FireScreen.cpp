@@ -114,13 +114,6 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
 
-    TFT_eSprite* sprite = _ui->createSprite(40, 40);
-    sprite->fillSprite(COLOR_BLUE);
-    sprite->pushSprite(150, 150);
-    sprite->deleteSprite();
-
-
-
     /*TFT_eSprite* sprite = display.createSprite(40, 40);
     sprite->fillSprite(TFT_RED);       // Hintergrund setzen
     sprite->setTextColor(TFT_WHITE);     // Textfarbe
@@ -131,15 +124,12 @@ void FireScreen::draw(DisplayDriver &display)
     FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
 
     if (heater.isHeating()) {
-        drawHeatingTimer(display);
+        drawHeatingTimer(_ui->createSprite(140, 140));
     }
 }
 
-void FireScreen::drawHeatingTimer(DisplayDriver &display)
+void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
 {
-    TFT_eSprite* sprite = _ui->createSprite(140, 140);
-    if (!sprite) return;
-
     const uint32_t elapsed = heater.getElapsedTime();
     const uint32_t seconds = elapsed / 1000;
     

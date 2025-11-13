@@ -45,7 +45,7 @@ private:
     float cachedYesterdayConsumption;
 
     // Helper methods
-    void drawHeatingTimer(DisplayDriver& display);
+    void drawHeatingTimer(TFT_eSprite* sprite);
     static void drawSessionRow(DisplayDriver &display, const char* label, float consumption, int y, uint8_t bgColor, uint8_t borderColor, uint8_t textColor, bool invert = false, bool thin = false);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);
