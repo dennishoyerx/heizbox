@@ -1,4 +1,5 @@
 #include "ui/base/SurfaceFactory.h"
+#include "ui/ColorPalette.h"
 
 SurfaceFactory::~SurfaceFactory() {
   for (auto &e : _pool) {
@@ -29,12 +30,17 @@ RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h) {
   if (_usePsram) spr->setPsram(true);
   #endif
 
+  spr->setColorDepth(4);
   if (!spr->createSprite(w, h)) {
     // create failed
     spr->deleteSprite();
     delete spr;
     return RenderSurface{ nullptr };
   }
+
+  spr->createPalette(heizbox_palette, 16);
+  spr->fillSprite(COLOR_ACCENT);
+
   return RenderSurface{ spr };
 }
 

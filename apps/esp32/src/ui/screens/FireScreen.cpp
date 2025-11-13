@@ -12,7 +12,7 @@
 
 //#enum SessionRowStyle {};
 
-void FireScreen::drawSessionRow(DisplayDriver &display, 
+void FireScreen::drawSessionRow(TFT_eSprite* sprite, 
     const char* label, 
     float consumption, 
     int y, 
@@ -22,7 +22,7 @@ void FireScreen::drawSessionRow(DisplayDriver &display,
     bool invert, 
     bool thin)
 {    
-    int x = 15;
+    int x = 0;
     int width = 250; 
     int height = thin ? 40 : 50;
     int radius = 16;
@@ -37,17 +37,14 @@ void FireScreen::drawSessionRow(DisplayDriver &display,
         _textColor = bgColor;
     }
 
-    void* renderer_ptr = display.getRenderer();
-    if (renderer_ptr) {
-        auto &renderer = *static_cast<TFT_eSprite*>(renderer_ptr);
-        renderer.fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
+        sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
 
         // "Session" Text
-        renderer.setTextSize(1);
-        renderer.setTextColor(_textColor);
-        renderer.setTextDatum(ML_DATUM);
-        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
-        renderer.drawString(label, 30, y + height / 2);
+        sprite->setTextSize(1);
+        sprite->setTextColor(_textColor);
+        sprite->setTextDatum(ML_DATUM);
+        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
+        sprite->drawString(label, 30, y + height / 2);
 
         // Verbrauchswert formatieren und anzeigen
         char consumptionStr[10];
@@ -63,10 +60,9 @@ void FireScreen::drawSessionRow(DisplayDriver &display,
         }
 
         // Verbrauchswert rechts ausgerichtet
-        renderer.setTextDatum(MR_DATUM);
-        renderer.setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
-        renderer.drawString(consumptionStr, x + width - 12, y + height / 2);
-    } // Close the if (renderer_ptr) block
+        sprite->setTextDatum(MR_DATUM);
+        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
+        sprite->drawString(consumptionStr, x + width - 12, y + height / 2);
 }
 
 
@@ -121,10 +117,21 @@ void FireScreen::draw(DisplayDriver &display)
     sprite->pushSprite(50, 50);*/
     //sprite->deleteSprite();              // Speicher freigeben
     //delete sprite;
-    FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
+    
+    _ui->withSurface(250, 140, 15, 75, [this](RenderSurface& s) {
+        //TimerState st{ 3900, true }; // 65min
+        s.sprite->fillSprite(COLOR_BG);
+        FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
+    });
+
 
     if (heater.isHeating()) {
-        drawHeatingTimer(_ui->createSprite(140, 140));
+        
+    _ui->withSurface(140, 140, 70, 75, [this](RenderSurface& s) {
+        //TimerState st{ 3900, true }; // 65min
+        s.sprite->fillSprite(COLOR_BG);
+        drawHeatingTimer(s.sprite);
+    });
     }
 }
 
@@ -135,7 +142,7 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
     
     static uint32_t lastSeconds = 999;
     if (seconds == lastSeconds && heater.isHeating()) { // Only skip redraw if actively heating and second hasn't changed
-        sprite->deleteSprite();
+        //sprite->deleteSprite();
         return;
     }
     lastSeconds = seconds;
@@ -194,8 +201,8 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
         sprite->drawString("CLICK ZONE", centerX, centerY + 80, 2);
     }
 
-    sprite->pushSprite(70, 75);
-    sprite->deleteSprite();
+//    sprite->pushSprite(70, 75);
+//    sprite->deleteSprite();
 }
 
 void FireScreen::update()

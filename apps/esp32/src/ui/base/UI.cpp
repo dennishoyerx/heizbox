@@ -1,7 +1,7 @@
 #include <ui/base/UI.h>
 #include <ui/base/SurfaceFactory.h> // Include the new header
 
-UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(*driver->getTFT()) {}
+UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {}
 
 RenderSurface UI::createSurface(int16_t w, int16_t h) {
     return _surfaceFactory.createSurface(w, h);

@@ -10,6 +10,9 @@ struct Rect { int16_t x, y, w, h; };
 struct RenderSurface {
   TFT_eSprite *sprite = nullptr; // owned by Screen/Pool
 
+  // Constructor to allow direct initialization with a TFT_eSprite*
+  RenderSurface(TFT_eSprite* s = nullptr) : sprite(s) {}
+
   int16_t width() const { return sprite ? sprite->width() : 0; }
   int16_t height() const { return sprite ? sprite->height() : 0; }
 
@@ -26,7 +29,7 @@ using SurfaceCallback = std::function<void(RenderSurface&)>;
 
 class SurfaceFactory {
 public:
-  SurfaceFactory(TFT_eSPI& tft) : _tft(&tft) {}
+  SurfaceFactory(TFT_eSPI* tft) : _tft(tft) {}
   ~SurfaceFactory();
 
   RenderSurface createSurface(int16_t w, int16_t h);

@@ -41,7 +41,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
 
 void DisplayDriver::reallocateSprites() {
     if (spriteRenderer) {
-        spriteRenderer->reallocateSprites(100, 100, 4);
+        spriteRenderer->reallocateSprites(1, 1, 4);
     }
     if (screenManager) {
         screenManager->setDirty();
