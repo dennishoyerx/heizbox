@@ -106,23 +106,24 @@ void FireScreen::onCycleFinalized() {
         DeviceState::instance().currentCycle.set(state.currentCycle);
         state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
     }
+
+    markDirty();
 }
 
 void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
 
-    /*TFT_eSprite* sprite = display.createSprite(10, 10);
+    /*TFT_eSprite* sprite = display.createSprite(40, 40);
     sprite->fillSprite(TFT_RED);       // Hintergrund setzen
     sprite->setTextColor(TFT_WHITE);     // Textfarbe
     sprite->drawString("xxx", 0, 0);
-    sprite->pushSprite(0, 0);
-    sprite->deleteSprite();              // Speicher freigeben
-    delete sprite;   */ 
-    
+    sprite->pushSprite(50, 50);*/
+    //sprite->deleteSprite();              // Speicher freigeben
+    //delete sprite;
     FireScreen::drawSessionRow(display, "Session", cachedConsumption, 50, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
-    FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY, false);
-    FireScreen::drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
+    //FireScreen::drawSessionRow(display, "Heute", cachedTodayConsumption, 105, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY, false);
+    //FireScreen::drawSessionRow(display, "Gestern", cachedYesterdayConsumption, 150, COLOR_ACCENT, COLOR_ACCENT, COLOR_TEXT_PRIMARY, false, true);
 
     if (heater.isHeating()) {
         drawHeatingTimer(display);
