@@ -30,7 +30,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
     tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
 
     // Since TFT_eSPI_Driver returns a TFT_eSPI object, we can cast it here
-    TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTft();
+    TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTFT();
     statusBar = new StatusBar(&tft_spi, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     
     spriteRenderer.reset(new SpriteRenderer(&tft_spi));
@@ -84,16 +84,7 @@ TFT_eSprite& DisplayDriver::getSprite() {
     return spriteRenderer->getSprite();
 }
 
-TFT_eSprite* DisplayDriver::createSprite(int16_t width, int16_t height) {
-    TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTft();
 
-    auto* sprite = new TFT_eSprite(&tft_spi);
-    sprite->createSprite(width, height);
-    sprite->setColorDepth(4);
-    sprite->createPalette(heizbox_palette, 16);
-    
-    return sprite;
-}
 
 void DisplayDriver::drawText(int16_t x, int16_t y, const char* text, uint8_t color, uint8_t size) {
     if (!text) return;
@@ -105,7 +96,7 @@ void DisplayDriver::drawText(int16_t x, int16_t y, const char* text, uint8_t col
         renderer.print(text);
     } else {
         // This is not ideal, as we are assuming the underlying type.
-        TFT_eSPI& renderer = static_cast<TFT_eSPI_Driver*>(tft.get())->getTft();
+        TFT_eSPI& renderer = static_cast<TFT_eSPI_Driver*>(tft.get())->getTFT();
         setFont(size, renderer);
         renderer.setCursor(x, y);
         renderer.print(text);

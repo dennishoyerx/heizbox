@@ -47,6 +47,6 @@ void TFT_eSPI_Driver::drawXBitmap(int16_t x, int16_t y, const uint8_t *bitmap, i
     tft.drawXBitmap(x, y, bitmap, w, h, color);
 }
 
-TFT_eSPI& TFT_eSPI_Driver::getTft() {
+TFT_eSPI& TFT_eSPI_Driver::getTFT() {
     return tft;
 }
