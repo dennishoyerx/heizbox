@@ -3,6 +3,7 @@
 #define SCREENMANAGER_H
 
 #include "ui/base/Screen.h"
+#include "ui/base/UI.h"
 #include "hardware/input/InputManager.h"
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenTransition.h"
@@ -32,6 +33,7 @@ private:
     // Core components
     DisplayDriver& display;
     InputManager& input;
+    UI* ui;
 
     // Screen state
     Screen* currentScreen;

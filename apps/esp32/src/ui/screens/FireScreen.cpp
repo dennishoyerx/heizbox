@@ -114,7 +114,8 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
 
-    TFT_eSprite* sprite = display.createSprite(40, 40);
+    TFT_eSprite* sprite = _ui->createSprite(40, 40);
+    sprite->fillSprite(COLOR_BLUE);
     sprite->pushSprite(150, 150);
     sprite->deleteSprite();
 

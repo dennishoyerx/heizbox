@@ -12,6 +12,7 @@
 class DisplayManager;
 class ScreenManager;
 class DisplayDriver;
+class UI;
 
 class Components {
 public:
@@ -62,6 +63,7 @@ public:
 
     // Manager access
     void setManager(ScreenManager* mgr);
+    void setUI(UI* ui);
 
 
 
@@ -69,8 +71,7 @@ protected:
     virtual void initState() {}
     ScreenManager* manager;
     Components* components;
-
-    TFT_eSprite* createSprite(DisplayDriver& display, int16_t width, int16_t height);
+    UI* _ui;
 
     void markDirty();
     void centerText(DisplayDriver& display, int16_t y, const char* text,

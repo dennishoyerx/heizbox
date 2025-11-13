@@ -2,6 +2,8 @@
 #include "ui/base/Screen.h"
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
+#include "ui/base/UI.h"
+
 
 
 Screen::Screen() : manager(nullptr) {
@@ -30,6 +32,10 @@ void Screen::setManager(ScreenManager* mgr) {
     manager = mgr;
 }
 
+void Screen::setUI(UI* ui) {
+    _ui = ui;
+}
+
 void Screen::markDirty() {
     if (manager) {
         manager->setDirty();
@@ -42,10 +48,6 @@ void Screen::centerText(DisplayDriver& display, int16_t y, const char* text,
     const int16_t textWidth = display.getTextWidth(text, size);
     const int16_t x = (display.getTFTWidth() - textWidth) / 2;
     display.drawText(x, y, text, color, size);
-}
-
-TFT_eSprite* Screen::createSprite(DisplayDriver& display, int16_t width, int16_t height) {
-    return display.createSprite(width, height);
 }
 
 

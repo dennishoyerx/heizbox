@@ -2,6 +2,7 @@
 #include "utils/Logger.h"
 #include "ui/base/ScreenManager.h"
 #include "hardware/display/DisplayDriver.h"
+#include "ui/base/UI.h"
 
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"
@@ -14,6 +15,7 @@ ScreenManager::ScreenManager(DisplayDriver& disp, InputManager& inp)
       dirty(true),
       lastDrawTime(0)
 {
+    ui = new UI(&disp);
     transition.type = ScreenTransition::NONE;
     transition.inProgress = false;
     transition.startTime = 0;
@@ -35,6 +37,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
     if (currentScreen) {
         currentScreenType = currentScreen->getType();
         currentScreen->setManager(this);
+        currentScreen->setUI(ui);
 
         // Initialize transition wenn gewünscht
         if (transitionType != ScreenTransition::NONE && previousScreen) {
