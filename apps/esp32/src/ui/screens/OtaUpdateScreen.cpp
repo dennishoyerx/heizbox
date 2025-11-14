@@ -11,11 +11,10 @@ OtaUpdateScreen::OtaUpdateScreen(DisplayDriver* displayManager) : _displayManage
 void OtaUpdateScreen::draw(DisplayDriver& display)
 {
     display.setBrightness(100);
-    display.clear();
-    display.drawBitmap(
-        (display.getTFTWidth() - 102) / 2,
-        (display.getTFTHeight() - 128) / 2 - 30,
-        ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
+    _ui->withSurface(102, 128, (280 - 102) / 2, (190 - 128) / 2, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+        s.sprite->drawBitmap(0, 0, ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
+    });
     //display.getTft()->setTextDatum(MC_DATUM);
     //display.drawText((display.getTFTWidth()/2) - 40, display.getTFTHeight() / 2 + 30, "Update lädt...", COLOR_TEXT_PRIMARY, 2);
 }

@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include <string>
+#include "ui/base/UI.h"
 #include "ui/base/ScreenTransition.h"
 #include "ui/base/UIComponent.h"
 #include "hardware/input/InputManager.h"
@@ -12,7 +13,6 @@
 class DisplayManager;
 class ScreenManager;
 class DisplayDriver;
-class UI;
 
 class Components {
 public:
