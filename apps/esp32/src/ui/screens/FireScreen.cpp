@@ -114,7 +114,7 @@ void FireScreen::draw(DisplayDriver &display)
 {
     display.clear();
 
-    _ui->withSurface(250, 140, 15, 75, [this](RenderSurface& s) {
+    _ui->withSurface(250, 140, 15, 60, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
@@ -127,6 +127,15 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->setFreeFont(&FreeSans12pt7b);
         s.sprite->drawString(String(state.targetTemp, 0), 0, 0);
         s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 1), 0, 25);
+    });
+
+
+    _ui->withSurface(50, 40, 65, 170, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+        s.sprite->setFreeFont(&FreeSans18pt7b);
+        s.sprite->drawString(String(heater.getPower()), 0, 0);
     });
 
 
@@ -255,7 +264,7 @@ void FireScreen::handleInput(InputEvent event)
         return;
     }
 
-    if (event.button == RIGHT) {
+    if (event.button == CENTER) {
         handleCycleChange();
         return;
     }
@@ -269,6 +278,16 @@ void FireScreen::handleInput(InputEvent event)
         DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() - 1);
         return;
     }
+
+    if (event.button == LEFT) {
+        DeviceState::instance().power.set(DeviceState::instance().power.get() - 10);
+        return;
+    }
+
+    if (event.button == RIGHT) {
+        DeviceState::instance().power.set(DeviceState::instance().power.get() + 10);
+    }
+
 }
 
 void FireScreen::handleCycleChange()

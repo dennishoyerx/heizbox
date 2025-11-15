@@ -1,19 +1,11 @@
-// ==== OPTIMIZED FILE ====
-// This file has been refactored to implement a type-safe, explicit state machine.
-// Key improvements:
-// - Replaced integer-based states with a scoped enum 'State' for type safety.
-// - Centralized all state changes in a 'transitionTo()' method to ensure consistency.
-// - Rewrote the 'update()' method with a clear switch-case structure.
-// - Replaced magic numbers with named constants (e.g., COOLDOWN_DURATION_MS).
-
 #include "hardware/heater/HeaterController.h"
 #include "core/Config.h"
+#include "core/DeviceState.h"
 #include <Arduino.h>
-
-
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
+      power(100),
       startTime(0), 
       pauseTime(0),
       autoStopTime(60000), 
@@ -26,7 +18,23 @@ void HeaterController::init() {
     pinMode(HardwareConfig::HEATER_MOSFET_PIN, OUTPUT);
     digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
 
+    power = DeviceState::instance().power.get();
+
+    DeviceState::instance().power.addListener([this](int val) {
+        power = val;
+    });
+
+
+
     Serial.println("🔥 Heater initialized");
+}
+
+void HeaterController::setPower(uint8_t _power) {
+    power = _power;
+}
+
+uint8_t HeaterController::getPower() {
+    return power;
 }
 
 // Optimization: Centralized state transition logic.
