@@ -17,8 +17,12 @@ namespace {
 void GenericMenuScreen::draw(DisplayDriver& display) {
     display.clear();
     
+    _ui->withSurface(280, 190, 0, 50, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+
+
     // Title
-    centerText(display, 10, title_, COLOR_TEXT_PRIMARY, 2);
+    //centerText(s.sprite, 10, title_, COLOR_TEXT_PRIMARY, 2);
     
     // Items (with scrolling support)
     const int itemsPerPage = 5;
@@ -32,20 +36,28 @@ void GenericMenuScreen::draw(DisplayDriver& display) {
         const auto& item = items_[i];
         const bool isSelected = (i == selectedIndex_);
         const uint8_t color = isSelected ? COLOR_ACCENT : COLOR_TEXT_PRIMARY;
+        s.sprite->setFreeFont(&FreeSans12pt7b);
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         
         // Selection indicator
         if (isSelected) {
-            display.drawText(10, y, adjustMode_ ? ">" : "*", color, 2);
+        s.sprite->setCursor(10, y);
+        s.sprite->print(adjustMode_ ? ">" : "*");
+            //s.sprite->drawText(10, y, adjustMode_ ? ">" : "*", color, 2);
         }
         
         // Item title
-        display.drawText(30, y, item->getTitle(), color, 2);
+        //s.sprite->drawText(30, y, item->getTitle(), color, 2);
+        s.sprite->setCursor(30, y);
+        s.sprite->print(item->getTitle());
         
         // Item value (if any)
         const char* value = item->getValue();
         if (value) {
             const int16_t valueX = 200;
-            display.drawText(valueX, y, value, color, 2);
+            //s.sprite->drawString(valueX, y, value, color, 2);
+        s.sprite->setCursor(valueX, y);
+        s.sprite->print(value);
         }
     }
     
@@ -53,7 +65,11 @@ void GenericMenuScreen::draw(DisplayDriver& display) {
     const char* footer = adjustMode_ 
         ? "L/R: Adjust  OK: Done"
         : "OK: Select  HOLD L: Back";
-    display.drawText(10, 210, footer, COLOR_TEXT_SECONDARY, 1);
+//    s.sprite->drawText(10, 210, footer, COLOR_TEXT_SECONDARY, 1);
+        s.sprite->setFreeFont(&FreeSans9pt7b);
+        s.sprite->setCursor(10, 210);
+        s.sprite->print(footer);
+    });
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {

@@ -69,11 +69,12 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
 
  
 FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
-                       ScreensaverScreen *ss, StatsManager *stm)
+                       ScreensaverScreen *ss, StatsManager *stm, TempSensor* ts)
     : heater(hc),
       screenManager(sm),
       screensaverScreen(ss),
       statsManager(stm),
+      tempSensor(ts), // Initialize TempSensor
       cachedClicks(0),
       cachedConsumption(0),
       cachedTodayConsumption(0),
@@ -90,6 +91,9 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
     state.currentCycle = 1;
     state.showingSavedConfirmation = false;
     state.confirmationStartTime = 0;
+
+    state.targetTemp = DeviceState::instance().targetTemperature.get();
+    DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
 }
 
 void FireScreen::onEnter()
@@ -111,10 +115,18 @@ void FireScreen::draw(DisplayDriver &display)
     display.clear();
 
     _ui->withSurface(250, 140, 15, 75, [this](RenderSurface& s) {
-        //TimerState st{ 3900, true }; // 65min
         s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
+    });
+
+    _ui->withSurface(50, 50, 15, 170, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+        s.sprite->setFreeFont(&FreeSans12pt7b);
+        s.sprite->drawString(String(state.targetTemp, 0), 0, 0);
+        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 1), 0, 25);
     });
 
 
@@ -201,15 +213,22 @@ void FireScreen::update()
 {
     const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
 
+        tempSensor->update();
+        state.currentTemp = tempSensor->getTemperature();
+
     if (isActive)
     {
-        state.lastActivityTime = millis();
         static uint32_t lastSecond = 0;
         const uint32_t currentSecond = heater.getElapsedTime() / 1000;
         if (currentSecond != lastSecond)
         {
             markDirty();
             lastSecond = currentSecond;
+        }
+
+        if (state.currentTemp > state.targetTemp) {
+            _handleHeatingTrigger(false);
+            markDirty();
         }
     }
 
@@ -236,8 +255,19 @@ void FireScreen::handleInput(InputEvent event)
         return;
     }
 
-    if (event.button == UP || event.button == DOWN) {
+    if (event.button == RIGHT) {
         handleCycleChange();
+        return;
+    }
+
+    if (event.button == UP) {
+        DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() + 1);
+        return;
+    }
+
+    if (event.button == DOWN) {
+        DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() - 1);
+        return;
     }
 }
 

@@ -10,8 +10,9 @@ OtaUpdateScreen::OtaUpdateScreen(DisplayDriver* displayManager) : _displayManage
 
 void OtaUpdateScreen::draw(DisplayDriver& display)
 {
+    display.clear();
     display.setBrightness(100);
-    _ui->withSurface(102, 128, (280 - 102) / 2, (190 - 128) / 2, [this](RenderSurface& s) {
+    _ui->withSurface(102, 128, 50, 50, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
         s.sprite->drawBitmap(0, 0, ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
     });

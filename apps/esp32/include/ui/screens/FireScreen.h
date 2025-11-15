@@ -6,12 +6,13 @@
 #include "hardware/heater/HeaterController.h"
 #include "ScreensaverScreen.h"
 #include "StatsManager.h"
+#include "hardware/sensor/TempSensor.h" // Include TempSensor
 #include <functional>
 
 class FireScreen : public Screen {
 public:
     FireScreen(HeaterController& hc, ScreenManager* sm,
-               ScreensaverScreen* ss, StatsManager* stm);
+               ScreensaverScreen* ss, StatsManager* stm, TempSensor* ts);
 
     void draw(DisplayDriver& display) override;
     void update() override;
@@ -28,6 +29,7 @@ private:
     ScreenManager* screenManager;
     ScreensaverScreen* screensaverScreen;
     StatsManager* statsManager;
+    TempSensor* tempSensor; // TempSensor instance
 
     // State
     struct {
@@ -35,6 +37,8 @@ private:
         uint8_t currentCycle;
         bool showingSavedConfirmation;
         uint32_t confirmationStartTime;
+        float targetTemp = 0;
+        float currentTemp = 0;
     } state;
 
     // Cached values from state
@@ -43,6 +47,10 @@ private:
     float cachedConsumption;
     float cachedTodayConsumption;
     float cachedYesterdayConsumption;
+
+    
+    unsigned long lastTempRead = 0;
+    float lastTemp = NAN;
 
     // Helper methods
     void drawHeatingTimer(TFT_eSprite* sprite);

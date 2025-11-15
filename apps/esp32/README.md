@@ -67,6 +67,11 @@ The pin connections are defined in the `platformio.ini` file:
 | **Heater**         |     |
 | MOSFET Gate      | 13  |
 
+thermo
+sck orange 15
+cs gelb 32
+so grün 22
+
 ## Building and Running
 
 The project is configured to be built and managed using the PlatformIO IDE extension in Visual Studio Code.

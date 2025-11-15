@@ -41,10 +41,10 @@ Device::Device()
       webSocketManager(),
       screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(
-          screenManager, heater, display.get(), statsManager, input
+          screenManager, heater, display.get(), statsManager, input, _tempSensor
       )),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
-
+      _tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN)),
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
@@ -57,7 +57,9 @@ Device::Device()
       inputHandler(std::make_unique<InputHandler>(screenManager))
 {}
 
-Device::~Device() = default;
+Device::~Device() {
+    delete _tempSensor; // Clean up TempSensor
+}
 
 void Device::setup() {
     Serial.begin(115200);
@@ -74,6 +76,7 @@ void Device::setup() {
     input.init();
     heater.init();
     statsManager.init();
+    _tempSensor->begin(); // Initialize TempSensor
 
     // Setup screens
     uiSetup->setupScreens();
@@ -88,7 +91,7 @@ void Device::setup() {
 
     uiSetup->setupMainMenu();
 
-    network->setup(WIFI_SSID, WIFI_PASSWORD, "Heizbox");
+    network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
     network->onReady([]() {
         static bool firmware_logged = false;
         if (!firmware_logged) {
@@ -111,7 +114,7 @@ void Device::loop() {
     input.update();
     heater.update();
     statsManager.update();
-    capacitiveSensor.update();
+    //capacitiveSensor.update();
 
     // Update UI
     screenManager.update();
