@@ -58,7 +58,7 @@ Device::Device()
 {}
 
 Device::~Device() {
-    delete _tempSensor; // Clean up TempSensor
+    delete _tempSensor;
 }
 
 void Device::setup() {
