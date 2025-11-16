@@ -31,6 +31,20 @@ private:
     StatsManager* statsManager;
     TempSensor* tempSensor; // TempSensor instance
 
+
+    RenderSurface tempSurface;
+    RenderSurface powerSurface;
+    RenderSurface sessionSurface;
+    
+    // Dirty flags
+    struct DirtyFlags {
+        bool temp : 1;
+        bool power : 1;
+        bool session : 1;
+        bool timer : 1;
+    } dirty;
+    
+
     // State
     struct {
         uint32_t lastActivityTime;

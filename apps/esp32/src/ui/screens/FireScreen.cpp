@@ -93,6 +93,13 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
 
     state.targetTemp = DeviceState::instance().targetTemperature.get();
     DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
+
+
+    tempSurface = _ui->createSurface(190, 50);
+    powerSurface = _ui->createSurface(100, 40);
+    sessionSurface = _ui->createSurface(250, 140);
+    
+    dirty = {true, true, true, true};
 }
 
 void FireScreen::onEnter()
@@ -113,9 +120,30 @@ void FireScreen::draw(DisplayDriver &display)
 {
     _ui->clear();
 
-   /* _ui->component(190, 50, 0, 60, [this](RenderSurface& s) {
+    if (dirty.temp) {
+        tempSurface.clear();
+        // ... zeichne Temperatur
+        tempSurface.blitToScreen(0, 60);
+        dirty.temp = false;
+    }
+    
+    if (dirty.power) {
+        powerSurface.clear();
+        // ... zeichne Power
+        powerSurface.blitToScreen(192, 60);
+        dirty.power = false;
+    }
+    
+    if (dirty.session) {
+        sessionSurface.clear();
+        // ... zeichne Session
+        sessionSurface.blitToScreen(15, 115);
+        dirty.session = false;
+    }
+    
+    /* _ui->component(190, 50, 0, 60, [this](RenderSurface& s) {
     });*/
-
+/*
     _ui->withSurface(190, 50, 0, 60, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
@@ -155,7 +183,7 @@ void FireScreen::draw(DisplayDriver &display)
         //s.sprite->fillSprite(COLOR_BG);
         drawHeatingTimer(s.sprite);
     });
-    }
+    }*/
 }
 
 void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
