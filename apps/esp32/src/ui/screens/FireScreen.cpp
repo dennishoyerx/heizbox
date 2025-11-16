@@ -2,7 +2,6 @@
 #include "hardware/display/DisplayDriver.h"
 #include "core/DeviceState.h"
 #include "ui/base/ScreenManager.h"
-#include "ui/components/UIText.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
 #include <TFT_eSPI.h>
