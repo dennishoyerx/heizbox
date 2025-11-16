@@ -1,4 +1,3 @@
-// apps/esp32/src/hardware/display/DisplayDriver.cpp
 #include <memory>
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"

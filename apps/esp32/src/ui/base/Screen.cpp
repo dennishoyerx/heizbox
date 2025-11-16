@@ -7,12 +7,10 @@
 
 
 Screen::Screen() : manager(nullptr) {
-    components = new Components();
     initState();
 }
 
 Screen::~Screen() {
-    delete components;
 }
 
 void Screen::setState(const std::string& key, int value) {
