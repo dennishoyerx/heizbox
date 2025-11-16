@@ -19,6 +19,10 @@ bool TempSensor::begin() {
     return true;
 }
 
+float TempSensor::readTemperature() {
+    return thermocouple->readCelsius();
+}
+
 // Nicht-blockierendes Update
 void TempSensor::update() {
     unsigned long now = millis();
@@ -41,7 +45,21 @@ float TempSensor::getTemperature() {
 }
 
 bool TempSensor::validateReading(float temp) const {
-    return !isnan(temp) && temp >= -20.0f && temp <= 400.0f;
+    if (isnan(temp)) return false;
+    if (temp < -20 || temp > 400) return false;
+
+    // Plausibilitätsprüfung: Max. Änderung
+    if (!isnan(lastValidTemp)) {
+        float delta = temp - lastValidTemp;
+        if (delta < -8.0f) {  // keine 8°C Sekundeneinbruch während Heizen
+            return false;
+        }
+        if (delta > 50.0f) { // keine 50°C Sprünge nach oben
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool TempSensor::hasError() const {

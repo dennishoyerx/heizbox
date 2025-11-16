@@ -21,6 +21,8 @@
         static constexpr uint8_t THERMO_CS_PIN = 27;
         static constexpr uint8_t THERMO_SO_PIN = 26;
 
+        static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 500;
+
     };
 
     struct NetworkConfig {

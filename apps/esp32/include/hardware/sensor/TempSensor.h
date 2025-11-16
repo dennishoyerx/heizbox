@@ -5,10 +5,11 @@
 
 class TempSensor {
 public:
-    TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs = 300);
+    TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs = 500);
     bool begin();
-    float getTemperature(); // Gibt immer den letzten stabilen Wert
-    void update();          // Nicht-blockierend, aktualisiert intern Temperatur
+    float getTemperature();
+    float readTemperature();
+    void update();
 
     void setClickThreshold(float clickTemp);
     bool hasReachedClickTemp();

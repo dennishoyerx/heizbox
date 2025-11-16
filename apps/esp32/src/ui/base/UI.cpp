@@ -1,6 +1,6 @@
 #include <ui/base/UI.h>
 #include <ui/ColorPalette.h>
-#include <ui/base/SurfaceFactory.h> // Include the new header
+#include <ui/base/SurfaceFactory.h>
 
 UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {}
 
@@ -20,5 +20,4 @@ void UI::clear() {
     _surfaceFactory.withSurface(280, 190, 0, 50, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
     });
-    //_driver->clear();
 }

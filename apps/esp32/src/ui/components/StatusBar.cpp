@@ -1,7 +1,7 @@
 // src/StatusBar.cpp
 #include "ui/components/StatusBar.h"
 #include "Fonts/GFXFF/gfxfont.h"
-#include "assets/bitmaps.h"
+#include "bitmaps.h"
 #include "net/WiFiManager.h"
 #include "utils/clock.h"
 #include "ui/ColorPalette.h"

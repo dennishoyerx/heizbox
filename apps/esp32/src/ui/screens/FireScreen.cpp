@@ -113,11 +113,14 @@ void FireScreen::draw(DisplayDriver &display)
 {
     _ui->clear();
 
+   /* _ui->component(190, 50, 0, 60, [this](RenderSurface& s) {
+    });*/
+
     _ui->withSurface(190, 50, 0, 60, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans24pt7b);
+        s.sprite->setFreeFont(&FreeSans18pt7b);
 
         // Current Temp
         s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
@@ -133,7 +136,7 @@ void FireScreen::draw(DisplayDriver &display)
 
         // Power
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans24pt7b);
+        s.sprite->setFreeFont(&FreeSans18pt7b);
         s.sprite->drawString(String(heater.getPower()), 34, 0);
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });

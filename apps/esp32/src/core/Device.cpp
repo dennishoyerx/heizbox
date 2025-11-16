@@ -44,7 +44,7 @@ Device::Device()
           screenManager, heater, display.get(), statsManager, input, _tempSensor
       )),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
-      _tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN)),
+      _tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HardwareConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS)),
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
