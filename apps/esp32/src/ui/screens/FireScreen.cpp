@@ -232,8 +232,8 @@ void FireScreen::update()
 {
     const bool isActive = heater.isHeating() || heater.isPaused();
 
-        tempSensor->update();
-        state.currentTemp = tempSensor->getTemperature();
+    tempSensor->update();
+    state.currentTemp = tempSensor->getTemperature();
 
     if (isActive)
     {
