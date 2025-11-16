@@ -113,26 +113,33 @@ void FireScreen::draw(DisplayDriver &display)
 {
     _ui->clear();
 
-    _ui->withSurface(150, 50, 15, 60, [this](RenderSurface& s) {
+    _ui->withSurface(190, 50, 0, 60, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         s.sprite->setFreeFont(&FreeSans24pt7b);
-        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 0, 0);
-        s.sprite->drawString(String(state.targetTemp, 0), 60, 0);
+
+        // Current Temp
+        s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 30, 0);
+
+        // Target Temp
+        s.sprite->drawBitmap(86, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawString(String(state.targetTemp, 0), 132, 0);
     });
 
-    _ui->withSurface(60, 40, 220, 60, [this](RenderSurface& s) {
+    _ui->withSurface(100, 40, 192, 60, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
-        //s.sprite->setTextDatum(MR_DATUM);
+        // Power
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         s.sprite->setFreeFont(&FreeSans24pt7b);
-        s.sprite->drawString(String(heater.getPower()), 0, 0);
+        s.sprite->drawString(String(heater.getPower()), 34, 0);
+        s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
 
 
-    _ui->withSurface(250, 140, 15, 110, [this](RenderSurface& s) {
+    _ui->withSurface(250, 140, 15, 115, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
@@ -140,7 +147,7 @@ void FireScreen::draw(DisplayDriver &display)
 
 
     if (heater.isHeating()) {
-    _ui->withSurface(140, 140, 70, 75, [this](RenderSurface& s) {
+    _ui->withSurface(140, 140, 70, 100, [this](RenderSurface& s) {
         //TimerState st{ 3900, true }; // 65min
         //s.sprite->fillSprite(COLOR_BG);
         drawHeatingTimer(s.sprite);
