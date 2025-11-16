@@ -11,7 +11,9 @@ HeaterController::HeaterController()
       autoStopTime(60000), 
       cycleCounter(0), 
       lastCycleDuration(0), 
-      cycleFinishedFlag(false) {
+      cycleFinishedFlag(false),
+      dutyCycleStartTime(0),
+      heaterPhysicallyOn(false) {
 }
 
 void HeaterController::init() {
@@ -24,12 +26,12 @@ void HeaterController::init() {
         power = val;
     });
 
-
-
     Serial.println("🔥 Heater initialized");
 }
 
 void HeaterController::setPower(uint8_t _power) {
+    if (_power > 100) _power = 100;
+    if (_power < 10) _power = 10;
     power = _power;
 }
 
@@ -37,8 +39,6 @@ uint8_t HeaterController::getPower() {
     return power;
 }
 
-// Optimization: Centralized state transition logic.
-// Benefit: Ensures state changes are atomic, logged, and always reset the state timer.
 void HeaterController::transitionTo(State newState) {
     if (state == newState) return;
 
@@ -49,15 +49,17 @@ void HeaterController::transitionTo(State newState) {
 void HeaterController::startHeating() {
     if (state == State::IDLE || state == State::COOLDOWN) {
         digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
-        digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
         startTime = millis();
+        dutyCycleStartTime = millis();
+        heaterPhysicallyOn = false; // Will be controlled by duty cycle
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
     } else if (state == State::PAUSED) {
         digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
-        digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
         // Adjust startTime to account for the pause duration
         startTime = millis() - (pauseTime - startTime);
+        dutyCycleStartTime = millis();
+        heaterPhysicallyOn = false;
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating resumed");
     }
@@ -68,6 +70,7 @@ void HeaterController::stopHeating(bool finalize) {
 
     digitalWrite(HardwareConfig::STATUS_LED_PIN, LOW);
     digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
+    heaterPhysicallyOn = false;
 
     if (finalize) {
         const uint32_t duration = millis() - startTime;
@@ -89,9 +92,41 @@ void HeaterController::stopHeating(bool finalize) {
     }
 }
 
-// Optimization: Replaced multiple if-statements with a clear switch-case state machine.
-// Benefit: Improves readability and maintainability of the heater logic.
+void HeaterController::updateDutyCycle() {
+    if (state != State::HEATING) {
+        // Ensure heater is off when not in HEATING state
+        if (heaterPhysicallyOn) {
+            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
+            heaterPhysicallyOn = false;
+        }
+        return;
+    }
+
+    const uint32_t dutyCycleElapsed = millis() - dutyCycleStartTime;
+    const uint32_t onTime = (DUTY_CYCLE_PERIOD_MS * power) / 100;
+    
+    if (dutyCycleElapsed < onTime) {
+        // ON phase
+        if (!heaterPhysicallyOn) {
+            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
+            heaterPhysicallyOn = true;
+        }
+    } else if (dutyCycleElapsed < DUTY_CYCLE_PERIOD_MS) {
+        // OFF phase
+        if (heaterPhysicallyOn) {
+            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
+            heaterPhysicallyOn = false;
+        }
+    } else {
+        // Start new duty cycle
+        dutyCycleStartTime = millis();
+    }
+}
+
 void HeaterController::update() {
+    // Update duty cycle first (controls physical heater switching)
+    updateDutyCycle();
+
     const uint32_t elapsed = getElapsedTime();
 
     switch (state) {
@@ -175,5 +210,3 @@ bool HeaterController::isCycleFinished() const {
 void HeaterController::clearCycleFinishedFlag() {
     cycleFinishedFlag = false;
 }
-
-

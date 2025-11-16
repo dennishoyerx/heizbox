@@ -41,6 +41,8 @@ private:
     static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
 
     void transitionTo(State newState);
+    void updateDutyCycle();
+
 
     State state = State::IDLE;
     uint8_t power = 0;

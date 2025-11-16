@@ -112,30 +112,31 @@ void FireScreen::onCycleFinalized() {
 
 void FireScreen::draw(DisplayDriver &display)
 {
-    display.clear();
+    _ui->clear();
 
-    _ui->withSurface(250, 140, 15, 60, [this](RenderSurface& s) {
+    _ui->withSurface(150, 50, 15, 60, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+        s.sprite->setFreeFont(&FreeSans24pt7b);
+        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 0, 0);
+        s.sprite->drawString(String(state.targetTemp, 0), 60, 0);
+    });
+
+    _ui->withSurface(60, 40, 220, 60, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+
+        //s.sprite->setTextDatum(MR_DATUM);
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+        s.sprite->setFreeFont(&FreeSans24pt7b);
+        s.sprite->drawString(String(heater.getPower()), 0, 0);
+    });
+
+
+    _ui->withSurface(250, 140, 15, 110, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
-    });
-
-    _ui->withSurface(50, 50, 15, 170, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
-
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans12pt7b);
-        s.sprite->drawString(String(state.targetTemp, 0), 0, 0);
-        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 1), 0, 25);
-    });
-
-
-    _ui->withSurface(50, 40, 65, 170, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
-
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans18pt7b);
-        s.sprite->drawString(String(heater.getPower()), 0, 0);
     });
 
 
@@ -220,7 +221,7 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
 
 void FireScreen::update()
 {
-    const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
+    const bool isActive = heater.isHeating() || heater.isPaused();
 
         tempSensor->update();
         state.currentTemp = tempSensor->getTemperature();
@@ -243,7 +244,7 @@ void FireScreen::update()
 
     static bool wasHeating = false;
     if (!heater.isHeating() && wasHeating) {
-        markDirty(); // Force redraw when heating stops
+        markDirty();
     }
     wasHeating = heater.isHeating();
 
@@ -280,12 +281,24 @@ void FireScreen::handleInput(InputEvent event)
     }
 
     if (event.button == LEFT) {
-        DeviceState::instance().power.set(DeviceState::instance().power.get() - 10);
+        uint8_t _power = DeviceState::instance().power.get() - 10;
+        if (_power < 10) {
+            _power = 10;
+        }
+
+        DeviceState::instance().power.set(_power);
+        markDirty();
         return;
     }
 
     if (event.button == RIGHT) {
-        DeviceState::instance().power.set(DeviceState::instance().power.get() + 10);
+        uint8_t _power = DeviceState::instance().power.get() + 10;
+       if (_power > 100) {
+            _power = 100;
+        }
+
+        DeviceState::instance().power.set(_power);
+        markDirty();
     }
 
 }
@@ -300,10 +313,10 @@ void FireScreen::handleCycleChange()
 void FireScreen::checkScreensaverTimeout()
 {
     const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
-    if (!isActive && (millis() - state.lastActivityTime > DeviceState::instance().sleepTimeout.get()))
+    /*if (!isActive && (millis() - state.lastActivityTime > DeviceState::instance().sleepTimeout.get()))
     {
         screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
-    }
+    }*/
 }
 
 void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)

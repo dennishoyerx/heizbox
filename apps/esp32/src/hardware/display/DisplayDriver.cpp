@@ -49,11 +49,14 @@ void DisplayDriver::reallocateSprites() {
 }
 
 void DisplayDriver::clear() {
-    if (spriteRenderer && spriteRenderer->isAllocated()) {
+        tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
+        //renderStatusBar();
+
+   /* if (spriteRenderer && spriteRenderer->isAllocated()) {
         spriteRenderer->getSprite().fillSprite(COLOR_ACCENT);
     } else {
         tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
-    }
+    }*/
     if (screenManager) {
         screenManager->setDirty();
     }

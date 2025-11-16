@@ -1,4 +1,5 @@
 #include <ui/base/UI.h>
+#include <ui/ColorPalette.h>
 #include <ui/base/SurfaceFactory.h> // Include the new header
 
 UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {}
@@ -16,5 +17,8 @@ void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, Sur
 }
 
 void UI::clear() {
-    _driver->clear();
+    _surfaceFactory.withSurface(280, 190, 0, 50, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+    });
+    //_driver->clear();
 }
