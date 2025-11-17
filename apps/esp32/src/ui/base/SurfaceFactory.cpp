@@ -17,22 +17,21 @@ RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h) {
   for (auto it = _pool.begin(); it != _pool.end(); ++it) {
     if (it->sprite && it->w == w && it->h == h) {
       TFT_eSprite* spr = it->sprite;
-      PoolEntry entry = *it;
+      RenderStateHash hash = it->stateHash; // Preserve state
       _pool.erase(it);
       RenderSurface s{ spr };
+      s.stateHash = hash;
       return s;
     }
   }
 
   TFT_eSprite *spr = new TFT_eSprite(_tft);
-  // Falls PSRAM verwendet werden soll, die Library-Version kann setPsram unterstützen
   #if defined(TFT_ESPI_HAS_SETPSRAM)
   if (_usePsram) spr->setPsram(true);
   #endif
 
   spr->setColorDepth(4);
   if (!spr->createSprite(w, h)) {
-    // create failed
     spr->deleteSprite();
     delete spr;
     return RenderSurface{ nullptr };
@@ -50,6 +49,7 @@ void SurfaceFactory::releaseSurface(RenderSurface& s) {
   e.sprite = s.sprite;
   e.w = s.sprite->width();
   e.h = s.sprite->height();
+  e.stateHash = s.stateHash; // Store state for next use
   _pool.push_back(e);
   s.sprite = nullptr;
 }
@@ -57,6 +57,25 @@ void SurfaceFactory::releaseSurface(RenderSurface& s) {
 void SurfaceFactory::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb) {
   RenderSurface s = createSurface(w, h);
   if (!s.sprite) return;
+  s.clear();
+  cb(s);
+  s.blitToScreen(targetX, targetY);
+  releaseSurface(s);
+}
+
+void SurfaceFactory::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY,
+                                  const std::unordered_map<std::string, StateValue>& state,
+                                  SurfaceCallback cb) {
+  RenderSurface s = createSurface(w, h);
+  if (!s.sprite) return;
+
+  // Check if state changed - if not, skip rendering
+  if (!s.stateHash.hasChanged(state)) {
+    releaseSurface(s);
+    return; // State unchanged, no render needed
+  }
+
+  // State changed, render surface
   s.clear();
   cb(s);
   s.blitToScreen(targetX, targetY);

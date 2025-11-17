@@ -4,13 +4,69 @@
 #include <TFT_eSPI.h>
 #include <vector>
 #include <functional>
+#include <unordered_map>
+#include <string>
+#include <initializer_list>
+#include <variant>
 
 struct Rect { int16_t x, y, w, h; };
 
-struct RenderSurface {
-  TFT_eSprite *sprite = nullptr; // owned by Screen/Pool
+// Variant type for different state value types
+using StateValue = std::variant<int, float, bool, std::string>;
 
-  // Constructor to allow direct initialization with a TFT_eSprite*
+// State hash für change detection
+struct RenderStateHash {
+  std::unordered_map<std::string, StateValue> values;
+  size_t hash = 0;
+
+  // Calculate hash from all values
+  size_t calculateHash() const {
+    size_t h = 0;
+    for (const auto& [key, value] : values) {
+      h ^= std::hash<std::string>{}(key);
+      std::visit([&h](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::string>) {
+          h ^= std::hash<std::string>{}(arg);
+        } else if constexpr (std::is_same_v<T, float>) {
+          h ^= std::hash<int>{}(static_cast<int>(arg * 1000)); // float precision
+        } else {
+          h ^= std::hash<T>{}(arg);
+        }
+      }, value);
+    }
+    return h;
+  }
+
+  bool hasChanged(const std::unordered_map<std::string, StateValue>& newValues) {
+    size_t newHash = 0;
+    for (const auto& [key, value] : newValues) {
+      newHash ^= std::hash<std::string>{}(key);
+      std::visit([&newHash](auto&& arg) {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::string>) {
+          newHash ^= std::hash<std::string>{}(arg);
+        } else if constexpr (std::is_same_v<T, float>) {
+          newHash ^= std::hash<int>{}(static_cast<int>(arg * 1000));
+        } else {
+          newHash ^= std::hash<T>{}(arg);
+        }
+      }, value);
+    }
+
+    if (newHash != hash) {
+      hash = newHash;
+      values = newValues;
+      return true;
+    }
+    return false;
+  }
+};
+
+struct RenderSurface {
+  TFT_eSprite *sprite = nullptr;
+  RenderStateHash stateHash;
+
   RenderSurface(TFT_eSprite* s = nullptr) : sprite(s) {}
 
   int16_t width() const { return sprite ? sprite->width() : 0; }
@@ -35,15 +91,29 @@ public:
   RenderSurface createSurface(int16_t w, int16_t h);
   void releaseSurface(RenderSurface& s);
 
+  // Original withSurface - always renders
   void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb);
+
+  // New withSurface with state tracking - only renders if state changed
+  void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, 
+                   const std::unordered_map<std::string, StateValue>& state,
+                   SurfaceCallback cb);
+
   void usePSRAM(bool en) { _usePsram = en; }
 
 private:
   TFT_eSPI* _tft = nullptr;
   bool _usePsram = false;
 
-  struct PoolEntry { TFT_eSprite* sprite; int16_t w, h; };
+  struct PoolEntry { 
+    TFT_eSprite* sprite; 
+    int16_t w, h;
+    RenderStateHash stateHash; // State tracking per pooled surface
+  };
   std::vector<PoolEntry> _pool;
+
+  // Helper to find surface in pool with matching dimensions and position
+  PoolEntry* findPoolEntry(int16_t w, int16_t h, int16_t x, int16_t y);
 };
 
 #endif // SURFACE_FACTORY_H

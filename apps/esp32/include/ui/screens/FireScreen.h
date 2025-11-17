@@ -31,20 +31,6 @@ private:
     StatsManager* statsManager;
     TempSensor* tempSensor; // TempSensor instance
 
-
-    RenderSurface tempSurface;
-    RenderSurface powerSurface;
-    RenderSurface sessionSurface;
-    
-    // Dirty flags
-    struct DirtyFlags {
-        bool temp : 1;
-        bool power : 1;
-        bool session : 1;
-        bool timer : 1;
-    } dirty;
-    
-
     // State
     struct {
         uint32_t lastActivityTime;
@@ -67,7 +53,7 @@ private:
     float lastTemp = NAN;
 
     // Helper methods
-    void drawHeatingTimer(TFT_eSprite* sprite);
+    void drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds);
     static void drawSessionRow(TFT_eSprite* sprite, const char* label, float consumption, int y, uint8_t bgColor, uint8_t borderColor, uint8_t textColor, bool invert = false, bool thin = false);
     void drawCycleInfo(DisplayDriver& display);
     void drawSessionStats(DisplayDriver& display);

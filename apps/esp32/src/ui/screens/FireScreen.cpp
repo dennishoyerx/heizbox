@@ -93,13 +93,6 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
 
     state.targetTemp = DeviceState::instance().targetTemperature.get();
     DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
-
-
-    tempSurface = _ui->createSurface(190, 50);
-    powerSurface = _ui->createSurface(100, 40);
-    sessionSurface = _ui->createSurface(250, 140);
-    
-    dirty = {true, true, true, true};
 }
 
 void FireScreen::onEnter()
@@ -118,33 +111,11 @@ void FireScreen::onCycleFinalized() {
 
 void FireScreen::draw(DisplayDriver &display)
 {
-    _ui->clear();
-
-    if (dirty.temp) {
-        tempSurface.clear();
-        // ... zeichne Temperatur
-        tempSurface.blitToScreen(0, 60);
-        dirty.temp = false;
-    }
-    
-    if (dirty.power) {
-        powerSurface.clear();
-        // ... zeichne Power
-        powerSurface.blitToScreen(192, 60);
-        dirty.power = false;
-    }
-    
-    if (dirty.session) {
-        sessionSurface.clear();
-        // ... zeichne Session
-        sessionSurface.blitToScreen(15, 115);
-        dirty.session = false;
-    }
-    
-    /* _ui->component(190, 50, 0, 60, [this](RenderSurface& s) {
-    });*/
-/*
-    _ui->withSurface(190, 50, 0, 60, [this](RenderSurface& s) {
+    //_ui->clear();
+    _ui->withSurface(190, 50, 0, 60, {
+        {"currentTemp", state.currentTemp},
+        {"targetTemp", state.targetTemp}
+    }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
@@ -159,7 +130,9 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->drawString(String(state.targetTemp, 0), 132, 0);
     });
 
-    _ui->withSurface(100, 40, 192, 60, [this](RenderSurface& s) {
+    _ui->withSurface(100, 40, 192, 60, {
+        {"power", heater.getPower()}
+    }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
         // Power
@@ -170,34 +143,31 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
 
-    _ui->withSurface(250, 140, 15, 115, [this](RenderSurface& s) {
+    _ui->withSurface(250, 140, 15, 115, {
+        {"consumption", cachedConsumption},
+        {"todayConsumption", cachedTodayConsumption},
+        {"currentCycle", state.currentCycle}
+    }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
     });
 
 
-    if (heater.isHeating()) {
-    _ui->withSurface(140, 140, 70, 100, [this](RenderSurface& s) {
-        //TimerState st{ 3900, true }; // 65min
-        //s.sprite->fillSprite(COLOR_BG);
-        drawHeatingTimer(s.sprite);
-    });
-    }*/
-}
-
-void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
-{
-    const uint32_t elapsed = heater.getElapsedTime();
-    const uint32_t seconds = elapsed / 1000;
-    
-    static uint32_t lastSeconds = 999;
-    if (seconds == lastSeconds && heater.isHeating()) { // Only skip redraw if actively heating and second hasn't changed
-        //sprite->deleteSprite();
+    if (!heater.isHeating()) {
         return;
     }
-    lastSeconds = seconds;
 
+    const uint32_t seconds = (heater.getElapsedTime()) / 1000;
+    _ui->withSurface(140, 140, 70, 100, {
+        {"seconds", (int)seconds}
+    }, [this, seconds](RenderSurface& s) {
+        drawHeatingTimer(s.sprite, seconds);
+    });
+}
+
+void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
+{
     uint8_t timerColor;
     if (seconds < 20) timerColor = COLOR_SUCCESS;
     else if (seconds < 35) timerColor = COLOR_WARNING;
@@ -251,9 +221,6 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite)
         sprite->setTextColor(COLOR_BG);
         sprite->drawString("CLICK ZONE", centerX, centerY + 80, 2);
     }
-
-//    sprite->pushSprite(70, 75);
-//    sprite->deleteSprite();
 }
 
 void FireScreen::update()
