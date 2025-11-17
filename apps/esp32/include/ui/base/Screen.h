@@ -13,7 +13,7 @@ class DisplayManager;
 class ScreenManager;
 class DisplayDriver;
 
-
+using InputCallback = std::function<void(InputEvent&)>;
 
 // Base Screen mit Common Functionality
 class Screen {
@@ -46,6 +46,8 @@ protected:
     virtual void initState() {}
     ScreenManager* manager;
     UI* _ui;
+
+    void onInput(InputButton button, InputEventType type, InputCallback callback);
 
     void markDirty();
     void centerText(DisplayDriver& display, int16_t y, const char* text,

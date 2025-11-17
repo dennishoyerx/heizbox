@@ -54,4 +54,7 @@ void Screen::centerText(DisplayDriver& display, int16_t y, const char* text,
     display.drawText(x, y, text, color, size);
 }
 
+void Screen::onInput(InputButton button, InputEventType type, InputCallback callback) {
+ //   manager->onInput(button, type, callback);
+}
 
