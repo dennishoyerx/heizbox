@@ -33,7 +33,7 @@ void InputManager::update() {
         const bool wasPressed = isPressed(i);
 
         // --- State Change Detection ---
-        if (isLow && !wasPressed && (now - lastDebounce[i] > DEBOUNCE_MS)) {
+        if (isLow && !wasPressed && (now - lastDebounce[i] > InputConfig::DEBOUNCE_MS)) {
             // --- PRESS ---
             setPressed(i, true);
             setHoldSent(i, false);
@@ -45,13 +45,24 @@ void InputManager::update() {
             // --- RELEASE ---
             setPressed(i, false);
             lastDebounce[i] = now;
-            // Optional: Uncomment to send RELEASE events
-            // if (callback) callback({RELEASE, cfg.button});
 
-        } else if (isLow && wasPressed && !isHoldSent(i) && (now - pressTimes[i] > HOLD_THRESHOLD_MS)) {
+            // RELEASE nur senden, wenn HOLD getriggert wurde
+            if (isHoldSent(i) && callback) {
+                callback({RELEASE, cfg.button});
+            }
+
+            // Reset Hold-Flag, damit erneutes Halten wieder funktioniert
+            setHoldSent(i, false);
+        } else if (isLow && wasPressed && !isHoldSent(i) && (now - pressTimes[i] > InputConfig::HOLD_THRESHOLD_MS)) {
             // --- HOLD ---
             setHoldSent(i, true);
             if (callback) callback({HOLD, cfg.button});
+        } else if (isLow && wasPressed && isHoldSent(i)) {
+            // --- HOLDING ---
+            if (now - lastHoldStep[i] >= InputConfig::HOLDING_INTERVAL_MS) {
+                lastHoldStep[i] = now;
+                if (callback) callback({HOLDING, cfg.button});
+            }
         }
     }
 }

@@ -24,6 +24,12 @@ struct HardwareConfig {
     static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 350;
 };
 
+struct HeaterConfig {
+    static constexpr uint32_t HEATCYCLE_MIN_DURATION_MS = 30000;
+    static constexpr uint32_t PAUSE_TIMEOUT_MS = 5000;
+    static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
+};
+
 struct NetworkConfig {
     static constexpr const char *BACKEND_WS_URL = "wss://backend.hzbx.de/ws";
     static constexpr const char *DEVICE_ID = "HeizboxESP32";
@@ -36,4 +42,12 @@ struct Timing {
     static constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 600000;
     static constexpr uint32_t HEATCYCLE_TIMEOUT_MS = 30000;
 };
+
+
+struct InputConfig {
+    static constexpr uint32_t HOLD_THRESHOLD_MS = 300;
+    static constexpr uint32_t HOLDING_INTERVAL_MS = 150;
+    static constexpr uint32_t DEBOUNCE_MS = 50;
+};
+
 

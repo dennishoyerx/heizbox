@@ -8,7 +8,8 @@
 enum InputEventType {
     PRESS,
     RELEASE,
-    HOLD
+    HOLD,
+    HOLDING
 };
 
 enum InputButton {
@@ -36,8 +37,6 @@ public:
 
 private:
     static constexpr uint8_t NUM_BUTTONS = 6;
-    static constexpr uint32_t HOLD_THRESHOLD_MS = 400;
-    static constexpr uint32_t DEBOUNCE_MS = 50;
 
     struct ButtonConfig {
         uint8_t pin;
@@ -52,6 +51,7 @@ private:
     uint8_t holdSentMask = 0;
     uint32_t pressTimes[NUM_BUTTONS] = {0};
     uint32_t lastDebounce[NUM_BUTTONS] = {0};
+    uint32_t lastHoldStep[NUM_BUTTONS] = {0};
 
     // --- Inline helper functions for bitmask manipulation ---
     inline bool isPressed(uint8_t idx) const { return pressedMask & (1 << idx); }

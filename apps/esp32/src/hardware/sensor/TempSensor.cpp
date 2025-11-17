@@ -8,7 +8,7 @@ TempSensor::TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t
       lastValidTemp(NAN), clickThreshold(190.0f), clickReached(false),
       errorCount(0), lastReadTime(0), readInterval(readIntervalMs)
 {
-    thermocouple = new MAX6675(sck_pin, cs_pin, so_pin); // Software-SPI Constructor
+    thermocouple = new MAX6675(sck_pin, cs_pin, so_pin);
 }
 
 bool TempSensor::begin() {

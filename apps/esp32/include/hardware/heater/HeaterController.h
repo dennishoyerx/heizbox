@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "hardware/sensor/TempSensor.h"
-
+#include "core/EventBus.h"
 
 
 class HeaterController {
@@ -12,7 +12,6 @@ public:
         IDLE,
         HEATING,
         PAUSED,
-        COOLDOWN,
         ERROR
     };
 
@@ -39,11 +38,7 @@ public:
 
 private:
     TempSensor* tempSensor;
-
-    static constexpr uint32_t COOLDOWN_DURATION_MS = 3000;
-    static constexpr uint32_t MIN_CYCLE_DURATION_MS = 10000;
-    static constexpr uint32_t PAUSE_TIMEOUT_MS = 5000;
-    static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
+    EventBus eventBus;
 
     void transitionTo(State newState);
     void updateDutyCycle();

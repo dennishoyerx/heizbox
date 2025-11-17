@@ -54,7 +54,7 @@ float HeaterController::getTemperature() {
 
 
 void HeaterController::startHeating() {
-    if (state == State::IDLE || state == State::COOLDOWN) {
+    if (state == State::IDLE) {
         digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
         startTime = millis();
         dutyCycleStartTime = millis();
@@ -84,13 +84,13 @@ void HeaterController::stopHeating(bool finalize) {
         lastCycleDuration = duration;
 
         // Only count cycles longer than a minimum threshold
-        if (duration >= MIN_CYCLE_DURATION_MS) {
+        if (duration >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
             cycleCounter++;
             cycleFinishedFlag = true; // Notify Device.cpp to send data
         }
 
         startTime = millis();
-        transitionTo(State::COOLDOWN);
+        transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
     } else {
         pauseTime = millis();
@@ -110,7 +110,7 @@ void HeaterController::updateDutyCycle() {
     }
 
     const uint32_t dutyCycleElapsed = millis() - dutyCycleStartTime;
-    const uint32_t onTime = (DUTY_CYCLE_PERIOD_MS * power) / 100;
+    const uint32_t onTime = (HeaterConfig::DUTY_CYCLE_PERIOD_MS * power) / 100;
     
     if (dutyCycleElapsed < onTime) {
         // ON phase
@@ -118,7 +118,7 @@ void HeaterController::updateDutyCycle() {
             digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
             heaterPhysicallyOn = true;
         }
-    } else if (dutyCycleElapsed < DUTY_CYCLE_PERIOD_MS) {
+    } else if (dutyCycleElapsed < HeaterConfig::DUTY_CYCLE_PERIOD_MS) {
         // OFF phase
         if (heaterPhysicallyOn) {
             digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
@@ -147,22 +147,17 @@ void HeaterController::update() {
             break;
 
         case State::PAUSED:
-            if (millis() - pauseTime >= PAUSE_TIMEOUT_MS) {
+            tempSensor->update(); 
+            if (millis() - pauseTime >= HeaterConfig::PAUSE_TIMEOUT_MS) {
                 Serial.println("Pause timeout, finalizing cycle.");
                 const uint32_t duration = pauseTime - startTime;
                 lastCycleDuration = duration;
 
-                if (duration >= MIN_CYCLE_DURATION_MS) {
+                if (duration >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
                     cycleCounter++;
                     cycleFinishedFlag = true;
                 }
                 startTime = millis();
-                transitionTo(State::COOLDOWN);
-            }
-            break;
-
-        case State::COOLDOWN:
-            if (millis() - startTime >= COOLDOWN_DURATION_MS) {
                 transitionTo(State::IDLE);
             }
             break;

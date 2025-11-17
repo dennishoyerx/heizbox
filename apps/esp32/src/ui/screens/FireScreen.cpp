@@ -1,5 +1,6 @@
 #include "ui/screens/FireScreen.h"
 #include "hardware/display/DisplayDriver.h"
+#include "core/Config.h"
 #include "core/DeviceState.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/ColorPalette.h"
@@ -8,8 +9,6 @@
 #include "utils/Logger.h"
 #include "StateManager.h"
 #include <utility>
-
-//#enum SessionRowStyle {};
 
 void FireScreen::drawSessionRow(TFT_eSprite* sprite, 
     const char* label, 
@@ -103,7 +102,7 @@ void FireScreen::onEnter()
 }
 
 void FireScreen::onCycleFinalized() {
-    if (heater.getLastCycleDuration() > 10000) {
+    if (heater.getLastCycleDuration() > HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
         DeviceState::instance().currentCycle.set(state.currentCycle);
         state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
     }
@@ -237,7 +236,6 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
 void FireScreen::update()
 {
     const bool isActive = heater.isHeating() || heater.isPaused();
-
     float temp = heater.getTemperature();
     
     if (temp != state.currentTemp) {
@@ -268,12 +266,22 @@ void FireScreen::update()
     }
     wasHeating = heater.isHeating();
 
-    checkScreensaverTimeout();
+    //checkScreensaverTimeout();
 }
 
 void FireScreen::handleInput(InputEvent event)
 {
-    if (event.type != PRESS) return;
+    if (event.type == HOLD || event.type == HOLDING) {
+        if (event.button == UP) {
+            DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() + 1);
+        }
+
+        if (event.button == DOWN) {
+            DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() - 1);
+        }
+        return;
+    }
+
 
     resetActivityTimer();
 
@@ -332,7 +340,7 @@ void FireScreen::handleCycleChange()
 
 void FireScreen::checkScreensaverTimeout()
 {
-    const bool isActive = heater.isHeating() || heater.isPaused() || heater.getState() == HeaterController::State::COOLDOWN;
+    const bool isActive = heater.isHeating() || heater.isPaused();
     /*if (!isActive && (millis() - state.lastActivityTime > DeviceState::instance().sleepTimeout.get()))
     {
         screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
