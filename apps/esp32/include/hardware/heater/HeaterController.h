@@ -2,6 +2,7 @@
 #define HEATERCONTROLLER_H
 
 #include <cstdint>
+#include "hardware/sensor/TempSensor.h"
 
 
 
@@ -33,8 +34,12 @@ public:
     void clearCycleFinishedFlag();
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
+    float getTemperature();
+
 
 private:
+    TempSensor* tempSensor;
+
     static constexpr uint32_t COOLDOWN_DURATION_MS = 3000;
     static constexpr uint32_t MIN_CYCLE_DURATION_MS = 10000;
     static constexpr uint32_t PAUSE_TIMEOUT_MS = 5000;

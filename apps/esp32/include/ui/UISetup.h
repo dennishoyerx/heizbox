@@ -41,8 +41,7 @@ public:
         HeaterController& heater,
         DisplayDriver* displayDriver,
         StatsManager& statsManager,
-        InputManager& inputManager,
-        TempSensor* tempSensor
+        InputManager& inputManager
     );
 
     void setupScreens();
@@ -63,7 +62,6 @@ private:
     DisplayDriver* displayDriver;
     StatsManager& statsManager;
     InputManager& inputManager;
-    TempSensor* tempSensor;
 
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
 

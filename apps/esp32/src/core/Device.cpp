@@ -29,8 +29,11 @@
 #include "hardware/drivers/TFT_eSPI_Driver.h"
 #include "hardware/display/BacklightController.h"
 
+#include "core/EventBus.h"
+
 Device::Device()
-    : input(),
+    : eventBus(),
+        input(),
       heater(),
       display(std::make_unique<DisplayDriver>(
           std::make_unique<TFT_eSPI_Driver>(),
@@ -41,10 +44,9 @@ Device::Device()
       webSocketManager(),
       screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(
-          screenManager, heater, display.get(), statsManager, input, _tempSensor
+          screenManager, heater, display.get(), statsManager, input
       )),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
-      _tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HardwareConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS)),
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
           [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
@@ -58,7 +60,6 @@ Device::Device()
 {}
 
 Device::~Device() {
-    delete _tempSensor;
 }
 
 void Device::setup() {
@@ -76,7 +77,6 @@ void Device::setup() {
     input.init();
     heater.init();
     statsManager.init();
-    _tempSensor->begin(); // Initialize TempSensor
 
     // Setup screens
     uiSetup->setupScreens();

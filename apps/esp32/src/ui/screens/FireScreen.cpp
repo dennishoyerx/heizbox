@@ -68,12 +68,11 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
 
  
 FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
-                       ScreensaverScreen *ss, StatsManager *stm, TempSensor* ts)
+                       ScreensaverScreen *ss, StatsManager *stm)
     : heater(hc),
       screenManager(sm),
       screensaverScreen(ss),
       statsManager(stm),
-      tempSensor(ts), // Initialize TempSensor
       cachedClicks(0),
       cachedConsumption(0),
       cachedTodayConsumption(0),
@@ -239,8 +238,7 @@ void FireScreen::update()
 {
     const bool isActive = heater.isHeating() || heater.isPaused();
 
-    tempSensor->update();
-    float temp = tempSensor->getTemperature();
+    float temp = heater.getTemperature();
     
     if (temp != state.currentTemp) {
         state.currentTemp = temp;

@@ -8,6 +8,7 @@
 #include "core/StateManager.h"
 #include "core/StateBinder.h"
 #include "core/Types.h"
+#include "core/EventBus.h"
 
 #include "hardware/heater/HeaterController.h"
 #include "hardware/input/InputManager.h"
@@ -20,7 +21,6 @@
 #include "hardware/heater/HeaterMonitor.h"
 #include "hardware/input/InputHandler.h"
 #include "hardware/sensor/CapacitiveSensor.h"
-#include "hardware/sensor/TempSensor.h" // Include TempSensor
 
 // UI
 #include "ui/base/ScreenManager.h"
@@ -44,8 +44,6 @@ public:
 
     void onHeatCycleFinalized();
 
-    TempSensor* getTempSensor() { return _tempSensor; } // Getter for TempSensor
-
 private:
     // Core components
     InputManager input;
@@ -55,7 +53,9 @@ private:
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;
     CapacitiveSensor capacitiveSensor;
-    TempSensor* _tempSensor; // TempSensor instance
+
+    EventBus eventBus;
+
 
     // Screen management
     ScreenManager screenManager;

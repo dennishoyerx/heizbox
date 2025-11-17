@@ -19,14 +19,10 @@ bool TempSensor::begin() {
     return true;
 }
 
-float TempSensor::readTemperature() {
-    return thermocouple->readCelsius();
-}
-
 // Nicht-blockierendes Update
-void TempSensor::update() {
+void TempSensor::update(bool ignoreInterval) {
     unsigned long now = millis();
-    if (now - lastReadTime >= readInterval) {
+    if (ignoreInterval || now - lastReadTime >= readInterval) {
         lastReadTime = now;
         float temp = thermocouple->readCelsius();
 

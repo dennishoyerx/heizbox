@@ -9,20 +9,18 @@ UISetup::UISetup(
     HeaterController& heater,
     DisplayDriver* displayDriver,
     StatsManager& statsManager,
-    InputManager& inputManager,
-    TempSensor* tempSensor
+    InputManager& inputManager
 )
     : screenManager(screenManager),
       heater(heater),
       displayDriver(displayDriver),
       statsManager(statsManager),
-      inputManager(inputManager),
-      tempSensor(tempSensor) // Initialize TempSensor
+      inputManager(inputManager)
 {}
 
 void UISetup::setupScreens() {
     // Create screens
-    fireScreen = std::make_unique<FireScreen>(heater, &screenManager, screensaverScreen.get(), &statsManager, tempSensor);
+    fireScreen = std::make_unique<FireScreen>(heater, &screenManager, screensaverScreen.get(), &statsManager);
     hiddenModeScreen = std::make_unique<HiddenModeScreen>(displayDriver);
     screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
         fireScreen->resetActivityTimer();

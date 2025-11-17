@@ -9,11 +9,13 @@ HeaterController::HeaterController()
       startTime(0), 
       pauseTime(0),
       autoStopTime(60000), 
-      cycleCounter(0), 
+      cycleCounter(0),
       lastCycleDuration(0), 
       cycleFinishedFlag(false),
       dutyCycleStartTime(0),
-      heaterPhysicallyOn(false) {
+      heaterPhysicallyOn(false),
+      tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HardwareConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS))
+       {
 }
 
 void HeaterController::init() {
@@ -45,6 +47,11 @@ void HeaterController::transitionTo(State newState) {
     Serial.printf("🔥 State: %d -> %d\n", static_cast<int>(state), static_cast<int>(newState));
     state = newState;
 }
+
+float HeaterController::getTemperature() {
+    return tempSensor->getTemperature();
+}
+
 
 void HeaterController::startHeating() {
     if (state == State::IDLE || state == State::COOLDOWN) {
@@ -117,6 +124,8 @@ void HeaterController::updateDutyCycle() {
             digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
             heaterPhysicallyOn = false;
         }
+
+        tempSensor->update(true); 
     } else {
         // Start new duty cycle
         dutyCycleStartTime = millis();
@@ -160,6 +169,7 @@ void HeaterController::update() {
 
         case State::IDLE:
         case State::ERROR:
+            tempSensor->update(); 
             // No automatic transitions from these states
             break;
     }
