@@ -48,9 +48,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
             transition.originalBrightness = display.getBrightness();
         } else {
             // Direkter Wechsel
-            display.clear();
             currentScreen->draw(display);
-            display.render();
             display.renderStatusBar();
             transition.inProgress = false;
         }
@@ -178,12 +176,9 @@ void ScreenManager::completeTransition() {
     // Restore brightness
     display.setBrightness(transition.originalBrightness);
 
-    // Force full redraw
-    display.clear();
     if (currentScreen) {
         currentScreen->draw(display);
     }
-    display.render();
     display.renderStatusBar();
 
     dirty = false;

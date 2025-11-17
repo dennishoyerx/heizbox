@@ -92,7 +92,10 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
     state.confirmationStartTime = 0;
 
     state.targetTemp = DeviceState::instance().targetTemperature.get();
+    state.power = DeviceState::instance().power.get();
+
     DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
+    DeviceState::instance().power.addListener([this](uint8_t val) { state.power = val; markDirty(); });
 }
 
 void FireScreen::onEnter()
@@ -111,10 +114,8 @@ void FireScreen::onCycleFinalized() {
 
 void FireScreen::draw(DisplayDriver &display)
 {
-    //_ui->clear();
-    _ui->withSurface(190, 50, 0, 60, {
-        {"currentTemp", state.currentTemp},
-        {"targetTemp", state.targetTemp}
+    _ui->withSurface(88, 50, 0, 60, {
+        {"currentTemp", state.currentTemp}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
@@ -123,11 +124,19 @@ void FireScreen::draw(DisplayDriver &display)
 
         // Current Temp
         s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 30, 0);
+        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 30, 6);
+    });
+
+    _ui->withSurface(104, 50, 84, 60, {
+        {"targetTemp", state.targetTemp}
+    }, [this](RenderSurface& s) {
+        s.sprite->fillSprite(COLOR_BG);
+        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+        s.sprite->setFreeFont(&FreeSans18pt7b);
 
         // Target Temp
-        s.sprite->drawBitmap(86, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.sprite->drawString(String(state.targetTemp, 0), 132, 0);
+        s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawString(String(state.targetTemp, 0), 46, 6);
     });
 
     _ui->withSurface(100, 40, 192, 60, {
@@ -138,7 +147,7 @@ void FireScreen::draw(DisplayDriver &display)
         // Power
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         s.sprite->setFreeFont(&FreeSans18pt7b);
-        s.sprite->drawString(String(heater.getPower()), 34, 0);
+        s.sprite->drawString(String(heater.getPower()), 32, 6);
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
 
@@ -231,7 +240,12 @@ void FireScreen::update()
     const bool isActive = heater.isHeating() || heater.isPaused();
 
     tempSensor->update();
-    state.currentTemp = tempSensor->getTemperature();
+    float temp = tempSensor->getTemperature();
+    
+    if (temp != state.currentTemp) {
+        state.currentTemp = temp;
+        markDirty();
+    }
 
     if (isActive)
     {
@@ -251,7 +265,7 @@ void FireScreen::update()
 
     static bool wasHeating = false;
     if (!heater.isHeating() && wasHeating) {
-        _ui->forceRedraw();
+        _ui->clear();
         markDirty();
     }
     wasHeating = heater.isHeating();

@@ -39,6 +39,7 @@ private:
         uint32_t confirmationStartTime;
         float targetTemp = 0;
         float currentTemp = 0;
+        uint8_t power = 0;
     } state;
 
     // Cached values from state

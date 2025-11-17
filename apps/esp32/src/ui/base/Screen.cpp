@@ -34,6 +34,12 @@ void Screen::setUI(UI* ui) {
     _ui = ui;
 }
 
+void Screen::redrawUI() {
+    if (_ui) {
+        _ui->forceRedraw();
+    }
+}
+
 void Screen::markDirty() {
     if (manager) {
         manager->setDirty();
