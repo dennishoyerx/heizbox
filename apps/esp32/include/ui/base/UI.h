@@ -2,6 +2,8 @@
 
 #include <hardware/display/DisplayDriver.h>
 #include <ui/base/SurfaceFactory.h>
+#include <unordered_map>
+#include <string>
 
 class UI {
 public:
@@ -17,6 +19,12 @@ public:
                      SurfaceCallback cb);
 
     void clear();
+    
+    // Force all surfaces to redraw on next render cycle
+    void forceRedraw();
+    
+    // Invalidate all cached surface states
+    void invalidateAll();
 
 private:
     DisplayDriver* _driver;

@@ -69,15 +69,18 @@ void SurfaceFactory::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t 
   RenderSurface s = createSurface(w, h);
   if (!s.sprite) return;
 
-  // Check if state changed - if not, skip rendering
-  if (!s.stateHash.hasChanged(state)) {
+  // Check if state changed - if not, skip rendering (unless force redraw)
+  if (!_forceRedraw && !s.stateHash.hasChanged(state)) {
     releaseSurface(s);
     return; // State unchanged, no render needed
   }
 
-  // State changed, render surface
+  // State changed or forced redraw, render surface
   s.clear();
   cb(s);
   s.blitToScreen(targetX, targetY);
   releaseSurface(s);
+  
+  // Reset force redraw flag after first use
+  _forceRedraw = false;
 }

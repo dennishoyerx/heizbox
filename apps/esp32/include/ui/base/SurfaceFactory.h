@@ -6,7 +6,6 @@
 #include <functional>
 #include <unordered_map>
 #include <string>
-#include <initializer_list>
 #include <variant>
 
 struct Rect { int16_t x, y, w, h; };
@@ -14,7 +13,7 @@ struct Rect { int16_t x, y, w, h; };
 // Variant type for different state value types
 using StateValue = std::variant<int, float, bool, std::string>;
 
-// State hash für change detection
+// State hash for change detection
 struct RenderStateHash {
   std::unordered_map<std::string, StateValue> values;
   size_t hash = 0;
@@ -79,13 +78,20 @@ struct RenderSurface {
   void blitToScreen(int16_t x, int16_t y) {
     if (sprite) sprite->pushSprite(x, y);
   }
+  void text(const char* text, int16_t x, int16_t y, uint16_t color) {
+    if (!sprite) return;
+    
+    sprite->setTextColor(color);
+    sprite->setFreeFont(&FreeSans18pt7b);
+    sprite->drawString(text, x, y);
+  }
 };
 
 using SurfaceCallback = std::function<void(RenderSurface&)>;
 
 class SurfaceFactory {
 public:
-  SurfaceFactory(TFT_eSPI* tft) : _tft(tft) {}
+  SurfaceFactory(TFT_eSPI* tft) : _tft(tft), _usePsram(false), _forceRedraw(false) {}
   ~SurfaceFactory();
 
   RenderSurface createSurface(int16_t w, int16_t h);
@@ -100,20 +106,30 @@ public:
                    SurfaceCallback cb);
 
   void usePSRAM(bool en) { _usePsram = en; }
+  
+  // Force all surfaces to redraw on next render
+  void forceRedraw() { _forceRedraw = true; }
+  
+  // Invalidate all cached states in the pool
+  void invalidateAll() {
+    for (auto& entry : _pool) {
+      entry.stateHash.hash = 0;
+      entry.stateHash.values.clear();
+    }
+  }
 
 private:
-  TFT_eSPI* _tft = nullptr;
-  bool _usePsram = false;
+  TFT_eSPI* _tft;
+  bool _usePsram;
+  bool _forceRedraw;
 
   struct PoolEntry { 
-    TFT_eSprite* sprite; 
-    int16_t w, h;
-    RenderStateHash stateHash; // State tracking per pooled surface
+    TFT_eSprite* sprite = nullptr; 
+    int16_t w = 0;
+    int16_t h = 0;
+    RenderStateHash stateHash;
   };
   std::vector<PoolEntry> _pool;
-
-  // Helper to find surface in pool with matching dimensions and position
-  PoolEntry* findPoolEntry(int16_t w, int16_t h, int16_t x, int16_t y);
 };
 
 #endif // SURFACE_FACTORY_H

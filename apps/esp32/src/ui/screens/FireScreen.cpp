@@ -131,7 +131,7 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
     _ui->withSurface(100, 40, 192, 60, {
-        {"power", heater.getPower()}
+        {"power", (int)heater.getPower()}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
@@ -143,7 +143,10 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
 
+    const bool isHeating = heater.isHeating();
+
     _ui->withSurface(250, 140, 15, 115, {
+        {"isHeating", isHeating},
         {"consumption", cachedConsumption},
         {"todayConsumption", cachedTodayConsumption},
         {"currentCycle", state.currentCycle}
@@ -154,7 +157,7 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
 
-    if (!heater.isHeating()) {
+    if (!isHeating) {
         return;
     }
 
@@ -248,6 +251,7 @@ void FireScreen::update()
 
     static bool wasHeating = false;
     if (!heater.isHeating() && wasHeating) {
+        _ui->forceRedraw();
         markDirty();
     }
     wasHeating = heater.isHeating();
