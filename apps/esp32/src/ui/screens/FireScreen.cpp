@@ -63,21 +63,15 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
         sprite->drawString(consumptionStr, x + width - 12, y + height / 2);
 }
 
-
-
- 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
-    DeviceState::instance().sessionConsumption.addListener([this](float val) { state.consumption = val; markDirty(); });
-    DeviceState::instance().todayConsumption.addListener([this](float val) { state.todayConsumption = val; markDirty(); });
-    DeviceState::instance().yesterdayConsumption.addListener([this](float val) { state.yesterdayConsumption = val; markDirty(); });
+    auto& ds = DeviceState::instance();
 
-    state.targetTemp = DeviceState::instance().targetTemperature.get();
-    state.power = DeviceState::instance().power.get();
-    state.currentCycle = DeviceState::instance().currentCycle.get();
-    DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
-    DeviceState::instance().power.addListener([this](uint8_t val) { state.power = val; markDirty(); });
-    DeviceState::instance().currentCycle.addListener([this](uint8_t val) { state.currentCycle = val; markDirty(); });
-    DeviceState::instance().isHeating.addListener([this](bool val) { state.isHeating = val; markDirty(); });
+    bindTo(state.consumption, ds.sessionConsumption);
+    bindTo(state.todayConsumption, ds.todayConsumption);
+    bindTo(state.yesterdayConsumption, ds.yesterdayConsumption);
+    bindTo(state.targetTemp, ds.targetTemperature);
+    bindTo(state.power, ds.power);
+    bindTo(state.currentCycle, ds.currentCycle);
 }
 
 void FireScreen::draw(DisplayDriver &display)

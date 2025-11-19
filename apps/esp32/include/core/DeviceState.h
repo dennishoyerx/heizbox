@@ -33,9 +33,9 @@ struct DeviceState {
     Observable<int> sessionClicks{0};
     Observable<int> sessionCaps{0};
     Observable<uint32_t> sessionCycles{0};
-    Observable<double> sessionConsumption{0};
-    Observable<double> todayConsumption{0};
-    Observable<double> yesterdayConsumption{0};
+    Observable<float> sessionConsumption{0};
+    Observable<float> todayConsumption{0};
+    Observable<float> yesterdayConsumption{0};
 
     // Statistics
     PersistedObservable<uint32_t> totalCycles{"stats", "total_cycles", 0};

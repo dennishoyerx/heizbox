@@ -4,6 +4,7 @@
 
 #include <unordered_map>
 #include <string>
+#include "core/Observable.h"
 #include "ui/base/UI.h"
 #include "ui/base/ScreenTransition.h"
 #include "hardware/input/InputManager.h"
@@ -53,6 +54,15 @@ protected:
     void markDirty();
     void centerText(DisplayDriver& display, int16_t y, const char* text,
                     uint16_t color, uint8_t size = 2);
+
+    template <typename T>
+    void bindTo(T& member, Observable<T>& observable) {
+        member = observable.get();
+        observable.addListener([this, &member](T v) {
+            member = v;
+            markDirty();
+        });
+    }
 
 private:
     std::unordered_map<std::string, int> state_;

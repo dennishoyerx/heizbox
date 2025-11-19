@@ -49,7 +49,6 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
         } else {
             // Direkter Wechsel 
             currentScreen->clear();
-
             currentScreen->draw(display);
             display.renderStatusBar();
             transition.inProgress = false;
@@ -156,7 +155,6 @@ void ScreenManager::drawTransitionFrame() {
                 // Bei 50% Screen wechseln
                 if (transition.progress >= 50 && previousScreen) {
                     //display.clear();
-                    currentScreen->clear();
                     currentScreen->draw(display);
                     display.render();
                     previousScreen = nullptr;
