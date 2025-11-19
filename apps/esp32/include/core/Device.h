@@ -13,7 +13,6 @@
 #include "hardware/heater/HeaterController.h"
 #include "hardware/input/InputManager.h"
 #include "hardware/display/DisplayDriver.h"
-#include "core/StatsManager.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"
@@ -28,11 +27,9 @@
 #include "ui/screens/HiddenModeScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/StatsScreen.h"
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
 #include "ui/UISetup.h"
-
 
 class Device {
 
@@ -43,40 +40,20 @@ public:
     void loop();
 
 private:
-    // Core components
     InputManager input;
     HeaterController heater;
     std::unique_ptr<DisplayDriver> display;
-    StatsManager statsManager;
     WiFiManager wifiManager;
     WebSocketManager webSocketManager;
     CapacitiveSensor capacitiveSensor;
-
     EventBus eventBus;
-
-
-    // Screen management
     ScreenManager screenManager;
 
-
-
-    // UI Setup
     std::unique_ptr<UISetup> uiSetup;
-
-    // Network Setup
     std::unique_ptr<Network> network;
-
-    // OTA Setup
     std::unique_ptr<OTASetup> otaSetup;
-
-    // Heater Monitor
     std::unique_ptr<HeaterMonitor> heaterMonitor;
-
-    // Input Handler
     std::unique_ptr<InputHandler> inputHandler;
-
-    // State
-
 
     // Helper methods
     void handleWebSocketMessage(const char* type, const JsonDocument& doc);

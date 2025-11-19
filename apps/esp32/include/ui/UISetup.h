@@ -7,7 +7,6 @@
 #include "ui/screens/HiddenModeScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/StatsScreen.h"
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
 #include "ui/base/ScreenTransition.h"
@@ -31,7 +30,6 @@ public:
      * @param hiddenModeScreen Reference to the HiddenModeScreen instance.
      * @param screensaverScreen Reference to the ScreensaverScreen instance.
      * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
-     * @param statsScreen Reference to the StatsScreen instance.
      * @param timezoneScreen Reference to the TimezoneScreen instance.
      * @param startupScreen Reference to the StartupScreen instance.
      * @param setCurrentCycleCallback Callback to set the current heat cycle.
@@ -40,7 +38,6 @@ public:
         ScreenManager& screenManager,
         HeaterController& heater,
         DisplayDriver* displayDriver,
-        StatsManager& statsManager,
         InputManager& inputManager
     );
 
@@ -52,7 +49,6 @@ public:
     StartupScreen* getStartupScreen() const { return startupScreen.get(); }
     HiddenModeScreen* getHiddenModeScreen() const { return hiddenModeScreen.get(); }
     TimezoneScreen* getTimezoneScreen() const { return timezoneScreen.get(); }
-    StatsScreen* getStatsScreen() const { return statsScreen.get(); }
 
     void setupMainMenu();
 
@@ -60,7 +56,6 @@ private:
     ScreenManager& screenManager;
     HeaterController& heater;
     DisplayDriver* displayDriver;
-    StatsManager& statsManager;
     InputManager& inputManager;
 
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
@@ -69,7 +64,6 @@ private:
     std::unique_ptr<HiddenModeScreen> hiddenModeScreen;
     std::unique_ptr<ScreensaverScreen> screensaverScreen;
     std::unique_ptr<OtaUpdateScreen> otaUpdateScreen;
-    std::unique_ptr<StatsScreen> statsScreen;
     std::unique_ptr<TimezoneScreen> timezoneScreen;
     std::unique_ptr<StartupScreen> startupScreen;
 };

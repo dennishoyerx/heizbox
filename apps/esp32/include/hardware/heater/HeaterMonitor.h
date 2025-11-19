@@ -3,7 +3,6 @@
 
 #include "hardware/heater/HeaterController.h"
 #include "net/WebSocketManager.h"
-#include "core/StatsManager.h"
 #include "core/StateManager.h"
 
 /**

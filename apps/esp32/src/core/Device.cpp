@@ -20,7 +20,6 @@
 #include "ui/screens/HiddenModeScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/StatsScreen.h"
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
 #include "ui/base/ScreenTransition.h"
@@ -39,12 +38,11 @@ Device::Device()
           std::make_unique<TFT_eSPI_Driver>(),
           std::make_unique<BacklightController>()
       )),
-      statsManager(),
       wifiManager(),
       webSocketManager(),
       screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(
-          screenManager, heater, display.get(), statsManager, input
+          screenManager, heater, display.get(), input
       )),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
       network(std::make_unique<Network>(
@@ -73,7 +71,6 @@ void Device::setup() {
     display->init(&screenManager);
     input.init();
     heater.init();
-    statsManager.init();
 
     // Setup screens
     uiSetup->setupScreens();
@@ -110,7 +107,6 @@ void Device::loop() {
     webSocketManager.update();
     input.update();
     heater.update();
-    statsManager.update();
     //capacitiveSensor.update();
 
     // Update UI

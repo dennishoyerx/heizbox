@@ -5,7 +5,6 @@
 #include "ui/base/Screen.h"
 #include "hardware/heater/HeaterController.h"
 #include "ScreensaverScreen.h"
-#include "StatsManager.h"
 #include <functional>
 
 class FireScreen : public Screen {
