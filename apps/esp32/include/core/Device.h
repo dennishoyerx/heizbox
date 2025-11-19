@@ -42,8 +42,6 @@ public:
     void setup();
     void loop();
 
-    void onHeatCycleFinalized();
-
 private:
     // Core components
     InputManager input;

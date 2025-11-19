@@ -19,16 +19,10 @@ public:
      * @brief Constructs a HeaterMonitor instance.
      * @param heater Reference to the HeaterController instance.
      * @param webSocketManager Reference to the WebSocketManager instance.
-     * @param statsManager Reference to the StatsManager instance.
-     * @param lastSetCycle Reference to the last set heat cycle.
-     * @param onFinalizedCallback Callback function to be invoked when a cycle is finalized.
      */
     HeaterMonitor(
         HeaterController& heater,
-        WebSocketManager& webSocketManager,
-        StatsManager& statsManager,
-        const PersistedObservable<unsigned int>& currentCycleObservable,
-        std::function<void()> onFinalizedCallback
+        WebSocketManager& webSocketManager
     );
 
     /**
@@ -44,8 +38,5 @@ public:
 private:
     HeaterController& heater;
     WebSocketManager& webSocketManager;
-    StatsManager& statsManager;
-    const PersistedObservable<unsigned int>& currentCycleObservable;
     bool lastHeatingStatusSent = false;
-    std::function<void()> onFinalizedCallback;
 };

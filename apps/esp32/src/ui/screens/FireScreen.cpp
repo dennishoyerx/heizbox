@@ -84,30 +84,12 @@ FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
     DeviceState::instance().todayConsumption.addListener([this](double val) { cachedTodayConsumption = val; markDirty(); });
     DeviceState::instance().yesterdayConsumption.addListener([this](double val) { cachedYesterdayConsumption = val; markDirty(); });
 
-    state.lastActivityTime = millis();
-    state.currentCycle = 1;
-    state.showingSavedConfirmation = false;
-    state.confirmationStartTime = 0;
-
     state.targetTemp = DeviceState::instance().targetTemperature.get();
     state.power = DeviceState::instance().power.get();
-
+    state.currentCycle = DeviceState::instance().currentCycle.get();
     DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
     DeviceState::instance().power.addListener([this](uint8_t val) { state.power = val; markDirty(); });
-}
-
-void FireScreen::onEnter()
-{
-    resetActivityTimer();
-}
-
-void FireScreen::onCycleFinalized() {
-    if (heater.getLastCycleDuration() > HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
-        DeviceState::instance().currentCycle.set(state.currentCycle);
-        state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-    }
-
-    markDirty();
+    DeviceState::instance().currentCycle.addListener([this](uint8_t val) { state.currentCycle = val; markDirty(); });
 }
 
 void FireScreen::draw(DisplayDriver &display)
@@ -265,8 +247,6 @@ void FireScreen::update()
         markDirty();
     }
     wasHeating = heater.isHeating();
-
-    //checkScreensaverTimeout();
 }
 
 void FireScreen::handleInput(InputEvent event)
@@ -282,9 +262,6 @@ void FireScreen::handleInput(InputEvent event)
         return;
     }
 
-
-    resetActivityTimer();
-
     bool triggerHeating = (event.button == FIRE) || (event.button == CENTER && DeviceState::instance().enableCenterButtonForHeating.get());
 
     if (triggerHeating)
@@ -294,7 +271,7 @@ void FireScreen::handleInput(InputEvent event)
     }
 
     if (event.button == CENTER) {
-        handleCycleChange();
+        DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
         return;
     }
 
@@ -331,21 +308,6 @@ void FireScreen::handleInput(InputEvent event)
 
 }
 
-void FireScreen::handleCycleChange()
-{
-    state.currentCycle = (state.currentCycle == 1) ? 2 : 1;
-    DeviceState::instance().currentCycle.set(state.currentCycle);
-    markDirty();
-}
-
-void FireScreen::checkScreensaverTimeout()
-{
-    const bool isActive = heater.isHeating() || heater.isPaused();
-    /*if (!isActive && (millis() - state.lastActivityTime > DeviceState::instance().sleepTimeout.get()))
-    {
-        screenManager->setScreen(screensaverScreen, ScreenTransition::FADE);
-    }*/
-}
 
 void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
 {
@@ -355,9 +317,4 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
         heater.stopHeating(false);
     }
     markDirty();
-}
-
-void FireScreen::resetActivityTimer()
-{
-    state.lastActivityTime = millis();
 }

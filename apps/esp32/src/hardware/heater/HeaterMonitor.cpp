@@ -5,16 +5,10 @@
 
 HeaterMonitor::HeaterMonitor(
     HeaterController& heater,
-    WebSocketManager& webSocketManager,
-    StatsManager& statsManager,
-    const PersistedObservable<unsigned int>& currentCycleObservable,
-    std::function<void()> onFinalizedCallback
+    WebSocketManager& webSocketManager
 )
     : heater(heater),
-      webSocketManager(webSocketManager),
-      statsManager(statsManager),
-      currentCycleObservable(currentCycleObservable),
-      onFinalizedCallback(onFinalizedCallback)
+      webSocketManager(webSocketManager)
 {}
 
 void HeaterMonitor::checkHeatingStatus() {
@@ -32,26 +26,16 @@ void HeaterMonitor::checkHeatCycle() {
         const uint32_t durationMs = heater.getLastCycleDuration();
         const uint32_t durationSec = durationMs / 1000;
 
-        // Add to stats
-        statsManager.addCycle(durationMs);
-
         // Update state
-        DeviceState::instance().totalCycles.update([](uint32_t val) { return val + 1; });
-        DeviceState::instance().sessionCycles.update([](uint32_t val) { return val + 1; });
-        DeviceState::instance().totalDuration.update([durationMs](uint32_t val) { return val + durationMs; });
-
-        // Invoke the callback to notify other components (e.g., UI)
-        if (onFinalizedCallback) {
-            onFinalizedCallback();
-        }
+        uint8_t currentCycle = DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
 
         heater.clearCycleFinishedFlag();
 
         // Send to backend
-        webSocketManager.sendHeatCycleCompleted(durationSec, currentCycleObservable.get());
+        webSocketManager.sendHeatCycleCompleted(durationSec, currentCycle);
 
         Serial.printf("✅ Heat cycle completed: %lu seconds (cycle %d)\n",
-                     durationSec, currentCycleObservable.get());
+                     durationSec, currentCycle);
     }
 }
 

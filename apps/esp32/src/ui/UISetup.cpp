@@ -1,8 +1,7 @@
-// src/ui/UISetup.cpp
 #include "ui/UISetup.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
-#include <utility> // For std::move and std::make_unique
+#include <utility>
 
 UISetup::UISetup(
     ScreenManager& screenManager,
@@ -23,7 +22,6 @@ void UISetup::setupScreens() {
     fireScreen = std::make_unique<FireScreen>(heater, &screenManager, screensaverScreen.get(), &statsManager);
     hiddenModeScreen = std::make_unique<HiddenModeScreen>(displayDriver);
     screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
-        fireScreen->resetActivityTimer();
         screenManager.setScreen(fireScreen.get());
     });
     otaUpdateScreen = std::make_unique<OtaUpdateScreen>(displayDriver);
@@ -60,10 +58,6 @@ void UISetup::setupMainMenu() {
 
         .addAction("Timezone", [this]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
-        })
-
-        .addAction("Stats", [this]() {
-            screenManager.setScreen(statsScreen.get(), ScreenTransition::FADE);
         })
 
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,

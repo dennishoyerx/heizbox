@@ -47,7 +47,7 @@ public:
 
     // Update mit Transformation
     template<typename Fn>
-    void update(Fn&& fn) {
+    T update(Fn&& fn) {
         T newValue = fn(value_);
         set(std::move(newValue));
     }
