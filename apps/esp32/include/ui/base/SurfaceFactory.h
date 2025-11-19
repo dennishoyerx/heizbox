@@ -1,6 +1,6 @@
-#ifndef SURFACE_FACTORY_H
-#define SURFACE_FACTORY_H
+#pragma once
 
+#include "ui/ColorPalette.h"
 #include <TFT_eSPI.h>
 #include <vector>
 #include <functional>
@@ -9,6 +9,13 @@
 #include <variant>
 
 struct Rect { int16_t x, y, w, h; };
+
+enum class TextSize {
+    sm,
+    md,
+    lg,
+    xl
+};
 
 // Variant type for different state value types
 using StateValue = std::variant<int, float, bool, std::string>;
@@ -62,6 +69,8 @@ struct RenderStateHash {
   }
 };
 
+const GFXfont* getFontForSize(TextSize ts);
+
 struct RenderSurface {
   TFT_eSprite *sprite = nullptr;
   RenderStateHash stateHash;
@@ -78,12 +87,21 @@ struct RenderSurface {
   void blitToScreen(int16_t x, int16_t y) {
     if (sprite) sprite->pushSprite(x, y);
   }
-  void text(const char* text, int16_t x, int16_t y, uint16_t color) {
-    if (!sprite) return;
-    
-    sprite->setTextColor(color);
-    sprite->setFreeFont(&FreeSans18pt7b);
-    sprite->drawString(text, x, y);
+
+  void text(int16_t x, int16_t y, const char* t, TextSize ts = TextSize::md, uint16_t color = COLOR_TEXT_PRIMARY) {
+    _text(x, y, String(t), ts, color);
+  }
+
+  void text(int16_t x, int16_t y, const String& t, TextSize ts = TextSize::md, uint16_t color = COLOR_TEXT_PRIMARY) {
+      _text(x, y, t, ts, color);
+  }
+
+  private:
+    void _text(int16_t x, int16_t y, const String& t, TextSize ts = TextSize::md, uint16_t color = COLOR_TEXT_PRIMARY) {
+      if (!sprite) return;
+      sprite->setTextColor(color);
+      sprite->setFreeFont(getFontForSize(ts));
+      sprite->drawString(t, x, y);
   }
 };
 
@@ -131,5 +149,3 @@ private:
   };
   std::vector<PoolEntry> _pool;
 };
-
-#endif // SURFACE_FACTORY_H

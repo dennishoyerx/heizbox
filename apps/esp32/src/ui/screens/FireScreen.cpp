@@ -76,46 +76,39 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 
 void FireScreen::draw(DisplayDriver &display)
 {
+    // Current Temp
     _ui->withSurface(88, 50, 0, 60, {
         {"currentTemp", state.currentTemp}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans18pt7b);
-
-        // Current Temp
         s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.sprite->drawString(isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), 30, 6);
+        s.text(30, 6, isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), TextSize::lg);
     });
 
+    // Target Temp
     _ui->withSurface(104, 50, 84, 60, {
         {"targetTemp", state.targetTemp}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans18pt7b);
 
-        // Target Temp
         s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.sprite->drawString(String(state.targetTemp, 0), 46, 6);
+        s.text(30, 6, String(state.targetTemp, 0), TextSize::lg);
     });
 
+    // Power
     _ui->withSurface(100, 40, 192, 60, {
         {"power", state.power}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
-
-        // Power
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-        s.sprite->setFreeFont(&FreeSans18pt7b);
-        s.sprite->drawString(String(state.power), 32, 6);
+        s.text(30, 6, String(state.power), TextSize::lg);
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
 
 
     const bool isHeating = heater.isHeating();
 
+    // Consumption
     _ui->withSurface(250, 140, 15, 115, {
         {"isHeating", isHeating},
         {"consumption", state.consumption},
@@ -197,8 +190,7 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
     }
 }
 
-void FireScreen::update()
-{
+void FireScreen::update() {
     const bool isActive = heater.isHeating() || heater.isPaused();
     float temp = heater.getTemperature();
     
@@ -207,20 +199,19 @@ void FireScreen::update()
         markDirty();
     }
 
-    if (isActive)
-    {
-        static uint32_t lastSecond = 0;
-        const uint32_t currentSecond = heater.getElapsedTime() / 1000;
-        if (currentSecond != lastSecond)
-        {
-            markDirty();
-            lastSecond = currentSecond;
-        }
-
+    if (isActive) {
         if (state.currentTemp > state.targetTemp) {
             _handleHeatingTrigger(false);
             markDirty();
         }
+
+        static uint32_t lastSecond = 0;
+        state.elapsedSeconds = heater.getElapsedTime() / 1000;
+        if (state.elapsedSeconds != lastSecond) {
+            lastSecond = state.elapsedSeconds;
+            markDirty();
+        }
+
     }
 
     static bool wasHeating = false;

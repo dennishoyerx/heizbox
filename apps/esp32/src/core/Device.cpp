@@ -54,8 +54,7 @@ Device::Device()
       inputHandler(std::make_unique<InputHandler>(screenManager))
 {}
 
-Device::~Device() {
-}
+Device::~Device() {}
 
 void Device::setup() {
     Serial.begin(115200);
