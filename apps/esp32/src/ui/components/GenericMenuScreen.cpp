@@ -13,6 +13,17 @@ namespace {
     }
 }
 
+GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items) : 
+        title_(title), items_(std::move(items)), selectedIndex_(0), adjustMode_(false) {
+            selectedIndex_ = 0;
+        while (selectedIndex_ < items_.size() && items_[selectedIndex_]->getType() == MenuItemType::HEADLINE) {
+            selectedIndex_++;
+        }
+
+        // Fallback, falls alle HEADLINEs
+        if (selectedIndex_ >= items_.size()) selectedIndex_ = 0;
+    }
+
 // Implementations of methods declared in GenericMenuScreen.h
 void GenericMenuScreen::draw(DisplayDriver& display) {
     _ui->clear();    
@@ -83,15 +94,17 @@ void GenericMenuScreen::handleInput(InputEvent event) {
 
 void GenericMenuScreen::handleNavigationMode(InputEvent event) {
     switch (event.button) {
-        case UP:
-            selectedIndex_ = (selectedIndex_ == 0) 
-                ? items_.size() - 1 
-                : selectedIndex_ - 1;
+                case DOWN:
+            do {
+                selectedIndex_ = (selectedIndex_ + 1) % items_.size();
+            } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
             markDirty();
             break;
-            
-        case DOWN:
-            selectedIndex_ = (selectedIndex_ + 1) % items_.size();
+
+        case UP:
+            do {
+                selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
+            } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
             markDirty();
             break;
             

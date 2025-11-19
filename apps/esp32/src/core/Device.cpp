@@ -1,7 +1,7 @@
 #include "core/Config.h"
 #include "core/Device.h" 
 #include "core/DeviceState.h" 
-#include "hardware/display/DisplayDriver.h" // Explicit include to resolve incomplete type
+#include "hardware/display/DisplayDriver.h"
 #include "credentials.h"
 #include <ArduinoOTA.h>
 #include "core/StateManager.h"
@@ -17,10 +17,7 @@
 // UI
 #include "ui/base/ScreenManager.h"
 #include "ui/screens/FireScreen.h"
-#include "ui/screens/HiddenModeScreen.h"
-#include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
 #include "ui/base/ScreenTransition.h"
 #include "ui/UISetup.h"
@@ -101,8 +98,7 @@ void Device::setup() {
 }
 
 void Device::loop() {
-    wifiManager.update();
-    webSocketManager.update();
+    network->update();
     input.update();
     heater.update();
     //capacitiveSensor.update();

@@ -41,6 +41,8 @@ void UISetup::setupMainMenu() {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
+        .addHeadline("DISPLAY")
+
         .addObservableRange("Brightness", state.brightness,
                            static_cast<uint8_t>(20),
                            static_cast<uint8_t>(100),
@@ -60,12 +62,6 @@ void UISetup::setupMainMenu() {
                              60000,    // 1 Minute min
                              1800000,  // 30 Minuten max
                              60000)    // 1 Minute step
-
-        .addAction("Reset Session", [this]() {
-            DeviceState::instance().sessionCycles.set(0);
-            DeviceState::instance().sessionClicks.set(0);
-            DeviceState::instance().sessionCaps.set(0);
-        })
 
         .addAction("FACTORY RESET", [this]() {
             nvs_flash_erase();

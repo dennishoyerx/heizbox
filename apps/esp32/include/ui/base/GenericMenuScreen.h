@@ -1,4 +1,3 @@
-// include/ui/base/GenericMenuScreen.h
 #pragma once
 
 #include <vector>
@@ -10,9 +9,7 @@
 
 class GenericMenuScreen : public Screen {
 public:
-    GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items)
-        : title_(title), items_(std::move(items)), selectedIndex_(0),
-          adjustMode_(false) {}
+    GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items);
 
     void draw(DisplayDriver& display) override;
 

@@ -36,6 +36,7 @@ public:
     void setup(const char* ssid, const char* password, const char* hostname);
     void setupWifi(const char* ssid, const char* password, const char* hostname);
     void onReady(std::function<void()> callback);
+    void update();
 
 private:
     WiFiManager& wifiManager;

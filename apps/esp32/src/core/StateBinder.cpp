@@ -1,4 +1,3 @@
-// src/core/StateBinder.cpp
 #include "core/StateBinder.h"
 #include "core/DeviceState.h"
 #include "hardware/display/DisplayDriver.h"

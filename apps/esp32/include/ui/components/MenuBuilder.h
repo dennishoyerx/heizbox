@@ -28,6 +28,7 @@ namespace std {
 // ============================================================================
 
 enum class MenuItemType : uint8_t {
+    HEADLINE,
     ACTION,      // Führt direkt eine Aktion aus
     TOGGLE,      // Boolean Toggle
     RANGE,       // Wert mit Min/Max
@@ -213,6 +214,20 @@ private:
     ScreenManager* manager_;
 };
 
+class HeadlineMenuItem : public MenuItem {
+public:
+    HeadlineMenuItem(const char* title)
+        : title_(title) {}
+    
+    const char* getTitle() const override { return title_; }
+    MenuItemType getType() const override { return MenuItemType::HEADLINE; }
+    
+    void execute() override {    }
+
+private:
+    const char* title_;
+};
+
 // ============================================================================
 // Observable Range mit Display-Converter (z.B. ms → s)
 // ============================================================================
@@ -268,6 +283,11 @@ private:
 class MenuBuilder {
 public:
     MenuBuilder() = default;
+
+    MenuBuilder& addHeadline(const char* title) {
+        items_.emplace_back(std::make_unique<HeadlineMenuItem>(title));
+        return *this;
+    }
     
     MenuBuilder& addAction(const char* title, std::function<void()> action) {
         items_.emplace_back(std::make_unique<ActionMenuItem>(title, std::move(action)));
