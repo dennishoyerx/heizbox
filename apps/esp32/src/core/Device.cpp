@@ -102,14 +102,12 @@ void Device::setup() {
 }
 
 void Device::loop() {
-    // Update managers
     wifiManager.update();
     webSocketManager.update();
     input.update();
     heater.update();
     //capacitiveSensor.update();
 
-    // Update UI
     screenManager.update();
     screenManager.draw();
     display->renderStatusBar();

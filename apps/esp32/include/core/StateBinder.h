@@ -30,7 +30,7 @@ public:
      * @brief Binds the auto-stop time state to the HeaterController.
      * @param heater Pointer to the HeaterController instance.
      */
-    static void bindAutoStopTime(HeaterController* heater);
+    static void bindHeater(HeaterController* heater);
 
     /**
      * @brief Binds all relevant states to their respective managers.

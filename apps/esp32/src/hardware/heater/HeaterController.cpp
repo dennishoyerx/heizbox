@@ -1,6 +1,5 @@
 #include "hardware/heater/HeaterController.h"
 #include "core/Config.h"
-#include "core/DeviceState.h"
 #include <Arduino.h>
 
 HeaterController::HeaterController()
@@ -9,7 +8,6 @@ HeaterController::HeaterController()
       startTime(0), 
       pauseTime(0),
       autoStopTime(60000), 
-      cycleCounter(0),
       lastCycleDuration(0), 
       cycleFinishedFlag(false),
       dutyCycleStartTime(0),
@@ -21,12 +19,6 @@ HeaterController::HeaterController()
 void HeaterController::init() {
     pinMode(HardwareConfig::HEATER_MOSFET_PIN, OUTPUT);
     digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
-
-    power = DeviceState::instance().power.get();
-
-    DeviceState::instance().power.addListener([this](int val) {
-        power = val;
-    });
 
     Serial.println("🔥 Heater initialized");
 }

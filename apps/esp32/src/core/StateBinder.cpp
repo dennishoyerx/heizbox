@@ -33,11 +33,15 @@ void StateBinder::bindDarkMode(DisplayDriver* display) {
 
 
 
-void StateBinder::bindAutoStopTime(HeaterController* heater) {
+void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
 
-    heater->setAutoStopTime(state.autoStopTime.get());
+    heater->setPower(state.power.get());
+    state.power.addListener([heater](int val) {
+        heater->setPower(val);
+    });
 
+    heater->setAutoStopTime(state.autoStopTime.get());
     state.autoStopTime.addListener([heater](uint32_t time) {
         heater->setAutoStopTime(time);
     });
@@ -46,5 +50,5 @@ void StateBinder::bindAutoStopTime(HeaterController* heater) {
 void StateBinder::bindAll(DisplayDriver* display, HeaterController* heater) {
     bindBrightness(display);
     bindDarkMode(display);
-    bindAutoStopTime(heater);
+    bindHeater(heater);
 }
