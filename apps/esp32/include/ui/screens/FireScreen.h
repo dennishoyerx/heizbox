@@ -1,6 +1,4 @@
-// include/FireScreen.h
-#ifndef FIRESCREEN_H
-#define FIRESCREEN_H
+#pragma once
 
 #include "ui/base/Screen.h"
 #include "hardware/heater/HeaterController.h"
@@ -38,13 +36,8 @@ private:
 
     
     // Helper methods
-    void drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds);
     static void drawSessionRow(TFT_eSprite* sprite, const char* label, float consumption, int y, uint8_t bgColor, uint8_t borderColor, uint8_t textColor, bool invert = false, bool thin = false);
-    void drawCycleInfo(DisplayDriver& display);
-    void drawSessionStats(DisplayDriver& display);
 
 public:
     void _handleHeatingTrigger(bool shouldStartHeating);
 };
-
-#endif

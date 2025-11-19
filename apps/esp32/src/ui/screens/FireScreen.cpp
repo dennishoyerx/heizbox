@@ -1,4 +1,5 @@
 #include "ui/screens/FireScreen.h"
+#include "ui/components/HeatUI.h"
 #include "hardware/display/DisplayDriver.h"
 #include "core/Config.h"
 #include "core/DeviceState.h"
@@ -105,12 +106,9 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
 
-
-    const bool isHeating = heater.isHeating();
-
     // Consumption
     _ui->withSurface(250, 140, 15, 115, {
-        {"isHeating", isHeating},
+        {"isHeating", state.isHeating},
         {"consumption", state.consumption},
         {"todayConsumption", state.todayConsumption},
         {"currentCycle", state.currentCycle}
@@ -121,59 +119,19 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
 
-    if (!isHeating) {
+    if (!state.isHeating) {
         return;
     }
 
-    const uint32_t seconds = (heater.getElapsedTime()) / 1000;
     _ui->withSurface(140, 140, 70, 100, {
-        {"seconds", (int)seconds}
-    }, [this, seconds](RenderSurface& s) {
-        drawHeatingTimer(s.sprite, seconds);
+        {"seconds", (int)state.elapsedSeconds}
+    }, [this](RenderSurface& s) {
+        HeatUI(s, state.elapsedSeconds);
     });
 }
 
-void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
-{
-    uint8_t timerColor;
-    if (seconds < 20) timerColor = COLOR_SUCCESS;
-    else if (seconds < 35) timerColor = COLOR_WARNING;
-    else if (seconds < 50) timerColor = COLOR_BLUE;
-    else timerColor = COLOR_PURPLE;
-    
-    int centerX = 70;
-    int centerY = 70;
-    
-    // === Vereinfachter Progress Ring ===
-    int radius = 70;
-
-    // Hintergrund-Ring
-    sprite->fillCircle(centerX, centerY, radius, COLOR_BG);
-    sprite->drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
-
-    float progress = min(progress, 1.0f);
-    int endAngle = (int)(progress * 360);
-    int startAngle = 180; 
-    int stopAngle = startAngle + endAngle;
-
-    sprite->drawArc(centerX, centerY,
-                    radius + 7, radius - 7,
-                    startAngle, stopAngle,
-                    timerColor, COLOR_ACCENT, true);
-
-    // === TIMER ===
-    char timeStr[4];
-    snprintf(timeStr, sizeof(timeStr), "%lu", seconds);
-    
-    sprite->setTextColor(COLOR_TEXT_PRIMARY);
-    sprite->setTextDatum(MC_DATUM);
-    sprite->setTextSize(2);
-    sprite->setFreeFont(&FreeSansBold18pt7b);
-    sprite->drawString(timeStr, centerX, centerY, 1);
-}
-
 void FireScreen::update() {
-    const bool isActive = heater.isHeating() || heater.isPaused();
+    state.isHeating = heater.isHeating();
     float temp = heater.getTemperature();
     
     if (temp != state.currentTemp) {
@@ -181,7 +139,7 @@ void FireScreen::update() {
         markDirty();
     }
 
-    if (isActive) {
+    if (state.isHeating) {
         if (state.currentTemp > state.targetTemp) {
             _handleHeatingTrigger(false);
             markDirty();
@@ -197,11 +155,11 @@ void FireScreen::update() {
     }
 
     static bool wasHeating = false;
-    if (!heater.isHeating() && wasHeating) {
+    if (!state.isHeating && wasHeating) {
         _ui->clear();
         markDirty();
     }
-    wasHeating = heater.isHeating();
+    wasHeating = state.isHeating;
 }
 
 void FireScreen::handleInput(InputEvent event) {

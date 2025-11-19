@@ -1,11 +1,5 @@
 #pragma once
 
-#include <TFT_eSPI.h>
+#include "ui/base/Screen.h"
 
-class HeatUI {
-public:
-    HeatUI(uint32_t* seconds);
-    void draw(TFT_eSprite* sprite, uint32_t seconds, bool isPaused);
-private:
-    uint32_t* seconds;
-};
+void HeatUI(RenderSurface s, uint32_t seconds);
