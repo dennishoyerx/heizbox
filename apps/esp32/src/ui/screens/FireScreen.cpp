@@ -93,7 +93,7 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, String(state.targetTemp, 0), TextSize::lg);
+        s.text(40, 6, String(state.targetTemp, 0), TextSize::lg);
     });
 
     // Power
@@ -151,7 +151,7 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
     sprite->fillCircle(centerX, centerY, radius, COLOR_BG);
     sprite->drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
 
-    float progress = (float)seconds / 60.0f;
+    float progress = min(progress, 1.0f);
     int endAngle = (int)(progress * 360);
     int startAngle = 180; 
     int stopAngle = startAngle + endAngle;
@@ -163,31 +163,13 @@ void FireScreen::drawHeatingTimer(TFT_eSprite* sprite, uint32_t seconds)
 
     // === TIMER ===
     char timeStr[4];
-    snprintf(timeStr, sizeof(timeStr), "%lu", seconds % 60);
+    snprintf(timeStr, sizeof(timeStr), "%lu", seconds);
     
     sprite->setTextColor(COLOR_TEXT_PRIMARY);
     sprite->setTextDatum(MC_DATUM);
     sprite->setTextSize(2);
     sprite->setFreeFont(&FreeSansBold18pt7b);
     sprite->drawString(timeStr, centerX, centerY, 1);
-    
-    
-    // "HEIZT" or "PAUSE" Badge
-    const char* badgeText = heater.isPaused() ? "PAUSE" : "HEIZT";
-    uint16_t badgeColor = heater.isPaused() ? COLOR_WARNING : timerColor;
-    sprite->fillRoundRect(centerX - 35, centerY + 50, 70, 20, 10, 0x8410);
-    sprite->fillCircle(centerX - 20, centerY + 60, 3, badgeColor);
-    sprite->setFreeFont(&FreeSans18pt7b);
-    sprite->setTextSize(1);
-    sprite->drawString(badgeText, centerX + 5, centerY + 60, 2);
-    
-    // Click Zone
-    if (seconds >= 30 && seconds <= 50) {
-    sprite->setFreeFont(&FreeSans18pt7b);
-        sprite->setTextSize(1);
-        sprite->setTextColor(COLOR_BG);
-        sprite->drawString("CLICK ZONE", centerX, centerY + 80, 2);
-    }
 }
 
 void FireScreen::update() {
