@@ -10,8 +10,7 @@
 
 class FireScreen : public Screen {
 public:
-    FireScreen(HeaterController& hc, ScreenManager* sm,
-               ScreensaverScreen* ss, StatsManager* stm);
+    FireScreen(HeaterController& hc);
 
     void draw(DisplayDriver& display) override;
     void update() override;
@@ -19,11 +18,7 @@ public:
     ScreenType getType() const override { return ScreenType::FIRE; }
 
 private:
-    // Dependencies
     HeaterController& heater;
-    ScreenManager* screenManager;
-    ScreensaverScreen* screensaverScreen;
-    StatsManager* statsManager;
 
     // State
     struct {

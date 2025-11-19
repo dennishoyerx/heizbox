@@ -66,12 +66,8 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
 
 
  
-FireScreen::FireScreen(HeaterController &hc, ScreenManager *sm,
-                       ScreensaverScreen *ss, StatsManager *stm)
+FireScreen::FireScreen(HeaterController &hc)
     : heater(hc),
-      screenManager(sm),
-      screensaverScreen(ss),
-      statsManager(stm),
       cachedClicks(0),
       cachedConsumption(0),
       cachedTodayConsumption(0),
@@ -251,21 +247,16 @@ void FireScreen::update()
 
 void FireScreen::handleInput(InputEvent event)
 {
-    if (event.type == HOLD || event.type == HOLDING) {
-        if (event.button == UP) {
-            DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() + 1);
-        }
-
-        if (event.button == DOWN) {
-            DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() - 1);
-        }
+    if (event.button == UP || event.button == DOWN && 
+        event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
+        float targetTempUpdate = event.button == UP ? 1 : -1;
+        DeviceState::instance().targetTemperature.update([targetTempUpdate](float val) { return val + targetTempUpdate; });
         return;
     }
 
     bool triggerHeating = (event.button == FIRE) || (event.button == CENTER && DeviceState::instance().enableCenterButtonForHeating.get());
 
-    if (triggerHeating)
-    {
+    if (triggerHeating) {
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }
@@ -275,37 +266,11 @@ void FireScreen::handleInput(InputEvent event)
         return;
     }
 
-    if (event.button == UP) {
-        DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() + 1);
+    if (event.button == LEFT || event.button == RIGHT) {
+        uint8_t powerUpdate = event.button == LEFT ? -10 : 10;
+        DeviceState::instance().power.update([powerUpdate](uint8_t val) { return constrain(val + powerUpdate, 10, 100); });
         return;
     }
-
-    if (event.button == DOWN) {
-        DeviceState::instance().targetTemperature.set(DeviceState::instance().targetTemperature.get() - 1);
-        return;
-    }
-
-    if (event.button == LEFT) {
-        uint8_t _power = DeviceState::instance().power.get() - 10;
-        if (_power < 10) {
-            _power = 10;
-        }
-
-        DeviceState::instance().power.set(_power);
-        markDirty();
-        return;
-    }
-
-    if (event.button == RIGHT) {
-        uint8_t _power = DeviceState::instance().power.get() + 10;
-       if (_power > 100) {
-            _power = 100;
-        }
-
-        DeviceState::instance().power.set(_power);
-        markDirty();
-    }
-
 }
 
 

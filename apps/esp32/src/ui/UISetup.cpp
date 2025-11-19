@@ -19,7 +19,7 @@ UISetup::UISetup(
 
 void UISetup::setupScreens() {
     // Create screens
-    fireScreen = std::make_unique<FireScreen>(heater, &screenManager, screensaverScreen.get(), &statsManager);
+    fireScreen = std::make_unique<FireScreen>(heater);
     hiddenModeScreen = std::make_unique<HiddenModeScreen>(displayDriver);
     screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
         screenManager.setScreen(fireScreen.get());
