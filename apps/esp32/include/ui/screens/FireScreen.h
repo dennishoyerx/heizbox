@@ -24,17 +24,16 @@ private:
     struct {
         uint8_t currentCycle;
 
+        bool isHeating = false;
         float targetTemp = 0;
         float currentTemp = 0;
         uint8_t power = 0;
-    } state;
 
-    // Cached values from state
-    int cachedClicks;
-    int cachedCaps;
-    float cachedConsumption;
-    float cachedTodayConsumption;
-    float cachedYesterdayConsumption;
+        
+        float consumption = 0;
+        float todayConsumption = 0;
+        float yesterdayConsumption = 0;
+    } state;
 
     
     // Helper methods

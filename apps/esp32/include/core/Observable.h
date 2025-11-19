@@ -50,6 +50,7 @@ public:
     T update(Fn&& fn) {
         T newValue = fn(value_);
         set(std::move(newValue));
+        return newValue;
     }
 
 private:

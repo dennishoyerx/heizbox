@@ -66,19 +66,10 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
 
 
  
-FireScreen::FireScreen(HeaterController &hc)
-    : heater(hc),
-      cachedClicks(0),
-      cachedConsumption(0),
-      cachedTodayConsumption(0),
-      cachedYesterdayConsumption(0),
-      cachedCaps(0)
-{
-    DeviceState::instance().sessionClicks.addListener([this](int val) { cachedClicks = val; markDirty(); });
-    DeviceState::instance().sessionCaps.addListener([this](int val) { cachedCaps = val; markDirty(); });
-    DeviceState::instance().sessionConsumption.addListener([this](double val) { cachedConsumption = val; markDirty(); });
-    DeviceState::instance().todayConsumption.addListener([this](double val) { cachedTodayConsumption = val; markDirty(); });
-    DeviceState::instance().yesterdayConsumption.addListener([this](double val) { cachedYesterdayConsumption = val; markDirty(); });
+FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
+    DeviceState::instance().sessionConsumption.addListener([this](float val) { state.consumption = val; markDirty(); });
+    DeviceState::instance().todayConsumption.addListener([this](float val) { state.todayConsumption = val; markDirty(); });
+    DeviceState::instance().yesterdayConsumption.addListener([this](float val) { state.yesterdayConsumption = val; markDirty(); });
 
     state.targetTemp = DeviceState::instance().targetTemperature.get();
     state.power = DeviceState::instance().power.get();
@@ -86,6 +77,7 @@ FireScreen::FireScreen(HeaterController &hc)
     DeviceState::instance().targetTemperature.addListener([this](float val) { state.targetTemp = val; markDirty(); });
     DeviceState::instance().power.addListener([this](uint8_t val) { state.power = val; markDirty(); });
     DeviceState::instance().currentCycle.addListener([this](uint8_t val) { state.currentCycle = val; markDirty(); });
+    DeviceState::instance().isHeating.addListener([this](bool val) { state.isHeating = val; markDirty(); });
 }
 
 void FireScreen::draw(DisplayDriver &display)
@@ -116,14 +108,14 @@ void FireScreen::draw(DisplayDriver &display)
     });
 
     _ui->withSurface(100, 40, 192, 60, {
-        {"power", (int)heater.getPower()}
+        {"power", state.power}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
         // Power
         s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         s.sprite->setFreeFont(&FreeSans18pt7b);
-        s.sprite->drawString(String(heater.getPower()), 32, 6);
+        s.sprite->drawString(String(state.power), 32, 6);
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
 
@@ -132,13 +124,13 @@ void FireScreen::draw(DisplayDriver &display)
 
     _ui->withSurface(250, 140, 15, 115, {
         {"isHeating", isHeating},
-        {"consumption", cachedConsumption},
-        {"todayConsumption", cachedTodayConsumption},
+        {"consumption", state.consumption},
+        {"todayConsumption", state.todayConsumption},
         {"currentCycle", state.currentCycle}
     }, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
-        FireScreen::drawSessionRow(s.sprite, "Session", cachedConsumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
-        FireScreen::drawSessionRow(s.sprite, "Heute", cachedTodayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
+        FireScreen::drawSessionRow(s.sprite, "Session", state.consumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
+        FireScreen::drawSessionRow(s.sprite, "Heute", state.todayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
     });
 
 
@@ -245,8 +237,7 @@ void FireScreen::update()
     wasHeating = heater.isHeating();
 }
 
-void FireScreen::handleInput(InputEvent event)
-{
+void FireScreen::handleInput(InputEvent event) {
     if (event.button == UP || event.button == DOWN && 
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
         float targetTempUpdate = event.button == UP ? 1 : -1;
@@ -268,7 +259,12 @@ void FireScreen::handleInput(InputEvent event)
 
     if (event.button == LEFT || event.button == RIGHT) {
         uint8_t powerUpdate = event.button == LEFT ? -10 : 10;
-        DeviceState::instance().power.update([powerUpdate](uint8_t val) { return constrain(val + powerUpdate, 10, 100); });
+        DeviceState::instance().power.update([powerUpdate](uint8_t val) { 
+            uint8_t newVal = val + powerUpdate;
+            if (newVal < 30) newVal = 30;
+            if (newVal > 100) newVal = 100;
+            return newVal; 
+        });
         return;
     }
 }

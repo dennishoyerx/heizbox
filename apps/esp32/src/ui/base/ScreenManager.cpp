@@ -48,6 +48,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
             transition.originalBrightness = display.getBrightness();
         } else {
             // Direkter Wechsel
+            currentScreen->redrawUI();
             currentScreen->draw(display);
             display.renderStatusBar();
             transition.inProgress = false;
@@ -153,7 +154,8 @@ void ScreenManager::drawTransitionFrame() {
 
                 // Bei 50% Screen wechseln
                 if (transition.progress >= 50 && previousScreen) {
-                    display.clear();
+                    //display.clear();
+                    currentScreen->redrawUI();
                     currentScreen->draw(display);
                     display.render();
                     previousScreen = nullptr;
@@ -177,6 +179,7 @@ void ScreenManager::completeTransition() {
     display.setBrightness(transition.originalBrightness);
 
     if (currentScreen) {
+        currentScreen->redrawUI();
         currentScreen->draw(display);
     }
     display.renderStatusBar();
