@@ -40,6 +40,12 @@ void Screen::redrawUI() {
     }
 }
 
+void Screen::clear() {
+    if (_ui) {
+        _ui->clear();
+    }
+}
+
 void Screen::markDirty() {
     if (manager) {
         manager->setDirty();
