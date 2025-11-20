@@ -68,8 +68,9 @@ void FireScreen::draw(DisplayDriver &display)
     _ui->withSurface(280, 140, 0, 100, {
         {"seconds", (int)state.elapsedSeconds},
         {"progress", state.progress},
+        {"currentTemp", state.currentTemp}
     }, [this](RenderSurface& s) {
-        HeatUI(s, state.elapsedSeconds, state.progress);
+        HeatUI(s, state.elapsedSeconds, state.progress, state.currentTemp);
     });
 }
 
@@ -83,8 +84,9 @@ void FireScreen::update() {
     }
 
     if (state.isHeating) {
-        
+        state.elapsedSeconds = heater.getElapsedTime() / 1000;
         state.progress = (float)state.currentTemp / state.targetTemp;
+
         if (state.progress > 1.0f) state.progress = 1.0f;
 
         if (state.currentTemp > state.targetTemp) {
@@ -93,7 +95,6 @@ void FireScreen::update() {
         }
 
         static uint32_t lastSecond = 0;
-        state.elapsedSeconds = heater.getElapsedTime() / 1000;
         if (state.elapsedSeconds != lastSecond) {
             lastSecond = state.elapsedSeconds;
             markDirty();

@@ -15,7 +15,14 @@ enum class TextSize {
     sm,
     md,
     lg,
-    xl
+    xl,
+    xxl
+};
+
+enum class TextAlign {
+    left,
+    right,
+    center
 };
 
 // Variant type for different state value types
@@ -75,6 +82,7 @@ const GFXfont* getFontForSize(TextSize ts);
 struct RenderSurface {
   TFT_eSprite *sprite = nullptr;
   RenderStateHash stateHash;
+  std::map<std::string, StateValue> state;
 
   RenderSurface(TFT_eSprite* s = nullptr) : sprite(s) {}
 
@@ -102,6 +110,7 @@ struct RenderSurface {
       if (!sprite) return;
       sprite->setTextColor(color);
       sprite->setFreeFont(getFontForSize(ts));
+      sprite->setTextSize(ts != TextSize::xxl ? 1 : 2);
       sprite->drawString(t, x, y);
   }
 };

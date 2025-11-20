@@ -7,6 +7,7 @@ const GFXfont* getFontForSize(TextSize ts) {
         case TextSize::md: return &FreeSans12pt7b;
         case TextSize::lg: return &FreeSans18pt7b;
         case TextSize::xl: return &FreeSans24pt7b;
+        case TextSize::xxl: return &FreeSans18pt7b;
         default:           return &FreeSans12pt7b;
     }
 }

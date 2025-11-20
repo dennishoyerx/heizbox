@@ -5,6 +5,21 @@
 #include "ScreensaverScreen.h"
 #include <functional>
 
+struct Consumption {
+    float session;
+    float today;
+    float yesterday;
+};
+
+struct HeaterState {
+    uint8_t power;
+    uint8_t targetTemp;
+    uint16_t currentTemp;
+    bool isHeating;
+    uint32_t elapsedSeconds;
+    float progress;
+};
+
 class FireScreen : public Screen {
 public:
     FireScreen(HeaterController& hc);

@@ -71,7 +71,7 @@ const uint16_t heizbox_palette[16] = {
 
     0xFB40,                     // 10: Reserve
     rgb888to565(0, 0, 0),       // 11: Schwarz
-    rgb888to565(255, 50, 50),      // 12: Purple
+    rgb888to565(160, 32, 240),      // 12: Purple
     rgb888to565(45, 104, 196),      // 13: Blue
     rgb888to565(60, 5, 0),      // 14
     rgb888to565(230, 95, 0),     // 15
