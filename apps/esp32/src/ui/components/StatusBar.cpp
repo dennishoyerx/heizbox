@@ -47,7 +47,7 @@ void StatusBar::draw(UI* ui) {
         {"wifiStatus", cache.wifiStatus},
         {"wifiStrength", cache.wifiStrength}
     },[this](RenderSurface& s) {
-        s.sprite->fillRect(0, height-1, 280, 2, COLOR_BG_2);
+        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BLACK);
         drawTimeRegion(s);
         drawWifiRegion(s);
     });
@@ -55,7 +55,7 @@ void StatusBar::draw(UI* ui) {
 
 void StatusBar::drawTimeRegion(RenderSurface s) {
     // Clear nur Zeit-Bereich
-    s.sprite->fillRect(280/2 - s.sprite->textWidth(cache.time)/2, 0, s.sprite->textWidth(cache.time), height, COLOR_BG);
+    s.sprite->fillRect(280/2 - s.sprite->textWidth(cache.time)/2, 0, s.sprite->textWidth(cache.time), height, COLOR_BLACK);
 
     // Render Zeit
     s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
@@ -71,12 +71,11 @@ void StatusBar::drawWifiRegion(RenderSurface s) {
     const int8_t iconRadius = iconSize / 2;
     const int16_t iconX = (280/2 + s.sprite->textWidth(cache.time)/2) + 10;
     const int16_t iconY = height / 2 - iconRadius;
-    s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BG);
+    s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BLACK);
 
     if (cache.wifiStatus != WL_CONNECTED) return;
 
     // Render WiFi-Icon
-    const uint8_t* icon = getWifiIcon();
     const uint8_t strength = cache.wifiStrength;
 
     

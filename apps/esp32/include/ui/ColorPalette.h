@@ -19,6 +19,7 @@ enum CustomColors : uint8_t {
     COLOR_TEST = 15,
     COLOR_PURPLE = 12,
     COLOR_BLUE = 13,
+    COLOR_BLACK = 11,
     
     // Fire/Heat Farben (10-19) - Gradient von schwarz zu weiß
     COLOR_FIRE_BLACK = 10,

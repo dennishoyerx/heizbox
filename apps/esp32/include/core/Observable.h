@@ -93,7 +93,7 @@ public:
 
         if (std::is_same<T, bool>::value) {
             value = prefs.getBool(key_, value);
-        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, uint8_t>::value) {
+        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, int16_t>::value || std::is_same<T, uint8_t>::value) {
             value = prefs.getInt(key_, value);
         } else if (std::is_same<T, uint32_t>::value) {
             value = prefs.getUInt(key_, value);
