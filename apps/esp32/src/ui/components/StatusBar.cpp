@@ -20,12 +20,10 @@ StatusBar::StatusBar(TFT_eSPI* tft_instance, uint16_t width, uint8_t h)
 
 void StatusBar::draw() {
     if (!clock || !tft) return;
-
+    tft->fillRect(0, height-1, 280, 2, heizbox_palette[COLOR_BG_2]);
     const uint32_t now = millis();
 
-    // ========================================================================
     // Check Time (nur alle 5s prüfen)
-    // ========================================================================
     if (now - cache.lastUpdate >= TIME_UPDATE_INTERVAL_MS || cache.lastUpdate == 0) {
         String timeStr = Utils::getFormattedTime();
         if (timeStr != cache.time) {
@@ -35,9 +33,7 @@ void StatusBar::draw() {
         cache.lastUpdate = now;
     }
 
-    // ========================================================================
     // Check WiFi (nur bei Änderungen)
-    // ========================================================================
     const wl_status_t currentStatus = WiFi.status();
     const int8_t currentStrength = getWifiStrength();
 
@@ -47,9 +43,6 @@ void StatusBar::draw() {
         dirty.wifi = true;
     }
 
-    // ========================================================================
-    // Selective Rendering
-    // ========================================================================
     if (dirty.time) {
         drawTimeRegion();
         dirty.time = false;
@@ -63,25 +56,41 @@ void StatusBar::draw() {
 
 void StatusBar::drawTimeRegion() {
     // Clear nur Zeit-Bereich
-    tft->fillRect(0, 0, 180, height, heizbox_palette[COLOR_ACCENT]);
+    tft->fillRect(280/2 - tft->textWidth(cache.time)/2, 0, tft->textWidth(cache.time), height, heizbox_palette[COLOR_BG]);
 
     // Render Zeit
     tft->setTextColor(heizbox_palette[COLOR_TEXT_PRIMARY]);
-    tft->setFreeFont(&FreeSans18pt7b);
+    tft->setFreeFont(&FreeSans12pt7b);
     tft->setTextSize(1);
-    tft->setCursor(15, tft->fontHeight() + 4);
+    tft->setCursor(280/2 - tft->textWidth(cache.time)/2, tft->fontHeight() - 4);
     tft->print(cache.time);
 }
 
 void StatusBar::drawWifiRegion() {
     // Clear nur WiFi-Icon Bereich
-    const int16_t iconX = tft->width() - 50;
-    const int16_t iconY = height - 40;
-    tft->fillRect(iconX, iconY, 40, 40, heizbox_palette[COLOR_ACCENT]);
+    const int8_t iconSize = 10;
+    const int8_t iconRadius = iconSize / 2;
+    const int16_t iconX = (280/2 + tft->textWidth(cache.time)/2) + 10;
+    const int16_t iconY = height / 2 - iconRadius;
+    tft->fillRect(iconX, iconY, iconSize, iconSize, heizbox_palette[COLOR_BG]);
+
+    if (cache.wifiStatus != WL_CONNECTED) return;
 
     // Render WiFi-Icon
     const uint8_t* icon = getWifiIcon();
-    tft->drawBitmap(iconX, iconY, icon, 40, 40, heizbox_palette[COLOR_TEXT_PRIMARY]);
+    const uint8_t strength = cache.wifiStrength;
+
+    
+    uint8_t color = COLOR_TEXT_PRIMARY;
+    if (strength >= 3) {
+        color = COLOR_SUCCESS;
+    } else if (strength >= 2) {
+        color = COLOR_WARNING;
+    } else if (strength >= 1) {
+        color = COLOR_ERROR;
+    }
+
+    tft->fillCircle(iconX + iconRadius, iconY + iconRadius, iconRadius, heizbox_palette[color]);
 }
 
 int8_t StatusBar::getWifiStrength() const {

@@ -13,19 +13,6 @@ Screen::Screen() : manager(nullptr) {
 Screen::~Screen() {
 }
 
-void Screen::setState(const std::string& key, int value) {
-    auto it = state_.find(key);
-    if (it == state_.end() || it->second != value) {
-        state_[key] = value;
-        markDirty();
-    }
-}
-
-int Screen::getState(const std::string& key, int defaultValue) const {
-    auto it = state_.find(key);
-    return (it != state_.end()) ? it->second : defaultValue;
-}
-
 void Screen::setManager(ScreenManager* mgr) {
     manager = mgr;
 }

@@ -3,117 +3,115 @@
 #include "hardware/display/DisplayDriver.h"
 #include "core/Config.h"
 #include "core/DeviceState.h"
-#include "ui/base/ScreenManager.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
-#include <TFT_eSPI.h>
-#include "utils/Logger.h"
 #include "StateManager.h"
 #include <utility>
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
 
-    bindTo(state.consumption, ds.sessionConsumption);
-    bindTo(state.todayConsumption, ds.todayConsumption);
-    bindTo(state.yesterdayConsumption, ds.yesterdayConsumption);
-    bindTo(state.targetTemp, ds.targetTemperature);
-    bindTo(state.power, ds.power);
-    bindTo(state.currentCycle, ds.currentCycle);
+    bindTo(state.consumption.session, ds.sessionConsumption);
+    bindTo(state.consumption.today, ds.todayConsumption);
+    bindTo(state.consumption.yesterday, ds.yesterdayConsumption);
+    bindTo(state.heater.targetTemp, ds.targetTemperature);
+    bindTo(state.heater.power, ds.power);
+    bindTo(state.heater.currentCycle, ds.currentCycle);
 }
 
-void FireScreen::draw(DisplayDriver &display)
-{
-    // Current Temp
-    _ui->withSurface(88, 50, 0, 60, {
-        {"currentTemp", state.currentTemp}
-    }, [this](RenderSurface& s) {
-        s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::lg);
-    });
+void FireScreen::draw(DisplayDriver &display) {
+    if (state.heater.isHeating) {
+        float progress = min(progress, 1.0f);
 
-    // Target Temp
-    _ui->withSurface(104, 50, 84, 60, {
-        {"targetTemp", state.targetTemp}
-    }, [this](RenderSurface& s) {
-        s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.text(40, 6, String(state.targetTemp), TextSize::lg);
-    });
-
-    // Power
-    _ui->withSurface(100, 40, 192, 60, {
-        {"power", state.power}
-    }, [this](RenderSurface& s) {
-        s.text(30, 6, String(state.power), TextSize::lg);
-        s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
-    });
-
-    // Consumption
-    _ui->withSurface(250, 140, 15, 115, {
-        {"isHeating", state.isHeating},
-        {"consumption", state.consumption},
-        {"todayConsumption", state.todayConsumption},
-        {"currentCycle", state.currentCycle}
-    }, [this](RenderSurface& s) {
-        FireScreen::drawSessionRow(s.sprite, "Session", state.consumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
-        FireScreen::drawSessionRow(s.sprite, "Heute", state.todayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
-    });
-
-
-    if (!state.isHeating) {
+        _ui->withSurface(280, 205, 0, 35, {
+            {"seconds", (int)state.heater.elapsedSeconds},
+            {"progress", state.heater.progress},
+            {"currentTemp", state.heater.currentTemp},
+            {"power", state.heater.power},
+            {"targetTemp", state.heater.targetTemp},
+            {"currentCycle", state.heater.currentCycle}
+        }, [this](RenderSurface& s) {
+            HeatUI(s, state.heater);
+        });
         return;
     }
 
-    float progress = min(progress, 1.0f);
-    _ui->withSurface(280, 140, 0, 100, {
-        {"seconds", (int)state.elapsedSeconds},
-        {"progress", state.progress},
-        {"currentTemp", state.currentTemp}
+    // Consumption
+    _ui->withSurface(250, 140, 15, 105, {
+        {"isHeating", state.heater.isHeating},
+        {"consumption", state.consumption.session},
+        {"todayConsumption", state.consumption.today},
+        {"currentCycle", state.heater.currentCycle}
     }, [this](RenderSurface& s) {
-        HeatUI(s, state.elapsedSeconds, state.progress, state.currentTemp);
+        FireScreen::drawSessionRow(s.sprite, "Session", state.consumption.session, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.heater.currentCycle == 1));
+        FireScreen::drawSessionRow(s.sprite, "Heute", state.consumption.today, 55, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
+    });
+
+    // Current Temp
+    _ui->withSurface(88, 50, 0, 45, {
+        {"currentTemp", state.heater.currentTemp}
+    }, [this](RenderSurface& s) {
+        s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.text(30, 6, isnan(state.heater.currentTemp) ? "Err" : String(state.heater.currentTemp), TextSize::lg);
+    });
+
+    // Target Temp
+    _ui->withSurface(104, 50, 84, 45, {
+        {"targetTemp", state.heater.targetTemp}
+    }, [this](RenderSurface& s) {
+        s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.text(40, 6, String(state.heater.targetTemp), TextSize::lg);
+    });
+
+    // Power
+    _ui->withSurface(100, 40, 192, 45, {
+        {"power", state.heater.power}
+    }, [this](RenderSurface& s) {
+        s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.text(30, 6, String(state.heater.power), TextSize::lg);
     });
 }
 
 void FireScreen::update() {
-    state.isHeating = heater.isHeating();
+    state.heater.isHeating = heater.isHeating();
     uint16_t temp = heater.getTemperature();
     
-    if (temp != state.currentTemp) {
-        state.currentTemp = temp;
+    if (temp != state.heater.currentTemp) {
+        state.heater.currentTemp = temp;
         markDirty();
     }
 
-    if (state.isHeating) {
-        state.elapsedSeconds = heater.getElapsedTime() / 1000;
-        state.progress = (float)state.currentTemp / state.targetTemp;
+    if (state.heater.isHeating) {
+        state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
+        state.heater.progress = (float)state.heater.currentTemp / state.heater.targetTemp;
 
-        if (state.progress > 1.0f) state.progress = 1.0f;
+        if (state.heater.progress > 1.0f) state.heater.progress = 1.0f;
 
-        if (state.currentTemp > state.targetTemp) {
+        if (state.heater.currentTemp > state.heater.targetTemp) {
             _handleHeatingTrigger(false);
             markDirty();
         }
 
         static uint32_t lastSecond = 0;
-        if (state.elapsedSeconds != lastSecond) {
-            lastSecond = state.elapsedSeconds;
+        if (state.heater.elapsedSeconds != lastSecond) {
+            lastSecond = state.heater.elapsedSeconds;
             markDirty();
         }
     }
 
     static bool wasHeating = false;
-    if (!state.isHeating && wasHeating) {
+    if (!state.heater.isHeating && wasHeating) {
         _ui->clear();
         markDirty();
     }
-    wasHeating = state.isHeating;
+    wasHeating = state.heater.isHeating;
 }
 
 void FireScreen::handleInput(InputEvent event) {
     if (event.button == UP || event.button == DOWN && 
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
-        float targetTempUpdate = event.button == UP ? 1 : -1;
-        DeviceState::instance().targetTemperature.update([targetTempUpdate](uint8_t val) { return val + targetTempUpdate; });
+        float delta = event.button == UP ? 1 : -1;
+        DeviceState::instance().targetTemperature.update([delta](uint8_t val) { return val + delta; });
         return;
     }
 
@@ -130,9 +128,9 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (event.button == LEFT || event.button == RIGHT) {
-        uint8_t powerUpdate = event.button == LEFT ? -10 : 10;
-        DeviceState::instance().power.update([powerUpdate](uint8_t val) { 
-            uint8_t newVal = val + powerUpdate;
+        uint8_t delta = event.button == LEFT ? -10 : 10;
+        DeviceState::instance().power.update([delta](uint8_t val) { 
+            uint8_t newVal = val + delta;
             if (newVal < 30) newVal = 30;
             if (newVal > 100) newVal = 100;
             return newVal; 

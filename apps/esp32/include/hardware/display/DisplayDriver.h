@@ -14,7 +14,7 @@ namespace DisplayConfig {
     constexpr uint16_t WIDTH = 280;
     constexpr uint16_t HEIGHT = 240;
     constexpr uint16_t SPRITE_HEIGHT = 230;
-    constexpr uint8_t STATUS_BAR_HEIGHT = 50;
+    constexpr uint8_t STATUS_BAR_HEIGHT = 35;
 }
 
 class DisplayDriver {

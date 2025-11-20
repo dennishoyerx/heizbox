@@ -1,23 +1,14 @@
 #pragma once
 
 #include "ui/base/Screen.h"
+#include "ui/components/HeatUI.h"
 #include "hardware/heater/HeaterController.h"
-#include "ScreensaverScreen.h"
 #include <functional>
 
 struct Consumption {
     float session;
     float today;
     float yesterday;
-};
-
-struct HeaterState {
-    uint8_t power;
-    uint8_t targetTemp;
-    uint16_t currentTemp;
-    bool isHeating;
-    uint32_t elapsedSeconds;
-    float progress;
 };
 
 class FireScreen : public Screen {
@@ -34,20 +25,8 @@ private:
 
     // State
     struct {
-        uint8_t currentCycle;
-
-        bool isHeating = false;
-        uint32_t elapsedSeconds = 0;
-        float progress = 0;
-
-        uint8_t targetTemp = 0;
-        uint16_t currentTemp = 0;
-        uint8_t power = 0;
-
-        
-        float consumption = 0;
-        float todayConsumption = 0;
-        float yesterdayConsumption = 0;
+        Consumption consumption;
+        HeatState heater;
     } state;
 
     

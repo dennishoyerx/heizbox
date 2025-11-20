@@ -23,7 +23,7 @@ void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY,
 }
 
 void UI::clear() {
-    _surfaceFactory.withSurface(280, 190, 0, 50, [](RenderSurface& s) {
+    _surfaceFactory.withSurface(280, 190, 0, 35, [](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
     });
     _surfaceFactory.invalidateAll();

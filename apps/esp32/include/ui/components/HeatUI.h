@@ -2,4 +2,14 @@
 
 #include "ui/base/Screen.h"
 
-void HeatUI(RenderSurface s, uint32_t seconds, float progress, uint8_t currentTemp);
+struct HeatState {
+    uint8_t currentCycle = 1;
+    uint8_t power;
+    uint8_t targetTemp;
+    uint16_t currentTemp;
+    bool isHeating = false;
+    uint32_t elapsedSeconds;
+    float progress;
+};
+
+void HeatUI(RenderSurface s, HeatState state);

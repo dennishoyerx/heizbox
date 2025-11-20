@@ -33,10 +33,6 @@ public:
     virtual void onExit() {}   // Called when screen is left
     virtual bool needsRedraw() const { return false; }
 
-    // State management (einfacher Key-Value Store)
-    void setState(const std::string& key, int value);
-    int getState(const std::string& key, int defaultValue = 0) const;
-
     // Manager access
     void setManager(ScreenManager* mgr);
     void setUI(UI* ui);
