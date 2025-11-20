@@ -38,16 +38,3 @@ void Screen::markDirty() {
         manager->setDirty();
     }
 }
-
-// Legacy
-void Screen::centerText(DisplayDriver& display, int16_t y, const char* text,
-                        uint16_t color, uint8_t size) {
-    const int16_t textWidth = display.getTextWidth(text, size);
-    const int16_t x = (display.getTFTWidth() - textWidth) / 2;
-    display.drawText(x, y, text, color, size);
-}
-
-void Screen::onInput(InputButton button, InputEventType type, InputCallback callback) {
- //   manager->onInput(button, type, callback);
-}
-

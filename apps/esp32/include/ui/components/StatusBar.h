@@ -6,19 +6,19 @@
 #include <WiFi.h>
 #include <TFT_eSPI.h>
 #include "utils/clock.h"
+#include "ui/base/SurfaceFactory.h"
+#include "ui/base/UI.h"
+
 
 class StatusBar {
 public:
-    StatusBar(TFT_eSPI* tft, uint16_t width, uint8_t height);
+    StatusBar(uint16_t width, uint8_t height);
     ~StatusBar() = default;
 
-    void draw();
+    void draw(UI* ui);
     void pushSprite(int16_t x, int16_t y);
 
 private:
-    // Components
-    TFT_eSPI* tft;
-
     // Dimensions
     uint8_t height;
 
@@ -37,8 +37,8 @@ private:
     } dirty;
 
     // Helper methods
-    void drawTimeRegion();
-    void drawWifiRegion();
+    void drawTimeRegion(RenderSurface s);
+    void drawWifiRegion(RenderSurface s);
     int8_t getWifiStrength() const;
     const uint8_t* getWifiIcon() const;
 

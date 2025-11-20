@@ -45,11 +45,7 @@ protected:
     ScreenManager* manager;
     UI* _ui;
 
-    void onInput(InputButton button, InputEventType type, InputCallback callback);
-
     void markDirty();
-    void centerText(DisplayDriver& display, int16_t y, const char* text,
-                    uint16_t color, uint8_t size = 2);
 
     template <typename T>
     void bindTo(T& member, Observable<T>& observable) {

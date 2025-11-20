@@ -13,9 +13,10 @@ ScreenManager::ScreenManager(DisplayDriver& disp, InputManager& inp)
       previousScreen(nullptr),
       currentScreenType(ScreenType::STARTUP),
       dirty(true),
-      lastDrawTime(0)
+      lastDrawTime(0),
+      ui(new UI(&disp)),
+      statusBar(new StatusBar(DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT))
 {
-    ui = new UI(&disp);
     transition.type = ScreenTransition::NONE;
     transition.inProgress = false;
     transition.startTime = 0;
@@ -50,7 +51,8 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
             // Direkter Wechsel 
             currentScreen->clear();
             currentScreen->draw(display);
-            display.renderStatusBar();
+            //statusBar->draw(ui);
+
             transition.inProgress = false;
         }
     }
@@ -100,8 +102,7 @@ void ScreenManager::draw() {
 
         currentScreen->draw(display);
         display.render();
-        display.renderStatusBar();
-
+        statusBar->draw(ui);
         const uint32_t drawTime = micros() - startTime;
         lastDrawTime = drawTime;
         dirty = false;
@@ -180,8 +181,8 @@ void ScreenManager::completeTransition() {
     if (currentScreen) {
         currentScreen->clear();
         currentScreen->draw(display);
+        statusBar->draw(ui);
     }
-    display.renderStatusBar();
 
     dirty = false;
 }

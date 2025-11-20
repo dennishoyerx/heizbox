@@ -104,7 +104,6 @@ void Device::loop() {
 
     screenManager.update();
     screenManager.draw();
-    display->renderStatusBar();
 
     heaterMonitor->checkHeatingStatus();
     heaterMonitor->checkHeatCycle();

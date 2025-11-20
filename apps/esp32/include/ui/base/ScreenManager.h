@@ -1,9 +1,8 @@
-// include/ScreenManager.h
-#ifndef SCREENMANAGER_H
-#define SCREENMANAGER_H
+#pragma once
 
 #include "ui/base/Screen.h"
 #include "ui/base/UI.h"
+#include "ui/components/StatusBar.h"
 #include "hardware/input/InputManager.h"
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenTransition.h"
@@ -33,6 +32,7 @@ private:
     // Core components
     DisplayDriver& display;
     InputManager& input;
+    StatusBar* statusBar;
     UI* ui;
 
     // Screen state
@@ -61,6 +61,3 @@ private:
     void completeTransition();
     void drawTransitionFrame();
 };
-
-
-#endif

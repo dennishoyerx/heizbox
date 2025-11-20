@@ -1,4 +1,3 @@
-// apps/esp32/include/hardware/display/DisplayDriver.h
 #ifndef DISPLAYDRIVER_H
 #define DISPLAYDRIVER_H
 
@@ -8,7 +7,6 @@
 #include <memory>
 
 class ScreenManager;
-class StatusBar;
 
 namespace DisplayConfig {
     constexpr uint16_t WIDTH = 280;
@@ -26,7 +24,6 @@ public:
     void init(ScreenManager* mgr);
     void clear();
     void render();
-    void renderStatusBar();
 
     void* getRenderer();
     TFT_eSprite& getSprite();
@@ -56,7 +53,6 @@ private:
     std::unique_ptr<IBacklightController> backlight;
     std::unique_ptr<SpriteRenderer> spriteRenderer;
     
-    StatusBar* statusBar;
     ScreenManager* screenManager;
 
     bool darkMode;

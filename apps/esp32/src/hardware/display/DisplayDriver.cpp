@@ -1,7 +1,6 @@
 #include <memory>
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/ScreenManager.h"
-#include "ui/components/StatusBar.h"
 #include "ui/ColorPalette.h"
 #include "hardware/drivers/TFT_eSPI_Driver.h"
 #include "ui/Font.h"
@@ -11,13 +10,11 @@ DisplayDriver::DisplayDriver(std::unique_ptr<ITFTDriver> tftDriver,
     : tft(std::move(tftDriver)),
       backlight(std::move(backlightController)),
       spriteRenderer(nullptr),
-      statusBar(nullptr),
       screenManager(nullptr),
       darkMode(false) {
 }
 
 DisplayDriver::~DisplayDriver() {
-    delete statusBar;
 }
 
 void DisplayDriver::init(ScreenManager* mgr) {
@@ -28,9 +25,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
 
     tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
 
-    // Since TFT_eSPI_Driver returns a TFT_eSPI object, we can cast it here
     TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTFT();
-    statusBar = new StatusBar(&tft_spi, DisplayConfig::WIDTH, DisplayConfig::STATUS_BAR_HEIGHT);
     
     spriteRenderer.reset(new SpriteRenderer(&tft_spi));
     reallocateSprites();
@@ -49,7 +44,6 @@ void DisplayDriver::reallocateSprites() {
 
 void DisplayDriver::clear() {
         tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
-        //renderStatusBar();
 
    /* if (spriteRenderer && spriteRenderer->isAllocated()) {
         spriteRenderer->getSprite().fillSprite(COLOR_ACCENT);
@@ -67,12 +61,7 @@ void DisplayDriver::render() {
     }
 }
 
-void DisplayDriver::renderStatusBar() {
-    if (statusBar) {
-        statusBar->draw();
-        statusBar->pushSprite(0, 0);
-    }
-}
+
 
 void* DisplayDriver::getRenderer() {
     if (spriteRenderer && spriteRenderer->isAllocated()) {

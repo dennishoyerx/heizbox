@@ -5,11 +5,11 @@
 
 void HeatUI(RenderSurface s, HeatState state) {
     uint8_t timerColor;
-    if (state.currentTemp < 160) timerColor = COLOR_WARNING;
+    if (state.currentTemp < 160) timerColor = COLOR_BLUE; //COLOR_WARNING;
     else if (state.currentTemp < 170) timerColor = COLOR_SUCCESS;
-    else if (state.progress < 180) timerColor = COLOR_BLUE;
-    else if (state.progress < 190) timerColor = COLOR_PURPLE;
-    else timerColor = COLOR_ERROR;
+    else if (state.progress < 180) timerColor = COLOR_WARNING;
+    else if (state.progress < 190) timerColor = COLOR_ERROR;
+    else timerColor = COLOR_PURPLE;
 
     int width = s.width();
     int height = s.height();
