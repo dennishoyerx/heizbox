@@ -23,9 +23,10 @@ private:
 
         bool isHeating = false;
         uint32_t elapsedSeconds = 0;
+        float progress = 0;
 
-        float targetTemp = 0;
-        float currentTemp = 0;
+        uint8_t targetTemp = 0;
+        uint16_t currentTemp = 0;
         uint8_t power = 0;
 
         

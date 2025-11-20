@@ -12,7 +12,7 @@ HeaterController::HeaterController()
       cycleFinishedFlag(false),
       dutyCycleStartTime(0),
       heaterPhysicallyOn(false),
-      tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HardwareConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS))
+      tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS))
        {
 }
 
@@ -40,8 +40,8 @@ void HeaterController::transitionTo(State newState) {
     state = newState;
 }
 
-float HeaterController::getTemperature() {
-    return tempSensor->getTemperature();
+uint16_t HeaterController::getTemperature() {
+    return (uint16_t)tempSensor->getTemperature();
 }
 
 
@@ -90,6 +90,7 @@ void HeaterController::stopHeating(bool finalize) {
         Serial.println("🔥 Heating paused");
     }
 }
+
 
 void HeaterController::updateDutyCycle() {
     if (state != State::HEATING) {

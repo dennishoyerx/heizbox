@@ -56,7 +56,6 @@ Device::~Device() {}
 void Device::setup() {
     Serial.begin(115200);
 
-    // Initialize NVS
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         nvs_flash_erase();

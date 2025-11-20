@@ -36,7 +36,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
 
     heater->setPower(state.power.get());
-    state.power.addListener([heater](int val) {
+    state.power.addListener([heater](uint8_t val) {
         heater->setPower(val);
     });
 

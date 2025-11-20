@@ -33,7 +33,7 @@ public:
     void clearCycleFinishedFlag();
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
-    float getTemperature();
+    uint16_t getTemperature();
 
 
 private:

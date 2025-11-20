@@ -20,14 +20,15 @@ struct HardwareConfig {
     static constexpr uint8_t THERMO_SCK_PIN = 25;
     static constexpr uint8_t THERMO_CS_PIN = 27;
     static constexpr uint8_t THERMO_SO_PIN = 26;
-
-    static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 350;
 };
 
 struct HeaterConfig {
+    static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 220;
+
     static constexpr uint32_t HEATCYCLE_MIN_DURATION_MS = 30000;
-    static constexpr uint32_t PAUSE_TIMEOUT_MS = 5000;
+    static constexpr uint32_t PAUSE_TIMEOUT_MS = 10000;
     static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
+    static constexpr uint32_t SENSOR_OFF_TIME_MS = 200;
 };
 
 struct NetworkConfig {
@@ -40,7 +41,6 @@ struct NetworkConfig {
 struct Timing {
     static constexpr uint32_t NVS_FLUSH_INTERVAL_MS = 5000;
     static constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 600000;
-    static constexpr uint32_t HEATCYCLE_TIMEOUT_MS = 30000;
 };
 
 

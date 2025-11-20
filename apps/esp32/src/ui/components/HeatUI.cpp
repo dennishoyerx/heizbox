@@ -2,32 +2,41 @@
 #include "ui/base/Screen.h"
 #include "ui/ColorPalette.h"
 
-void HeatUI(RenderSurface s, uint32_t seconds) {
+void HeatUI(RenderSurface s, uint32_t seconds, float progress) {
     uint8_t timerColor;
-    if (seconds < 20) timerColor = COLOR_SUCCESS;
-    else if (seconds < 35) timerColor = COLOR_WARNING;
+    if (seconds < 20) timerColor = COLOR_WARNING;
+    else if (seconds < 35) timerColor = COLOR_SUCCESS;
     else if (seconds < 50) timerColor = COLOR_BLUE;
     else timerColor = COLOR_PURPLE;
     
-    int centerX = 70;
+    int centerX = 140;
     int centerY = 70;
+
+    
+int bottomY = centerY + s.height()/2; // unterer Rand
+int leftX = centerX - s.width()/2;    // linker Rand
+
+// progress = 0.0 .. 1.0
+int fillHeight = (int)(s.height() * progress);
+
+// Rechteck von unten nach oben
+s.sprite->fillRect(leftX, bottomY - fillHeight, s.width(), fillHeight, timerColor);
     
     // === Vereinfachter Progress Ring ===
     int radius = 70;
 
     // Hintergrund-Ring
-    s.sprite->fillCircle(centerX, centerY, radius, COLOR_BG);
-    s.sprite->drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
+    //s.sprite->fillCircle(centerX, centerY, radius, COLOR_BG);
+    //s.sprite->drawCircle(centerX, centerY, radius + 4, COLOR_TEXT_PRIMARY);
 
-    float progress = min(progress, 1.0f);
     int endAngle = (int)(progress * 360);
     int startAngle = 180; 
     int stopAngle = startAngle + endAngle;
 
-    s.sprite->drawArc(centerX, centerY,
+    /*s.sprite->drawArc(centerX, centerY,
                     radius + 7, radius - 7,
                     startAngle, stopAngle,
-                    timerColor, COLOR_ACCENT, true);
+                    timerColor, COLOR_ACCENT, true);*/
 
     // === TIMER ===
     char timeStr[4];

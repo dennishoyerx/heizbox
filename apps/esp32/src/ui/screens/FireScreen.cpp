@@ -84,7 +84,7 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, isnan(state.currentTemp) ? "Err" : String(state.currentTemp, 0), TextSize::lg);
+        s.text(30, 6, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::lg);
     });
 
     // Target Temp
@@ -94,7 +94,7 @@ void FireScreen::draw(DisplayDriver &display)
         s.sprite->fillSprite(COLOR_BG);
 
         s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
-        s.text(40, 6, String(state.targetTemp, 0), TextSize::lg);
+        s.text(40, 6, String(state.targetTemp), TextSize::lg);
     });
 
     // Power
@@ -123,16 +123,18 @@ void FireScreen::draw(DisplayDriver &display)
         return;
     }
 
-    _ui->withSurface(140, 140, 70, 100, {
-        {"seconds", (int)state.elapsedSeconds}
+    float progress = min(progress, 1.0f);
+    _ui->withSurface(280, 140, 0, 100, {
+        {"seconds", (int)state.elapsedSeconds},
+        {"progress", state.progress},
     }, [this](RenderSurface& s) {
-        HeatUI(s, state.elapsedSeconds);
+        HeatUI(s, state.elapsedSeconds, state.progress);
     });
 }
 
 void FireScreen::update() {
     state.isHeating = heater.isHeating();
-    float temp = heater.getTemperature();
+    uint16_t temp = heater.getTemperature();
     
     if (temp != state.currentTemp) {
         state.currentTemp = temp;
@@ -140,6 +142,10 @@ void FireScreen::update() {
     }
 
     if (state.isHeating) {
+        
+        state.progress = (float)state.currentTemp / state.targetTemp;
+        if (state.progress > 1.0f) state.progress = 1.0f;
+
         if (state.currentTemp > state.targetTemp) {
             _handleHeatingTrigger(false);
             markDirty();
@@ -151,7 +157,6 @@ void FireScreen::update() {
             lastSecond = state.elapsedSeconds;
             markDirty();
         }
-
     }
 
     static bool wasHeating = false;
@@ -166,7 +171,7 @@ void FireScreen::handleInput(InputEvent event) {
     if (event.button == UP || event.button == DOWN && 
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
         float targetTempUpdate = event.button == UP ? 1 : -1;
-        DeviceState::instance().targetTemperature.update([targetTempUpdate](float val) { return val + targetTempUpdate; });
+        DeviceState::instance().targetTemperature.update([targetTempUpdate](uint8_t val) { return val + targetTempUpdate; });
         return;
     }
 
