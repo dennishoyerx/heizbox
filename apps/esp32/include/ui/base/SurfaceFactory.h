@@ -6,6 +6,7 @@
 #include <functional>
 #include <unordered_map>
 #include <string>
+#include <map>
 #include <variant>
 
 struct Rect { int16_t x, y, w, h; };
@@ -106,6 +107,7 @@ struct RenderSurface {
 };
 
 using SurfaceCallback = std::function<void(RenderSurface&)>;
+using SurfaceCallbackWithState = std::function<void(RenderSurface&, std::unordered_map<std::string, StateValue>&)>;
 
 class SurfaceFactory {
 public:

@@ -11,59 +11,6 @@
 #include "StateManager.h"
 #include <utility>
 
-void FireScreen::drawSessionRow(TFT_eSprite* sprite, 
-    const char* label, 
-    float consumption, 
-    int y, 
-    uint8_t bgColor, 
-    uint8_t borderColor, 
-    uint8_t textColor, 
-    bool invert, 
-    bool thin)
-{    
-    int x = 0;
-    int width = 250; 
-    int height = thin ? 40 : 50;
-    int radius = 16;
-    uint8_t _bgColor;
-    uint8_t _textColor;
-
-    if (!invert) {
-        _bgColor = bgColor;
-        _textColor = textColor;
-    } else {
-        _bgColor = textColor;
-        _textColor = bgColor;
-    }
-
-        sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
-
-        // "Session" Text
-        sprite->setTextSize(1);
-        sprite->setTextColor(_textColor);
-        sprite->setTextDatum(ML_DATUM);
-        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
-        sprite->drawString(label, 30, y + height / 2);
-
-        // Verbrauchswert formatieren und anzeigen
-        char consumptionStr[10];
-        int integer = (int)consumption;
-        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
-        if (integer > 0)
-        {
-            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
-        }
-        else
-        {
-            sprintf(consumptionStr, ".%02dg", decimal);
-        }
-
-        // Verbrauchswert rechts ausgerichtet
-        sprite->setTextDatum(MR_DATUM);
-        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
-        sprite->drawString(consumptionStr, x + width - 12, y + height / 2);
-}
-
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
 
@@ -81,8 +28,6 @@ void FireScreen::draw(DisplayDriver &display)
     _ui->withSurface(88, 50, 0, 60, {
         {"currentTemp", state.currentTemp}
     }, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
-
         s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(30, 6, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::lg);
     });
@@ -91,8 +36,6 @@ void FireScreen::draw(DisplayDriver &display)
     _ui->withSurface(104, 50, 84, 60, {
         {"targetTemp", state.targetTemp}
     }, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
-
         s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(40, 6, String(state.targetTemp), TextSize::lg);
     });
@@ -101,7 +44,6 @@ void FireScreen::draw(DisplayDriver &display)
     _ui->withSurface(100, 40, 192, 60, {
         {"power", state.power}
     }, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
         s.text(30, 6, String(state.power), TextSize::lg);
         s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
     });
@@ -113,7 +55,6 @@ void FireScreen::draw(DisplayDriver &display)
         {"todayConsumption", state.todayConsumption},
         {"currentCycle", state.currentCycle}
     }, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
         FireScreen::drawSessionRow(s.sprite, "Session", state.consumption, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", state.todayConsumption, 50, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
     });
@@ -208,4 +149,57 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
         heater.stopHeating(false);
     }
     markDirty();
+}
+
+void FireScreen::drawSessionRow(TFT_eSprite* sprite, 
+    const char* label, 
+    float consumption, 
+    int y, 
+    uint8_t bgColor, 
+    uint8_t borderColor, 
+    uint8_t textColor, 
+    bool invert, 
+    bool thin)
+{    
+    int x = 0;
+    int width = 250; 
+    int height = thin ? 40 : 50;
+    int radius = 16;
+    uint8_t _bgColor;
+    uint8_t _textColor;
+
+    if (!invert) {
+        _bgColor = bgColor;
+        _textColor = textColor;
+    } else {
+        _bgColor = textColor;
+        _textColor = bgColor;
+    }
+
+        sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
+
+        // "Session" Text
+        sprite->setTextSize(1);
+        sprite->setTextColor(_textColor);
+        sprite->setTextDatum(ML_DATUM);
+        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
+        sprite->drawString(label, 30, y + height / 2);
+
+        // Verbrauchswert formatieren und anzeigen
+        char consumptionStr[10];
+        int integer = (int)consumption;
+        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
+        if (integer > 0)
+        {
+            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
+        }
+        else
+        {
+            sprintf(consumptionStr, ".%02dg", decimal);
+        }
+
+        // Verbrauchswert rechts ausgerichtet
+        sprite->setTextDatum(MR_DATUM);
+        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
+        sprite->drawString(consumptionStr, x + width - 12, y + height / 2);
 }
