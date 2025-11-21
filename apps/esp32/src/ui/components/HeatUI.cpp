@@ -36,10 +36,10 @@ void HeatUI(RenderSurface s, HeatState state) {
     s.sprite->drawString(timeStr, centerX, centerY, 1);
 
     if (state.currentCycle == 1) {
-        s.sprite->drawBitmap(width - 48 , 24, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawBitmap(width - 48 , 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
     }
 
-    s.sprite->drawBitmap(0, 24, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
+    s.sprite->drawBitmap(0, 20, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
     s.text(70, 40, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::bxl);
     s.text(165, 40, String(state.targetTemp), TextSize::xl);
 

@@ -36,8 +36,9 @@ void FireScreen::draw(DisplayDriver &display) {
         return;
     }
 
+    
     // Consumption
-    _ui->withSurface(250, 140, 15, 105, {
+    _ui->withSurface(250, 140, 15, 110, {
         {"isHeating", state.heater.isHeating},
         {"consumption", state.consumption.session},
         {"todayConsumption", state.consumption.today},
@@ -51,7 +52,8 @@ void FireScreen::draw(DisplayDriver &display) {
     _ui->withSurface(88, 50, 0, 45, {
         {"currentTemp", state.heater.currentTemp}
     }, [this](RenderSurface& s) {
-        s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
+        //s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(30, 6, isnan(state.heater.currentTemp) ? "Err" : String(state.heater.currentTemp), TextSize::lg);
     });
 
@@ -59,7 +61,8 @@ void FireScreen::draw(DisplayDriver &display) {
     _ui->withSurface(104, 50, 84, 45, {
         {"targetTemp", state.heater.targetTemp}
     }, [this](RenderSurface& s) {
-        s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawBitmap(0, 0, image_target_40, 40, 40, COLOR_TEXT_PRIMARY);
+        //s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(40, 6, String(state.heater.targetTemp), TextSize::lg);
     });
 
@@ -67,8 +70,13 @@ void FireScreen::draw(DisplayDriver &display) {
     _ui->withSurface(100, 40, 192, 45, {
         {"power", state.heater.power}
     }, [this](RenderSurface& s) {
-        s.sprite->drawBitmap(-10, 0, image_power_48, 48, 48, COLOR_TEXT_PRIMARY);
+        s.sprite->drawBitmap(-10, 0, image_power_40, 40, 40, COLOR_TEXT_PRIMARY);
         s.text(30, 6, String(state.heater.power), TextSize::lg);
+    });
+
+    // Seperator
+    _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
+        s.sprite->drawRect(0, 0, 280, 1, COLOR_BG_2);
     });
 }
 
