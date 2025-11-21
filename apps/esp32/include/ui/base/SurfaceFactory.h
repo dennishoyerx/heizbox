@@ -16,7 +16,13 @@ enum class TextSize {
     md,
     lg,
     xl,
-    xxl
+    xxl,
+
+    bsm,
+    bmd,
+    blg,
+    bxl,
+    bxxl
 };
 
 enum class TextAlign {
@@ -151,6 +157,7 @@ private:
   TFT_eSPI* _tft;
   bool _usePsram;
   bool _forceRedraw;
+
 
   struct PoolEntry { 
     TFT_eSprite* sprite = nullptr; 

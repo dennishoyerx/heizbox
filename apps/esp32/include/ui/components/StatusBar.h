@@ -1,6 +1,4 @@
-// include/StatusBar.h
-#ifndef STATUSBAR_H
-#define STATUSBAR_H
+#pragma once
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -14,9 +12,7 @@ class StatusBar {
 public:
     StatusBar(uint16_t width, uint8_t height);
     ~StatusBar() = default;
-
     void draw(UI* ui);
-    void pushSprite(int16_t x, int16_t y);
 
 private:
     // Dimensions
@@ -28,7 +24,7 @@ private:
         wl_status_t wifiStatus;
         int8_t wifiStrength;
         uint32_t lastUpdate;
-    } cache;
+    } state;
 
     // Dirty flags für selective rendering
     struct {
@@ -40,11 +36,7 @@ private:
     void drawTimeRegion(RenderSurface s);
     void drawWifiRegion(RenderSurface s);
     int8_t getWifiStrength() const;
-    const uint8_t* getWifiIcon() const;
 
     static constexpr uint32_t TIME_UPDATE_INTERVAL_MS = 5000;
     static constexpr uint16_t BG_COLOR = 1;
 };
-
-
-#endif

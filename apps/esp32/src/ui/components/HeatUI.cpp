@@ -5,11 +5,11 @@
 
 void HeatUI(RenderSurface s, HeatState state) {
     uint8_t timerColor;
-    if (state.currentTemp < 160) timerColor = COLOR_BLUE; //COLOR_WARNING;
-    else if (state.currentTemp < 170) timerColor = COLOR_SUCCESS;
-    else if (state.progress < 180) timerColor = COLOR_WARNING;
-    else if (state.progress < 190) timerColor = COLOR_ERROR;
-    else timerColor = COLOR_PURPLE;
+    if (state.currentTemp < 165) timerColor = COLOR_BLUE;
+    else if (state.currentTemp < 180) timerColor = COLOR_SUCCESS;
+    else if (state.currentTemp < 190) timerColor = COLOR_WARNING;
+    else if (state.currentTemp < 200) timerColor = COLOR_PURPLE;
+    else timerColor = COLOR_ERROR;
 
     int width = s.width();
     int height = s.height();
@@ -40,7 +40,7 @@ void HeatUI(RenderSurface s, HeatState state) {
     }
 
     s.sprite->drawBitmap(0, 24, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-    s.text(70, 40, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::xl);
-    s.text(150, 40, String(state.targetTemp), TextSize::xl);
+    s.text(70, 40, isnan(state.currentTemp) ? "Err" : String(state.currentTemp), TextSize::bxl);
+    s.text(165, 40, String(state.targetTemp), TextSize::xl);
 
 }

@@ -8,6 +8,12 @@ const GFXfont* getFontForSize(TextSize ts) {
         case TextSize::lg: return &FreeSans18pt7b;
         case TextSize::xl: return &FreeSans24pt7b;
         case TextSize::xxl: return &FreeSans18pt7b;
+
+        case TextSize::bsm: return &FreeSansBold9pt7b;
+        case TextSize::bmd: return &FreeSansBold12pt7b;
+        case TextSize::blg: return &FreeSansBold18pt7b;
+        case TextSize::bxl: return &FreeSansBold24pt7b;
+        case TextSize::bxxl: return &FreeSansBold18pt7b;
         default:           return &FreeSans12pt7b;
     }
 }
@@ -49,7 +55,7 @@ RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h) {
   }
 
   spr->createPalette(heizbox_palette, 16);
-  spr->fillSprite(COLOR_ACCENT);
+  spr->fillSprite(COLOR_BG);
 
   return RenderSurface{ spr };
 }
