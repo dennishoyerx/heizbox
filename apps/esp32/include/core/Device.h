@@ -24,7 +24,6 @@
 // UI
 #include "ui/base/ScreenManager.h"
 #include "ui/screens/FireScreen.h"
-#include "ui/screens/HiddenModeScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
 #include "ui/screens/TimezoneScreen.h"

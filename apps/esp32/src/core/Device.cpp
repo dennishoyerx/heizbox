@@ -117,17 +117,14 @@ void Device::loop() {
 
 void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
     if (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0) {
-        if (!doc["clicks"].isNull()) {
-            DeviceState::instance().sessionClicks.set(doc["clicks"].as<int>());
-        }
-        if (!doc["caps"].isNull()) {
-            DeviceState::instance().sessionCaps.set(doc["caps"].as<int>());
-        }
         if (!doc["consumption"].isNull()) {
             DeviceState::instance().sessionConsumption.set(doc["consumption"].as<float>());
         }
         if (!doc["consumptionTotal"].isNull()) {
             DeviceState::instance().todayConsumption.set(doc["consumptionTotal"].as<float>());
+        }
+        if (!doc["consumptionTotal"].isNull()) {
+            DeviceState::instance().yesterdayConsumption.set(doc["consumptionYesterday"].as<float>());
         }
         screenManager.setDirty();
     }

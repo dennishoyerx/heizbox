@@ -18,7 +18,6 @@ UISetup::UISetup(
 void UISetup::setupScreens() {
     // Create screens
     fireScreen = std::make_unique<FireScreen>(heater);
-    hiddenModeScreen = std::make_unique<HiddenModeScreen>(displayDriver);
     screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
         screenManager.setScreen(fireScreen.get());
     });
@@ -34,7 +33,6 @@ void UISetup::setupScreens() {
     screenManager.registerScreen(ScreenType::TIMEZONE, timezoneScreen.get());
     screenManager.registerScreen(ScreenType::SCREENSAVER, screensaverScreen.get());
     screenManager.registerScreen(ScreenType::OTA_UPDATE, otaUpdateScreen.get());
-    screenManager.registerScreen(ScreenType::HIDDEN_MODE, hiddenModeScreen.get());
 }
 
 void UISetup::setupMainMenu() {

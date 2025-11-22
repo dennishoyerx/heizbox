@@ -46,6 +46,7 @@ void FireScreen::draw(DisplayDriver &display) {
     }, [this](RenderSurface& s) {
         FireScreen::drawSessionRow(s.sprite, "Session", state.consumption.session, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.heater.currentCycle == 1));
         FireScreen::drawSessionRow(s.sprite, "Heute", state.consumption.today, 55, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
+        FireScreen::drawSessionRow(s.sprite, "Gestern", state.consumption.yesterday, 105, COLOR_BG, COLOR_BG, COLOR_TEXT_PRIMARY, false, true);
     });
 
     // Current Temp
@@ -53,7 +54,6 @@ void FireScreen::draw(DisplayDriver &display) {
         {"currentTemp", state.heater.currentTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        //s.sprite->drawBitmap(-10, 0, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(30, 6, isnan(state.heater.currentTemp) ? "Err" : String(state.heater.currentTemp), TextSize::lg);
     });
 
@@ -62,7 +62,6 @@ void FireScreen::draw(DisplayDriver &display) {
         {"targetTemp", state.heater.targetTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(0, 0, image_target_40, 40, 40, COLOR_TEXT_PRIMARY);
-        //s.sprite->drawBitmap(0, 0, image_target_48, 48, 48, COLOR_TEXT_PRIMARY);
         s.text(40, 6, String(state.heater.targetTemp), TextSize::lg);
     });
 
@@ -170,7 +169,7 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
 {    
     int x = 0;
     int width = 250; 
-    int height = thin ? 40 : 50;
+    int height = thin ? 20 : 50;
     int radius = 16;
     uint8_t _bgColor;
     uint8_t _textColor;
@@ -196,12 +195,10 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
         char consumptionStr[10];
         int integer = (int)consumption;
         int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
-        if (integer > 0)
-        {
+        if (integer > 0) {
             sprintf(consumptionStr, "%d.%02dg", integer, decimal);
         }
-        else
-        {
+        else {
             sprintf(consumptionStr, ".%02dg", decimal);
         }
 

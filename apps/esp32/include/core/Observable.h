@@ -1,16 +1,11 @@
-#ifndef OBSERVABLE_H
-#define OBSERVABLE_H
+#pragma once
 
 #include <functional>
 #include <vector>
 #include <Preferences.h>
 #include <type_traits>
 #include "utils/Logger.h"
-#include <nvs_flash.h> // Added for nvs_flash_init()
-
-// ============================================================================ 
-// Observable Pattern - Automatische Benachrichtigungen
-// ============================================================================ 
+#include <nvs_flash.h> 
 
 template<typename T>
 class Observable {
@@ -77,7 +72,6 @@ public:
     }
 
     void set(T newValue) {
-        //logPrint("StateManager", "PersistedObservable::set() for %s::%s\n", namespace_, key_);
         Observable<T>::set(newValue);
         save();
     }
@@ -85,7 +79,6 @@ public:
     void load() {
         Preferences prefs;
         if (!prefs.begin(namespace_, true)) {
-            //logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-only.", namespace_);
             return;
         }
 
@@ -105,7 +98,6 @@ public:
 
         this->setSilent(value);
         prefs.end();
-        //logPrint("StateManager", "[NVS] LOAD %s::%s -> %d", namespace_, key_, static_cast<int>(value));
     }
 
     void save() {
@@ -140,5 +132,3 @@ private:
     const char* namespace_;
     const char* key_;
 };
-
-#endif // OBSERVABLE_H

@@ -4,7 +4,6 @@
 #include <memory>
 #include "ui/base/ScreenManager.h"
 #include "ui/screens/FireScreen.h"
-#include "ui/screens/HiddenModeScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
 #include "ui/screens/TimezoneScreen.h"
@@ -27,7 +26,6 @@ public:
      * @brief Constructs a UISetup instance.
      * @param screenManager Reference to the ScreenManager instance.
      * @param fireScreen Reference to the FireScreen instance.
-     * @param hiddenModeScreen Reference to the HiddenModeScreen instance.
      * @param screensaverScreen Reference to the ScreensaverScreen instance.
      * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
      * @param timezoneScreen Reference to the TimezoneScreen instance.
@@ -47,7 +45,6 @@ public:
     ScreensaverScreen* getScreensaverScreen() const { return screensaverScreen.get(); }
     OtaUpdateScreen* getOtaUpdateScreen() const { return otaUpdateScreen.get(); }
     StartupScreen* getStartupScreen() const { return startupScreen.get(); }
-    HiddenModeScreen* getHiddenModeScreen() const { return hiddenModeScreen.get(); }
     TimezoneScreen* getTimezoneScreen() const { return timezoneScreen.get(); }
 
     void setupMainMenu();
@@ -61,7 +58,6 @@ private:
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
 
     std::unique_ptr<FireScreen> fireScreen;
-    std::unique_ptr<HiddenModeScreen> hiddenModeScreen;
     std::unique_ptr<ScreensaverScreen> screensaverScreen;
     std::unique_ptr<OtaUpdateScreen> otaUpdateScreen;
     std::unique_ptr<TimezoneScreen> timezoneScreen;
