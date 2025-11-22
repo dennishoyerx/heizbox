@@ -14,11 +14,11 @@ enum CustomColors : uint8_t {
     COLOR_SUCCESS = 6,
     COLOR_WARNING = 7,
     COLOR_ERROR = 8,
-    COLOR_BORDER = 9,
-    COLOR_TEST = 15,
     COLOR_PURPLE = 12,
     COLOR_BLUE = 13,
     COLOR_BLACK = 11,
+
+    COLOR_HIGHLIGHT = 14,
     
     // Fire/Heat Farben (10-19) - Gradient von schwarz zu weiß
     COLOR_HEAT_COLD = 13,
@@ -45,13 +45,13 @@ const uint16_t heizbox_palette[16] = {
     rgb888to565(50, 200, 100),  //  6: COLOR_SUCCESS - Grün
     rgb888to565(255, 180, 50),  //  7: COLOR_WARNING - Gelb/Orange
     rgb888to565(255, 50, 50),   //  8: COLOR_ERROR - Rot
-    rgb888to565(60, 60, 70),    //  9: COLOR_BORDER - Dunkles Grau
+    rgb888to565(60, 60, 70),    //  9: 
 
-    0xFB40,                     // 10: Reserve
+    rgb888to565(0, 0, 0),                     // 10: 
     rgb888to565(0, 0, 0),       // 11: Schwarz
     rgb888to565(160, 32, 240),      // 12: Purple
     rgb888to565(45, 104, 196),      // 13: Blue
-    rgb888to565(60, 5, 0),      // 14
+    rgb888to565(240, 240, 245),      // 14
     rgb888to565(230, 95, 0),     // 15
 };
 
@@ -67,13 +67,13 @@ const uint16_t heizbox_palette_dark[16] = {
     rgb888to565(71,213,166),  //  6: COLOR_SUCCESS - Grün
     rgb888to565(215,172,97),  //  7: COLOR_WARNING - Gelb/Orange
     rgb888to565(217,74,74),   //  8: COLOR_ERROR - Rot
-    rgb888to565(60, 60, 70),    //  9: COLOR_BORDER - Dunkles Grau
+    rgb888to565(60, 60, 70),    //  9: 
 
-    0xFB40,                     // 10: Reserve
+    rgb888to565(0, 0, 0),        // 10: 
     rgb888to565(0, 0, 0),       // 11: Schwarz
     rgb888to565(106,78,128),      // 12: Purple
     rgb888to565(64,119,209),      // 13: Blue
-    rgb888to565(60, 5, 0),      // 14
+    rgb888to565(106,78,128),      // 14
     rgb888to565(230, 95, 0),     // 15
 };
 

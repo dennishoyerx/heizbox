@@ -178,8 +178,8 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
         _bgColor = bgColor;
         _textColor = textColor;
     } else {
-        _bgColor = textColor;
-        _textColor = bgColor;
+        _bgColor = COLOR_HIGHLIGHT;
+        _textColor = textColor;
     }
 
         sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
