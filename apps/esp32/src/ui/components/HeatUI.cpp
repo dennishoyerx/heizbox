@@ -4,7 +4,7 @@
 #include "bitmaps.h"
 
 void HeatUI(RenderSurface s, HeatState state) {
-    uint8_t timerColor = ColorUtils::getTemperatureColor(state.currentTemp);
+    uint8_t tempColor = ColorUtils::getTemperatureColor(state.currentTemp);
 
 
     int width = s.width();
@@ -20,7 +20,7 @@ void HeatUI(RenderSurface s, HeatState state) {
 
     // Rechteck von unten nach oben
     s.sprite->fillRect(leftX, bottomY, width, s.height(), COLOR_BLACK);
-    s.sprite->fillRect(leftX, bottomY - fillHeight, width, fillHeight, timerColor);
+    s.sprite->fillRect(leftX, bottomY - fillHeight, width, fillHeight, tempColor);
 
     // === TIMER ===
     char timeStr[4];
