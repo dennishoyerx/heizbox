@@ -1,7 +1,6 @@
-#ifndef COLOR_PALETTE_H
-#define COLOR_PALETTE_H
-
+#pragma once 
 #include <Arduino.h>
+#include <core/DeviceState.h>
 
 enum CustomColors : uint8_t {
     // UI Basis-Farben (0-9)
@@ -22,33 +21,11 @@ enum CustomColors : uint8_t {
     COLOR_BLACK = 11,
     
     // Fire/Heat Farben (10-19) - Gradient von schwarz zu weiß
-    COLOR_FIRE_BLACK = 10,
-    COLOR_FIRE_DARK_RED = 11,
-    COLOR_FIRE_RED = 12,
-    COLOR_FIRE_ORANGE_RED = 13,
-    COLOR_FIRE_ORANGE = 14,
-    COLOR_FIRE_YELLOW_ORANGE = 15,
-    COLOR_FIRE_YELLOW = 16,
-    COLOR_FIRE_BRIGHT_YELLOW = 17,
-    COLOR_FIRE_WHITE = 18,
-    
-    // Battery Level Indicator (60-69)
-    COLOR_BATTERY_FULL = 60,
-    COLOR_BATTERY_HIGH = 61,
-    COLOR_BATTERY_MEDIUM = 62,
-    COLOR_BATTERY_LOW = 63,
-    COLOR_BATTERY_CRITICAL = 64,
-    
-    
-    // Temperatur-Gradient (100-139) - Blau zu Rot
-    COLOR_TEMP_COLD_START = 1,
-    COLOR_TEMP_COLD_END = 1,
-    COLOR_TEMP_WARM_START = 1,
-    COLOR_TEMP_WARM_END = 1,
-    COLOR_TEMP_HOT_START = 1,
-    COLOR_TEMP_HOT_END = 1,
-    COLOR_TEMP_EXTREME_START = 1,
-    COLOR_TEMP_EXTREME_END = 1,
+    COLOR_HEAT_COLD = 13,
+    COLOR_HEAT_LOW = 6,
+    COLOR_HEAT_MEDIUM = 7,
+    COLOR_HEAT_HIGH = 8,
+    COLOR_HEAT_EXTREME = 12,
 };
 
 // Hilfsfunktion: RGB888 zu RGB565 Konvertierung
@@ -78,6 +55,28 @@ const uint16_t heizbox_palette[16] = {
     rgb888to565(230, 95, 0),     // 15
 };
 
+const uint16_t heizbox_palette_dark[16] = {
+    rgb888to565(35, 0, 70),       //  0: COLOR_BG
+    rgb888to565(66, 44, 100),  //  1: COLOR_BG_2
+    rgb888to565(43, 22, 82),  //  2: COLOR_BG_3
+
+    rgb888to565(234, 226, 243), //  3: COLOR_TEXT_PRIMARY - Fast weiß
+    rgb888to565(180, 180, 190), //  4: COLOR_TEXT_SECONDARY - Helles Grau
+
+    rgb888to565(255, 105, 0),   //  5: COLOR_ACCENT - Orange/Rot Akzent
+    rgb888to565(71,213,166),  //  6: COLOR_SUCCESS - Grün
+    rgb888to565(215,172,97),  //  7: COLOR_WARNING - Gelb/Orange
+    rgb888to565(217,74,74),   //  8: COLOR_ERROR - Rot
+    rgb888to565(60, 60, 70),    //  9: COLOR_BORDER - Dunkles Grau
+
+    0xFB40,                     // 10: Reserve
+    rgb888to565(0, 0, 0),       // 11: Schwarz
+    rgb888to565(106,78,128),      // 12: Purple
+    rgb888to565(64,119,209),      // 13: Blue
+    rgb888to565(60, 5, 0),      // 14
+    rgb888to565(230, 95, 0),     // 15
+};
+
 // Hilfsfunktionen für Farbinterpolation
 class ColorUtils {
 public:
@@ -87,28 +86,14 @@ public:
     }
     
     // Gib Farbe basierend auf Temperatur zurück (0-400°C)
-    static uint8_t getTemperatureColor(float tempC) {
-        if(tempC < 0) return COLOR_TEMP_COLD_START;
-        if(tempC > 400) return COLOR_TEMP_EXTREME_END;
-        
-        if(tempC < 100) {
-            // 0-100°C: Blau-Bereich
-            float t = tempC / 100.0f;
-            return interpolatePalette(COLOR_TEMP_COLD_START, COLOR_TEMP_COLD_END, t);
-        } else if(tempC < 200) {
-            // 100-200°C: Grün-Bereich
-            float t = (tempC - 100) / 100.0f;
-            return interpolatePalette(COLOR_TEMP_WARM_START, COLOR_TEMP_WARM_END, t);
-        } else if(tempC < 300) {
-            // 200-300°C: Gelb-Orange-Bereich
-            float t = (tempC - 200) / 100.0f;
-            return interpolatePalette(COLOR_TEMP_HOT_START, COLOR_TEMP_HOT_END, t);
-        } else {
-            // 300-400°C: Rot-Weiß-Bereich
-            float t = (tempC - 300) / 100.0f;
-            return interpolatePalette(COLOR_TEMP_EXTREME_START, COLOR_TEMP_EXTREME_END, t);
-        }
+    static uint8_t getTemperatureColor(float temp) {
+        if (temp < 165) return COLOR_HEAT_COLD;
+        else if (temp < 180) return COLOR_HEAT_LOW;
+        else if (temp < 190) return COLOR_HEAT_MEDIUM;
+        else if (temp < 200) return COLOR_HEAT_HIGH;
+        else return COLOR_HEAT_EXTREME;
     }
+    /*
     
     // Gib Fire-Farbe basierend auf Intensität zurück (0.0 - 1.0)
     static uint8_t getFireColor(float intensity) {
@@ -119,7 +104,6 @@ public:
         uint8_t steps = COLOR_FIRE_WHITE - COLOR_FIRE_BLACK;
         return COLOR_FIRE_BLACK + (uint8_t)(steps * intensity);
     }
-    
     // Gib Battery-Farbe basierend auf Prozent zurück
     static uint8_t getBatteryColor(uint8_t percent) {
         if(percent > 80) return COLOR_BATTERY_FULL;
@@ -127,8 +111,5 @@ public:
         if(percent > 20) return COLOR_BATTERY_MEDIUM;
         if(percent > 10) return COLOR_BATTERY_LOW;
         return COLOR_BATTERY_CRITICAL;
-    }
+    }*/
 };
-
-#endif // COLOR_PALETTE_H
-

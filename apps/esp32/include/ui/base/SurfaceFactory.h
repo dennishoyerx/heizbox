@@ -153,10 +153,14 @@ public:
     }
   }
 
+  void setDarkMode(bool dark);
+
+
 private:
   TFT_eSPI* _tft;
   bool _usePsram;
   bool _forceRedraw;
+  bool _darkMode;
 
 
   struct PoolEntry { 

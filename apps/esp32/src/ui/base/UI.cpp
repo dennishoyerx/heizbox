@@ -1,8 +1,15 @@
 #include <ui/base/UI.h>
 #include <ui/ColorPalette.h>
 #include <ui/base/SurfaceFactory.h>
+#include <core/DeviceState.h>
 
-UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {}
+UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {
+
+    DeviceState::instance().darkMode.addListener([this](bool val) {
+        _surfaceFactory.setDarkMode(val);
+        clear();
+    });
+}
 
 RenderSurface UI::createSurface(int16_t w, int16_t h) {
     return _surfaceFactory.createSurface(w, h);
@@ -23,7 +30,7 @@ void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY,
 }
 
 void UI::clear() {
-    _surfaceFactory.withSurface(280, 190, 0, 35, [](RenderSurface& s) {
+    _surfaceFactory.withSurface(280, 190, 0, 35, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
     });
     _surfaceFactory.invalidateAll();

@@ -10,7 +10,6 @@ OtaUpdateScreen::OtaUpdateScreen(DisplayDriver* displayManager) : _displayManage
 
 void OtaUpdateScreen::draw(DisplayDriver& display)
 {
-    display.clear();
     display.setBrightness(100);
     _ui->withSurface(102, 128, 50, 50, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);

@@ -25,8 +25,8 @@ void SpriteRenderer::reallocateSprites(uint16_t w, uint16_t h, uint8_t color_dep
     spriteAllocated = mainSprite.createSprite(w, h);
 
     if (spriteAllocated) {
-        mainSprite.createPalette(heizbox_palette, 16);
-        mainSprite.fillSprite(COLOR_ACCENT);
+        //mainSprite.createPalette(heizbox_palette, 16);
+        //mainSprite.fillSprite(COLOR_ACCENT);
 
         const size_t bytes = w * h * (color_depth / 8);
         Serial.printf("✅ Sprite allocated with custom palette: %u bytes (%ux%u @%d-bit)\n",

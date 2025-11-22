@@ -29,6 +29,8 @@ SurfaceFactory::~SurfaceFactory() {
   _pool.clear();
 }
 
+void SurfaceFactory::setDarkMode(bool dark) { _darkMode = dark; }
+
 RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h) {
   // Suche passenden Sprite im Pool
   for (auto it = _pool.begin(); it != _pool.end(); ++it) {
@@ -54,7 +56,7 @@ RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h) {
     return RenderSurface{ nullptr };
   }
 
-  spr->createPalette(heizbox_palette, 16);
+  spr->createPalette(_darkMode ? heizbox_palette_dark : heizbox_palette, 16);
   spr->fillSprite(COLOR_BG);
 
   return RenderSurface{ spr };

@@ -4,12 +4,8 @@
 #include "bitmaps.h"
 
 void HeatUI(RenderSurface s, HeatState state) {
-    uint8_t timerColor;
-    if (state.currentTemp < 165) timerColor = COLOR_BLUE;
-    else if (state.currentTemp < 180) timerColor = COLOR_SUCCESS;
-    else if (state.currentTemp < 190) timerColor = COLOR_WARNING;
-    else if (state.currentTemp < 200) timerColor = COLOR_PURPLE;
-    else timerColor = COLOR_ERROR;
+    uint8_t timerColor = ColorUtils::getTemperatureColor(state.currentTemp);
+
 
     int width = s.width();
     int height = s.height();
@@ -23,6 +19,7 @@ void HeatUI(RenderSurface s, HeatState state) {
     int fillHeight = (int)(s.height() * state.progress);
 
     // Rechteck von unten nach oben
+    s.sprite->fillRect(leftX, bottomY, width, s.height(), COLOR_BLACK);
     s.sprite->fillRect(leftX, bottomY - fillHeight, width, fillHeight, timerColor);
 
     // === TIMER ===
