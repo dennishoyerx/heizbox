@@ -2,7 +2,7 @@
 #include "core/DeviceState.h"
 #include "core/Device.h"
 #include "core/StateManager.h"
-#include "hardware/heater/HeaterController.h"
+#include "heater/HeaterController.h"
 #include <Arduino.h>
 
 CapacitiveSensor::CapacitiveSensor(HeaterController& h, std::function<void(bool)> heatingCb)

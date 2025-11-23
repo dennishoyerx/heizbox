@@ -2,7 +2,7 @@
 
 #include "ui/base/Screen.h"
 #include "ui/components/HeatUI.h"
-#include "hardware/heater/HeaterController.h"
+#include "heater/HeaterController.h"
 #include <functional>
 
 struct Consumption {

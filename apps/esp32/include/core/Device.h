@@ -10,14 +10,14 @@
 #include "core/Types.h"
 #include "core/EventBus.h"
 
-#include "hardware/heater/HeaterController.h"
+#include "heater/HeaterController.h"
 #include "hardware/input/InputManager.h"
 #include "hardware/display/DisplayDriver.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"
 #include "net/OTASetup.h"
-#include "hardware/heater/HeaterMonitor.h"
+#include "heater/HeaterMonitor.h"
 #include "hardware/input/InputHandler.h"
 #include "hardware/sensor/CapacitiveSensor.h"
 

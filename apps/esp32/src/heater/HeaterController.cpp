@@ -1,4 +1,4 @@
-#include "hardware/heater/HeaterController.h"
+#include "heater/HeaterController.h"
 #include "core/Config.h"
 #include <Arduino.h>
 

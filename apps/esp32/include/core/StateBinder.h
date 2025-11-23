@@ -2,7 +2,7 @@
 #pragma once
 
 #include "hardware/display/DisplayDriver.h"
-#include "hardware/heater/HeaterController.h"
+#include "heater/HeaterController.h"
 #include "core/StateManager.h" // For DeviceState
 
 /**
