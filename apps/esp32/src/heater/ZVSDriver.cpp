@@ -191,11 +191,21 @@ void ZVSDriver::updateStatusLed() {
 }
 
 uint32_t ZVSDriver::calculateOnTime() const {
+    // At 100% power, ensure we still have sensor window
+    if (power >= 100) {
+        return periodMs - sensorOffTimeMs;
+    }
+    
     // ON time = (period * power) / 100
     return (periodMs * power) / 100;
 }
 
 uint32_t ZVSDriver::calculateOffTime() const {
+    // At 100% power, only OFF for sensor measurement
+    if (power >= 100) {
+        return sensorOffTimeMs;
+    }
+    
     // OFF time = period - ON time
     const uint32_t onTime = calculateOnTime();
     return periodMs - onTime;

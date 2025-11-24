@@ -33,6 +33,40 @@ void FireScreen::draw(DisplayDriver &display) {
         }, [this](RenderSurface& s) {
             HeatUI(s, state.heater);
         });
+
+        
+        ZVSDriver* zvs = heater.getZVSDriver();
+        if (!zvs) return;
+        
+        const auto& stats = zvs->getStats();
+        
+        _ui->withSurface(280, 130, 0, 110, [&](RenderSurface& s) {
+            // Current state
+            const char* phaseStr = "";
+            switch (zvs->getCurrentPhase()) {
+                case ZVSDriver::Phase::OFF_IDLE: phaseStr = "IDLE"; break;
+                case ZVSDriver::Phase::ON_PHASE: phaseStr = "HEATING"; break;
+                case ZVSDriver::Phase::OFF_PHASE: phaseStr = "OFF"; break;
+                case ZVSDriver::Phase::SENSOR_WINDOW: phaseStr = "SENSOR"; break;
+            }
+            
+            s.text(10, 10, String("Phase: ") + phaseStr, TextSize::md);
+            s.text(10, 30, String("Power: ") + zvs->getPower() + "%", TextSize::md);
+            s.text(10, 50, String("MOSFET: ") + (zvs->isPhysicallyOn() ? "ON" : "OFF"), TextSize::md);
+            
+            // Statistics
+            s.text(10, 70, String("Cycles: ") + stats.cycleCount, TextSize::sm);
+            s.text(10, 85, String("ON Time: ") + (stats.totalOnTime / 1000) + "s", TextSize::sm);
+            s.text(10, 100, String("OFF Time: ") + (stats.totalOffTime / 1000) + "s", TextSize::sm);
+            
+            // Duty cycle calculation
+            float dutyCycle = 0;
+            if ((stats.totalOnTime + stats.totalOffTime) > 0) {
+                dutyCycle = (float)stats.totalOnTime / (stats.totalOnTime + stats.totalOffTime) * 100;
+            }
+            s.text(150, 70, String("Duty: ") + String(dutyCycle, 1) + "%", TextSize::sm);
+            s.text(150, 85, String("Temp Reads: ") + stats.tempMeasures, TextSize::sm);
+        });
         return;
     }
 
@@ -77,6 +111,7 @@ void FireScreen::draw(DisplayDriver &display) {
     _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
         s.sprite->drawRect(0, 0, 280, 1, COLOR_BG_2);
     });
+
 }
 
 void FireScreen::update() {

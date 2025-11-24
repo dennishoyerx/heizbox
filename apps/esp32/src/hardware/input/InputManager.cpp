@@ -33,16 +33,14 @@ void InputManager::update() {
         const bool wasPressed = isPressed(i);
 
         // --- State Change Detection ---
-        if (isLow && !wasPressed) {
-            if (now - lastDebounce[i] > InputConfig::DEBOUNCE_MS) {
-                // PRESS nur senden, wenn wir unter dem Hold-Schwellenwert sind
-                if (now - pressTimes[i] < InputConfig::HOLD_THRESHOLD_MS) {
-                    setPressed(i, true);
-                    setHoldSent(i, false);
-                    pressTimes[i] = now;
-                    if (callback) callback({PRESS, cfg.button});
-                }
-            }
+        if (isLow && !wasPressed && (now - lastDebounce[i] > InputConfig::DEBOUNCE_MS)) {
+            // --- PRESS ---
+            setPressed(i, true);
+            setHoldSent(i, false);
+            pressTimes[i] = now;
+            lastDebounce[i] = now;
+            if (callback) callback({PRESS, cfg.button});
+
         } else if (!isLow && wasPressed) {
             // --- RELEASE ---
             setPressed(i, false);
