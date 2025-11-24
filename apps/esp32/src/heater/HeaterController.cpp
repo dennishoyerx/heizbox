@@ -9,24 +9,51 @@ HeaterController::HeaterController()
       pauseTime(0),
       autoStopTime(60000), 
       lastCycleDuration(0), 
-      cycleFinishedFlag(false),
-      dutyCycleStartTime(0),
-      heaterPhysicallyOn(false),
-      tempSensor(new TempSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS))
-       {
+      cycleFinishedFlag(false)
+{
+    // Initialize temperature sensor
+    tempSensor = new TempSensor(
+        HardwareConfig::THERMO_SCK_PIN, 
+        HardwareConfig::THERMO_CS_PIN, 
+        HardwareConfig::THERMO_SO_PIN, 
+        HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS
+    );
+    
+    // Initialize ZVS driver
+    zvsDriver = new ZVSDriver(
+        HardwareConfig::HEATER_MOSFET_PIN,
+        HardwareConfig::STATUS_LED_PIN
+    );
 }
 
 void HeaterController::init() {
-    pinMode(HardwareConfig::HEATER_MOSFET_PIN, OUTPUT);
-    digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
-
-    Serial.println("🔥 Heater initialized");
+    // Initialize ZVS driver
+    zvsDriver->init();
+    zvsDriver->setPeriod(HeaterConfig::DUTY_CYCLE_PERIOD_MS);
+    zvsDriver->setSensorOffTime(HeaterConfig::SENSOR_OFF_TIME_MS);
+    zvsDriver->setPower(power);
+    
+    // Register temperature measurement callback
+    zvsDriver->onTempMeasure([this]() {
+        // This is called during the OFF phase - safe to measure temperature
+        tempSensor->update(true); // Force immediate read
+    });
+    
+    // Initialize temperature sensor
+    if (!tempSensor->begin()) {
+        Serial.println("⚠️  Temperature sensor initialization failed");
+    }
+    
+    Serial.println("🔥 Heater initialized with ZVS driver");
 }
 
 void HeaterController::setPower(uint8_t _power) {
     if (_power > 100) _power = 100;
     if (_power < 10) _power = 10;
     power = _power;
+    
+    // Update ZVS driver
+    zvsDriver->setPower(power);
 }
 
 uint8_t HeaterController::getPower() {
@@ -44,21 +71,23 @@ uint16_t HeaterController::getTemperature() {
     return (uint16_t)tempSensor->getTemperature();
 }
 
-
 void HeaterController::startHeating() {
     if (state == State::IDLE) {
-        digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
         startTime = millis();
-        dutyCycleStartTime = millis();
-        heaterPhysicallyOn = false; // Will be controlled by duty cycle
+        
+        // Enable ZVS driver
+        zvsDriver->setEnabled(true);
+        
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
+        
     } else if (state == State::PAUSED) {
-        digitalWrite(HardwareConfig::STATUS_LED_PIN, HIGH);
         // Adjust startTime to account for the pause duration
         startTime = millis() - (pauseTime - startTime);
-        dutyCycleStartTime = millis();
-        heaterPhysicallyOn = false;
+        
+        // Enable ZVS driver
+        zvsDriver->setEnabled(true);
+        
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating resumed");
     }
@@ -67,9 +96,8 @@ void HeaterController::startHeating() {
 void HeaterController::stopHeating(bool finalize) {
     if (state != State::HEATING) return;
 
-    digitalWrite(HardwareConfig::STATUS_LED_PIN, LOW);
-    digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
-    heaterPhysicallyOn = false;
+    // Disable ZVS driver
+    zvsDriver->setEnabled(false);
 
     if (finalize) {
         const uint32_t duration = millis() - startTime;
@@ -78,7 +106,7 @@ void HeaterController::stopHeating(bool finalize) {
         // Only count cycles longer than a minimum threshold
         if (duration >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
             cycleCounter++;
-            cycleFinishedFlag = true; // Notify Device.cpp to send data
+            cycleFinishedFlag = true;
         }
 
         startTime = millis();
@@ -91,44 +119,15 @@ void HeaterController::stopHeating(bool finalize) {
     }
 }
 
-
-void HeaterController::updateDutyCycle() {
-    if (state != State::HEATING) {
-        // Ensure heater is off when not in HEATING state
-        if (heaterPhysicallyOn) {
-            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
-            heaterPhysicallyOn = false;
-        }
-        return;
-    }
-
-    const uint32_t dutyCycleElapsed = millis() - dutyCycleStartTime;
-    const uint32_t onTime = (HeaterConfig::DUTY_CYCLE_PERIOD_MS * power) / 100;
-    
-    if (dutyCycleElapsed < onTime) {
-        // ON phase
-        if (!heaterPhysicallyOn) {
-            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, HIGH);
-            heaterPhysicallyOn = true;
-        }
-    } else if (dutyCycleElapsed < HeaterConfig::DUTY_CYCLE_PERIOD_MS) {
-        // OFF phase
-        if (heaterPhysicallyOn) {
-            digitalWrite(HardwareConfig::HEATER_MOSFET_PIN, LOW);
-            heaterPhysicallyOn = false;
-        }
-
-        tempSensor->update(true); 
-    } else {
-        // Start new duty cycle
-        dutyCycleStartTime = millis();
-    }
-}
-
 void HeaterController::update() {
-    // Update duty cycle first (controls physical heater switching)
-    updateDutyCycle();
-
+    // Update ZVS driver (handles duty cycle automatically)
+    zvsDriver->update();
+    
+    // Update temperature sensor (additional updates outside duty cycle)
+    if (state != State::HEATING) {
+        tempSensor->update();
+    }
+    
     const uint32_t elapsed = getElapsedTime();
 
     switch (state) {
@@ -140,7 +139,6 @@ void HeaterController::update() {
             break;
 
         case State::PAUSED:
-            tempSensor->update(); 
             if (millis() - pauseTime >= HeaterConfig::PAUSE_TIMEOUT_MS) {
                 Serial.println("Pause timeout, finalizing cycle.");
                 const uint32_t duration = pauseTime - startTime;
@@ -157,7 +155,6 @@ void HeaterController::update() {
 
         case State::IDLE:
         case State::ERROR:
-            tempSensor->update(); 
             // No automatic transitions from these states
             break;
     }

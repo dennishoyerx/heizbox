@@ -1,0 +1,219 @@
+#include "heater/ZVSDriver.h"
+#include "utils/Logger.h"
+
+ZVSDriver::ZVSDriver(uint8_t mosfetPin, uint8_t statusLedPin)
+    : mosfetPin(mosfetPin),
+      statusLedPin(statusLedPin),
+      power(100),
+      periodMs(1000),
+      sensorOffTimeMs(200),
+      enabled(false),
+      physicallyOn(false),
+      currentPhase(Phase::OFF_IDLE),
+      phaseStartTime(0),
+      tempMeasureCallback(nullptr),
+      tempMeasureCalled(false)
+{
+    memset(&stats, 0, sizeof(stats));
+}
+
+void ZVSDriver::init() {
+    // Configure MOSFET pin
+    pinMode(mosfetPin, OUTPUT);
+    digitalWrite(mosfetPin, LOW);
+    
+    // Configure status LED if provided
+    if (statusLedPin != 255) {
+        pinMode(statusLedPin, OUTPUT);
+        digitalWrite(statusLedPin, LOW);
+    }
+    
+    physicallyOn = false;
+    currentPhase = Phase::OFF_IDLE;
+    phaseStartTime = millis();
+    
+    //logPrint("ZVSDriver", "Initialized (MOSFET: Pin %d, LED: Pin %d)", 
+    //         mosfetPin, statusLedPin);
+}
+
+void ZVSDriver::update() {
+    if (!enabled) {
+        // Ensure everything is off when disabled
+        if (currentPhase != Phase::OFF_IDLE) {
+            transitionPhase(Phase::OFF_IDLE);
+            setMosfet(false);
+        }
+        return;
+    }
+    
+    const uint32_t now = millis();
+    const uint32_t elapsed = now - phaseStartTime;
+    
+    switch (currentPhase) {
+        case Phase::OFF_IDLE:
+            // Should not happen when enabled, transition to ON
+            transitionPhase(Phase::ON_PHASE);
+            break;
+            
+        case Phase::ON_PHASE:
+            {
+                const uint32_t onTime = calculateOnTime();
+                
+                if (elapsed >= onTime) {
+                    // ON phase complete, transition to OFF
+                    transitionPhase(Phase::OFF_PHASE);
+                    setMosfet(false);
+                    tempMeasureCalled = false; // Reset for new cycle
+                }
+            }
+            break;
+            
+        case Phase::OFF_PHASE:
+            {
+                const uint32_t offTime = calculateOffTime();
+                
+                // Check if we should enter sensor window
+                if (!tempMeasureCalled && elapsed >= (offTime - sensorOffTimeMs)) {
+                    transitionPhase(Phase::SENSOR_WINDOW);
+                }
+                
+                // Check if OFF phase is complete
+                if (elapsed >= offTime) {
+                    // Cycle complete, start new cycle
+                    stats.cycleCount++;
+                    transitionPhase(Phase::ON_PHASE);
+                    setMosfet(true);
+                }
+            }
+            break;
+            
+        case Phase::SENSOR_WINDOW:
+            {
+                // Call temperature measurement callback once
+                if (!tempMeasureCalled && tempMeasureCallback) {
+                    tempMeasureCallback();
+                    tempMeasureCalled = true;
+                    stats.tempMeasures++;
+                }
+                
+                // Check if OFF phase is complete
+                const uint32_t offTime = calculateOffTime();
+                if (elapsed >= offTime) {
+                    // Cycle complete, start new cycle
+                    stats.cycleCount++;
+                    transitionPhase(Phase::ON_PHASE);
+                    setMosfet(true);
+                }
+            }
+            break;
+    }
+    
+    updateStatusLed();
+}
+
+void ZVSDriver::setEnabled(bool enable) {
+    if (enabled == enable) return;
+    
+    enabled = enable;
+    
+    if (enabled) {
+        //logPrint("ZVSDriver", "Enabled (Power: %d%%)", power);
+        phaseStartTime = millis();
+        transitionPhase(Phase::ON_PHASE);
+        setMosfet(true);
+    } else {
+        //logPrint("ZVSDriver", "Disabled");
+        transitionPhase(Phase::OFF_IDLE);
+        setMosfet(false);
+    }
+}
+
+void ZVSDriver::setPower(uint8_t newPower) {
+    power = constrain(newPower, 0, 100);
+    
+    if (enabled) {
+        //logPrint("ZVSDriver", "Power set to %d%%", power);
+    }
+}
+
+void ZVSDriver::setPeriod(uint32_t periodMs) {
+    this->periodMs = max(100u, periodMs); // Min 100ms period
+    //logPrint("ZVSDriver", "Period set to %lums", this->periodMs);
+}
+
+void ZVSDriver::setSensorOffTime(uint32_t timeMs) {
+    sensorOffTimeMs = timeMs;
+    //logPrint("ZVSDriver", "Sensor off time set to %lums", sensorOffTimeMs);
+}
+
+void ZVSDriver::onTempMeasure(TempMeasureCallback callback) {
+    tempMeasureCallback = callback;
+}
+
+uint32_t ZVSDriver::getPhaseElapsed() const {
+    return millis() - phaseStartTime;
+}
+
+void ZVSDriver::resetStats() {
+    memset(&stats, 0, sizeof(stats));
+    //logPrint("ZVSDriver", "Statistics reset");
+}
+
+// Private methods
+
+void ZVSDriver::setMosfet(bool on) {
+    if (physicallyOn == on) return;
+    
+    physicallyOn = on;
+    digitalWrite(mosfetPin, on ? HIGH : LOW);
+    
+    // Update statistics
+    if (on) {
+        // Track off time when turning on
+        if (currentPhase != Phase::OFF_IDLE) {
+            stats.totalOffTime += getPhaseElapsed();
+        }
+    } else {
+        // Track on time when turning off
+        stats.totalOnTime += getPhaseElapsed();
+    }
+}
+
+void ZVSDriver::updateStatusLed() {
+    if (statusLedPin == 255) return;
+    
+    // Status LED reflects MOSFET state when enabled
+    if (enabled) {
+        digitalWrite(statusLedPin, physicallyOn ? HIGH : LOW);
+    } else {
+        digitalWrite(statusLedPin, LOW);
+    }
+}
+
+uint32_t ZVSDriver::calculateOnTime() const {
+    // ON time = (period * power) / 100
+    return (periodMs * power) / 100;
+}
+
+uint32_t ZVSDriver::calculateOffTime() const {
+    // OFF time = period - ON time
+    const uint32_t onTime = calculateOnTime();
+    return periodMs - onTime;
+}
+
+void ZVSDriver::transitionPhase(Phase newPhase) {
+    if (currentPhase == newPhase) return;
+    
+    // Debug logging for phase transitions
+    const char* phaseNames[] = {
+        "OFF_IDLE", "ON_PHASE", "OFF_PHASE", "SENSOR_WINDOW"
+    };
+    
+    /*//logPrint("ZVSDriver", "Phase: %s -> %s (after %lums)",
+             phaseNames[static_cast<int>(currentPhase)],
+             phaseNames[static_cast<int>(newPhase)],
+             getPhaseElapsed());*/
+    
+    currentPhase = newPhase;
+    phaseStartTime = millis();
+}
