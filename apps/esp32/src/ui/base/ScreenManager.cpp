@@ -70,6 +70,15 @@ Screen* ScreenManager::getScreen(ScreenType type) {
     return nullptr;
 }
 
+void ScreenManager::switchScreen(ScreenType screenType, ScreenTransition transition) {
+    Screen* screenToSwitch = getScreen(screenType);
+    if (screenToSwitch) {
+        setScreen(screenToSwitch, transition);
+    } else {
+        //Logger::error("ScreenManager", "Attempted to switch to unregistered screen type: %d", static_cast<int>(screenType));
+    }
+}
+
 // ============================================================================
 // Update & Draw Loop
 // ============================================================================

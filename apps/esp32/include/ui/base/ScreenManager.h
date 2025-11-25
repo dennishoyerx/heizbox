@@ -23,6 +23,7 @@ public:
     ScreenType getCurrentScreenType() const { return currentScreenType; }
     void registerScreen(ScreenType type, Screen* screen);
     Screen* getScreen(ScreenType type);
+    void switchScreen(ScreenType screenType, ScreenTransition transition = ScreenTransition::NONE);
 
     // Dirty flag für Re-Rendering
     void setDirty() { dirty = true; }

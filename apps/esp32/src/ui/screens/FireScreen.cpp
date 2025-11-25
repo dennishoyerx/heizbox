@@ -141,8 +141,7 @@ void FireScreen::handleInput(InputEvent event) {
             .addHeadline("ZVS ADVANCED")
             
             .addAction("Settings", [&]() {
-                manager->
-                manager->setScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
+                manager->switchScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
             })
             
             .build();

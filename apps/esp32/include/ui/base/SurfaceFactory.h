@@ -95,6 +95,14 @@ struct RenderSurface {
   int16_t width() const { return sprite ? sprite->width() : 0; }
   int16_t height() const { return sprite ? sprite->height() : 0; }
 
+  int16_t centerX() const { return width() / 2; }
+  int16_t centerY() const { return height() / 2; }
+  int16_t top() const { return 0; }
+  int16_t bottom() const { return height(); }
+  int16_t left() const { return 0; }
+  int16_t right() const { return width(); }
+
+
   void clear(uint16_t color = TFT_BLACK) {
     if (sprite) sprite->fillSprite(color);
   }
