@@ -3,6 +3,7 @@
 #define DEVICESTATE_H
 
 #include "core/Observable.h"
+#include "core/Config.h"
 
 class DisplayDriver; // Forward declaration
 
@@ -28,6 +29,10 @@ struct DeviceState {
     Observable<bool> isHeating{false};
     Observable<bool> isOnline{false};
     Observable<uint32_t> heatingStartTime{0};
+
+    PersistedObservable<bool> zvsDebug{"debug", "zvsDebug", true};
+    Observable<uint32_t> tempSensorOffTime{HeaterConfig::SENSOR_OFF_TIME_MS};
+
 
     // Session State
     Observable<uint32_t> sessionCycles{0};

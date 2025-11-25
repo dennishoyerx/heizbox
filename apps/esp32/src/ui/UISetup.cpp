@@ -42,6 +42,7 @@ void UISetup::setupMainMenu() {
          .addAction("Heater", [&]() {
              screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
          })
+        .addObservableToggle("ZVS Debug", state.zvsDebug)
         .addHeadline("DISPLAY")
 
         .addObservableRange("Brightness", state.brightness,
