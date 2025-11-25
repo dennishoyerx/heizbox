@@ -108,6 +108,7 @@ void FireScreen::update() {
             lastSecond = state.heater.elapsedSeconds;
             markDirty();
         }
+            markDirty();
     }
 
     static bool wasHeating = false;
@@ -136,19 +137,12 @@ void FireScreen::handleInput(InputEvent event) {
     if (event.button == CENTER) {
         ZVSDriver* zvs = heater.getZVSDriver();
         
-        MenuBuilder()
+       MenuBuilder()
             .addHeadline("ZVS ADVANCED")
             
-            .addRange("Duty Period", 
-                     [zvs](int val) { zvs->setPeriod(val); },
-                     500, 5000, 100, "ms")
-            
-            .addRange("Sensor Time",
-                     [zvs](int val) { zvs->setSensorOffTime(val); },
-                     50, 500, 50, "ms")
-            
-            .addAction("Reset Stats", [zvs]() {
-                zvs->resetStats();
+            .addAction("Settings", [&]() {
+                manager->
+                manager->setScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
             })
             
             .build();
