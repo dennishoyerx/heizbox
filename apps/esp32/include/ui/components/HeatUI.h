@@ -14,4 +14,4 @@ struct HeatState {
     float progress;
 };
 
-void HeatUI(RenderSurface s, HeatState state, ZVSDriver* zvs);
+void HeatUI(UI* _ui, HeatState state, ZVSDriver* zvs);

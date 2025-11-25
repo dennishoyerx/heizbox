@@ -22,19 +22,8 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 
 void FireScreen::draw(DisplayDriver &display) {
         ZVSDriver* zvs = heater.getZVSDriver();
-    if (state.heater.isHeating) {
-        float progress = min(progress, 1.0f);
-
-        _ui->withSurface(280, 205, 0, 35, /*{
-            {"seconds", (int)state.heater.elapsedSeconds},
-            {"progress", state.heater.progress},
-            {"currentTemp", state.heater.currentTemp},
-            {"power", state.heater.power},
-            {"targetTemp", state.heater.targetTemp},
-            {"currentCycle", state.heater.currentCycle}
-        },*/ [&](RenderSurface& s) {
-            HeatUI(s, state.heater, zvs);
-        });
+        if (state.heater.isHeating) {
+        HeatUI(_ui, state.heater, zvs);
 
         return;
     }

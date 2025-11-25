@@ -88,15 +88,17 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 
 
 
-void HeatUI(RenderSurface s, HeatState state, ZVSDriver* zvs) {
-    uint8_t tempColor = ColorUtils::getTemperatureColor(state.currentTemp);
+void HeatUI(UI* _ui, HeatState state, ZVSDriver* zvs) {
+    _ui->withSurface(280, 205, 0, 35, [&](RenderSurface& s) {
+        uint8_t tempColor = ColorUtils::getTemperatureColor(state.currentTemp);
 
-    Background(s, state.progress, tempColor);
-    ZVSOscilloscopeUI(s, zvs);
+        Background(s, state.progress, tempColor);
+        ZVSOscilloscopeUI(s, zvs);
 
-    Timer(s, state.elapsedSeconds);
-    HeatCycleIndicator(s, state.currentCycle);
-    Temperature(s, state.currentTemp, state.targetTemp);
+        Timer(s, state.elapsedSeconds);
+        HeatCycleIndicator(s, state.currentCycle);
+        Temperature(s, state.currentTemp, state.targetTemp);
 
-    if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
+        if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
+    });
 }
