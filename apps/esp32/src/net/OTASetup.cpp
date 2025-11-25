@@ -13,12 +13,12 @@ void OTASetup::setupOTA() {
 
     ArduinoOTA.onStart([this]() {
         logPrint("OTA", "Update started");
-        screenManager.setScreen(&otaUpdateScreen);
+        screenManager.switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
     });
 
     ArduinoOTA.onEnd([this]() {
         logPrint("OTA", "Update completed");
-        screenManager.setScreen(&fireScreen);
+        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
     });
 
     ArduinoOTA.onError([this](ota_error_t error) {

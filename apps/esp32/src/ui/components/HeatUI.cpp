@@ -13,7 +13,7 @@ void ZVSOscilloscopeUI(RenderSurface s, ZVSDriver* zvs) {
 void Background(RenderSurface s, float progress, uint8_t color) {
     int fillHeight = (int)(s.height() * progress);
     // Rechteck von unten nach oben
-    s.sprite->fillRect(s.left(), s.bottom(), s.width(), s.height(), COLOR_BLACK);
+    //s.sprite->fillRect(s.left(), s.bottom(), s.width(), s.height(), COLOR_BLACK);
     s.sprite->fillRect(s.left(), s.bottom() - fillHeight, s.width(), fillHeight, color);
 }
 
@@ -90,7 +90,8 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 
 void HeatUI(UI* _ui, HeatState state, ZVSDriver* zvs) {
     _ui->withSurface(280, 205, 0, 35, [&](RenderSurface& s) {
-        uint8_t tempColor = ColorUtils::getTemperatureColor(state.currentTemp);
+        uint8_t tempColor = 15; //ColorUtils::getTemperatureColor(state.currentTemp);
+        s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(state.currentTemp, true));
 
         Background(s, state.progress, tempColor);
         ZVSOscilloscopeUI(s, zvs);
