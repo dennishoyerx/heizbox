@@ -1,4 +1,5 @@
 #include "ui/screens/FireScreen.h"
+#include "ui/components/MenuBuilder.h"
 #include "ui/components/HeatUI.h"
 #include "hardware/display/DisplayDriver.h"
 #include "core/Config.h"
@@ -20,53 +21,21 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 }
 
 void FireScreen::draw(DisplayDriver &display) {
+        ZVSDriver* zvs = heater.getZVSDriver();
     if (state.heater.isHeating) {
         float progress = min(progress, 1.0f);
 
-        _ui->withSurface(280, 205, 0, 35, {
+        _ui->withSurface(280, 205, 0, 35, /*{
             {"seconds", (int)state.heater.elapsedSeconds},
             {"progress", state.heater.progress},
             {"currentTemp", state.heater.currentTemp},
             {"power", state.heater.power},
             {"targetTemp", state.heater.targetTemp},
             {"currentCycle", state.heater.currentCycle}
-        }, [this](RenderSurface& s) {
-            HeatUI(s, state.heater);
+        },*/ [&](RenderSurface& s) {
+            HeatUI(s, state.heater, zvs);
         });
 
-        
-        ZVSDriver* zvs = heater.getZVSDriver();
-        if (!zvs) return;
-        
-        const auto& stats = zvs->getStats();
-        
-        _ui->withSurface(280, 130, 0, 110, [&](RenderSurface& s) {
-            // Current state
-            const char* phaseStr = "";
-            switch (zvs->getCurrentPhase()) {
-                case ZVSDriver::Phase::OFF_IDLE: phaseStr = "IDLE"; break;
-                case ZVSDriver::Phase::ON_PHASE: phaseStr = "HEATING"; break;
-                case ZVSDriver::Phase::OFF_PHASE: phaseStr = "OFF"; break;
-                case ZVSDriver::Phase::SENSOR_WINDOW: phaseStr = "SENSOR"; break;
-            }
-            
-            s.text(10, 10, String("Phase: ") + phaseStr, TextSize::md);
-            s.text(10, 30, String("Power: ") + zvs->getPower() + "%", TextSize::md);
-            s.text(10, 50, String("MOSFET: ") + (zvs->isPhysicallyOn() ? "ON" : "OFF"), TextSize::md);
-            
-            // Statistics
-            s.text(10, 70, String("Cycles: ") + stats.cycleCount, TextSize::sm);
-            s.text(10, 85, String("ON Time: ") + (stats.totalOnTime / 1000) + "s", TextSize::sm);
-            s.text(10, 100, String("OFF Time: ") + (stats.totalOffTime / 1000) + "s", TextSize::sm);
-            
-            // Duty cycle calculation
-            float dutyCycle = 0;
-            if ((stats.totalOnTime + stats.totalOffTime) > 0) {
-                dutyCycle = (float)stats.totalOnTime / (stats.totalOnTime + stats.totalOffTime) * 100;
-            }
-            s.text(150, 70, String("Duty: ") + String(dutyCycle, 1) + "%", TextSize::sm);
-            s.text(150, 85, String("Temp Reads: ") + stats.tempMeasures, TextSize::sm);
-        });
         return;
     }
 
@@ -165,7 +134,25 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (event.button == CENTER) {
-        DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+        ZVSDriver* zvs = heater.getZVSDriver();
+        
+        MenuBuilder()
+            .addHeadline("ZVS ADVANCED")
+            
+            .addRange("Duty Period", 
+                     [zvs](int val) { zvs->setPeriod(val); },
+                     500, 5000, 100, "ms")
+            
+            .addRange("Sensor Time",
+                     [zvs](int val) { zvs->setSensorOffTime(val); },
+                     50, 500, 50, "ms")
+            
+            .addAction("Reset Stats", [zvs]() {
+                zvs->resetStats();
+            })
+            
+            .build();
+        //DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
         return;
     }
 
