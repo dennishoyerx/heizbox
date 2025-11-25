@@ -29,7 +29,7 @@ void OTASetup::setupOTA() {
             case OTA_RECEIVE_ERROR: logPrint("OTA", "ERROR: Receive Failed"); break;
             case OTA_END_ERROR:     logPrint("OTA", "ERROR: End Failed"); break;
         }
-        screenManager.setScreen(&fireScreen);
+        screenManager.switchScreen(ScreenType::FIRE);
     });
 
     ArduinoOTA.begin();

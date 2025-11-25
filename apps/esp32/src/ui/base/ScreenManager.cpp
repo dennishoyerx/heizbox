@@ -75,7 +75,7 @@ void ScreenManager::switchScreen(ScreenType screenType, ScreenTransition transit
     if (screenToSwitch) {
         setScreen(screenToSwitch, transition);
     } else {
-        //Logger::error("ScreenManager", "Attempted to switch to unregistered screen type: %d", static_cast<int>(screenType));
+        logPrint("ScreenManager", "Attempted to switch to unregistered screen type: %d", static_cast<int>(screenType));
     }
 }
 
@@ -110,7 +110,6 @@ void ScreenManager::draw() {
         const uint32_t startTime = micros();
 
         currentScreen->draw(display);
-        display.render();
         statusBar->draw(ui);
         const uint32_t drawTime = micros() - startTime;
         lastDrawTime = drawTime;
@@ -166,7 +165,6 @@ void ScreenManager::drawTransitionFrame() {
                 if (transition.progress >= 50 && previousScreen) {
                     //display.clear();
                     currentScreen->draw(display);
-                    display.render();
                     previousScreen = nullptr;
                 }
             }

@@ -96,40 +96,41 @@ public:
     }
 
     static uint16_t getTemperatureColor565(float temp, bool darkMode = false) {
-        // Basispalette für Gradient
         struct RGB { uint8_t r,g,b; };
         const RGB cold     = {64,119,209};    // Blau
-        const RGB low      = {71,213,166};  // Cyan
+        const RGB low      = {71,213,166};    // Cyan
         const RGB medium   = {215,172,97};    // Grün
-        const RGB high     = {217,74,74};  // Gelb
-        const RGB extreme  = {106,78,128};    // Rot
+        const RGB high     = {217,74,74};     // Rot-Orange
+        const RGB extreme  = {106,78,128};    // Lila
 
         RGB start, end;
         float t = 0.0f;
 
-        if(temp < 165) {
+        if(temp < 155) {
             start = cold; end = low;
-            t = (temp - 0.0f) / (165.0f - 0.0f);
-        } else if(temp < 180) {
+            t = (temp - 0.0f) / (155.0f - 0.0f);
+        } else if(temp < 170) {
             start = low; end = medium;
-            t = (temp - 165.0f) / (180.0f - 165.0f);
-        } else if(temp < 190) {
+            t = (temp - 155.0f) / (170.0f - 155.0f);
+        } else if(temp < 180) {
             start = medium; end = high;
-            t = (temp - 180.0f) / (190.0f - 180.0f);
-        } else if(temp < 200) {
+            t = (temp - 170.0f) / (180.0f - 170.0f);
+        } else if(temp < 190) {
             start = high; end = extreme;
-            t = (temp - 190.0f) / (200.0f - 190.0f);
+            t = (temp - 180.0f) / (190.0f - 180.0f);
         } else {
             return rgb888to565(extreme.r, extreme.g, extreme.b);
         }
 
-        // Linear interpolieren
+        t = constrain(t, 0.0f, 1.0f);
+
         uint8_t r = start.r + (end.r - start.r) * t;
         uint8_t g = start.g + (end.g - start.g) * t;
         uint8_t b = start.b + (end.b - start.b) * t;
 
         return rgb888to565(r,g,b);
     }
+
     /*
     
     // Gib Farbe basierend auf Temperatur zurück (0-400°C)

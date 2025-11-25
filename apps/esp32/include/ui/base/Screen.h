@@ -45,14 +45,14 @@ protected:
     ScreenManager* manager;
     UI* _ui;
 
-    void markDirty();
+    void dirty();
 
     template <typename T>
     void bindTo(T& member, Observable<T>& observable) {
         member = observable.get();
         observable.addListener([this, &member](T v) {
             member = v;
-            markDirty();
+            dirty();
         });
     }
 

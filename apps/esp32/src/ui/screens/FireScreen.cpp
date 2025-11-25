@@ -78,7 +78,7 @@ void FireScreen::update() {
     
     if (temp != state.heater.currentTemp) {
         state.heater.currentTemp = temp;
-        markDirty();
+        dirty();
     }
 
     if (state.heater.isHeating) {
@@ -89,21 +89,21 @@ void FireScreen::update() {
 
         if (state.heater.currentTemp > state.heater.targetTemp) {
             _handleHeatingTrigger(false);
-            markDirty();
+            dirty();
         }
 
         static uint32_t lastSecond = 0;
         if (state.heater.elapsedSeconds != lastSecond) {
             lastSecond = state.heater.elapsedSeconds;
-            markDirty();
+            dirty();
         }
-            markDirty();
+            dirty();
     }
 
     static bool wasHeating = false;
     if (!state.heater.isHeating && wasHeating) {
         _ui->clear();
-        markDirty();
+        dirty();
     }
     wasHeating = state.heater.isHeating;
 }
@@ -168,7 +168,7 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
     } else if (heater.isHeating()) {
         heater.stopHeating(false);
     }
-    markDirty();
+    dirty();
 }
 
 void FireScreen::drawSessionRow(TFT_eSprite* sprite, 

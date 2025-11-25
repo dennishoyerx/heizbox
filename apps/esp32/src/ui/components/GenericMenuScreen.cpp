@@ -98,14 +98,14 @@ void GenericMenuScreen::handleNavigationMode(InputEvent event) {
             do {
                 selectedIndex_ = (selectedIndex_ + 1) % items_.size();
             } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
-            markDirty();
+            dirty();
             break;
 
         case UP:
             do {
                 selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
             } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
-            markDirty();
+            dirty();
             break;
             
         case CENTER:
@@ -117,7 +117,7 @@ void GenericMenuScreen::handleNavigationMode(InputEvent event) {
                 } else {
                     item->execute();
                 }
-                markDirty();
+                dirty();
             }
             break;
             
@@ -130,17 +130,17 @@ void GenericMenuScreen::handleAdjustMode(InputEvent event) {
     switch (event.button) {
         case LEFT:
             items_[selectedIndex_]->adjust(-1);
-            markDirty();
+            dirty();
             break;
             
         case RIGHT:
             items_[selectedIndex_]->adjust(1);
-            markDirty();
+            dirty();
             break;
             
         case CENTER:
             adjustMode_ = false;
-            markDirty();
+            dirty();
             break;
             
         default:

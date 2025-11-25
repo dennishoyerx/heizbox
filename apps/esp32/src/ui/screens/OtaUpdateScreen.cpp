@@ -11,8 +11,9 @@ OtaUpdateScreen::OtaUpdateScreen(DisplayDriver* displayManager) : _displayManage
 void OtaUpdateScreen::draw(DisplayDriver& display)
 {
     display.setBrightness(100);
+    _ui->clear();
     _ui->withSurface(102, 128, 100, 100, [this](RenderSurface& s) {
-        s.sprite->fillSprite(COLOR_BG);
+        //s.sprite->fillSprite(COLOR_BG);
         s.sprite->drawBitmap(0, 0, ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
     });
     //display.getTft()->setTextDatum(MC_DATUM);

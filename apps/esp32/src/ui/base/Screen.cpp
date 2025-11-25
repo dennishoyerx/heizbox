@@ -33,7 +33,7 @@ void Screen::clear() {
     }
 }
 
-void Screen::markDirty() {
+void Screen::dirty() {
     if (manager) {
         manager->setDirty();
     }
