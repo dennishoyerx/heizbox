@@ -97,7 +97,6 @@ void HeatUI(RenderSurface s, HeatState state, ZVSDriver* zvs) {
     Timer(s, state.elapsedSeconds);
     HeatCycleIndicator(s, state.currentCycle);
     Temperature(s, state.currentTemp, state.targetTemp);
-
     
     ZVSDebug(s, zvs);
 }

@@ -39,6 +39,9 @@ void UISetup::setupMainMenu() {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
+         .addAction("Heater", [&]() {
+             screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
+         })
         .addHeadline("DISPLAY")
 
         .addObservableRange("Brightness", state.brightness,
@@ -74,6 +77,12 @@ void UISetup::setupMainMenu() {
 
     this->mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
+
+
+    auto heaterMenuItems = this->fireScreen.get()->buildMenu();
+
+    this->heaterMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(heaterMenuItems));
+    screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());
 
     // Setup timezone exit callback
     timezoneScreen->setCallback([this]() {

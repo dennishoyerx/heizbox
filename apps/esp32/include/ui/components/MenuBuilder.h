@@ -301,11 +301,20 @@ public:
     }
     
     MenuBuilder& addRange(const char* title, int* valuePtr,
-                         int minVal, int maxVal, int step = 1,
-                         const char* unit = nullptr,
-                         std::function<void(int)> onChange = nullptr) {
+                        int minVal, int maxVal, int step = 1,
+                        const char* unit = nullptr,
+                        std::function<void(int)> onChange = nullptr) {
         items_.emplace_back(std::make_unique<RangeMenuItem>(
             title, valuePtr, minVal, maxVal, step, unit, std::move(onChange)));
+        return *this;
+    }
+
+    MenuBuilder& addRange(const char* title,
+                        std::function<void(int)> onChange,
+                        int minVal, int maxVal, int step = 1,
+                        const char* unit = nullptr) {
+        items_.emplace_back(std::make_unique<RangeMenuItem>(
+            title, nullptr, minVal, maxVal, step, unit, std::move(onChange)));
         return *this;
     }
 

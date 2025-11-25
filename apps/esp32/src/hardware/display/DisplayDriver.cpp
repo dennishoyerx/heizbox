@@ -23,7 +23,7 @@ void DisplayDriver::init(ScreenManager* mgr) {
     tft->setRotation(1);
     backlight->init();
 
-    tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
+    tft->fillScreen(heizbox_palette_dark[COLOR_BG]);
 
     TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTFT();
     
@@ -43,7 +43,7 @@ void DisplayDriver::reallocateSprites() {
 }
 
 void DisplayDriver::clear() {
-        tft->fillScreen(heizbox_palette[COLOR_ACCENT]);
+        tft->fillScreen(heizbox_palette_dark[COLOR_BG]);
 
    /* if (spriteRenderer && spriteRenderer->isAllocated()) {
         spriteRenderer->getSprite().fillSprite(COLOR_ACCENT);

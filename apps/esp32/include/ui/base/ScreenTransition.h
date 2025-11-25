@@ -11,7 +11,8 @@ enum class ScreenType : uint8_t {
     SCREENSAVER,
     OTA_UPDATE,
     HIDDEN_MODE,
-    MAIN_MENU
+    MAIN_MENU,
+    HEAT_MENU,
 };
 
 // Transition-Effekte für Screen-Wechsel

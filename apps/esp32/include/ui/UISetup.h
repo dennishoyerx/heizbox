@@ -56,6 +56,7 @@ private:
     InputManager& inputManager;
 
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
+    std::unique_ptr<GenericMenuScreen> heaterMenuScreen;
 
     std::unique_ptr<FireScreen> fireScreen;
     std::unique_ptr<ScreensaverScreen> screensaverScreen;

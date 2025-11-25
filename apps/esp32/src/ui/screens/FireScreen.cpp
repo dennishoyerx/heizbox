@@ -119,6 +119,24 @@ void FireScreen::update() {
     wasHeating = state.heater.isHeating;
 }
 
+std::vector<std::unique_ptr<MenuItem>>  FireScreen::buildMenu() {
+        ZVSDriver* zvs = heater.getZVSDriver();
+    return MenuBuilder()
+         .addHeadline("ZVS ADVANCED")
+            .addRange("Duty Period", 
+                     [zvs](int val) { zvs->setPeriod(val); },
+                     500, 5000, 100, "ms")
+            
+            .addRange("Sensor Time",
+                     [zvs](int val) { zvs->setSensorOffTime(val); },
+                     50, 500, 50, "ms")
+         .addAction("Settings", [&]() {
+             manager->switchScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
+         })
+         
+         .build();
+}
+
 void FireScreen::handleInput(InputEvent event) {
     if (event.button == UP || event.button == DOWN && 
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
@@ -135,17 +153,9 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (event.button == CENTER) {
-        ZVSDriver* zvs = heater.getZVSDriver();
-        
-       MenuBuilder()
-            .addHeadline("ZVS ADVANCED")
-            
-            .addAction("Settings", [&]() {
-                manager->switchScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
-            })
-            
-            .build();
-        //DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+        //ZVSDriver* zvs = heater.getZVSDriver();
+        //manager->switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
+        DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
         return;
     }
 
