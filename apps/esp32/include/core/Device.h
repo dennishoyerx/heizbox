@@ -5,7 +5,6 @@
 #include <memory>
 #include <functional> // For std::function
 
-#include "core/StateManager.h"
 #include "core/StateBinder.h"
 #include "core/Types.h"
 #include "core/EventBus.h"

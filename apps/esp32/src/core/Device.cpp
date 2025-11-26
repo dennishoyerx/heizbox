@@ -4,7 +4,6 @@
 #include "hardware/display/DisplayDriver.h"
 #include "credentials.h"
 #include <ArduinoOTA.h>
-#include "core/StateManager.h"
 #include "utils/Logger.h"
 #include "utils/Logs.h"
 #include <utility> 

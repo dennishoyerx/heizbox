@@ -1,10 +1,8 @@
-// include/Screen.h
-#ifndef SCREEN_H
-#define SCREEN_H
+#pragma once
 
 #include <unordered_map>
 #include <string>
-#include "core/Observable.h"
+#include "Observable.h"
 #include "ui/base/UI.h"
 #include "ui/base/ScreenTransition.h"
 #include "hardware/input/InputManager.h"
@@ -168,5 +166,3 @@ public:
         }
     }
 };
-
-#endif

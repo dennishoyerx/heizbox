@@ -22,6 +22,16 @@ struct HardwareConfig {
     static constexpr uint8_t THERMO_SO_PIN = 26;
 };
 
+struct DisplayConfig {
+    static constexpr uint16_t WIDTH = 280;
+    static constexpr uint16_t HEIGHT = 240;
+    static constexpr uint16_t STATUS_BAR_HEIGHT = 35;
+    
+    static constexpr uint8_t BRIGHTNESS_MIN = 20;
+    static constexpr uint8_t BRIGHTNESS_MAX = 100;
+    static constexpr uint8_t BRIGHTNESS_DEFAULT = 100;
+};
+
 struct HeaterConfig {
     static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 220;
 

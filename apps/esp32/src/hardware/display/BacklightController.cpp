@@ -1,4 +1,3 @@
-// apps/esp32/src/hardware/display/BacklightController.cpp
 #include "hardware/display/BacklightController.h"
 #include <Arduino.h>
 
@@ -6,8 +5,8 @@ BacklightController::BacklightController()
     : brightness(DisplayConfig::BRIGHTNESS_DEFAULT) {}
 
 void BacklightController::init() {
-    ledcAttachPin(HardwareConfig::TFT_BL_PIN, DisplayConfig::PWM_CHANNEL);
-    ledcSetup(DisplayConfig::PWM_CHANNEL, DisplayConfig::PWM_FREQUENCY, DisplayConfig::PWM_RESOLUTION);
+    ledcAttachPin(HardwareConfig::TFT_BL_PIN, DisplayPWMConfig::PWM_CHANNEL);
+    ledcSetup(DisplayPWMConfig::PWM_CHANNEL, DisplayPWMConfig::PWM_FREQUENCY, DisplayPWMConfig::PWM_RESOLUTION);
     setBrightness(brightness);
 }
 
@@ -19,7 +18,7 @@ void BacklightController::setBrightness(uint8_t level) {
                                   DisplayConfig::BRIGHTNESS_MAX,
                                   0, 255);
 
-    ledcWrite(DisplayConfig::PWM_CHANNEL, pwmValue);
+    ledcWrite(DisplayPWMConfig::PWM_CHANNEL, pwmValue);
 
     Serial.printf("💡 Brightness: %u%% (PWM: %u)\n", brightness, pwmValue);
 }

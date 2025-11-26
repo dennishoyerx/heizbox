@@ -2,7 +2,6 @@
 
 #include "heater/HeaterController.h"
 #include "net/WebSocketManager.h"
-#include "core/StateManager.h"
 
 /**
  * @brief Monitors the heater's status and manages heat cycle completion.

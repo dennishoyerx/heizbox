@@ -1,7 +1,6 @@
 #include "hardware/sensor/CapacitiveSensor.h"
 #include "core/DeviceState.h"
 #include "core/Device.h"
-#include "core/StateManager.h"
 #include "heater/HeaterController.h"
 #include <Arduino.h>
 

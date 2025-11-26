@@ -3,6 +3,7 @@
 #include "ui/base/ScreenManager.h"
 #include "hardware/display/DisplayDriver.h"
 #include "ui/base/UI.h"
+#include "core/Config.h"
 
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"

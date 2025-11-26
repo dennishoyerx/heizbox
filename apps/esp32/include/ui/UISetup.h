@@ -10,7 +10,6 @@
 #include "ui/screens/StartupScreen.h"
 #include "ui/base/ScreenTransition.h"
 #include "ui/components/MenuBuilder.h"
-#include "core/StateManager.h"
 #include "base/GenericMenuScreen.h"
 #include "TempSensor.h" 
 

@@ -2,7 +2,7 @@
 #ifndef DEVICESTATE_H
 #define DEVICESTATE_H
 
-#include "core/Observable.h"
+#include "Observable.h"
 #include "core/Config.h"
 
 class DisplayDriver; // Forward declaration

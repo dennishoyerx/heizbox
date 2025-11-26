@@ -1,5 +1,4 @@
-#ifndef CALLBACK_MIXIN_H
-#define CALLBACK_MIXIN_H
+#pragma once
 
 #include <functional>
 
@@ -48,5 +47,3 @@ public:
         }
     }
 };
-
-#endif // CALLBACK_MIXIN_H

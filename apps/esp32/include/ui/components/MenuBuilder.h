@@ -11,7 +11,7 @@
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "hardware/display/DisplayDriver.h" // For DisplayManager and TFT_ colors
 #include "hardware/input/InputManager.h" // For InputEvent
-#include "StateManager.h" // For Observable
+  // For Observable
 
 // Custom make_unique for C++11 compatibility if needed
 #if __cplusplus < 201402L

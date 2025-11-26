@@ -4,7 +4,6 @@
 #include <vector>
 #include <Preferences.h>
 #include <type_traits>
-#include "utils/Logger.h"
 #include <nvs_flash.h> 
 
 template<typename T>
@@ -93,7 +92,7 @@ public:
         } else if (std::is_same<T, float>::value) {
             value = prefs.getFloat(key_, value);
         } else {
-            logPrint("StateManager", "WARNING: No NVS handler for key '%s'", key_);
+            //logPrint("StateManager", "WARNING: No NVS handler for key '%s'", key_);
         }
 
         this->setSilent(value);
@@ -103,7 +102,7 @@ public:
     void save() {
         Preferences prefs;
         if (!prefs.begin(namespace_, false)) {
-            logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-write.", namespace_);
+            //logPrint("StateManager", "ERROR: Failed to open NVS '%s' read-write.", namespace_);
             return;
         }
 
@@ -124,7 +123,7 @@ public:
         if (bytesWritten > 0) {
             //logPrint("StateManager", "[NVS] SAVE %s::%s -> %d", namespace_, key_, static_cast<int>(value));
         } else {
-            logPrint("StateManager", "ERROR: Failed to write to NVS for key '%s'", key_);
+            //logPrint("StateManager", "ERROR: Failed to write to NVS for key '%s'", key_);
         }
     }
 

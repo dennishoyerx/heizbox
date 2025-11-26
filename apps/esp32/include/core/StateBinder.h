@@ -1,9 +1,7 @@
-// include/core/StateBinder.h
 #pragma once
 
 #include "hardware/display/DisplayDriver.h"
 #include "heater/HeaterController.h"
-#include "core/StateManager.h" // For DeviceState
 
 /**
  * @brief Manages the binding of DeviceState observables to various hardware and system managers.

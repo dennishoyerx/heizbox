@@ -22,11 +22,11 @@ void StateBinder::bindDarkMode(DisplayDriver* display) {
     auto& state = DeviceState::instance();
 
     // Initial sync
-    display->setDarkMode(state.darkMode.get());
+    //display->setDarkMode(state.darkMode.get());
 
     // Listen to state changes
     state.darkMode.addListener([display](bool enabled) {
-        display->setDarkMode(enabled);
+        //display->setDarkMode(enabled);
     });
 }
 

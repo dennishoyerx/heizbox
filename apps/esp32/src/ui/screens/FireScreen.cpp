@@ -6,7 +6,7 @@
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
-#include "StateManager.h"
+ 
 #include <utility>
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
