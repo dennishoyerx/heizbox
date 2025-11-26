@@ -36,6 +36,15 @@ void TempSensor::update(bool ignoreInterval) {
     }
 }
 
+void TempSensor::setReadInterval(uint16_t interval) {
+    readInterval = interval;
+}
+
+uint16_t TempSensor::getReadInterval() const {
+    return readInterval;
+}
+
+
 float TempSensor::getTemperature() {
     return lastValidTemp;
 }

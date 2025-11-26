@@ -29,6 +29,10 @@ void HeaterMonitor::checkHeatCycle() {
         // Update state
         uint8_t currentCycle = DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
 
+/*        static uint8_t lastCycle = 0;
+        if (currentCycle == 1) {
+        }
+*/
         heater.clearCycleFinishedFlag();
 
         // Send to backend

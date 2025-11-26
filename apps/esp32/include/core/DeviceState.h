@@ -30,8 +30,11 @@ struct DeviceState {
     Observable<bool> isOnline{false};
     Observable<uint32_t> heatingStartTime{0};
 
-    PersistedObservable<bool> zvsDebug{"debug", "zvsDebug", true};
-    Observable<uint32_t> tempSensorOffTime{HeaterConfig::SENSOR_OFF_TIME_MS};
+    PersistedObservable<bool> zvsDebug{"zvs", "debug", true};
+    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
+    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
+
+    PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
 
 
     // Session State

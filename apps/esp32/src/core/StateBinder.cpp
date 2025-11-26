@@ -44,6 +44,19 @@ void StateBinder::bindHeater(HeaterController* heater) {
     state.autoStopTime.addListener([heater](uint32_t time) {
         heater->setAutoStopTime(time);
     });
+
+    
+    heater->getTempSensor()->setReadInterval(state.tempSensorOffTime.get());
+    heater->getZVSDriver()->setSensorOffTime(state.tempSensorOffTime.get());
+    state.tempSensorOffTime.addListener([heater](uint32_t time) {
+        heater->getTempSensor()->setReadInterval(time);
+        heater->getZVSDriver()->setSensorOffTime(time);
+    });
+
+    heater->getZVSDriver()->setPeriod(state.zvsDutyCyclePeriodMs.get());
+    state.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
+        heater->getZVSDriver()->setPeriod(val);
+    });
 }
 
 void StateBinder::bindAll(DisplayDriver* display, HeaterController* heater) {

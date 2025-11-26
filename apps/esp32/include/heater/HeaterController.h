@@ -33,7 +33,7 @@ public:
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
     uint16_t getTemperature();
-    
+
     // Expose components
     TempSensor* getTempSensor() { return tempSensor; }
     ZVSDriver* getZVSDriver() { return zvsDriver; }

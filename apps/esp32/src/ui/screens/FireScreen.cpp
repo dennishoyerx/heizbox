@@ -18,11 +18,23 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.heater.targetTemp, ds.targetTemperature);
     bindTo(state.heater.power, ds.power);
     bindTo(state.heater.currentCycle, ds.currentCycle);
+
+    ds.currentCycle.addListener([this](uint8_t val) {
+        auto& ds = DeviceState::instance();
+
+        if (val == 1 && state.heater.targetTemp != ds.targetTemperature) {
+            state.heater.targetTemp = ds.targetTemperature;
+            dirty();
+        } else if (val == 2 && state.heater.targetTemp == ds.targetTemperature) {
+            state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
+            dirty();
+        }
+    });
 }
 
 void FireScreen::draw(DisplayDriver &display) {
         ZVSDriver* zvs = heater.getZVSDriver();
-        if (state.heater.isHeating) {
+    if (state.heater.isHeating) {
         HeatUI(_ui, state.heater, zvs);
 
         return;
@@ -109,28 +121,43 @@ void FireScreen::update() {
 }
 
 std::vector<std::unique_ptr<MenuItem>>  FireScreen::buildMenu() {
-        ZVSDriver* zvs = heater.getZVSDriver();
+    auto& state = DeviceState::instance();
+
     return MenuBuilder()
          .addHeadline("ZVS ADVANCED")
-            .addRange("Duty Period", 
-                     [zvs](int val) { zvs->setPeriod(val); },
-                     500, 5000, 100, "ms")
-            
-            .addRange("Sensor Time",
-                     [zvs](int val) { zvs->setSensorOffTime(val); },
-                     50, 500, 50, "ms")
-         .addAction("Settings", [&]() {
-             manager->switchScreen(ScreenType::MAIN_MENU, ScreenTransition::FADE);
-         })
+            .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100)
+            .addObservableRangeMs("Temp Sensor", state.tempSensorOffTime, 50, 220, 10)
          
          .build();
+}
+
+bool triggeredTwice(uint32_t intervalMs) {
+    static uint32_t lastTime = 0;
+    uint32_t now = millis();
+    if (now - lastTime <= intervalMs) {
+        lastTime = 0; // zurücksetzen, damit nicht mehrfach ausgelöst
+        return true;
+    }
+    lastTime = now;
+    return false;
 }
 
 void FireScreen::handleInput(InputEvent event) {
     if (event.button == UP || event.button == DOWN && 
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
         float delta = event.button == UP ? 1 : -1;
-        DeviceState::instance().targetTemperature.update([delta](uint8_t val) { return val + delta; });
+        auto& ds = DeviceState::instance();
+
+        if (state.heater.currentCycle == 1) {
+            ds.targetTemperature.update([delta](uint8_t val) { return val + delta; });
+            dirty();
+        } else if (state.heater.currentCycle == 2) {
+            ds.heatCycleTempDelta.update([delta](uint8_t val) { return val + delta; });
+            state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
+            dirty();
+        }
+
+        
         return;
     }
 
@@ -145,6 +172,8 @@ void FireScreen::handleInput(InputEvent event) {
         //ZVSDriver* zvs = heater.getZVSDriver();
         //manager->switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
         DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+        if (triggeredTwice(200) && state.heater.isHeating) DeviceState::instance().zvsDebug.set(!DeviceState::instance().zvsDebug.get());
+        dirty();
         return;
     }
 
@@ -196,7 +225,13 @@ void FireScreen::drawSessionRow(TFT_eSprite* sprite,
         _textColor = textColor;
     }
 
-        sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
+        if (invert) {
+            sprite->fillSmoothRoundRect(x, y, width, height, radius, COLOR_TEXT_SECONDARY, _textColor);
+            sprite->fillSmoothRoundRect(x+2, y+2, width-4, height-4, radius - 2, _bgColor, _textColor);
+        } else {
+            sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
+
+        }
 
         // "Session" Text
         sprite->setTextSize(1);

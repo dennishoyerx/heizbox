@@ -4,10 +4,32 @@
 #include "ui/base/Screen.h"
 #include "ui/components/ZVSOscilloscope.h"
 
+float smoothProgress(float target) {
+    static float smoothed = 0.0f;
+    static uint32_t last = millis();
+
+    uint32_t now = millis();
+    float dt = (now - last) / 1000.0f;   // dt in Sekunden
+    last = now;
+
+    // Ziel: in exact DUTY_CYCLE_PERIOD_MS (1 s) zu ~95% am Ziel sein.
+    // -> Klassischer RC-Filter: tau = Periode / 3
+    // Dadurch 95% nach 1 Periode.
+    const float tau = (HeaterConfig::DUTY_CYCLE_PERIOD_MS / 1000.0f) / 3.0f;
+
+    float alpha = 1.0f - expf(-dt / tau);
+
+    smoothed += (target - smoothed) * alpha;
+    return smoothed;
+}
+
+
 void ZVSOscilloscopeUI(RenderSurface s, ZVSDriver* zvs) {
     static ZVSOscilloscope osc = ZVSOscilloscope(zvs, 280);
     osc.update();
-    osc.draw(s, 0, 0, s.height());
+    int h = s.height() /2;        // osc-Höhe
+    int y = (s.height() - h) / 2; 
+    osc.draw(s, 0, y, h);
 }
 
 void Background(RenderSurface s, float progress, uint8_t color) {
@@ -93,8 +115,8 @@ void HeatUI(UI* _ui, HeatState state, ZVSDriver* zvs) {
         uint8_t tempColor = 15; //ColorUtils::getTemperatureColor(state.currentTemp);
         s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(state.currentTemp, true));
 
-        Background(s, state.progress, tempColor);
-        ZVSOscilloscopeUI(s, zvs);
+        Background(s, smoothProgress(state.progress), tempColor);
+        if (DeviceState::instance().zvsDebug) ZVSOscilloscopeUI(s, zvs);
 
         Timer(s, state.elapsedSeconds);
         HeatCycleIndicator(s, state.currentCycle);

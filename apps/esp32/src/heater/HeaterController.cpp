@@ -16,9 +16,9 @@ HeaterController::HeaterController()
         HardwareConfig::THERMO_SCK_PIN, 
         HardwareConfig::THERMO_CS_PIN, 
         HardwareConfig::THERMO_SO_PIN, 
-        HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS
+        HeaterConfig::SENSOR_OFF_TIME_MS
     );
-    
+
     // Initialize ZVS driver
     zvsDriver = new ZVSDriver(
         HardwareConfig::HEATER_MOSFET_PIN,

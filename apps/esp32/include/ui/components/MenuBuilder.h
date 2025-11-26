@@ -335,14 +335,30 @@ public:
     }
     
     // Helper für PersistedObservable mit automatischer Unit-Konvertierung
-    MenuBuilder& addObservableRangeMs(const char* title, Observable<uint32_t>& observable,
-                                      uint32_t minMs, uint32_t maxMs, uint32_t stepMs) {
-        // Wrapper der Millisekunden in Sekunden anzeigt
-        items_.emplace_back(std::make_unique<ObservableRangeMenuItemWithConverter<uint32_t>>(
-            title, observable, minMs, maxMs, stepMs, "s",
-            [](uint32_t ms) { return ms / 1000; },  // Display converter
-            [](uint32_t s) { return s * 1000; }     // Store converter, not used here but good practice
-        ));
+    MenuBuilder& addObservableRangeMs(
+        const char* title,
+        Observable<uint32_t>& observable,
+        uint32_t minMs, uint32_t maxMs, uint32_t stepMs,
+        bool showInMs = false
+    ) {
+        if (showInMs) {
+            // Anzeige in ms
+            items_.emplace_back(std::make_unique<
+                ObservableRangeMenuItemWithConverter<uint32_t>
+            >(title, observable, minMs, maxMs, stepMs,
+            "ms",
+            [](uint32_t v){ return v; },
+            [](uint32_t v){ return v; }));
+        } else {
+            // Anzeige in Sekunden
+            items_.emplace_back(std::make_unique<
+                ObservableRangeMenuItemWithConverter<uint32_t>
+            >(title, observable, minMs, maxMs, stepMs,
+            "s",
+            [](uint32_t ms){ return ms / 1000; },
+            [](uint32_t s ){ return s * 1000; }));
+        }
+
         return *this;
     }
     

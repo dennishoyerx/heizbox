@@ -39,6 +39,8 @@ void UISetup::setupMainMenu() {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
+        .addObservableRange("HC Temp", state.heatCycleTempDelta, static_cast<uint8_t>(0), static_cast<uint8_t>(40), static_cast<uint8_t>(1), "°C")
+
          .addAction("Heater", [&]() {
              screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
          })
@@ -80,7 +82,13 @@ void UISetup::setupMainMenu() {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
 
-    auto heaterMenuItems = this->fireScreen.get()->buildMenu();
+    auto heaterMenuItems = MenuBuilder()
+         .addHeadline("ZVS ADVANCED")
+            .addObservableRange("HC Temp", state.heatCycleTempDelta, static_cast<uint8_t>(0), static_cast<uint8_t>(40), static_cast<uint8_t>(1), "°C")
+            .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
+            .addObservableRangeMs("Temp Sensor", state.tempSensorOffTime, 50, 220, 10, true)
+         
+         .build();
 
     this->heaterMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(heaterMenuItems));
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());

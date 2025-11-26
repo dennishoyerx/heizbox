@@ -14,6 +14,9 @@ public:
     bool hasReachedClickTemp();
     bool hasError() const;
 
+    void setReadInterval(uint16_t interval);
+    uint16_t getReadInterval() const;
+
 private:
     MAX6675* thermocouple;
     uint8_t sckPin, csPin, soPin;
