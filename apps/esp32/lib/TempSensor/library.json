@@ -1,0 +1,7 @@
+{
+  "name": "TempSensor",
+  "version": "1.0.0",
+  "description": "MAX6675 basierter Temperatur-Sensor mit Plausibilitätsprüfung",
+  "frameworks": "arduino",
+  "platforms": "*"
+}

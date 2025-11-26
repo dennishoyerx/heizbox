@@ -18,6 +18,7 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.heater.targetTemp, ds.targetTemperature);
     bindTo(state.heater.power, ds.power);
     bindTo(state.heater.currentCycle, ds.currentCycle);
+    bindTo(state.heater.isHeating, ds.isHeating);
 
     ds.currentCycle.addListener([this](uint8_t val) {
         auto& ds = DeviceState::instance();
@@ -85,7 +86,6 @@ void FireScreen::draw() {
 }
 
 void FireScreen::update() {
-    state.heater.isHeating = heater.isHeating();
     uint16_t temp = heater.getTemperature();
     
     if (temp != state.heater.currentTemp) {
@@ -135,7 +135,7 @@ bool triggeredTwice(uint32_t intervalMs) {
     static uint32_t lastTime = 0;
     uint32_t now = millis();
     if (now - lastTime <= intervalMs) {
-        lastTime = 0; // zurücksetzen, damit nicht mehrfach ausgelöst
+        lastTime = 0;
         return true;
     }
     lastTime = now;

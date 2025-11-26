@@ -1,4 +1,3 @@
-// TempSensor.h
 #pragma once
 #include <MAX6675.h>
 #include <Arduino.h>

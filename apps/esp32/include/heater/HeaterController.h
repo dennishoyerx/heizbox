@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "hardware/sensor/TempSensor.h"
+#include "TempSensor.h"
 #include "heater/ZVSDriver.h"
 #include "core/EventBus.h"
 

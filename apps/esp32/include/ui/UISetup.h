@@ -12,7 +12,7 @@
 #include "ui/components/MenuBuilder.h"
 #include "core/StateManager.h"
 #include "base/GenericMenuScreen.h"
-#include "hardware/sensor/TempSensor.h" // Include TempSensor
+#include "TempSensor.h" 
 
 /**
  * @brief Manages the setup and registration of all UI screens and the main menu.

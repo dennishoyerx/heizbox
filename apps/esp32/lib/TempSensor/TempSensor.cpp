@@ -1,5 +1,4 @@
-// TempSensor.cpp
-#include "hardware/sensor/TempSensor.h"
+#include "TempSensor.h"
 #include <MAX6675.h>
 #include <Arduino.h>
 
