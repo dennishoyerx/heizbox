@@ -18,8 +18,8 @@ void TimezoneScreen::onEnter() {
     if (screenManager) screenManager->setDirty();
 }
 
-void TimezoneScreen::draw(DisplayDriver& display) {
-    display.clear();
+void TimezoneScreen::draw() {
+    /*display.clear();
 
     // Draw title
     display.drawText(50, 10, "TIMEZONE", COLOR_TEXT_PRIMARY, 2);
@@ -31,7 +31,7 @@ void TimezoneScreen::draw(DisplayDriver& display) {
 
     // Draw instructions
     display.drawText(30, 160, "UP/DOWN: Adjust", COLOR_TEXT_SECONDARY, 1);
-    display.drawText(30, 180, "CENTER: Save & Exit", COLOR_TEXT_SECONDARY, 1);
+    display.drawText(30, 180, "CENTER: Save & Exit", COLOR_TEXT_SECONDARY, 1);*/
 }
 
 void TimezoneScreen::update() {

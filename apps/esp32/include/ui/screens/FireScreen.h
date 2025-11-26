@@ -16,7 +16,7 @@ class FireScreen : public Screen {
 public:
     FireScreen(HeaterController& hc);
 
-    void draw(DisplayDriver& display) override;
+    void draw() override;
     void update() override;
     void handleInput(InputEvent event) override;
     ScreenType getType() const override { return ScreenType::FIRE; }

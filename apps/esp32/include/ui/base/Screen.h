@@ -23,7 +23,7 @@ public:
     virtual ~Screen();
 
     // Pure virtual (muss implementiert werden)
-    virtual void draw(DisplayDriver& display) = 0;
+    virtual void draw() = 0;
     virtual void update() = 0;
     virtual void handleInput(InputEvent event) = 0;
     virtual ScreenType getType() const = 0;

@@ -8,9 +8,9 @@ const unsigned char ota_icon[] PROGMEM = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0
 
 OtaUpdateScreen::OtaUpdateScreen(DisplayDriver* displayManager) : _displayManager(displayManager) {}
 
-void OtaUpdateScreen::draw(DisplayDriver& display)
+void OtaUpdateScreen::draw()
 {
-    display.setBrightness(100);
+    //display.setBrightness(100);
     _ui->clear();
     _ui->withSurface(102, 128, 100, 100, [this](RenderSurface& s) {
         //s.sprite->fillSprite(COLOR_BG);

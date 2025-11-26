@@ -13,7 +13,7 @@ private:
 public:
     ScreensaverScreen(unsigned long timeout, DisplayDriver* dm, std::function<void()> callback = nullptr);
     
-    void draw(DisplayDriver& display) override;
+    void draw() override;
     void update() override;
     void handleInput(InputEvent event) override;
     ScreenType getType() const override { return ScreenType::SCREENSAVER; };

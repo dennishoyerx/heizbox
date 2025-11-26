@@ -50,7 +50,7 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
         } else {
             // Direkter Wechsel 
             currentScreen->clear();
-            currentScreen->draw(display);
+            currentScreen->draw();
             //statusBar->draw(ui);
 
             transition.inProgress = false;
@@ -109,7 +109,7 @@ void ScreenManager::draw() {
     if (dirty) {
         const uint32_t startTime = micros();
 
-        currentScreen->draw(display);
+        currentScreen->draw();
         statusBar->draw(ui);
         const uint32_t drawTime = micros() - startTime;
         lastDrawTime = drawTime;
@@ -164,7 +164,7 @@ void ScreenManager::drawTransitionFrame() {
                 // Bei 50% Screen wechseln
                 if (transition.progress >= 50 && previousScreen) {
                     //display.clear();
-                    currentScreen->draw(display);
+                    currentScreen->draw();
                     previousScreen = nullptr;
                 }
             }
@@ -187,7 +187,7 @@ void ScreenManager::completeTransition() {
 
     if (currentScreen) {
         currentScreen->clear();
-        currentScreen->draw(display);
+        currentScreen->draw();
         statusBar->draw(ui);
     }
 

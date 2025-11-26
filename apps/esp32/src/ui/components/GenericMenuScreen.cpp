@@ -25,7 +25,7 @@ GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_
     }
 
 // Implementations of methods declared in GenericMenuScreen.h
-void GenericMenuScreen::draw(DisplayDriver& display) {
+void GenericMenuScreen::draw() {
     _ui->clear();    
     _ui->withSurface(280, 190, 0, 50, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);

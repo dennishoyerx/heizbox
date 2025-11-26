@@ -11,7 +11,7 @@ class GenericMenuScreen : public Screen {
 public:
     GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items);
 
-    void draw(DisplayDriver& display) override;
+    void draw() override;
 
     void update() override {}
 

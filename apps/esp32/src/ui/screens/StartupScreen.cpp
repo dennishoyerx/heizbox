@@ -15,7 +15,7 @@ StartupScreen::StartupScreen(std::function<void()> callback) {
     startAnimation(3000, nullptr, callback);
 }
 
-void StartupScreen::draw(DisplayDriver& display) {
+void StartupScreen::draw() {
     _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
         // Zentrale Position berechnen
         constexpr int16_t bitmapWidth = 96;

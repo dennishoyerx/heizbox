@@ -32,7 +32,7 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     });
 }
 
-void FireScreen::draw(DisplayDriver &display) {
+void FireScreen::draw() {
         ZVSDriver* zvs = heater.getZVSDriver();
     if (state.heater.isHeating) {
         HeatUI(_ui, state.heater, zvs);
@@ -109,7 +109,7 @@ void FireScreen::update() {
             lastSecond = state.heater.elapsedSeconds;
             dirty();
         }
-            dirty();
+        dirty();
     }
 
     static bool wasHeating = false;

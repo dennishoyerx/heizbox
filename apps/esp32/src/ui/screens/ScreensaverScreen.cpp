@@ -12,8 +12,8 @@ ScreensaverScreen::ScreensaverScreen(unsigned long timeout, DisplayDriver* dm, s
     startTimeout(timeout, callback);
 }
 
-void ScreensaverScreen::draw(DisplayDriver& display) {
-    display.clear();
+void ScreensaverScreen::draw() {
+    /*display.clear();
 
     // Display time
     String time = Utils::getFormattedTime();
@@ -25,7 +25,7 @@ void ScreensaverScreen::draw(DisplayDriver& display) {
     String date = Utils::getFormattedDate();
     int16_t dateWidth = display.getTextWidth(date.c_str(), 2);
     int16_t dateX = (display.getTFTWidth() - dateWidth) / 2 + 25;
-    display.drawText(dateX, 130, date.c_str(), COLOR_TEXT_PRIMARY, 2);
+    display.drawText(dateX, 130, date.c_str(), COLOR_TEXT_PRIMARY, 2);*/
 }
 
 void ScreensaverScreen::update() {
