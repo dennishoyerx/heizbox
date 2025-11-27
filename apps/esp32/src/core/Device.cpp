@@ -1,4 +1,4 @@
-#include "core/Config.h"
+#include "Config.h"
 #include "core/Device.h" 
 #include "core/DeviceState.h" 
 #include "DisplayDriver.h"
@@ -27,23 +27,19 @@
 #include "core/EventBus.h"
 
 Device::Device()
-    : eventBus(),
+    : events(),
     input(),
       heater(),
       display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
         std::make_unique<TFT_eSPI_Driver>(), 
         std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
-      wifiManager(),
-      webSocketManager(),
+      wifi(),
+      webSocket(),
       screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)),
-      capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
-      network(std::make_unique<Network>(
-          wifiManager, webSocketManager,
-          [this](const char* type, const JsonDocument& doc) { this->handleWebSocketMessage(type, doc); }
-      )),
+      network(std::make_unique<Network>(wifi, webSocket)),
       otaSetup(std::make_unique<OTASetup>(screenManager, *uiSetup->getOtaUpdateScreen(), *uiSetup->getFireScreen())),
-      heaterMonitor(std::make_unique<HeaterMonitor>( heater, webSocketManager )),
+      heaterMonitor(std::make_unique<HeaterMonitor>( heater, webSocket )),
       inputHandler(std::make_unique<InputHandler>(screenManager))
 {}
 
@@ -105,25 +101,6 @@ void Device::loop() {
     heaterMonitor->checkHeatCycle();
 
     otaSetup->handleOTA();
-}
-
-// ============================================================================
-// Helper Methods
-// ============================================================================
-
-void Device::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
-    if (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0) {
-        if (!doc["consumption"].isNull()) {
-            DeviceState::instance().sessionConsumption.set(doc["consumption"].as<float>());
-        }
-        if (!doc["consumptionTotal"].isNull()) {
-            DeviceState::instance().todayConsumption.set(doc["consumptionTotal"].as<float>());
-        }
-        if (!doc["consumptionTotal"].isNull()) {
-            DeviceState::instance().yesterdayConsumption.set(doc["consumptionYesterday"].as<float>());
-        }
-        screenManager.setDirty();
-    }
 }
 
 

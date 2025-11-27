@@ -2,8 +2,6 @@
 #include "ui/base/ScreenManager.h"
 #include "ui/base/UI.h"
 
-
-
 Screen::Screen() : manager(nullptr) {
     initState();
 }

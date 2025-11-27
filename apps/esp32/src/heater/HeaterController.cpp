@@ -1,5 +1,5 @@
 #include "heater/HeaterController.h"
-#include "core/Config.h"
+#include "Config.h"
 #include <Arduino.h>
 
 HeaterController::HeaterController()

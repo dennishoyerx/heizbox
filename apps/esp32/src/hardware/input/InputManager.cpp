@@ -1,6 +1,6 @@
 #include "hardware/input/InputManager.h"
 #include <Arduino.h>
-#include "core/Config.h"
+#include "Config.h"
 
 
 

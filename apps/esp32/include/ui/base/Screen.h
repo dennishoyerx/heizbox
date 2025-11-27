@@ -6,15 +6,9 @@
 #include "ui/base/UI.h"
 #include "ui/base/ScreenTransition.h"
 #include "hardware/input/InputManager.h"
-#include "utils/CallbackMixin.h" // For TimeoutMixin
 
-class DisplayManager;
 class ScreenManager;
-class DisplayDriver;
 
-using InputCallback = std::function<void(InputEvent&)>;
-
-// Base Screen mit Common Functionality
 class Screen {
 public:
     Screen();
@@ -54,7 +48,6 @@ protected:
     }
 
 private:
-    std::unordered_map<std::string, int> state_;
 };
 
 

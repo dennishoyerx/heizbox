@@ -1,4 +1,4 @@
-// core/Config.h
+// Config.h
 #pragma once
 
 #include <Arduino.h>

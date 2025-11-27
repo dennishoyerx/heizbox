@@ -6,7 +6,7 @@
 #include <functional> // For std::function
 
 #include "core/StateBinder.h"
-#include "core/Types.h"
+#include "Types.h"
 #include "core/EventBus.h"
 
 #include "heater/HeaterController.h"
@@ -22,11 +22,6 @@
 
 // UI
 #include "ui/base/ScreenManager.h"
-#include "ui/screens/FireScreen.h"
-#include "ui/screens/ScreensaverScreen.h"
-#include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/TimezoneScreen.h"
-#include "ui/screens/StartupScreen.h"
 #include "ui/UISetup.h"
 
 class Device {
@@ -41,10 +36,9 @@ private:
     InputManager input;
     HeaterController heater;
     std::unique_ptr<DisplayDriver> display;
-    WiFiManager wifiManager;
-    WebSocketManager webSocketManager;
-    CapacitiveSensor capacitiveSensor;
-    EventBus eventBus;
+    WiFiManager wifi;
+    WebSocketManager webSocket;
+    EventBus events;
     ScreenManager screenManager;
 
     std::unique_ptr<UISetup> uiSetup;
@@ -52,8 +46,4 @@ private:
     std::unique_ptr<OTASetup> otaSetup;
     std::unique_ptr<HeaterMonitor> heaterMonitor;
     std::unique_ptr<InputHandler> inputHandler;
-
-    // Helper methods
-    void handleWebSocketMessage(const char* type, const JsonDocument& doc);
-
 };

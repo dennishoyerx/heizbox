@@ -1,5 +1,5 @@
 ﻿#include <Arduino.h>
-#include "core/Config.h"
+#include "Config.h"
 #include "core/Device.h"
 
 // For safe mode

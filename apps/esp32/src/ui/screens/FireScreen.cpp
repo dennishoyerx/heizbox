@@ -2,7 +2,7 @@
 #include "ui/components/MenuBuilder.h"
 #include "ui/components/HeatUI.h"
 #include "DisplayDriver.h"
-#include "core/Config.h"
+#include "Config.h"
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"

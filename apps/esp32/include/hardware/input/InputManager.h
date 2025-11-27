@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <Arduino.h>
-#include "core/Config.h"
+#include "Config.h"
 
 enum InputEventType {
     PRESS,
