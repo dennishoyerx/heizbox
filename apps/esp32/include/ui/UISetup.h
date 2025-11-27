@@ -38,6 +38,7 @@ public:
         InputManager& inputManager
     );
 
+    void setup();
     void setupScreens();
 
     FireScreen* getFireScreen() const { return fireScreen.get(); }

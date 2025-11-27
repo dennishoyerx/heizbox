@@ -21,7 +21,7 @@ public:
      * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
      * @param fireScreen Reference to the FireScreen instance.
      */
-    OTASetup(ScreenManager& screenManager, OtaUpdateScreen& otaUpdateScreen, FireScreen& fireScreen);
+    OTASetup(ScreenManager& screenManager);
 
     /**
      * @brief Sets up ArduinoOTA with the specified hostname and event callbacks.
@@ -35,6 +35,4 @@ public:
 
 private:
     ScreenManager& screenManager;
-    OtaUpdateScreen& otaUpdateScreen;
-    FireScreen& fireScreen;
 };

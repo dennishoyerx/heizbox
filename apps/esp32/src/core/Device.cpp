@@ -1,47 +1,38 @@
+#include "core/Device.h"
 #include "Config.h"
-#include "core/Device.h" 
-#include "core/DeviceState.h" 
 #include "DisplayDriver.h"
+#include "core/DeviceState.h"
 #include "credentials.h"
-#include <ArduinoOTA.h>
 #include "utils/Logger.h"
 #include "utils/Logs.h"
-#include <utility> 
+#include <ArduinoOTA.h>
+#include <utility>
 
 // Network
-#include "net/WiFiManager.h"
-#include "net/WebSocketManager.h"
 #include "net/Network.h"
+#include "net/WebSocketManager.h"
+#include "net/WiFiManager.h"
 
 // UI
-#include "ui/base/ScreenManager.h"
-#include "ui/screens/FireScreen.h"
-#include "ui/screens/OtaUpdateScreen.h"
-#include "ui/screens/StartupScreen.h"
-#include "ui/base/ScreenTransition.h"
 #include "ui/UISetup.h"
+#include "ui/base/ScreenManager.h"
 
-#include "TFT_eSPI_Driver.h"
 #include "BacklightController.h"
+#include "TFT_eSPI_Driver.h"
 
 #include "core/EventBus.h"
 
 Device::Device()
-    : events(),
-    input(),
-      heater(),
+    : events(), input(), heater(),
       display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
-        std::make_unique<TFT_eSPI_Driver>(), 
-        std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
-      wifi(),
-      webSocket(),
-      screenManager(*display, input),
+                                              std::make_unique<TFT_eSPI_Driver>(),
+                                              std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
+      wifi(), webSocket(), screenManager(*display, input),
       uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)),
       network(std::make_unique<Network>(wifi, webSocket)),
-      otaSetup(std::make_unique<OTASetup>(screenManager, *uiSetup->getOtaUpdateScreen(), *uiSetup->getFireScreen())),
-      heaterMonitor(std::make_unique<HeaterMonitor>( heater, webSocket )),
-      inputHandler(std::make_unique<InputHandler>(screenManager))
-{}
+      otaSetup(std::make_unique<OTASetup>(screenManager)),
+      heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)),
+      inputHandler(std::make_unique<InputHandler>(screenManager)) {}
 
 Device::~Device() {}
 
@@ -60,17 +51,13 @@ void Device::setup() {
     heater.init();
 
     // Setup screens
-    uiSetup->setupScreens();
-    screenManager.setScreen(uiSetup->getStartupScreen());
+    uiSetup->setup();
+    screenManager.switchScreen(ScreenType::STARTUP);
 
-    input.setCallback([this](InputEvent event) {
-        inputHandler->handleInput(event);
-    });
+    input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
 
     StateBinder::bindAll(display.get(), &heater);
     DeviceState::instance().display = display.get();
-
-    uiSetup->setupMainMenu();
 
     network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
     network->onReady([]() {
@@ -82,7 +69,7 @@ void Device::setup() {
             firmware_logged = true;
         }
     });
-    
+
     otaSetup->setupOTA();
 
     Serial.println("✅ Device initialized");
@@ -102,5 +89,3 @@ void Device::loop() {
 
     otaSetup->handleOTA();
 }
-
-

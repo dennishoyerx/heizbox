@@ -15,6 +15,11 @@ UISetup::UISetup(
       inputManager(inputManager)
 {}
 
+void UISetup::setup() {
+    setupScreens();
+    setupMainMenu();
+}
+
 void UISetup::setupScreens() {
     // Create screens
     fireScreen = std::make_unique<FireScreen>(heater);

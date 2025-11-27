@@ -1,11 +1,8 @@
-// src/hardware/OTASetup.cpp
 #include "net/OTASetup.h"
 #include "utils/Logger.h"
 
-OTASetup::OTASetup(ScreenManager& screenManager, OtaUpdateScreen& otaUpdateScreen, FireScreen& fireScreen)
-    : screenManager(screenManager),
-      otaUpdateScreen(otaUpdateScreen),
-      fireScreen(fireScreen)
+OTASetup::OTASetup(ScreenManager& screenManager)
+    : screenManager(screenManager)
 {}
 
 void OTASetup::setupOTA() {
