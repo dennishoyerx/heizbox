@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "heater/HeaterController.h"
 
 /**

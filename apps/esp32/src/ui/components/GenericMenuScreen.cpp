@@ -1,5 +1,5 @@
 // src/GenericMenuScreen.cpp
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "ui/base/GenericMenuScreen.h" // New include
 #include "hardware/input/InputManager.h" // For InputEvent and its enums
 #include "ui/base/ScreenManager.h" // For ScreenTransition

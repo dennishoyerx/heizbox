@@ -1,6 +1,6 @@
 #include "core/StateBinder.h"
 #include "core/DeviceState.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 
 // ============================================================================
 // State Bindings - UI ↔ State Synchronisation

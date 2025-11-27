@@ -19,12 +19,6 @@ void Screen::setUI(UI* ui) {
     _ui = ui;
 }
 
-void Screen::redrawUI() {
-    if (_ui) {
-        _ui->forceRedraw();
-    }
-}
-
 void Screen::clear() {
     if (_ui) {
         _ui->clear();

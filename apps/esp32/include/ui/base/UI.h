@@ -1,6 +1,6 @@
 #pragma once
 
-#include <hardware/display/DisplayDriver.h>
+#include <DisplayDriver.h>
 #include <ui/base/SurfaceFactory.h>
 #include <unordered_map>
 #include <string>

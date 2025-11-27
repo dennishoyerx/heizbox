@@ -2,7 +2,7 @@
 #pragma once
 
 #include "ui/base/Screen.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 
 class OtaUpdateScreen : public Screen {
 public:

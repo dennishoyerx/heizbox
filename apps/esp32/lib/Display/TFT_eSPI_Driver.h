@@ -1,4 +1,3 @@
-// apps/esp32/include/hardware/drivers/TFT_eSPI_Driver.h
 #ifndef TFT_ESPI_DRIVER_H
 #define TFT_ESPI_DRIVER_H
 

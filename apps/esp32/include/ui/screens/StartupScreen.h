@@ -3,7 +3,7 @@
 #define STARTUPSCREEN_H
 
 #include "ui/base/Screen.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "hardware/input/InputManager.h"
 
 class StartupScreen : public AnimatedScreen {

@@ -9,7 +9,7 @@
 #include <Arduino.h> // For constrain
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenManager.h" // For ScreenTransition
-#include "hardware/display/DisplayDriver.h" // For DisplayManager and TFT_ colors
+#include "DisplayDriver.h" // For DisplayManager and TFT_ colors
 #include "hardware/input/InputManager.h" // For InputEvent
   // For Observable
 

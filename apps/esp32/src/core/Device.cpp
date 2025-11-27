@@ -1,7 +1,7 @@
 #include "core/Config.h"
 #include "core/Device.h" 
 #include "core/DeviceState.h" 
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "credentials.h"
 #include <ArduinoOTA.h>
 #include "utils/Logger.h"
@@ -21,25 +21,22 @@
 #include "ui/base/ScreenTransition.h"
 #include "ui/UISetup.h"
 
-#include "hardware/drivers/TFT_eSPI_Driver.h"
-#include "hardware/display/BacklightController.h"
+#include "TFT_eSPI_Driver.h"
+#include "BacklightController.h"
 
 #include "core/EventBus.h"
 
 Device::Device()
     : eventBus(),
-        input(),
+    input(),
       heater(),
-      display(std::make_unique<DisplayDriver>(
-          std::make_unique<TFT_eSPI_Driver>(),
-          std::make_unique<BacklightController>()
-      )),
+      display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
+        std::make_unique<TFT_eSPI_Driver>(), 
+        std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
       wifiManager(),
       webSocketManager(),
       screenManager(*display, input),
-      uiSetup(std::make_unique<UISetup>(
-          screenManager, heater, display.get(), input
-      )),
+      uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)),
       capacitiveSensor(heater, [this](bool start) { uiSetup->getFireScreen()->_handleHeatingTrigger(start); }),
       network(std::make_unique<Network>(
           wifiManager, webSocketManager,
@@ -62,7 +59,7 @@ void Device::setup() {
     }
 
     // Initialize core components
-    display->init(&screenManager);
+    display->init();
     input.init();
     heater.init();
 

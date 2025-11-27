@@ -11,7 +11,7 @@
 
 #include "heater/HeaterController.h"
 #include "hardware/input/InputManager.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"

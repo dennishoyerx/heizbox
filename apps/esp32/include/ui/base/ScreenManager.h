@@ -4,7 +4,7 @@
 #include "ui/base/UI.h"
 #include "ui/components/StatusBar.h"
 #include "hardware/input/InputManager.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "ui/base/ScreenTransition.h"
 
 class ScreenManager {

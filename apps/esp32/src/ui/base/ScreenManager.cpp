@@ -1,7 +1,6 @@
-// src/ScreenManager.cpp
 #include "utils/Logger.h"
 #include "ui/base/ScreenManager.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "ui/base/UI.h"
 #include "core/Config.h"
 
@@ -164,7 +163,6 @@ void ScreenManager::drawTransitionFrame() {
 
                 // Bei 50% Screen wechseln
                 if (transition.progress >= 50 && previousScreen) {
-                    //display.clear();
                     currentScreen->draw();
                     previousScreen = nullptr;
                 }

@@ -34,7 +34,6 @@ public:
     // Manager access
     void setManager(ScreenManager* mgr);
     void setUI(UI* ui);
-    void redrawUI();
     void clear();
 
 

@@ -1,7 +1,7 @@
 #include "ui/screens/FireScreen.h"
 #include "ui/components/MenuBuilder.h"
 #include "ui/components/HeatUI.h"
-#include "hardware/display/DisplayDriver.h"
+#include "DisplayDriver.h"
 #include "core/Config.h"
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"

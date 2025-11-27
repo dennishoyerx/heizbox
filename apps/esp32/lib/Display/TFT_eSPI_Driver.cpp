@@ -1,5 +1,4 @@
-// apps/esp32/src/hardware/drivers/TFT_eSPI_Driver.cpp
-#include "hardware/drivers/TFT_eSPI_Driver.h"
+#include "TFT_eSPI_Driver.h"
 
 TFT_eSPI_Driver::TFT_eSPI_Driver() : tft() {}
 

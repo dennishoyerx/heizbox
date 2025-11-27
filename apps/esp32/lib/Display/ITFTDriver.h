@@ -1,4 +1,3 @@
-// apps/esp32/include/hardware/drivers/ITFTDriver.h
 #ifndef ITFTDRIVER_H
 #define ITFTDRIVER_H
 
