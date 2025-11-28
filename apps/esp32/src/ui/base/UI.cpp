@@ -4,7 +4,6 @@
 #include <core/DeviceState.h>
 
 UI::UI(DisplayDriver* driver) : _driver(driver), _surfaceFactory(&driver->getTFT()) {
-
     DeviceState::instance().darkMode.addListener([this](bool val) {
         _surfaceFactory.setDarkMode(val);
         clear();

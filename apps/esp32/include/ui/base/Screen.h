@@ -33,6 +33,7 @@ public:
 
 protected:
     virtual void initState() {}
+
     ScreenManager* manager;
     UI* _ui;
 
