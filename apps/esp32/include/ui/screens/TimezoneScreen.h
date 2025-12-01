@@ -8,11 +8,10 @@
 
 class TimezoneScreen : public Screen, protected CallbackMixin<> {
 private:
-    ScreenManager* screenManager;
     int timezoneOffsetHours;
 
 public:
-    TimezoneScreen(ScreenManager* sm);
+    TimezoneScreen();
 
     void draw() override;
     void update() override;

@@ -23,20 +23,16 @@ void UISetup::setup() {
 void UISetup::setupScreens() {
     // Create screens
     fireScreen = std::make_unique<FireScreen>(heater);
-    screensaverScreen = std::make_unique<ScreensaverScreen>(DeviceState::instance().sleepTimeout.get(), displayDriver, [this]() {
-        screenManager.setScreen(fireScreen.get());
-    });
-    otaUpdateScreen = std::make_unique<OtaUpdateScreen>(displayDriver);
-    timezoneScreen = std::make_unique<TimezoneScreen>(&screenManager);
+    otaUpdateScreen = std::make_unique<OtaUpdateScreen>();
+    timezoneScreen = std::make_unique<TimezoneScreen>();
     startupScreen = std::make_unique<StartupScreen>([this]() {
-        screenManager.setScreen(fireScreen.get(), ScreenTransition::FADE);
+        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
     });
 
     // Register screens
     screenManager.registerScreen(ScreenType::STARTUP, startupScreen.get());
     screenManager.registerScreen(ScreenType::FIRE, fireScreen.get());
     screenManager.registerScreen(ScreenType::TIMEZONE, timezoneScreen.get());
-    screenManager.registerScreen(ScreenType::SCREENSAVER, screensaverScreen.get());
     screenManager.registerScreen(ScreenType::OTA_UPDATE, otaUpdateScreen.get());
 }
 

@@ -1,8 +1,8 @@
 #include "net/OTASetup.h"
 #include "utils/Logger.h"
 
-OTASetup::OTASetup(ScreenManager& screenManager)
-    : screenManager(screenManager)
+OTASetup::OTASetup(DeviceUI& ui)
+    : ui(ui)
 {}
 
 void OTASetup::setupOTA() {
@@ -10,12 +10,12 @@ void OTASetup::setupOTA() {
 
     ArduinoOTA.onStart([this]() {
         logPrint("OTA", "Update started");
-        screenManager.switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
+        ui.switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
     });
 
     ArduinoOTA.onEnd([this]() {
         logPrint("OTA", "Update completed");
-        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+        ui.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
     });
 
     ArduinoOTA.onError([this](ota_error_t error) {
@@ -26,7 +26,7 @@ void OTASetup::setupOTA() {
             case OTA_RECEIVE_ERROR: logPrint("OTA", "ERROR: Receive Failed"); break;
             case OTA_END_ERROR:     logPrint("OTA", "ERROR: End Failed"); break;
         }
-        screenManager.switchScreen(ScreenType::FIRE);
+        ui.switchScreen(ScreenType::FIRE);
     });
 
     ArduinoOTA.begin();

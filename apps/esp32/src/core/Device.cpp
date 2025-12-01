@@ -13,26 +13,13 @@
 #include "net/WebSocketManager.h"
 #include "net/WiFiManager.h"
 
-// UI
-#include "ui/UISetup.h"
-#include "ui/base/ScreenManager.h"
-
-#include "BacklightController.h"
-#include "TFT_eSPI_Driver.h"
-
 #include "core/EventBus.h"
 
 Device::Device()
-    : events(), input(), heater(),
-      display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
-                                              std::make_unique<TFT_eSPI_Driver>(),
-                                              std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
-      wifi(), webSocket(), screenManager(*display, input),
-      uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)),
-      network(std::make_unique<Network>(wifi, webSocket)),
-      otaSetup(std::make_unique<OTASetup>(screenManager)),
-      heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)),
-      inputHandler(std::make_unique<InputHandler>(screenManager)) {}
+    : events(), heater(), ui(heater),
+      wifi(), webSocket(), network(std::make_unique<Network>(wifi, webSocket)),
+      otaSetup(std::make_unique<OTASetup>(ui)),
+      heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)) {}
 
 Device::~Device() {}
 
@@ -46,30 +33,13 @@ void Device::setup() {
     }
 
     // Initialize core components
-    display->init();
-    input.init();
     heater.init();
+    ui.setup();
 
-    // Setup screens
-    uiSetup->setup();
-    screenManager.switchScreen(ScreenType::STARTUP);
-
-    input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
-
-    StateBinder::bindAll(display.get(), &heater);
-    DeviceState::instance().display = display.get();
+    StateBinder::bindAll(ui.getDisplay(), &heater);
+    DeviceState::instance().display = ui.getDisplay();
 
     network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
-    network->onReady([]() {
-        static bool firmware_logged = false;
-        if (!firmware_logged) {
-            char firmwareInfo[64];
-            snprintf(firmwareInfo, sizeof(firmwareInfo), "%s (%s)", FIRMWARE_VERSION, BUILD_DATE);
-            logPrint("Firmware", firmwareInfo);
-            firmware_logged = true;
-        }
-    });
-
     otaSetup->setupOTA();
 
     Serial.println("✅ Device initialized");
@@ -77,12 +47,9 @@ void Device::setup() {
 
 void Device::loop() {
     network->update();
-    input.update();
+    ui.update();
     heater.update();
     //capacitiveSensor.update();
-
-    screenManager.update();
-    screenManager.draw();
 
     heaterMonitor->checkHeatingStatus();
     heaterMonitor->checkHeatCycle();

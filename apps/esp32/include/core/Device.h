@@ -11,18 +11,15 @@
 
 #include "heater/HeaterController.h"
 #include "hardware/input/InputManager.h"
-#include "DisplayDriver.h"
+#include "hardware/input/InputHandler.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"
 #include "net/OTASetup.h"
 #include "heater/HeaterMonitor.h"
-#include "hardware/input/InputHandler.h"
-#include "hardware/sensor/CapacitiveSensor.h"
 
-// UI
-#include "ui/base/ScreenManager.h"
-#include "ui/UISetup.h"
+
+#include "ui/DeviceUI.h"
 
 class Device {
 
@@ -33,17 +30,13 @@ public:
     void loop();
 
 private:
-    InputManager input;
     HeaterController heater;
-    std::unique_ptr<DisplayDriver> display;
     WiFiManager wifi;
     WebSocketManager webSocket;
     EventBus events;
-    ScreenManager screenManager;
+    DeviceUI ui;
 
-    std::unique_ptr<UISetup> uiSetup;
     std::unique_ptr<Network> network;
     std::unique_ptr<OTASetup> otaSetup;
     std::unique_ptr<HeaterMonitor> heaterMonitor;
-    std::unique_ptr<InputHandler> inputHandler;
 };

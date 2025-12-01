@@ -21,16 +21,6 @@
  */
 class UISetup {
 public:
-    /**
-     * @brief Constructs a UISetup instance.
-     * @param screenManager Reference to the ScreenManager instance.
-     * @param fireScreen Reference to the FireScreen instance.
-     * @param screensaverScreen Reference to the ScreensaverScreen instance.
-     * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
-     * @param timezoneScreen Reference to the TimezoneScreen instance.
-     * @param startupScreen Reference to the StartupScreen instance.
-     * @param setCurrentCycleCallback Callback to set the current heat cycle.
-     */
     UISetup(
         ScreenManager& screenManager,
         HeaterController& heater,
@@ -40,12 +30,6 @@ public:
 
     void setup();
     void setupScreens();
-
-    FireScreen* getFireScreen() const { return fireScreen.get(); }
-    ScreensaverScreen* getScreensaverScreen() const { return screensaverScreen.get(); }
-    OtaUpdateScreen* getOtaUpdateScreen() const { return otaUpdateScreen.get(); }
-    StartupScreen* getStartupScreen() const { return startupScreen.get(); }
-    TimezoneScreen* getTimezoneScreen() const { return timezoneScreen.get(); }
 
     void setupMainMenu();
 

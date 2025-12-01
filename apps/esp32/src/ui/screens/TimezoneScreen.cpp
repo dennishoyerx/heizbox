@@ -5,8 +5,7 @@
 #include <TFT_eSPI.h>
  
 
-TimezoneScreen::TimezoneScreen(ScreenManager* sm)
-    : screenManager(sm), timezoneOffsetHours(0) {}
+TimezoneScreen::TimezoneScreen() : timezoneOffsetHours(0) {}
 
 ScreenType TimezoneScreen::getType() const {
     return ScreenType::TIMEZONE;
@@ -15,7 +14,7 @@ ScreenType TimezoneScreen::getType() const {
 void TimezoneScreen::onEnter() {
     // Load current offset when screen is entered
     timezoneOffsetHours = DeviceState::instance().timezoneOffset.get() / 3600;
-    if (screenManager) screenManager->setDirty();
+    dirty();
 }
 
 void TimezoneScreen::draw() {
@@ -44,12 +43,12 @@ void TimezoneScreen::handleInput(InputEvent event) {
         case UP:
             timezoneOffsetHours++;
             if (timezoneOffsetHours > 14) timezoneOffsetHours = -12;
-            if (screenManager) screenManager->setDirty();
+            dirty();
             break;
         case DOWN:
             timezoneOffsetHours--;
             if (timezoneOffsetHours < -12) timezoneOffsetHours = 14;
-            if (screenManager) screenManager->setDirty();
+            dirty();
             break;
         case CENTER:
             DeviceState::instance().timezoneOffset.set(timezoneOffsetHours * 3600);

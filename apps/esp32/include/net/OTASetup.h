@@ -6,6 +6,7 @@
 #include "ui/base/ScreenManager.h"
 #include "ui/screens/OtaUpdateScreen.h"
 #include "ui/screens/FireScreen.h"
+#include "ui/DeviceUI.h"
 
 /**
  * @brief Manages the setup and handling of Over-The-Air (OTA) updates.
@@ -21,7 +22,7 @@ public:
      * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
      * @param fireScreen Reference to the FireScreen instance.
      */
-    OTASetup(ScreenManager& screenManager);
+    OTASetup(DeviceUI& ui);
 
     /**
      * @brief Sets up ArduinoOTA with the specified hostname and event callbacks.
@@ -34,5 +35,5 @@ public:
     void handleOTA();
 
 private:
-    ScreenManager& screenManager;
+    DeviceUI& ui;
 };
