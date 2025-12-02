@@ -23,8 +23,8 @@ public:
 
 private:
     std::unique_ptr<DisplayDriver> display;
-    ScreenManager screenManager;
     InputManager input;
+    ScreenManager screenManager;
     std::unique_ptr<InputHandler> inputHandler;
     std::unique_ptr<UISetup> uiSetup;
 };

@@ -7,8 +7,9 @@ DeviceUI::DeviceUI(HeaterController& heater):
     display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
                                               std::make_unique<TFT_eSPI_Driver>(),
                                               std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
-    input(), inputHandler(),
+    input(),
     screenManager(*display, input),
+    inputHandler(std::make_unique<InputHandler>(screenManager)),
     uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)) {};
 
 void DeviceUI::setup() {
