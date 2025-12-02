@@ -14,7 +14,7 @@
 Device::Device()
     : events(), heater(), ui(heater),
       wifi(), webSocket(), network(std::make_unique<Network>(wifi, webSocket)),
-      otaSetup(std::make_unique<OTASetup>(ui)),
+      ota(),
       heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)) {}
 
 Device::~Device() {}
@@ -36,7 +36,7 @@ void Device::setup() {
     DeviceState::instance().display = ui.getDisplay();
 
     network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
-    otaSetup->setupOTA();
+    ota->setup();
 
     Serial.println("✅ Device initialized");
 }
@@ -45,10 +45,9 @@ void Device::loop() {
     network->update();
     ui.update();
     heater.update();
-    //capacitiveSensor.update();
 
     heaterMonitor->checkHeatingStatus();
     heaterMonitor->checkHeatCycle();
 
-    otaSetup->handleOTA();
+    ota->handle();
 }

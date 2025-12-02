@@ -34,6 +34,6 @@ private:
     DeviceUI ui;
 
     std::unique_ptr<Network> network;
-    std::unique_ptr<OTASetup> otaSetup;
+    std::unique_ptr<OTASetup> ota;
     std::unique_ptr<HeaterMonitor> heaterMonitor;
 };

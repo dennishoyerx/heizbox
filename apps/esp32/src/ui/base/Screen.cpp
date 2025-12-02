@@ -21,6 +21,7 @@ void Screen::clear() {
     if (_ui) {
         _ui->clear();
     }
+    dirty();
 }
 
 void Screen::dirty() {

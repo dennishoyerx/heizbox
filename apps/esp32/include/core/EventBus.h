@@ -1,5 +1,5 @@
-#ifndef EVENTBUS_H
-#define EVENTBUS_H
+#pragma once
+
 #include <functional>
 #include <map>
 #include <vector>
@@ -7,6 +7,9 @@
 #include <mutex>
 
 enum class EventType {
+    OTA_UPDATE_STARTED,
+    OTA_UPDATE_FINISHED,
+    OTA_UPDATE_FAILED,
     SENSOR_TRIGGERED,
     HEATER_STARTED,
     HEATER_STOPPED,
@@ -60,5 +63,3 @@ private:
     std::map<EventType, std::vector<Callback>> subscribers;
     std::mutex mutex_;
 };
-
-#endif

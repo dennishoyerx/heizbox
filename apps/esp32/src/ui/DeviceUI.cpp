@@ -2,6 +2,7 @@
 
 #include "BacklightController.h"
 #include "TFT_eSPI_Driver.h"
+#include "core/EventBus.h"
 
 DeviceUI::DeviceUI(HeaterController& heater): 
     display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
@@ -14,12 +15,21 @@ DeviceUI::DeviceUI(HeaterController& heater):
 
 void DeviceUI::setup() {
     display->init();
-
     uiSetup->setup();
     screenManager.switchScreen(ScreenType::STARTUP);
 
     input.init();
     input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
+
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_STARTED, [this](const Event& event) {
+        switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
+    });
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_FINISHED, [this](const Event& event) {
+        switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+    });
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_FAILED, [this](const Event& event) {
+        switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+    });
 };
 
 void DeviceUI::update() {

@@ -1,10 +1,12 @@
+
+/*
 struct HeaterState {
     bool isHeating;
     float temperature;
     int power;
 };
 
-/*enum class EventType {
+enum class EventType {
     SENSOR_TRIGGERED,
     HEATER_STARTED,
     HEATER_STOPPED,

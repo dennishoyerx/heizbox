@@ -22,18 +22,15 @@ public:
      * @param otaUpdateScreen Reference to the OtaUpdateScreen instance.
      * @param fireScreen Reference to the FireScreen instance.
      */
-    OTASetup(DeviceUI& ui);
+    OTASetup();
 
     /**
      * @brief Sets up ArduinoOTA with the specified hostname and event callbacks.
      */
-    void setupOTA();
+    void setup();
 
     /**
      * @brief Handles ArduinoOTA events. Should be called in the main loop.
      */
-    void handleOTA();
-
-private:
-    DeviceUI& ui;
+    void handle();
 };
