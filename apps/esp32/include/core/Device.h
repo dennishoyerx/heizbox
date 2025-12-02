@@ -1,4 +1,3 @@
-// include/Device.h
 #pragma once
 
 #include <Arduino.h>
@@ -10,8 +9,6 @@
 #include "core/EventBus.h"
 
 #include "heater/HeaterController.h"
-#include "hardware/input/InputManager.h"
-#include "hardware/input/InputHandler.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
 #include "net/Network.h"

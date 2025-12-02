@@ -1,11 +1,7 @@
 #include "core/Device.h"
 #include "Config.h"
-#include "DisplayDriver.h"
 #include "core/DeviceState.h"
 #include "credentials.h"
-#include "utils/Logger.h"
-#include "utils/Logs.h"
-#include <ArduinoOTA.h>
 #include <utility>
 
 // Network
