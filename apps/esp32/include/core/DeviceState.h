@@ -18,6 +18,7 @@ struct DeviceState {
     PersistedObservable<bool> smart{"heater", "smart", false};
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint8_t> targetTemperature{"heater", "temperature", 175};
+    PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
 
 
     // System Settings
@@ -34,7 +35,6 @@ struct DeviceState {
     PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
     PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
 
-    PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
 
 
     // Session State

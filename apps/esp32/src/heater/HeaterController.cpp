@@ -52,7 +52,6 @@ void HeaterController::setPower(uint8_t _power) {
     if (_power < 10) _power = 10;
     power = _power;
     
-    // Update ZVS driver
     zvsDriver->setPower(power);
 }
 
@@ -80,7 +79,7 @@ void HeaterController::startHeating() {
         
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
-        
+        eventBus.instance().publish(Event{EventType::HEATER_STARTED, nullptr});
     } else if (state == State::PAUSED) {
         // Adjust startTime to account for the pause duration
         startTime = millis() - (pauseTime - startTime);
@@ -112,6 +111,8 @@ void HeaterController::stopHeating(bool finalize) {
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
+
+        eventBus.instance().publish(Event{EventType::HEATER_STOPPED, nullptr});
     } else {
         pauseTime = millis();
         transitionTo(State::PAUSED);
