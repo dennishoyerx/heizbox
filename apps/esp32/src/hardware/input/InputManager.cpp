@@ -17,7 +17,7 @@ InputManager::InputManager()
     : callback(nullptr) {
 }
 
-void InputManager::init() {
+void InputManager::setup() {
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }

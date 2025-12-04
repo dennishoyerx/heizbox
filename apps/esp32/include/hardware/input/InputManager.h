@@ -31,7 +31,7 @@ public:
     using EventCallback = std::function<void(InputEvent)>;
 
     InputManager();
-    void init();
+    void setup();
     void update();
     void setCallback(EventCallback cb);
 

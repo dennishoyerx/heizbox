@@ -1,4 +1,3 @@
-// src/core/DeviceState.cpp
 #include "core/DeviceState.h"
 #include <nvs_flash.h>
 

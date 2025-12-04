@@ -1,15 +1,6 @@
-// src/screens/StartupScreen.cpp
-#include "utils/Logger.h"
 #include "ui/screens/StartupScreen.h"
-#include "DisplayDriver.h"
- 
 #include "ui/ColorPalette.h"
-#include <TFT_eSPI.h>
 #include "bitmaps.h"
-
-// ============================================================================
-// Modernisierte Implementation mit AnimatedScreen
-// ============================================================================
 
 StartupScreen::StartupScreen(std::function<void()> callback) {
     startAnimation(3000, nullptr, callback);

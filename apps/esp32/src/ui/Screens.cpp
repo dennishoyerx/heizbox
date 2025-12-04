@@ -1,42 +1,34 @@
-#include "ui/UISetup.h"
-#include "core/DeviceState.h"
-#include "utils/Logger.h"
-#include <utility>
+#include "ui/Screens.h"
+#include "core/EventBus.h"
 
-UISetup::UISetup(
-    ScreenManager& screenManager,
-    HeaterController& heater,
-    DisplayDriver* displayDriver,
-    InputManager& inputManager
-)
-    : screenManager(screenManager),
-      heater(heater),
-      displayDriver(displayDriver),
-      inputManager(inputManager)
-{}
+Screens::Screens(HeaterController& heater): heater(heater) {}
 
-void UISetup::setup() {
-    setupScreens();
-    setupMainMenu();
-}
-
-void UISetup::setupScreens() {
-    // Create screens
+void Screens::setup(ScreenManager& screenManager) {
     fireScreen = std::make_unique<FireScreen>(heater);
     otaUpdateScreen = std::make_unique<OtaUpdateScreen>();
     timezoneScreen = std::make_unique<TimezoneScreen>();
-    startupScreen = std::make_unique<StartupScreen>([this]() {
+    startupScreen = std::make_unique<StartupScreen>([&]() {
         screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
     });
 
-    // Register screens
     screenManager.registerScreen(ScreenType::STARTUP, startupScreen.get());
     screenManager.registerScreen(ScreenType::FIRE, fireScreen.get());
     screenManager.registerScreen(ScreenType::TIMEZONE, timezoneScreen.get());
     screenManager.registerScreen(ScreenType::OTA_UPDATE, otaUpdateScreen.get());
-}
 
-void UISetup::setupMainMenu() {
+    
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_STARTED, [&](const Event& event) {
+        screenManager.switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
+    });
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_FINISHED, [&](const Event& event) {
+        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+    });
+    EventBus::instance().subscribe(EventType::OTA_UPDATE_FAILED, [&](const Event& event) {
+        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+    });
+};
+
+void Screens::setupMenus(ScreenManager& screenManager) {
     auto& state = DeviceState::instance();
 
     auto menuItems = MenuBuilder()
@@ -59,7 +51,7 @@ void UISetup::setupMainMenu() {
 
         .addObservableToggle("Center Heat", state.enableCenterButtonForHeating)
 
-        .addAction("Timezone", [this]() {
+        .addAction("Timezone", [&]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
         })
 
@@ -95,7 +87,7 @@ void UISetup::setupMainMenu() {
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());
 
     // Setup timezone exit callback
-    timezoneScreen->setCallback([this]() {
+    timezoneScreen->setCallback([&]() {
         screenManager.setScreen(this->mainMenuScreen.get(), ScreenTransition::FADE);
     });
 }

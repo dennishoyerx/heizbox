@@ -4,7 +4,7 @@
 #include "hardware/input/InputHandler.h"
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenManager.h"
-#include "ui/UISetup.h"
+#include "ui/Screens.h"
 
 
 class DeviceUI {
@@ -25,6 +25,6 @@ private:
     std::unique_ptr<DisplayDriver> display;
     InputManager input;
     ScreenManager screenManager;
+    Screens screens;
     std::unique_ptr<InputHandler> inputHandler;
-    std::unique_ptr<UISetup> uiSetup;
 };

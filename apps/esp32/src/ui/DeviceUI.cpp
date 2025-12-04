@@ -8,28 +8,20 @@ DeviceUI::DeviceUI(HeaterController& heater):
     display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
                                               std::make_unique<TFT_eSPI_Driver>(),
                                               std::make_unique<BacklightController>(HardwareConfig::TFT_BL_PIN))),
-    input(),
+    screens(heater),
     screenManager(*display, input),
-    inputHandler(std::make_unique<InputHandler>(screenManager)),
-    uiSetup(std::make_unique<UISetup>(screenManager, heater, display.get(), input)) {};
+    inputHandler(std::make_unique<InputHandler>(screenManager)) {};
 
 void DeviceUI::setup() {
     display->init();
-    uiSetup->setup();
+
+    screens.setup(screenManager);
+    screens.setupMenus(screenManager);
+
     screenManager.switchScreen(ScreenType::STARTUP);
 
-    input.init();
+    input.setup();
     input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
-
-    EventBus::instance().subscribe(EventType::OTA_UPDATE_STARTED, [this](const Event& event) {
-        switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
-    });
-    EventBus::instance().subscribe(EventType::OTA_UPDATE_FINISHED, [this](const Event& event) {
-        switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
-    });
-    EventBus::instance().subscribe(EventType::OTA_UPDATE_FAILED, [this](const Event& event) {
-        switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
-    });
 };
 
 void DeviceUI::update() {
