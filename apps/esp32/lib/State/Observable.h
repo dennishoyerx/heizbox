@@ -15,11 +15,12 @@ public:
     explicit Observable(T initialValue) : value_(std::move(initialValue)) {}
 
     // Wert setzen und Listener benachrichtigen
-    virtual void set(T newValue) {
+    virtual T set(T newValue) {
         if (value_ != newValue) {
             value_ = std::move(newValue);
             notifyListeners();
         }
+        return newValue;
     }
 
     // Wert ohne Benachrichtigung setzen (für Initialisierung)
@@ -70,9 +71,10 @@ public:
         load();
     }
 
-    void set(T newValue) {
+    T set(T newValue) {
         Observable<T>::set(newValue);
         save();
+        return newValue;
     }
 
     void load() {

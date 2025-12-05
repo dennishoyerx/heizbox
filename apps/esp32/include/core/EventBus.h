@@ -5,6 +5,7 @@
 #include <vector>
 #include <Arduino.h>
 #include <mutex>
+#include <memory>
 
 enum class EventType {
     OTA_UPDATE_STARTED,
@@ -21,45 +22,97 @@ enum class EventType {
 
 struct Event {
     EventType type;
-    void* data;  // optional payload pointer
+    std::shared_ptr<void> data = nullptr;
 };
+
+template<typename T>
+using CallbackT = std::function<void(const T&)>;
+
 
 class EventBus {
 public:
-    using Callback = std::function<void(const Event&)>;
+    using UntypedCallback = std::function<void(const Event&)>;
+    EventBus();
+    static EventBus* instance();
 
-    static EventBus& instance() {
-        static EventBus bus;
-        return bus;
-    }
-
-    void subscribe(EventType type, Callback cb) {
+    // ---------------------------
+    // Untyped Subscribe (wie bisher)
+    // ---------------------------
+    void subscribe(EventType type, UntypedCallback cb) {
         std::lock_guard<std::mutex> lock(mutex_);
-        subscribers[type].push_back(cb);
+        untypedSubscribers[type].push_back(cb);
     }
 
+    // ---------------------------
+    // Typed Subscribe
+    // ---------------------------
+    template<typename T>
+    void subscribe(EventType type, CallbackT<T> cb) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        typedSubscribers[type].push_back([cb](const void* data){
+            cb(*static_cast<const T*>(data));
+        });
+    }
+
+    // ---------------------------
+    // Untyped Publish
+    // ---------------------------
     void publish(const Event& event) {
         std::lock_guard<std::mutex> lock(mutex_);
-        auto it = subscribers.find(event.type);
-        if (it != subscribers.end()) {
+
+        // Untyped Dispatch
+        if (auto it = untypedSubscribers.find(event.type); it != untypedSubscribers.end()) {
             for (auto& cb : it->second) {
-                // Dispatch async (FreeRTOS task)
+                UntypedCallback copied = cb;
+                Event evCopy = event;
+
                 xTaskCreatePinnedToCore(
-                    [](void* arg) {
-                        auto pair = static_cast<std::pair<Callback, Event>*>(arg);
-                        pair->first(pair->second);
-                        delete pair;
+                    [](void* arg){
+                        auto* p = static_cast<std::pair<UntypedCallback, Event>*>(arg);
+                        p->first(p->second);
+                        delete p;
                         vTaskDelete(nullptr);
                     },
-                    "evt", 2048,
-                    new std::pair<Callback, Event>(cb, event),
+                    "evt_untyped", 4096,
+                    new std::pair<UntypedCallback, Event>(copied, evCopy),
+                    1, nullptr, APP_CPU_NUM
+                );
+            }
+        }
+
+        // Typed Dispatch (falls vorhanden)
+        if (auto it = typedSubscribers.find(event.type); it != typedSubscribers.end()) {
+            for (auto& cb : it->second) {
+                auto* stored = event.data.get(); // shared ownership already safe
+                using PairT = std::pair<std::function<void(const void*)>, void*>;
+
+                xTaskCreatePinnedToCore(
+                    [](void* arg){
+                        auto* p = static_cast<PairT*>(arg);
+                        p->first(p->second);
+                        delete p;
+                        vTaskDelete(nullptr);
+                    },
+                    "evt_typed", 4096,
+                    new PairT(cb, stored),
                     1, nullptr, APP_CPU_NUM
                 );
             }
         }
     }
 
+    // ---------------------------
+    // Typed Publish (komfortabel)
+    // ---------------------------
+    template<typename T>
+    void publish(EventType type, const T& payload) {
+        Event ev{ type, std::make_shared<T>(payload) };
+        publish(ev);
+    }
+
 private:
-    std::map<EventType, std::vector<Callback>> subscribers;
+    static EventBus* _instance;
+    std::map<EventType, std::vector<UntypedCallback>> untypedSubscribers;
+    std::map<EventType, std::vector<std::function<void(const void*)>>> typedSubscribers;
     std::mutex mutex_;
 };

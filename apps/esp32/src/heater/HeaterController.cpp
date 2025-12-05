@@ -1,6 +1,8 @@
 #include "heater/HeaterController.h"
 #include "Config.h"
 #include <Arduino.h>
+#include "utils/Logger.h"
+#include "core/EventBus.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -74,17 +76,14 @@ void HeaterController::startHeating() {
     if (state == State::IDLE) {
         startTime = millis();
         
-        // Enable ZVS driver
         zvsDriver->setEnabled(true);
         
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
-        eventBus.instance().publish(Event{EventType::HEATER_STARTED, nullptr});
+        EventBus::instance()->publish(EventType::HEATER_STARTED, nullptr);
     } else if (state == State::PAUSED) {
-        // Adjust startTime to account for the pause duration
         startTime = millis() - (pauseTime - startTime);
-        
-        // Enable ZVS driver
+
         zvsDriver->setEnabled(true);
         
         transitionTo(State::HEATING);
@@ -95,7 +94,6 @@ void HeaterController::startHeating() {
 void HeaterController::stopHeating(bool finalize) {
     if (state != State::HEATING) return;
 
-    // Disable ZVS driver
     zvsDriver->setEnabled(false);
 
     if (finalize) {
@@ -111,8 +109,7 @@ void HeaterController::stopHeating(bool finalize) {
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
-
-        eventBus.instance().publish(Event{EventType::HEATER_STOPPED, nullptr});
+        EventBus::instance()->publish(EventType::HEATER_STOPPED, HeaterStoppedData{duration, startTime});
     } else {
         pauseTime = millis();
         transitionTo(State::PAUSED);
@@ -121,10 +118,8 @@ void HeaterController::stopHeating(bool finalize) {
 }
 
 void HeaterController::update() {
-    // Update ZVS driver (handles duty cycle automatically)
     zvsDriver->update();
     
-    // Update temperature sensor (additional updates outside duty cycle)
     if (state != State::HEATING) {
         tempSensor->update();
     }

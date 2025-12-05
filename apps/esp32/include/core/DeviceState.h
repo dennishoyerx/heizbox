@@ -17,7 +17,9 @@ struct DeviceState {
     PersistedObservable<uint8_t> currentCycle{"heater", "cycle", 1};
     PersistedObservable<bool> smart{"heater", "smart", false};
     PersistedObservable<uint8_t> power{"heater", "power", 100};
-    PersistedObservable<uint8_t> targetTemperature{"heater", "temperature", 175};
+    PersistedObservable<uint8_t> targetTemperature{"heater", "temperature", 170};
+    PersistedObservable<uint8_t> targetTemperatureCycle1{"heater", "temperatureCycle1", 170};
+    PersistedObservable<uint8_t> targetTemperatureCycle2{"heater", "temperatureCycle2", 180};
     PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
 
 

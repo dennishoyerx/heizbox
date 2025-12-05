@@ -12,7 +12,7 @@
 #include "core/EventBus.h"
 
 Device::Device()
-    : events(), heater(), ui(heater),
+    : heater(), ui(heater),
       wifi(), webSocket(), network(std::make_unique<Network>(wifi, webSocket)),
       ota(),
       heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)) {}

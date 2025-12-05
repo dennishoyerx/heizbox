@@ -41,7 +41,7 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
 
     wifi.init(ssid, password, hostname);
     wifi.onConnectionChange([this](bool connected) {
-        EventBus::instance().publish(Event{connected ? EventType::WIFI_CONNECTED : EventType::WIFI_DISCONNECTED, nullptr});
+        EventBus::instance()->publish(Event{connected ? EventType::WIFI_CONNECTED : EventType::WIFI_DISCONNECTED, nullptr});
         if (!initialized && connected) {
             configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
             webSocket.init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");

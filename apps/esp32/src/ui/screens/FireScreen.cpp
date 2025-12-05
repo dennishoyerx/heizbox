@@ -6,8 +6,12 @@
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
+#include "heater\HeaterCycle.h"
+#include "core/EventBus.h"
  
 #include <utility>
+
+#include "utils/Logger.h"
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
@@ -23,13 +27,21 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ds.currentCycle.addListener([this](uint8_t val) {
         auto& ds = DeviceState::instance();
 
-        if (val == 1 && state.heater.targetTemp != ds.targetTemperature) {
-            state.heater.targetTemp = ds.targetTemperature;
+        if (val == 1) {
+            state.heater.targetTemp = ds.targetTemperature.set(ds.targetTemperatureCycle1.get());
             dirty();
-        } else if (val == 2 && state.heater.targetTemp == ds.targetTemperature) {
-            state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
-            dirty();
+        } else if (val == 2) {
+            state.heater.targetTemp = ds.targetTemperature.set(ds.targetTemperatureCycle2.get());
         }
+        dirty();
+    });
+        logPrint("DBG", "y");
+
+    
+    EventBus::instance()->subscribe<HeaterStoppedData>(EventType::HEATER_STOPPED,
+    [](const HeaterStoppedData& d){
+        logPrint("DBG", "d:xxx");
+        logPrint("DBG", "d: ", d.duration, "s: ", d.startedAt);
     });
 }
 
@@ -147,16 +159,17 @@ void FireScreen::handleInput(InputEvent event) {
         event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
         float delta = event.button == UP ? 1 : -1;
         auto& ds = DeviceState::instance();
+        uint8_t temp;
 
-        if (state.heater.currentCycle == 1) {
-            ds.targetTemperature.update([delta](uint8_t val) { return val + delta; });
-            dirty();
-        } else if (state.heater.currentCycle == 2) {
-            ds.heatCycleTempDelta.update([delta](uint8_t val) { return val + delta; });
-            state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
-            dirty();
+        if (HeaterCycle::currentCycle() == 1) {
+            temp = ds.targetTemperatureCycle1.update([delta](uint8_t val) { return val + delta; });
+        } else {
+            temp = ds.targetTemperatureCycle2.update([delta](uint8_t val) { return val + delta; });
+            //ds.heatCycleTempDelta.update([delta](uint8_t val) { return val + delta; });
+            //state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
         }
-
+        ds.targetTemperature.set(temp);
+        dirty();
         
         return;
     }
@@ -169,9 +182,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (event.button == CENTER) {
-        //ZVSDriver* zvs = heater.getZVSDriver();
-        //manager->switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
-        DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+        HeaterCycle::nextCycle();
         if (triggeredTwice(200) && state.heater.isHeating) DeviceState::instance().zvsDebug.set(!DeviceState::instance().zvsDebug.get());
         dirty();
         return;

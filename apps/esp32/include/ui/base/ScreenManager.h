@@ -29,6 +29,10 @@ public:
     void setDirty() { dirty = true; }
     bool isDirty() const { return dirty; }
 
+    UI* getUI() const { return ui; }
+
+    
+
 private:
     // Core components
     DisplayDriver& display;

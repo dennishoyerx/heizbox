@@ -1,7 +1,5 @@
 #include "net/WebSocketManager.h"
 
-
-
 WebSocketManager* WebSocketManager::instance = nullptr;
 
 WebSocketManager* WebSocketManager::getInstance() {

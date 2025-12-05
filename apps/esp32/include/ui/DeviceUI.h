@@ -4,6 +4,7 @@
 #include "hardware/input/InputHandler.h"
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenManager.h"
+#include "ui/base/UI.h"
 #include "ui/Screens.h"
 
 

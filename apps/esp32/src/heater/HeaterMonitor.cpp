@@ -11,7 +11,7 @@ void HeaterMonitor::checkHeatingStatus() {
 
     if (currentHeatingStatus != lastHeatingStatusSent) {
         DeviceState::instance().isHeating.set(currentHeatingStatus);
-        webSocket.sendStatusUpdate(true, currentHeatingStatus);
+        WebSocketManager::getInstance()->sendStatusUpdate(true, currentHeatingStatus);
         lastHeatingStatusSent = currentHeatingStatus;
     }
 }

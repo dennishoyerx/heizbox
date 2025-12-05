@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "TempSensor.h"
 #include "heater/ZVSDriver.h"
-#include "core/EventBus.h"
 
 class HeaterController {
 public:
@@ -41,7 +40,6 @@ public:
 private:
     TempSensor* tempSensor;
     ZVSDriver* zvsDriver;
-    EventBus eventBus;
 
     void transitionTo(State newState);
 
@@ -54,3 +52,10 @@ private:
     uint32_t lastCycleDuration = 0;
     bool cycleFinishedFlag = false;
 };
+
+
+struct HeaterStoppedData {
+    uint32_t duration;
+    uint32_t startedAt;
+};
+
