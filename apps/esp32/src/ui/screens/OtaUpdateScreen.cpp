@@ -21,6 +21,7 @@ void OtaUpdateScreen::draw()
 
 void OtaUpdateScreen::update() {
     // Nothing to do here
+    dirty();
 }
 
 void OtaUpdateScreen::handleInput(InputEvent event) {

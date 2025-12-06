@@ -29,11 +29,10 @@ void InputHandler::handleInput(InputEvent event) {
 bool InputHandler::handleGlobalShortcuts(InputEvent event) {
     const ScreenType currentScreen = screenManager.getCurrentScreenType();
 
-    // HOLD LEFT: Toggle between Fire <-> MainMenu
-    if (event.button == CENTER && event.type == HOLD) {
+    if (event.button == CENTER && event.type == HOLD_ONCE) {
         ScreenType targetType = (currentScreen == ScreenType::FIRE)
             ? ScreenType::MAIN_MENU : ScreenType::FIRE;
-        screenManager.setScreen(screenManager.getScreen(targetType), ScreenTransition::FADE);
+        screenManager.switchScreen(targetType, ScreenTransition::FADE);
         return true;
     }
 

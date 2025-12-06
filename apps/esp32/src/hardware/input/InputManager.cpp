@@ -60,6 +60,8 @@ void InputManager::update() {
         } else if (isLow && wasPressed && !isHoldSent(i) && (now - pressTimes[i] > InputConfig::HOLD_THRESHOLD_MS)) {
             // --- HOLD ---
             setHoldSent(i, true);
+            lastHoldStep[i] = now;
+            if (callback) callback({HOLD_ONCE, cfg.button});
             if (callback) callback({HOLD, cfg.button});
         } else if (isLow && wasPressed && isHoldSent(i)) {
             // --- HOLDING ---

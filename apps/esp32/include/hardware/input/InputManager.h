@@ -10,7 +10,7 @@ enum InputEventType {
     PRESSED,
     RELEASE,
     HOLD,
-    HOLDING
+    HOLD_ONCE
 };
 
 enum InputButton {

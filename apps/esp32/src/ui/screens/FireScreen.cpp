@@ -35,7 +35,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         }
         dirty();
     });
-        logPrint("DBG", "y");
 
     
     EventBus::instance()->subscribe<HeaterStoppedData>(EventType::HEATER_STOPPED,
@@ -175,6 +174,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (event.button == FIRE && event.type == PRESSED) {
+        logPrint("DBG", "yxy");
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }

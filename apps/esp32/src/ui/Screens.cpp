@@ -18,13 +18,13 @@ void Screens::setup(ScreenManager& screenManager) {
 
     
     EventBus::instance()->subscribe(EventType::OTA_UPDATE_STARTED, [&](const Event& event) {
-        screenManager.switchScreen(ScreenType::OTA_UPDATE, ScreenTransition::FADE);
+        screenManager.switchScreen(ScreenType::OTA_UPDATE);
     });
     EventBus::instance()->subscribe(EventType::OTA_UPDATE_FINISHED, [&](const Event& event) {
-        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+        screenManager.switchScreen(ScreenType::FIRE);
     });
     EventBus::instance()->subscribe(EventType::OTA_UPDATE_FAILED, [&](const Event& event) {
-        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
+        screenManager.switchScreen(ScreenType::FIRE);
     });
 };
 
