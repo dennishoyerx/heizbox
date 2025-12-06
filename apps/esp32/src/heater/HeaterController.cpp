@@ -80,7 +80,7 @@ void HeaterController::startHeating() {
         
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
-        EventBus::instance()->publish(EventType::HEATER_STARTED, nullptr);
+        EventBus::instance().publish(EventType::HEATER_STARTED, nullptr);
     } else if (state == State::PAUSED) {
         startTime = millis() - (pauseTime - startTime);
 
@@ -109,7 +109,10 @@ void HeaterController::stopHeating(bool finalize) {
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
-        EventBus::instance()->publish(EventType::HEATER_STOPPED, HeaterStoppedData{duration, startTime});
+        
+        EventBus::instance().publish<HeaterStoppedData>(
+            EventType::HEATER_STOPPED, {duration, startTime}
+        );
     } else {
         pauseTime = millis();
         transitionTo(State::PAUSED);
@@ -135,15 +138,12 @@ void HeaterController::update() {
             break;
 
         case State::PAUSED:
-            if (millis() - pauseTime >= HeaterConfig::PAUSE_TIMEOUT_MS) {
+            if (millis() - pauseTime >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
                 Serial.println("Pause timeout, finalizing cycle.");
                 const uint32_t duration = pauseTime - startTime;
                 lastCycleDuration = duration;
-
-                if (duration >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
-                    cycleCounter++;
-                    cycleFinishedFlag = true;
-                }
+                cycleCounter++;
+                cycleFinishedFlag = true;
                 startTime = millis();
                 transitionTo(State::IDLE);
             }

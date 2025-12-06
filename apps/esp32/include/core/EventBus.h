@@ -32,8 +32,6 @@ using CallbackT = std::function<void(const T&)>;
 class EventBus {
 public:
     using UntypedCallback = std::function<void(const Event&)>;
-    EventBus();
-    static EventBus* instance();
 
     // ---------------------------
     // Untyped Subscribe (wie bisher)
@@ -83,19 +81,25 @@ public:
         // Typed Dispatch (falls vorhanden)
         if (auto it = typedSubscribers.find(event.type); it != typedSubscribers.end()) {
             for (auto& cb : it->second) {
-                auto* stored = event.data.get(); // shared ownership already safe
-                using PairT = std::pair<std::function<void(const void*)>, void*>;
+
+                auto dataCopy = event.data;   // shared_ptr<uint8_t etc> wird kopiert!
+
+                using TaskArg = std::pair<std::function<void(const void*)>, std::shared_ptr<void>>;
+                auto* arg = new TaskArg(cb, dataCopy);
 
                 xTaskCreatePinnedToCore(
-                    [](void* arg){
-                        auto* p = static_cast<PairT*>(arg);
-                        p->first(p->second);
+                    [](void* v){
+                        auto* p = static_cast<TaskArg*>(v);
+                        p->first(p->second.get());
                         delete p;
                         vTaskDelete(nullptr);
                     },
-                    "evt_typed", 4096,
-                    new PairT(cb, stored),
-                    1, nullptr, APP_CPU_NUM
+                    "evt_typed",
+                    4096,
+                    arg,
+                    1,
+                    nullptr,
+                    APP_CPU_NUM
                 );
             }
         }
@@ -110,8 +114,13 @@ public:
         publish(ev);
     }
 
+    static EventBus& instance();
+
 private:
-    static EventBus* _instance;
+    EventBus() = default;
+    EventBus(const EventBus&) = delete;
+    EventBus& operator=(const EventBus&) = delete;
+
     std::map<EventType, std::vector<UntypedCallback>> untypedSubscribers;
     std::map<EventType, std::vector<std::function<void(const void*)>>> typedSubscribers;
     std::mutex mutex_;

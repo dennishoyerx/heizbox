@@ -35,13 +35,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         }
         dirty();
     });
-
-    
-    EventBus::instance()->subscribe<HeaterStoppedData>(EventType::HEATER_STOPPED,
-    [](const HeaterStoppedData& d){
-        logPrint("DBG", "d:xxx");
-        logPrint("DBG", "d: ", d.duration, "s: ", d.startedAt);
-    });
 }
 
 void FireScreen::draw() {
@@ -154,10 +147,10 @@ bool triggeredTwice(uint32_t intervalMs) {
 }
 
 void FireScreen::handleInput(InputEvent event) {
+    auto& ds = DeviceState::instance();
     if ((event.button == UP || event.button == DOWN) && 
         (event.type == PRESS || event.type == HOLD)) {
         float delta = event.button == UP ? 1 : -1;
-        auto& ds = DeviceState::instance();
         uint8_t temp;
 
         if (HeaterCycle::currentCycle() == 1) {
@@ -173,31 +166,34 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
+
+    static uint32_t _temp;
     if (event.button == FIRE && event.type == PRESSED) {
-        logPrint("DBG", "yxy");
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }
 
-    if (event.button == FIRE && event.type == HOLD) {
+    if (event.button == FIRE && event.type == HOLD_ONCE) {
         _handleHeatingTrigger(true);
+        ds.targetTemperature.set(200);
         return;
     }
     if (event.button == FIRE && event.type == RELEASE) {
         _handleHeatingTrigger(false);
+        ds.targetTemperature.set(ds.currentCycle.get() == 1 ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
     }
 
     if (event.button == CENTER && event.type == PRESSED) {
         HeaterCycle::nextCycle();
-        if (triggeredTwice(200) && state.heater.isHeating) DeviceState::instance().zvsDebug.set(!DeviceState::instance().zvsDebug.get());
+        if (triggeredTwice(200) && state.heater.isHeating) ds.zvsDebug.set(!ds.zvsDebug.get());
         dirty();
         return;
     }
 
     if (event.button == LEFT || event.button == RIGHT) {
         uint8_t delta = event.button == LEFT ? -10 : 10;
-        DeviceState::instance().power.update([delta](uint8_t val) { 
+        ds.power.update([delta](uint8_t val) { 
             uint8_t newVal = val + delta;
             if (newVal < 30) newVal = 30;
             if (newVal > 100) newVal = 100;

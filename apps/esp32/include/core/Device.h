@@ -30,7 +30,6 @@ private:
     HeaterController heater;
     WiFiManager wifi;
     WebSocketManager webSocket;
-    EventBus events;
     DeviceUI ui;
 
     std::unique_ptr<Network> network;

@@ -8,11 +8,11 @@ void OTASetup::setup() {
     ArduinoOTA.setHostname("Heizbox");
 
     ArduinoOTA.onStart([this]() {
-        EventBus::instance()->publish(EventType::OTA_UPDATE_STARTED, nullptr);
+        EventBus::instance().publish(EventType::OTA_UPDATE_STARTED, nullptr);
     });
 
     ArduinoOTA.onEnd([this]() {
-        EventBus::instance()->publish(EventType::OTA_UPDATE_FINISHED, nullptr);
+        EventBus::instance().publish(EventType::OTA_UPDATE_FINISHED, nullptr);
     });
 
     ArduinoOTA.onError([this](ota_error_t error) {
@@ -23,7 +23,7 @@ void OTASetup::setup() {
             case OTA_RECEIVE_ERROR: logPrint("OTA", "ERROR: Receive Failed"); break;
             case OTA_END_ERROR:     logPrint("OTA", "ERROR: End Failed"); break;
         }
-        EventBus::instance()->publish(EventType::OTA_UPDATE_FAILED, &error);
+        EventBus::instance().publish(EventType::OTA_UPDATE_FAILED, &error);
     });
 
     ArduinoOTA.begin();

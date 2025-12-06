@@ -39,7 +39,9 @@ void ScreenManager::setScreen(Screen* newScreen, ScreenTransition transitionType
         currentScreenType = currentScreen->getType();
         currentScreen->setManager(this);
         currentScreen->setUI(ui);
-
+        ui->invalidateAll();
+        ui->clear();
+        
         // Initialize transition wenn gewünscht
         if (transitionType != ScreenTransition::NONE && previousScreen) {
             transition.type = transitionType;
@@ -74,7 +76,6 @@ void ScreenManager::switchScreen(ScreenType screenType, ScreenTransition transit
     Screen* screenToSwitch = getScreen(screenType);
     if (screenToSwitch) {
         setScreen(screenToSwitch, transition);
-        logPrint("ScreenManager", "switch to screen type: %d", static_cast<int>(screenType));
     } else {
         logPrint("ScreenManager", "Attempted to switch to unregistered screen type: %d", static_cast<int>(screenType));
     }

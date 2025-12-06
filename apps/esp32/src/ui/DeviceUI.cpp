@@ -3,6 +3,8 @@
 #include "BacklightController.h"
 #include "TFT_eSPI_Driver.h"
 #include "core/EventBus.h"
+#include "heater/HeaterController.h"
+#include "utils/Logger.h"
 
 DeviceUI::DeviceUI(HeaterController& heater): 
     display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
@@ -19,6 +21,15 @@ void DeviceUI::setup() {
     screens.setupMenus(screenManager);
 
     screenManager.switchScreen(ScreenType::STARTUP);
+
+    EventBus::instance().subscribe<HeaterStoppedData>(
+        EventType::HEATER_STOPPED,
+        [](const HeaterStoppedData& d){
+            std::string msg = "Stopped: " + std::to_string(d.duration) +
+                  " ms, started: " + std::to_string(d.startedAt) + "\n";
+            logPrint("Heater", msg);
+        }
+    );
 
     input.setup();
     input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
