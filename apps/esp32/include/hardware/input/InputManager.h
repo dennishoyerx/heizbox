@@ -7,6 +7,7 @@
 
 enum InputEventType {
     PRESS,
+    PRESSED,
     RELEASE,
     HOLD,
     HOLDING

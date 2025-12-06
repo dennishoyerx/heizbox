@@ -3,7 +3,6 @@
 #include "Config.h"
 
 
-
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
     {HardwareConfig::JOY_UP_PIN, UP},
     {HardwareConfig::JOY_DOWN_PIN, DOWN},
@@ -46,9 +45,14 @@ void InputManager::update() {
             setPressed(i, false);
             lastDebounce[i] = now;
 
+           
+
             // RELEASE nur senden, wenn HOLD getriggert wurde
             if (isHoldSent(i) && callback) {
-                callback({RELEASE, cfg.button});
+               callback({RELEASE, cfg.button});
+            } else  if (callback) {
+                callback({PRESSED, cfg.button});
+               // callback({RELEASE, cfg.button});
             }
 
             // Reset Hold-Flag, damit erneutes Halten wieder funktioniert
@@ -61,7 +65,7 @@ void InputManager::update() {
             // --- HOLDING ---
             if (now - lastHoldStep[i] >= InputConfig::HOLDING_INTERVAL_MS) {
                 lastHoldStep[i] = now;
-                if (callback) callback({HOLDING, cfg.button});
+                if (callback) callback({HOLD, cfg.button});
             }
         }
     }

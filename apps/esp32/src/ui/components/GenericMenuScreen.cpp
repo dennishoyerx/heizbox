@@ -75,7 +75,7 @@ void GenericMenuScreen::draw() {
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {
-    if (event.type != PRESS) return;
+    if (event.type != PRESSED) return;
     
     if (adjustMode_) {
         handleAdjustMode(event);

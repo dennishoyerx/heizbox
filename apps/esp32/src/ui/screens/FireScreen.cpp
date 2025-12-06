@@ -155,8 +155,8 @@ bool triggeredTwice(uint32_t intervalMs) {
 }
 
 void FireScreen::handleInput(InputEvent event) {
-    if (event.button == UP || event.button == DOWN && 
-        event.type == PRESS || event.type == HOLD || event.type == HOLDING) {
+    if ((event.button == UP || event.button == DOWN) && 
+        (event.type == PRESS || event.type == HOLD)) {
         float delta = event.button == UP ? 1 : -1;
         auto& ds = DeviceState::instance();
         uint8_t temp;
@@ -174,14 +174,21 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    bool triggerHeating = (event.button == FIRE) || (event.button == CENTER && DeviceState::instance().enableCenterButtonForHeating.get());
-
-    if (triggerHeating) {
+    if (event.button == FIRE && event.type == PRESSED) {
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }
 
-    if (event.button == CENTER) {
+    if (event.button == FIRE && event.type == HOLD) {
+        _handleHeatingTrigger(true);
+        return;
+    }
+    if (event.button == FIRE && event.type == RELEASE) {
+        _handleHeatingTrigger(false);
+        return;
+    }
+
+    if (event.button == CENTER && event.type == PRESSED) {
         HeaterCycle::nextCycle();
         if (triggeredTwice(200) && state.heater.isHeating) DeviceState::instance().zvsDebug.set(!DeviceState::instance().zvsDebug.get());
         dirty();

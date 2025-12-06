@@ -76,18 +76,7 @@ void StatusBar::drawWifiRegion(RenderSurface s) {
     if (state.wifiStatus != WL_CONNECTED) return;
 
     // Render WiFi-Icon
-    const uint8_t strength = state.wifiStrength;
-
-    
-    uint8_t color = COLOR_TEXT_PRIMARY;
-    if (strength >= 3) {
-        color = COLOR_SUCCESS;
-    } else if (strength >= 2) {
-        color = COLOR_WARNING;
-    } else if (strength >= 1) {
-        color = COLOR_ERROR;
-    }
-
+    uint8_t color = ColorUtils::getWifiColor(state.wifiStrength);
     s.sprite->fillCircle(iconX + iconRadius, iconY + iconRadius, iconRadius, color);
 }
 

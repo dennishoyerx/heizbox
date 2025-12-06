@@ -160,4 +160,16 @@ public:
         if(percent > 10) return COLOR_BATTERY_LOW;
         return COLOR_BATTERY_CRITICAL;
     }*/
+
+    static uint8_t getWifiColor(uint8_t strength) {
+        uint8_t color = COLOR_TEXT_PRIMARY;
+        if (strength >= 3) {
+            color = COLOR_SUCCESS;
+        } else if (strength >= 2) {
+            color = COLOR_WARNING;
+        } else if (strength <= 1) {
+            color = COLOR_ERROR;
+        }
+        return color;
+    }
 };
