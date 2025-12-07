@@ -50,7 +50,7 @@ float TempSensor::getTemperature() {
 
 bool TempSensor::validateReading(float temp) const {
     if (isnan(temp)) return false;
-    if (temp < -20 || temp > 400) return false;
+    if (temp < -20 || temp > 230) return false;
 
     // Plausibilitätsprüfung: Max. Änderung
     if (!isnan(lastValidTemp)) {

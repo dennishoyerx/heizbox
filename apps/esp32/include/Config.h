@@ -4,22 +4,25 @@
 #include <Arduino.h>
 
 struct HardwareConfig {
-    static constexpr uint8_t TFT_BL_PIN = 4;
+    static constexpr uint8_t TFT_BL_PIN = 16;
     static constexpr uint8_t STATUS_LED_PIN = 2;
 
-    static constexpr uint8_t JOY_UP_PIN = 12;
-    static constexpr uint8_t JOY_DOWN_PIN = 33;
-    static constexpr uint8_t JOY_LEFT_PIN = 22;
-    static constexpr uint8_t JOY_RIGHT_PIN = 14;
-    static constexpr uint8_t JOY_PRESS_PIN = 15;
+    static constexpr uint8_t JOY_UP_PIN = 14; // green
+    static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
+    static constexpr uint8_t JOY_LEFT_PIN = 19; // purple
+    static constexpr uint8_t JOY_RIGHT_PIN = 21; // white
+    static constexpr uint8_t JOY_PRESS_PIN = 15; // orange
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;
 
     static constexpr uint8_t HEATER_MOSFET_PIN = 32;
 
-    static constexpr uint8_t THERMO_SCK_PIN = 25;
-    static constexpr uint8_t THERMO_CS_PIN = 27;
-    static constexpr uint8_t THERMO_SO_PIN = 26;
+    static constexpr uint8_t THERMO_SO_PIN = 26; // O
+    static constexpr uint8_t THERMO_CS_PIN = 27; // Y
+    static constexpr uint8_t THERMO_SCK_PIN = 25; // G 
+
+    static constexpr uint8_t IR_SDL_PIN = 33; // Purple
+    static constexpr uint8_t IR_SDA_PIN = 22; // White
 };
 
 struct DisplayConfig {
