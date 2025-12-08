@@ -21,6 +21,7 @@ bool IRTempSensor::begin() {
         return false;
     }
 
+    delay(100);
     mlx.writeEmissivity(0.95);  
     //setEmissivity(0.95);
 

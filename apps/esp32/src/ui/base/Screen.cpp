@@ -1,6 +1,8 @@
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/base/UI.h"
+#include "hardware/input/InputManager.h"
+
 
 Screen::Screen() : manager(nullptr) {
     initState();
@@ -29,3 +31,9 @@ void Screen::dirty() {
         manager->setDirty();
     }
 }
+
+/*
+void Screen::Input(InputEventType type, InputButton button, std::function<void()> callback) {
+
+}
+*/

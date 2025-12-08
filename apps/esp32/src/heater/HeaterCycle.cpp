@@ -14,16 +14,20 @@ void HeaterCycle::init() {
 void HeaterCycle::update() {
 }
 
-uint8_t HeaterCycle::currentCycle() {
+uint8_t HeaterCycle::current() {
     return DeviceState::instance().currentCycle.get();
 }
 
-uint8_t HeaterCycle::setCycle(uint8_t cycle) {
+uint8_t HeaterCycle::set(uint8_t cycle) {
     return DeviceState::instance().currentCycle.set(cycle);
 }
 
-uint8_t HeaterCycle::nextCycle() {
+uint8_t HeaterCycle::next() {
     return DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+}
+
+bool HeaterCycle::is(uint8_t cycle) {
+    return DeviceState::instance().currentCycle.get() == cycle;
 }
 
 HeaterCycle& HeaterCycle::instance() {
@@ -31,7 +35,7 @@ HeaterCycle& HeaterCycle::instance() {
     return heaterCycle;
 }
 
-
+/*
 HeaterTemperature::HeaterTemperature() {}
 
 uint8_t HeaterTemperature::current() {
@@ -44,4 +48,4 @@ uint8_t HeaterTemperature::target() {
 
 uint8_t HeaterTemperature::setTarget(uint8_t cycle) {
     return DeviceState::instance().targetTemperature.set(cycle);
-}
+}*/

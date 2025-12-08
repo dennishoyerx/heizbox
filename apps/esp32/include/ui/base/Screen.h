@@ -17,7 +17,7 @@ public:
     // Pure virtual (muss implementiert werden)
     virtual void draw() = 0;
     virtual void update() = 0;
-    virtual void handleInput(InputEvent event) = 0;
+    virtual void handleInput(InputEvent event/*, std::function<void(InputEventType type, InputButton button)> handler*/) = 0;
     virtual ScreenType getType() const = 0;
 
     // Optional overrides
@@ -38,6 +38,8 @@ protected:
     UI* _ui;
 
     void dirty();
+
+    //void Input(InputEventType type, InputButton button, std::function<void()> callback);
 
     template <typename T>
     void bindTo(T& member, Observable<T>& observable) {

@@ -37,6 +37,25 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     });
 }
 
+String formatConsumption(float consumption) {
+        char consumptionStr[10];
+        int integer = (int)consumption;
+        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
+        if (integer > 0) {
+            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
+        }
+        else {
+            sprintf(consumptionStr, ".%02dg", decimal);
+        }
+    return (String) consumptionStr;
+}
+
+void drawStats(RenderSurface& s, int x, int y, String label, String value) {
+    //s.sprite->setTextDatum(MC_DATUM);
+    s.text(x, y, value);
+    s.text(x, y + 24, label, TextSize::sm);
+}
+
 void FireScreen::draw() {
         ZVSDriver* zvs = heater.getZVSDriver();
     if (state.heater.isHeating) {
@@ -47,15 +66,18 @@ void FireScreen::draw() {
 
     
     // Consumption
-    _ui->withSurface(250, 140, 15, 110, {
+    _ui->withSurface(250, 50, 15, 190, {
         {"isHeating", state.heater.isHeating},
         {"consumption", state.consumption.session},
         {"todayConsumption", state.consumption.today},
         {"currentCycle", state.heater.currentCycle}
     }, [this](RenderSurface& s) {
-        FireScreen::drawSessionRow(s.sprite, "Session", state.consumption.session, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.heater.currentCycle == 1));
-        FireScreen::drawSessionRow(s.sprite, "Heute", state.consumption.today, 55, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
-        FireScreen::drawSessionRow(s.sprite, "Gestern", state.consumption.yesterday, 105, COLOR_BG, COLOR_BG, COLOR_TEXT_PRIMARY, false, true);
+        drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
+        drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
+        drawStats(s, 160, 0, "Gestern", formatConsumption(state.consumption.yesterday));
+        //FireScreen::drawSessionRow(s.sprite, "Session", state.consumption.session, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.heater.currentCycle == 1));
+        //FireScreen::drawSessionRow(s.sprite, "Heute", state.consumption.today, 55, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
+        //FireScreen::drawSessionRow(s.sprite, "Gestern", state.consumption.yesterday, 105, COLOR_BG, COLOR_BG, COLOR_TEXT_PRIMARY, false, true);
     });
 
     // Current Temp
@@ -63,8 +85,8 @@ void FireScreen::draw() {
         {"currentTemp", state.heater.irTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, -4, isnan(state.heater.irTemp) ? "Err" : String(state.heater.irTemp), TextSize::lg);
-        s.text(30, 26, isnan(state.heater.thermoTemp) ? "Err" : String(state.heater.thermoTemp), TextSize::md);
+        s.text(30, -4, isnan(state.heater.thermoTemp) ? "Err" : String(state.heater.thermoTemp), TextSize::lg);
+        s.text(30, 26, isnan(state.heater.irTemp) ? "Err" : String(state.heater.irTemp), TextSize::md);
     });
 
     // Target Temp
@@ -109,8 +131,6 @@ void FireScreen::update() {
         state.heater.irTemp = irTemp;
         dirty();
     }
-
-    
 
     if (state.heater.isHeating) {
         state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
@@ -166,18 +186,16 @@ void FireScreen::handleInput(InputEvent event) {
     if ((event.button == UP || event.button == DOWN) && 
         (event.type == PRESS || event.type == HOLD)) {
         float delta = event.button == UP ? 1 : -1;
-        uint8_t temp;
-
-        if (HeaterCycle::currentCycle() == 1) {
-            temp = ds.targetTemperatureCycle1.update([delta](uint8_t val) { return val + delta; });
-        } else {
-            temp = ds.targetTemperatureCycle2.update([delta](uint8_t val) { return val + delta; });
-            //ds.heatCycleTempDelta.update([delta](uint8_t val) { return val + delta; });
-            //state.heater.targetTemp = ds.targetTemperature + ds.heatCycleTempDelta;
-        }
-        ds.targetTemperature.set(temp);
-        dirty();
         
+        PersistedObservable<uint8_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
+        uint8_t temp = cycleTemp->update([delta](uint8_t val) { return val + delta; });
+
+        ds.targetTemperature.set(temp);
+        return;
+    }
+
+    if (event.button == CENTER && event.type == PRESS) {
+        HeaterCycle::next();
         return;
     }
 
@@ -190,12 +208,12 @@ void FireScreen::handleInput(InputEvent event) {
 
     if (event.button == FIRE && event.type == HOLD_ONCE) {
         _handleHeatingTrigger(true);
-        ds.targetTemperature.set(200);
+        ds.targetTemperature.set(HeaterConfig::MAX_TEMPERATURE);
         return;
     }
     if (event.button == FIRE && event.type == RELEASE) {
         _handleHeatingTrigger(false);
-        ds.targetTemperature.set(ds.currentCycle.get() == 1 ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
+        ds.targetTemperature.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
     }
 
@@ -220,61 +238,4 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
         heater.stopHeating(false);
     }
     dirty();
-}
-
-void FireScreen::drawSessionRow(TFT_eSprite* sprite, 
-    const char* label, 
-    float consumption, 
-    int y, 
-    uint8_t bgColor, 
-    uint8_t borderColor, 
-    uint8_t textColor, 
-    bool invert, 
-    bool thin)
-{    
-    int x = 0;
-    int width = 250; 
-    int height = thin ? 20 : 50;
-    int radius = 16;
-    uint8_t _bgColor;
-    uint8_t _textColor;
-
-    if (!invert) {
-        _bgColor = bgColor;
-        _textColor = textColor;
-    } else {
-        _bgColor = COLOR_HIGHLIGHT;
-        _textColor = textColor;
-    }
-
-        if (invert) {
-            sprite->fillSmoothRoundRect(x, y, width, height, radius, COLOR_TEXT_SECONDARY, _textColor);
-            sprite->fillSmoothRoundRect(x+2, y+2, width-4, height-4, radius - 2, _bgColor, _textColor);
-        } else {
-            sprite->fillSmoothRoundRect(x, y, width, height, radius, _bgColor, _textColor);
-
-        }
-
-        // "Session" Text
-        sprite->setTextSize(1);
-        sprite->setTextColor(_textColor);
-        sprite->setTextDatum(ML_DATUM);
-        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans12pt7b);
-        sprite->drawString(label, 30, y + height / 2);
-
-        // Verbrauchswert formatieren und anzeigen
-        char consumptionStr[10];
-        int integer = (int)consumption;
-        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
-        if (integer > 0) {
-            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
-        }
-        else {
-            sprintf(consumptionStr, ".%02dg", decimal);
-        }
-
-        // Verbrauchswert rechts ausgerichtet
-        sprite->setTextDatum(MR_DATUM);
-        sprite->setFreeFont(thin ? &FreeSans9pt7b : &FreeSans18pt7b);
-        sprite->drawString(consumptionStr, x + width - 12, y + height / 2);
 }

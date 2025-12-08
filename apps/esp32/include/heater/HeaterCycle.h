@@ -7,14 +7,15 @@ public:
     void init();
     void update();
 
-    static uint8_t currentCycle();
-    static uint8_t setCycle(uint8_t cycle);
-    static uint8_t nextCycle();
+    static uint8_t current();
+    static uint8_t set(uint8_t cycle);
+    static bool is(uint8_t cycle);
+    static uint8_t next();
 
     HeaterCycle& instance();
 private:
 };
-
+/*
 class HeaterTemperature {
 public:
     HeaterTemperature();
@@ -22,4 +23,4 @@ public:
     static uint8_t current();
     static uint8_t target();
     static uint8_t setTarget(uint8_t cycle);
-};
+};*/

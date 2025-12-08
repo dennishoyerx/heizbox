@@ -13,19 +13,6 @@ HeaterController::HeaterController()
       lastCycleDuration(0), 
       cycleFinishedFlag(false)
 {
-    // Initialize temperature sensor
-    tempSensor = new TempSensor(
-        HardwareConfig::THERMO_SCK_PIN, 
-        HardwareConfig::THERMO_CS_PIN, 
-        HardwareConfig::THERMO_SO_PIN, 
-        HeaterConfig::SENSOR_OFF_TIME_MS
-    );
-
-    irTempSensor = new IRTempSensor(
-        HardwareConfig::IR_SDA_PIN,
-        HardwareConfig::IR_SDL_PIN
-    );
-
     // Initialize ZVS driver
     zvsDriver = new ZVSDriver(
         HardwareConfig::HEATER_MOSFET_PIN,
@@ -43,16 +30,10 @@ void HeaterController::init() {
     // Register temperature measurement callback
     zvsDriver->onTempMeasure([this]() {
         // This is called during the OFF phase - safe to measure temperature
-        tempSensor->update(true); // Force immediate read
+        temperature.update(K, true);
     });
     
-    // Initialize temperature sensor
-    if (!tempSensor->begin()) {
-        Serial.println("⚠️  Temperature sensor initialization failed");
-    }
-    if (!irTempSensor->begin()) {
-        Serial.println("⚠️  IR Temperature sensor initialization failed");
-    }
+    temperature.init();
     
     Serial.println("🔥 Heater initialized with ZVS driver");
 }
@@ -77,14 +58,12 @@ void HeaterController::transitionTo(State newState) {
 }
 
 uint16_t HeaterController::getTemperature() {
-    uint16_t temp = tempSensor->getTemperature();
-    return temp < 300 ? temp : NAN;
+    return temperature.get(K);
 }
 
 
 uint16_t HeaterController::getIRTemperature() {
-    uint16_t temp = irTempSensor->getTemperature();
-    return temp < 300 ? temp : NAN;
+    return temperature.get(IR);
 }
 
 void HeaterController::startHeating() {
@@ -137,10 +116,10 @@ void HeaterController::stopHeating(bool finalize) {
 
 void HeaterController::update() {
     zvsDriver->update();
-    irTempSensor->update();
+    temperature.update(IR);
     
     if (state != State::HEATING) {
-        tempSensor->update();
+        temperature.update(K);
     }
     
     const uint32_t elapsed = getElapsedTime();

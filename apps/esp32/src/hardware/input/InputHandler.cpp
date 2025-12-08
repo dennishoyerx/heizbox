@@ -15,9 +15,7 @@ void InputHandler::handleInput(InputEvent event) {
                         (event.button == CENTER) ? "CENTER" : "FIRE";
 
     Serial.printf("Input: %s %s\n", btnStr, typeStr);
-
-    logPrint("x", "Input: %s %s\n", btnStr, typeStr);
-
+    //logPrint("x", "Input: %s %s\n", btnStr, typeStr);
 
     // Handle global shortcuts
     if (handleGlobalShortcuts(event)) {

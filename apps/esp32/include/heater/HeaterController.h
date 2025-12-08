@@ -4,6 +4,7 @@
 #include "TempSensor.h"
 #include "IRTempSensor.h"
 #include "heater/ZVSDriver.h"
+#include "heater/HeaterTemperature.h"
 
 class HeaterController {
 public:
@@ -35,13 +36,12 @@ public:
     uint16_t getIRTemperature();
 
     // Expose components
-    TempSensor* getTempSensor() { return tempSensor; }
-    IRTempSensor* getIRTempSensor() { return irTempSensor; }
+    TempSensor* getTempSensor() { return temperature.getKSensor(); }
+    IRTempSensor* getIRTempSensor() { return temperature.getIRSensor(); }
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 
 private:
-    TempSensor* tempSensor;
-    IRTempSensor* irTempSensor;
+    HeaterTemperature temperature;
     ZVSDriver* zvsDriver;
 
     void transitionTo(State newState);
