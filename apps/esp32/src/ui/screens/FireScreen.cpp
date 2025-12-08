@@ -8,7 +8,7 @@
 #include "bitmaps.h"
 #include "heater\HeaterCycle.h"
 #include "core/EventBus.h"
- 
+ #include <Wire.h>
 #include <utility>
 
 #include "utils/Logger.h"
@@ -60,10 +60,11 @@ void FireScreen::draw() {
 
     // Current Temp
     _ui->withSurface(88, 50, 0, 45, {
-        {"currentTemp", state.heater.currentTemp}
+        {"currentTemp", state.heater.irTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, isnan(state.heater.currentTemp) ? "Err" : String(state.heater.currentTemp), TextSize::lg);
+        s.text(30, -4, isnan(state.heater.irTemp) ? "Err" : String(state.heater.irTemp), TextSize::lg);
+        s.text(30, 26, isnan(state.heater.thermoTemp) ? "Err" : String(state.heater.thermoTemp), TextSize::md);
     });
 
     // Target Temp
@@ -90,20 +91,34 @@ void FireScreen::draw() {
 }
 
 void FireScreen::update() {
-    uint16_t temp = heater.getTemperature();
-    
-    if (temp != state.heater.currentTemp) {
-        state.heater.currentTemp = temp;
+    uint16_t thermoTemp = heater.getTemperature();
+    uint16_t irTemp = heater.getIRTemperature();
+    uint16_t temp = irTemp > thermoTemp ? irTemp : thermoTemp;
+
+    if (temp != state.heater.temp) {
+        state.heater.temp = temp + DeviceState::instance().temperatureOffset.get();
         dirty();
     }
 
+    if (thermoTemp != state.heater.thermoTemp) {
+        state.heater.thermoTemp = thermoTemp;
+        dirty();
+    }
+
+    if (irTemp != state.heater.irTemp) {
+        state.heater.irTemp = irTemp;
+        dirty();
+    }
+
+    
+
     if (state.heater.isHeating) {
         state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
-        state.heater.progress = (float)state.heater.currentTemp / state.heater.targetTemp;
+        state.heater.progress = (float)state.heater.temp / state.heater.targetTemp;
 
         if (state.heater.progress > 1.0f) state.heater.progress = 1.0f;
 
-        if (state.heater.currentTemp > state.heater.targetTemp) {
+        if (state.heater.temp > state.heater.targetTemp) {
             _handleHeatingTrigger(false);
             dirty();
         }
@@ -181,13 +196,6 @@ void FireScreen::handleInput(InputEvent event) {
     if (event.button == FIRE && event.type == RELEASE) {
         _handleHeatingTrigger(false);
         ds.targetTemperature.set(ds.currentCycle.get() == 1 ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
-        return;
-    }
-
-    if (event.button == CENTER && event.type == PRESSED) {
-        HeaterCycle::nextCycle();
-        if (triggeredTwice(200) && state.heater.isHeating) ds.zvsDebug.set(!ds.zvsDebug.get());
-        dirty();
         return;
     }
 

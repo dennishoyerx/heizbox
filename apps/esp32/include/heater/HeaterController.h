@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "TempSensor.h"
+#include "IRTempSensor.h"
 #include "heater/ZVSDriver.h"
 
 class HeaterController {
@@ -25,20 +26,22 @@ public:
     bool isHeating() const;
     bool isPaused() const;
     uint32_t getElapsedTime() const;
-    uint32_t getCycleCount() const;
     uint32_t getLastCycleDuration() const;
     bool isCycleFinished() const;
     void clearCycleFinishedFlag();
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
     uint16_t getTemperature();
+    uint16_t getIRTemperature();
 
     // Expose components
     TempSensor* getTempSensor() { return tempSensor; }
+    IRTempSensor* getIRTempSensor() { return irTempSensor; }
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 
 private:
     TempSensor* tempSensor;
+    IRTempSensor* irTempSensor;
     ZVSDriver* zvsDriver;
 
     void transitionTo(State newState);

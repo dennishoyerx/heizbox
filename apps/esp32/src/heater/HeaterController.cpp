@@ -21,6 +21,11 @@ HeaterController::HeaterController()
         HeaterConfig::SENSOR_OFF_TIME_MS
     );
 
+    irTempSensor = new IRTempSensor(
+        HardwareConfig::IR_SDA_PIN,
+        HardwareConfig::IR_SDL_PIN
+    );
+
     // Initialize ZVS driver
     zvsDriver = new ZVSDriver(
         HardwareConfig::HEATER_MOSFET_PIN,
@@ -44,6 +49,9 @@ void HeaterController::init() {
     // Initialize temperature sensor
     if (!tempSensor->begin()) {
         Serial.println("⚠️  Temperature sensor initialization failed");
+    }
+    if (!irTempSensor->begin()) {
+        Serial.println("⚠️  IR Temperature sensor initialization failed");
     }
     
     Serial.println("🔥 Heater initialized with ZVS driver");
@@ -69,7 +77,14 @@ void HeaterController::transitionTo(State newState) {
 }
 
 uint16_t HeaterController::getTemperature() {
-    return (uint16_t)tempSensor->getTemperature();
+    uint16_t temp = tempSensor->getTemperature();
+    return temp < 300 ? temp : NAN;
+}
+
+
+uint16_t HeaterController::getIRTemperature() {
+    uint16_t temp = irTempSensor->getTemperature();
+    return temp < 300 ? temp : NAN;
 }
 
 void HeaterController::startHeating() {
@@ -122,6 +137,7 @@ void HeaterController::stopHeating(bool finalize) {
 
 void HeaterController::update() {
     zvsDriver->update();
+    irTempSensor->update();
     
     if (state != State::HEATING) {
         tempSensor->update();
@@ -178,9 +194,6 @@ uint32_t HeaterController::getElapsedTime() const {
     return 0;
 }
 
-uint32_t HeaterController::getCycleCount() const {
-    return cycleCounter;
-}
 
 void HeaterController::setAutoStopTime(uint32_t time) {
     autoStopTime = time;

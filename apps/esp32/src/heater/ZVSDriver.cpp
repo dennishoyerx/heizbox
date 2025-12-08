@@ -42,6 +42,7 @@ void ZVSDriver::update() {
         if (currentPhase != Phase::OFF_IDLE) {
             transitionPhase(Phase::OFF_IDLE);
             setMosfet(false);
+            updateStatusLed();
         }
         return;
     }

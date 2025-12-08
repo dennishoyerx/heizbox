@@ -48,12 +48,20 @@ void Timer(RenderSurface s, uint32_t time) {
     s.sprite->setTextSize(2);
     s.sprite->setFreeFont(&FreeSansBold18pt7b);
     s.sprite->drawString(timeStr, s.centerX(), s.centerY(), 1);
+    s.sprite->setTextDatum(ML_DATUM);
 }
 
-void Temperature(RenderSurface s, uint8_t  current, uint8_t target) {
-    s.sprite->drawBitmap(0, 20, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-    s.text(70, 40, isnan(current) ? "Err" : String(current), TextSize::bxl);
-    s.text(165, 40, String(target), TextSize::xl);
+void Temperature(RenderSurface s, HeatState state) {
+    s.sprite->drawBitmap(0, 15, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
+    s.text(45, 30, String(state.temp), TextSize::bxl);
+
+    s.text(32, 70, "ir", TextSize::sm);
+    s.text(45, 70, String(state.irTemp), TextSize::lg);
+
+    s.text(32, 100, "k", TextSize::sm);
+    s.text(45, 100, String(state.thermoTemp), TextSize::lg);
+
+    s.text(150, 30, String(state.targetTemp), TextSize::xl);
 }
 
 
@@ -113,14 +121,15 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 void HeatUI(UI* _ui, HeatState state, ZVSDriver* zvs) {
     _ui->withSurface(280, 205, 0, 35, [&](RenderSurface& s) {
         uint8_t tempColor = 15; //ColorUtils::getTemperatureColor(state.currentTemp);
-        s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(state.currentTemp, true));
+        s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(state.temp, true));
 
         Background(s, smoothProgress(state.progress), tempColor);
         if (DeviceState::instance().zvsDebug) ZVSOscilloscopeUI(s, zvs);
 
         Timer(s, state.elapsedSeconds);
+        
         HeatCycleIndicator(s, state.currentCycle);
-        Temperature(s, state.currentTemp, state.targetTemp);
+        Temperature(s, state);
 
         if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
     });

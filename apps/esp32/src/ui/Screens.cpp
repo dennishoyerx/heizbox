@@ -77,6 +77,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     auto heaterMenuItems = MenuBuilder()
          .addHeadline("ZVS ADVANCED")
+            .addObservableRange("Temp Offset", state.temperatureOffset, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "°C")
             .addObservableRange("HC Temp", state.heatCycleTempDelta, static_cast<uint8_t>(0), static_cast<uint8_t>(40), static_cast<uint8_t>(1), "°C")
             .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
             .addObservableRangeMs("Temp Sensor", state.tempSensorOffTime, 50, 220, 10, true)

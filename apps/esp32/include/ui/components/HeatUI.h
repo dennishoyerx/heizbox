@@ -8,7 +8,9 @@ struct HeatState {
     uint8_t currentCycle = 1;
     uint8_t power;
     uint8_t targetTemp;
-    uint16_t currentTemp;
+    uint16_t temp;
+    uint16_t irTemp;
+    uint16_t thermoTemp;
     bool isHeating = false;
     uint32_t elapsedSeconds;
     float progress;

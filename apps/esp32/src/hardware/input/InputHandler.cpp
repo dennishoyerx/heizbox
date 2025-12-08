@@ -1,4 +1,3 @@
-// src/hardware/InputHandler.cpp
 #include "hardware/input/InputHandler.h"
 #include "utils/Logger.h"
 
@@ -16,6 +15,9 @@ void InputHandler::handleInput(InputEvent event) {
                         (event.button == CENTER) ? "CENTER" : "FIRE";
 
     Serial.printf("Input: %s %s\n", btnStr, typeStr);
+
+    logPrint("x", "Input: %s %s\n", btnStr, typeStr);
+
 
     // Handle global shortcuts
     if (handleGlobalShortcuts(event)) {
