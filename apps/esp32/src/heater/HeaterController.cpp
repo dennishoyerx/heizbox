@@ -39,10 +39,6 @@ void HeaterController::init() {
 }
 
 void HeaterController::setPower(uint8_t _power) {
-    if (_power > 100) _power = 100;
-    if (_power < 10) _power = 10;
-    power = _power;
-    
     zvsDriver->setPower(power);
 }
 

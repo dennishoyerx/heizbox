@@ -57,13 +57,20 @@ void drawStats(RenderSurface& s, int x, int y, String label, String value) {
 }
 
 void FireScreen::draw() {
-        ZVSDriver* zvs = heater.getZVSDriver();
     if (state.heater.isHeating) {
-        HeatUI(_ui, state.heater, zvs);
+        ZVSDriver* zvs = heater.getZVSDriver();
+        HeatUI::render(_ui, state.heater, zvs);
 
         return;
     }
 
+    _ui->withSurface(48, 48, 15, 110, [this](RenderSurface& s) {
+        if (HeaterCycle::is(1)) {
+            s.sprite->drawBitmap(0, 0, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
+        } else {
+            s.sprite->fillRect(0, 0, 48, 48, COLOR_BG);
+        }
+    });
     
     // Consumption
     _ui->withSurface(250, 50, 15, 190, {
@@ -187,8 +194,8 @@ void FireScreen::handleInput(InputEvent event) {
         (event.type == PRESS || event.type == HOLD)) {
         float delta = event.button == UP ? 1 : -1;
         
-        PersistedObservable<uint8_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
-        uint8_t temp = cycleTemp->update([delta](uint8_t val) { return val + delta; });
+        PersistedObservable<uint16_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
+        uint16_t temp = cycleTemp->update([delta](uint16_t val) { return val + delta; });
 
         ds.targetTemperature.set(temp);
         return;
@@ -196,6 +203,7 @@ void FireScreen::handleInput(InputEvent event) {
 
     if (event.button == CENTER && event.type == PRESS) {
         HeaterCycle::next();
+        dirty();
         return;
     }
 

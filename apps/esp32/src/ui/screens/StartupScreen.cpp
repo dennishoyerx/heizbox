@@ -26,8 +26,8 @@ void StartupScreen::draw() {
         memcpy(short_time, BUILD_TIME, 5);
         short_time[5] = '\0';
 
-        s.text(20, 20, short_date);
-        s.text(20, 40, short_time);
+        s.text(20, 35, short_date);
+        s.text(20, 55, short_time);
 
         // Optional: Progress-Bar
         const float progress = this->getProgress();

@@ -36,7 +36,7 @@ struct DisplayConfig {
 };
 
 struct HeaterConfig {
-    static constexpr uint8_t MAX_TEMPERATURE = 220;
+    static constexpr uint16_t MAX_TEMPERATURE = 260;
     static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 220;
 
     static constexpr uint32_t HEATCYCLE_MIN_DURATION_MS = 120000;
