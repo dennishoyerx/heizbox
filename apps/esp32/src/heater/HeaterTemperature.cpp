@@ -1,4 +1,5 @@
 #include "heater\HeaterTemperature.h"
+#include "core/DeviceState.h"
 #include "Config.h"
 
 HeaterTemperature::HeaterTemperature(): 
@@ -10,9 +11,9 @@ void HeaterTemperature::init() {
     if (!irSensor.begin()) Serial.println("⚠️ IR Temperature sensor initialization failed");
 }
 
-void HeaterTemperature::update(HeaterTemperatures type, bool ignoreInterval) {
-    if (type == K || type == MAIN) kSensor.update(ignoreInterval);
-    if (type == IR) irSensor.update();
+bool HeaterTemperature::update(HeaterTemperatures type, bool ignoreInterval) {
+    if (type == IR) return irSensor.update();
+    return kSensor.update(ignoreInterval);
 }
 
 uint16_t HeaterTemperature::get(HeaterTemperatures type) {

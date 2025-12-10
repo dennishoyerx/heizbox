@@ -115,9 +115,9 @@ public:
         } else if(temp < 200) {
             start = medium; end = high;
             t = (temp - 180.0f) / (200.0f - 180.0f);
-        } else if(temp < 230) {
+        } else if(temp < 240) {
             start = high; end = extreme;
-            t = (temp - 200.0f) / (230.0f - 200.0f);
+            t = (temp - 200.0f) / (240.0f - 200.0f);
         } else {
             return rgb888to565(extreme.r, extreme.g, extreme.b);
         }

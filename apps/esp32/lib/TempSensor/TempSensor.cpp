@@ -19,7 +19,7 @@ bool TempSensor::begin() {
 }
 
 // Nicht-blockierendes Update
-void TempSensor::update(bool ignoreInterval) {
+bool TempSensor::update(bool ignoreInterval) {
     unsigned long now = millis();
     if (ignoreInterval || now - lastReadTime >= readInterval) {
         lastReadTime = now;
@@ -28,11 +28,13 @@ void TempSensor::update(bool ignoreInterval) {
         if (validateReading(temp)) {
             lastValidTemp = temp;
             errorCount = 0;
+            return true;
         } else {
             errorCount++;
             if (errorCount >= 5) lastValidTemp = NAN; // persistent error
         }
     }
+    return false;
 }
 
 void TempSensor::setReadInterval(uint16_t interval) {

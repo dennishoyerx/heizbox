@@ -3,6 +3,7 @@
 #include "ui/ColorPalette.h"
 #include "ui/base/Screen.h"
 #include "ui/components/ZVSOscilloscope.h"
+#include "heater/HeaterState.h"
 
 float smoothProgress(float target) {
     static float smoothed = 0.0f;

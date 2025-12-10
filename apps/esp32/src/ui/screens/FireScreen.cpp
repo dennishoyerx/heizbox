@@ -10,11 +10,13 @@
 #include "core/EventBus.h"
  #include <Wire.h>
 #include <utility>
+#include "heater/HeaterState.h"
 
 #include "utils/Logger.h"
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
+    auto& hs = HeaterState::instance();
 
     bindTo(state.consumption.session, ds.sessionConsumption);
     bindTo(state.consumption.today, ds.todayConsumption);
@@ -22,19 +24,9 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.heater.targetTemp, ds.targetTemperature);
     bindTo(state.heater.power, ds.power);
     bindTo(state.heater.currentCycle, ds.currentCycle);
-    bindTo(state.heater.isHeating, ds.isHeating);
-
-    ds.currentCycle.addListener([this](uint8_t val) {
-        auto& ds = DeviceState::instance();
-
-        if (val == 1) {
-            state.heater.targetTemp = ds.targetTemperature.set(ds.targetTemperatureCycle1.get());
-            dirty();
-        } else if (val == 2) {
-            state.heater.targetTemp = ds.targetTemperature.set(ds.targetTemperatureCycle2.get());
-        }
-        dirty();
-    });
+    bindTo(state.heater.isHeating, hs.isHeating);
+    bindTo(state.heater.thermoTemp, hs.tempK);
+    bindTo(state.heater.irTemp, hs.tempIR);
 }
 
 String formatConsumption(float consumption) {
@@ -89,16 +81,18 @@ void FireScreen::draw() {
 
     // Current Temp
     _ui->withSurface(88, 50, 0, 45, {
-        {"currentTemp", state.heater.irTemp}
+        {"irTemp", hs().tempIR},
+        {"thermoTemp", hs().tempK}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, -4, isnan(state.heater.thermoTemp) ? "Err" : String(state.heater.thermoTemp), TextSize::lg);
-        s.text(30, 26, isnan(state.heater.irTemp) ? "Err" : String(state.heater.irTemp), TextSize::md);
+        s.text(30, -4, String(hs().tempK), TextSize::lg);
+        s.text(30, 26, String(hs().tempIR), TextSize::md);
     });
 
     // Target Temp
     _ui->withSurface(104, 50, 84, 45, {
-        {"targetTemp", state.heater.targetTemp}
+        {"targetTemp", state.heater.targetTemp},
+        {"currentCycle", state.heater.currentCycle}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(0, 0, image_target_40, 40, 40, COLOR_TEXT_PRIMARY);
         s.text(40, 6, String(state.heater.targetTemp), TextSize::lg);
@@ -120,39 +114,20 @@ void FireScreen::draw() {
 }
 
 void FireScreen::update() {
-    uint16_t thermoTemp = heater.getTemperature();
-    uint16_t irTemp = heater.getIRTemperature();
-    uint16_t temp = irTemp > thermoTemp ? irTemp : thermoTemp;
-
-    if (temp != state.heater.temp) {
-        state.heater.temp = temp + DeviceState::instance().temperatureOffset.get();
-        dirty();
-    }
-
-    if (thermoTemp != state.heater.thermoTemp) {
-        state.heater.thermoTemp = thermoTemp;
-        dirty();
-    }
-
-    if (irTemp != state.heater.irTemp) {
-        state.heater.irTemp = irTemp;
-        dirty();
-    }
-
-    if (state.heater.isHeating) {
+    if (hs().isHeating) {
         state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
         state.heater.progress = (float)state.heater.temp / state.heater.targetTemp;
 
         if (state.heater.progress > 1.0f) state.heater.progress = 1.0f;
 
-        if (state.heater.temp > state.heater.targetTemp) {
+        if (hs().tempK > state.heater.targetTemp) {
             _handleHeatingTrigger(false);
             dirty();
         }
 
         static uint32_t lastSecond = 0;
-        if (state.heater.elapsedSeconds != lastSecond) {
-            lastSecond = state.heater.elapsedSeconds;
+        if (hs().timer != lastSecond) {
+            lastSecond = hs().timer;
             dirty();
         }
         dirty();
@@ -225,7 +200,7 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (event.button == LEFT || event.button == RIGHT) {
+    /*if (event.button == LEFT || event.button == RIGHT) {
         uint8_t delta = event.button == LEFT ? -10 : 10;
         ds.power.update([delta](uint8_t val) { 
             uint8_t newVal = val + delta;
@@ -234,7 +209,7 @@ void FireScreen::handleInput(InputEvent event) {
             return newVal; 
         });
         return;
-    }
+    }*/
 }
 
 

@@ -30,22 +30,25 @@ bool IRTempSensor::begin() {
     return true;
 }
 
-void IRTempSensor::update() {
+bool IRTempSensor::update() {
     unsigned long now = millis();
-    if (now - lastReadTime < readInterval) return;
+    if (now - lastReadTime < readInterval) return false;
 
     lastReadTime = now;
 
     float reading = mlx.readObjectTempC();
     float ambient = mlx.readAmbientTempC();
-    reading -= (ambient - 25) * 0.2;
+    //reading -= (ambient - 25) * 0.2;
 
     if (validateReading(reading)) {
         lastValidTemp = reading;
         errorCount = 0;
+        return true;
     } else {
         errorCount++;
     }
+
+    return false;
 }
 
 float IRTempSensor::getTemperature() {
@@ -73,6 +76,10 @@ uint16_t IRTempSensor::getReadInterval() const {
 
 
 bool IRTempSensor::setEmissivity(float emissivity) {
+    mlx.writeEmissivity(emissivity);  
+    return getEmissivity() == emissivity;
+
+/*
     // Emissivity muss zwischen 0.1 und 1.0 sein
     if (emissivity < 0.1 || emissivity > 1.0) return false;
     
@@ -88,10 +95,12 @@ bool IRTempSensor::setEmissivity(float emissivity) {
     uint8_t pec = 0; // Simplified - no PEC for now
     Wire.write(pec);
     
-    return Wire.endTransmission() == 0;
+    return Wire.endTransmission() == 0;*/
 }
 
 float IRTempSensor::getEmissivity() {
+     return mlx.readEmissivity();
+    /*
     Wire.beginTransmission(0x5A);
     Wire.write(0x24); // Read Emissivity from EEPROM
     Wire.endTransmission(false);
@@ -103,5 +112,5 @@ float IRTempSensor::getEmissivity() {
         
         return emissValue / 65535.0;
     }
-    return 0.95; // Default
+    return 0.95; // Default*/
 }

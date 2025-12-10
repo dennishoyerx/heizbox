@@ -13,7 +13,7 @@ class HeaterTemperature {
 public:
     HeaterTemperature();
     void init();
-    void update(HeaterTemperatures type = MAIN, bool ignoreInterval = false);
+    bool update(HeaterTemperatures type = MAIN, bool ignoreInterval = false);
 
     uint16_t get(HeaterTemperatures type = MAIN);
 

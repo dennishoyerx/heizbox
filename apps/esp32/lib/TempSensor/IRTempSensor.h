@@ -7,7 +7,7 @@ public:
     IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readIntervalMs = 100);
 
     bool begin();
-    void update();
+    bool update();
     bool hasError() const;
 
     void setReadInterval(uint16_t interval);

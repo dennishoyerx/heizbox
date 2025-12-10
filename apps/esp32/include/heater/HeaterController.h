@@ -5,6 +5,7 @@
 #include "IRTempSensor.h"
 #include "heater/ZVSDriver.h"
 #include "heater/HeaterTemperature.h"
+#include "heater/HeaterState.h"
 
 class HeaterController {
 public:
@@ -22,6 +23,7 @@ public:
     void setPower(uint8_t power);
     uint8_t getPower();
     void update();
+    void updateTemperature();
 
     State getState() const;
     bool isHeating() const;
@@ -34,6 +36,7 @@ public:
     uint32_t getAutoStopTime() const;
     uint16_t getTemperature();
     uint16_t getIRTemperature();
+    HeaterState hs() { return HeaterState::instance(); };
 
     // Expose components
     TempSensor* getTempSensor() { return temperature.getKSensor(); }
