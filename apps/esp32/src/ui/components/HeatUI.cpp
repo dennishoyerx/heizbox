@@ -61,6 +61,7 @@ void HeatUI::Temperature(RenderSurface s, HeatState state) {
     s.text(45, 100, String(state.thermoTemp), TextSize::lg);
 
     s.text(150, 30, String(state.targetTemp), TextSize::xl);
+    s.text(150, 70, String(DeviceState::instance().irEmissivity / 100.0f), TextSize::sm);
 }
 
 

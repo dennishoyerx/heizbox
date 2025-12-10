@@ -27,4 +27,5 @@ private:
     std::unique_ptr<StartupScreen> startupScreen;
     std::unique_ptr<GenericMenuScreen> mainMenuScreen;
     std::unique_ptr<GenericMenuScreen> heaterMenuScreen;
+    std::unique_ptr<GenericMenuScreen> debugMenuScreen;
 };

@@ -25,8 +25,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.heater.power, ds.power);
     bindTo(state.heater.currentCycle, ds.currentCycle);
     bindTo(state.heater.isHeating, hs.isHeating);
-    bindTo(state.heater.thermoTemp, hs.tempK);
-    bindTo(state.heater.irTemp, hs.tempIR);
 }
 
 String formatConsumption(float consumption) {
@@ -81,12 +79,12 @@ void FireScreen::draw() {
 
     // Current Temp
     _ui->withSurface(88, 50, 0, 45, {
-        {"irTemp", hs().tempIR},
-        {"thermoTemp", hs().tempK}
+        {"irTemp", state.heater.irTemp},
+        {"thermoTemp", state.heater.thermoTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, -4, String(hs().tempK), TextSize::lg);
-        s.text(30, 26, String(hs().tempIR), TextSize::md);
+        s.text(30, -4, String(state.heater.thermoTemp), TextSize::lg);
+        s.text(30, 26, String(state.heater.irTemp), TextSize::md);
     });
 
     // Target Temp
@@ -114,20 +112,29 @@ void FireScreen::draw() {
 }
 
 void FireScreen::update() {
-    if (hs().isHeating) {
+    state.heater.isHeating = heater.isHeating();
+
+    if (heater.getTemperature() != state.heater.temp) dirty();
+    if (heater.getIRTemperature() != state.heater.irTemp) dirty();
+
+    state.heater.thermoTemp = state.heater.temp = heater.getTemperature();
+    state.heater.irTemp = heater.getIRTemperature();
+
+
+    if (state.heater.isHeating) {
         state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
         state.heater.progress = (float)state.heater.temp / state.heater.targetTemp;
 
         if (state.heater.progress > 1.0f) state.heater.progress = 1.0f;
 
-        if (hs().tempK > state.heater.targetTemp) {
+        if (state.heater.temp > state.heater.targetTemp) {
             _handleHeatingTrigger(false);
             dirty();
         }
 
         static uint32_t lastSecond = 0;
-        if (hs().timer != lastSecond) {
-            lastSecond = hs().timer;
+        if (state.heater.elapsedSeconds != lastSecond) {
+            lastSecond = state.heater.elapsedSeconds;
             dirty();
         }
         dirty();
@@ -165,6 +172,20 @@ bool triggeredTwice(uint32_t intervalMs) {
 
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
+
+    
+    if (event.button == LEFT || event.button == RIGHT) {
+        uint8_t delta = event.button == LEFT ? -1 : 1;
+        ds.irEmissivity.update([delta](uint8_t val) { 
+            uint8_t newVal = val + delta;
+            if (newVal == 0) newVal = 1;
+            if (newVal == 101) newVal = 100;
+            return newVal; 
+        });
+        return;
+    }
+
+    
     if ((event.button == UP || event.button == DOWN) && 
         (event.type == PRESS || event.type == HOLD)) {
         float delta = event.button == UP ? 1 : -1;
@@ -199,7 +220,7 @@ void FireScreen::handleInput(InputEvent event) {
         ds.targetTemperature.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
     }
-
+    
     /*if (event.button == LEFT || event.button == RIGHT) {
         uint8_t delta = event.button == LEFT ? -10 : 10;
         ds.power.update([delta](uint8_t val) { 

@@ -118,12 +118,12 @@ void GenericMenuScreen::handleNavigationMode(InputEvent event) {
 
 void GenericMenuScreen::handleAdjustMode(InputEvent event) {
     switch (event.button) {
-        case LEFT:
+        case UP:
             items_[selectedIndex_]->adjust(-1);
             dirty();
             break;
             
-        case RIGHT:
+        case DOWN:
             items_[selectedIndex_]->adjust(1);
             dirty();
             break;

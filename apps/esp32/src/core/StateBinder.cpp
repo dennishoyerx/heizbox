@@ -45,14 +45,15 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->setAutoStopTime(time);
     });
 
+    state.targetTemperature.set(state.currentCycle == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
     state.currentCycle.addListener([&state](uint8_t val) {
         state.targetTemperature.set(val == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
     });
 
 
-    heater->getIRTempSensor()->setEmissivity(state.irEmissivity.get());
-    state.irEmissivity.addListener([heater](float val) {
-        heater->getIRTempSensor()->setEmissivity(val);
+    heater->getIRTempSensor()->setEmissivity(state.irEmissivity  / 100.0f);
+    state.irEmissivity.addListener([heater](uint8_t val) {
+        heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });
     
     heater->getTempSensor()->setReadInterval(state.tempSensorOffTime.get());
@@ -66,11 +67,18 @@ void StateBinder::bindHeater(HeaterController* heater) {
     state.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
         heater->getZVSDriver()->setPeriod(val);
     });
+}
+void StateBinder::bindDebug(DeviceUI* ui) {
+    auto& state = DeviceState::instance();
 
+    state.debugInput.addListener([ui] (bool val) {
+        ui->getInputHandler()->setDebug(val);
+    });
 }
 
-void StateBinder::bindAll(DisplayDriver* display, HeaterController* heater) {
-    bindBrightness(display);
-    bindDarkMode(display);
+void StateBinder::bindAll(DeviceUI* ui, HeaterController* heater) {
+    bindBrightness(ui->getDisplay());
+    bindDarkMode(ui->getDisplay());
     bindHeater(heater);
+    bindDebug(ui);
 }

@@ -48,3 +48,7 @@ ScreenManager* DeviceUI::getScreenManager() {
 DisplayDriver* DeviceUI::getDisplay() {
     return display.get();
 }
+
+InputHandler* DeviceUI::getInputHandler() {
+    return inputHandler.get();
+}

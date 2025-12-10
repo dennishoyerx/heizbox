@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ui/DeviceUI.h"
 #include "DisplayDriver.h"
 #include "heater/HeaterController.h"
 
@@ -30,11 +31,13 @@ public:
      */
     static void bindHeater(HeaterController* heater);
 
+    static void bindDebug(DeviceUI* ui);
+
     /**
      * @brief Binds all relevant states to their respective managers.
      * @param display Pointer to the DisplayDriver instance.
      * @param clock Pointer to the ClockManager instance.
      * @param heater Pointer to the HeaterController instance.
      */
-    static void bindAll(DisplayDriver* display, HeaterController* heater);
+    static void bindAll(DeviceUI* ui, HeaterController* heater);
 };

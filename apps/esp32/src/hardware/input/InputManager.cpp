@@ -45,8 +45,6 @@ void InputManager::update() {
             setPressed(i, false);
             lastDebounce[i] = now;
 
-           
-
             // RELEASE nur senden, wenn HOLD getriggert wurde
             if (isHoldSent(i) && callback) {
                callback({RELEASE, cfg.button});

@@ -151,7 +151,7 @@ void HeaterController::update() {
 
 void HeaterController::updateTemperature() {
     if (temperature.update(IR)) hs().tempIR.set(temperature.get(IR));
-    if (state != State::HEATING && temperature.update(K)) hs().tempK.set(temperature.get(K));
+    if (!isHeating() && temperature.update(K)) hs().tempK.set(temperature.get(K));
 }
 
 HeaterController::State HeaterController::getState() const {

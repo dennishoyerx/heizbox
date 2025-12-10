@@ -13,6 +13,7 @@ enum class ScreenType : uint8_t {
     HIDDEN_MODE,
     MAIN_MENU,
     HEAT_MENU,
+    DEBUG_MENU,
 };
 
 // Transition-Effekte für Screen-Wechsel

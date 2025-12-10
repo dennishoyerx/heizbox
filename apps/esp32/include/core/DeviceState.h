@@ -22,7 +22,7 @@ struct DeviceState {
     PersistedObservable<uint16_t> targetTemperatureCycle2{"heater", "temperatureCycle2", 220};
     PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
     PersistedObservable<uint8_t> temperatureOffset{"heater", "temperatureOffset", 0};
-    PersistedObservable<float> irEmissivity{"heater", "irEmissivity", 0.95};
+    PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
 
 
     // System Settings
@@ -42,6 +42,8 @@ struct DeviceState {
     PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
     PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
 
+    // Debug
+    Observable<bool> debugInput{false};
 
 
     // Session State
@@ -49,8 +51,6 @@ struct DeviceState {
     Observable<float> sessionConsumption{0};
     Observable<float> todayConsumption{0};
     Observable<float> yesterdayConsumption{0};
-
-    DisplayDriver* display = nullptr;
 
     static DeviceState& instance();
 

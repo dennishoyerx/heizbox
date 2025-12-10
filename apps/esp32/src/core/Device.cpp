@@ -32,8 +32,7 @@ void Device::setup() {
     heater.init();
     ui.setup();
 
-    StateBinder::bindAll(ui.getDisplay(), &heater);
-    DeviceState::instance().display = ui.getDisplay();
+    StateBinder::bindAll(&ui, &heater);
 
     network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
     ota->setup();

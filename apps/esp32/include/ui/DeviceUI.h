@@ -16,6 +16,7 @@ public:
 
     DisplayDriver* getDisplay();
     ScreenManager* getScreenManager();
+    InputHandler* getInputHandler();
 
     void switchScreen(ScreenType type, ScreenTransition transition = ScreenTransition::NONE) {
         screenManager.switchScreen(type, transition);

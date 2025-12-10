@@ -26,8 +26,11 @@ public:
      */
     void handleInput(InputEvent event);
 
+    void setDebug(bool val) { debug = val; }
+
 private:
     ScreenManager& screenManager;
+    bool debug = false;
 
     /**
      * @brief Checks for and handles global shortcuts.
