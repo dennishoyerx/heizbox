@@ -53,12 +53,12 @@ void Timer(RenderSurface s, uint32_t time) {
 void HeatUI::Temperature(RenderSurface s, HeatState state) {
     s.sprite->drawBitmap(0, 15, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
     s.text(45, 30, String(state.temp), TextSize::bxl);
+    
+    s.text(32, 70, "k", TextSize::sm);
+    s.text(45, 70, String(state.thermoTemp), TextSize::lg);
 
-    s.text(32, 70, "ir", TextSize::sm);
-    s.text(45, 70, String(state.irTemp), TextSize::lg);
-
-    s.text(32, 100, "k", TextSize::sm);
-    s.text(45, 100, String(state.thermoTemp), TextSize::lg);
+    s.text(32, 100, "ir", TextSize::sm);
+    s.text(45, 100, String(state.irTemp), TextSize::lg);
 
     s.text(150, 30, String(state.targetTemp), TextSize::xl);
     s.text(150, 70, String(DeviceState::instance().irEmissivity / 100.0f), TextSize::sm);
@@ -125,7 +125,7 @@ void HeatUI::render(UI* _ui, HeatState state, ZVSDriver* zvs) {
         Background(s, smoothProgress(state.progress), tempColor);
         if (DeviceState::instance().zvsDebug) ZVSOscilloscopeUI(s, zvs);
 
-        Timer(s, state.elapsedSeconds);
+        Timer(s, HeaterState::instance().timer);
         
         Cycle(s);
         Temperature(s, state);

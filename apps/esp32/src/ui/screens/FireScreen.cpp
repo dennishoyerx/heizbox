@@ -103,12 +103,14 @@ void FireScreen::draw() {
 
     // Current Temp
     _ui->withSurface(88, 50, 0, 45, {
+        {"irTemp", state.heater.temp},
         {"irTemp", state.heater.irTemp},
         {"thermoTemp", state.heater.thermoTemp}
     }, [this](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, -4, String(state.heater.thermoTemp), TextSize::lg);
-        s.text(30, 26, String(state.heater.irTemp), TextSize::md);
+        s.text(30, 0, String(state.heater.temp), TextSize::lg);
+        s.text(30, 30, String(state.heater.thermoTemp), TextSize::lg);
+        s.text(30, 60, String(state.heater.irTemp), TextSize::md);
     });
 
     // Target Temp
@@ -127,7 +129,7 @@ void FireScreen::draw() {
         s.sprite->drawBitmap(-10, 0, image_power_40, 40, 40, COLOR_TEXT_PRIMARY);
         s.text(30, 6, String(state.heater.power), TextSize::lg);
     });
-
+return;
     // Seperator
     _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
         s.sprite->drawRect(0, 0, 280, 1, COLOR_BG_2);
@@ -136,14 +138,17 @@ void FireScreen::draw() {
 }
 
 void FireScreen::update() {
+    auto& ds = DeviceState::instance();
     state.heater.isHeating = heater.isHeating();
 
     if (heater.getTemperature() != state.heater.temp) dirty();
     if (heater.getIRTemperature() != state.heater.irTemp) dirty();
 
-    state.heater.thermoTemp = state.heater.temp = heater.getTemperature();
+    state.heater.thermoTemp =  heater.getTemperature();
     state.heater.irTemp = heater.getIRTemperature();
 
+    state.heater.temp = state.heater.thermoTemp;
+    if (state.heater.isHeating) state.heater.temp += ds.heatingTempOffset;              // Apply Offset while heating; encounters EMI
 
     if (state.heater.isHeating) {
         state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;

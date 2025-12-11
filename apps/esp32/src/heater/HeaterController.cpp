@@ -121,7 +121,7 @@ void HeaterController::update() {
     zvsDriver->update();
     
     const uint32_t elapsed = getElapsedTime();
-    hs().timer.set(elapsed);
+    hs().timer.set(elapsed / 1000);
 
     switch (state) {
         case State::HEATING:

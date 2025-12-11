@@ -23,6 +23,7 @@ struct DeviceState {
     PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
     PersistedObservable<uint8_t> temperatureOffset{"heater", "temperatureOffset", 0};
     PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
+    PersistedObservable<int8_t> heatingTempOffset{"temp", "heatingOffset", 0};
 
 
     // System Settings
