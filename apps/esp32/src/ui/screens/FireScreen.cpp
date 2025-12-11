@@ -25,6 +25,33 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.heater.power, ds.power);
     bindTo(state.heater.currentCycle, ds.currentCycle);
     bindTo(state.heater.isHeating, hs.isHeating);
+/*
+    String KLog;
+    hs.tempK.addListener([&](uint16_t val) {
+        if (!heater.isHeating()) return;
+        float t = heater.getElapsedTime() / 1000.0f;   // Sekunden
+        if (KLog.length() > 0) KLog += ",";
+        KLog += String(t, 1) + ":" + String(val);
+    });
+    
+    String IRLog;
+    hs.tempIR.addListener([&](uint16_t val) {
+        if (!heater.isHeating()) return;
+        float t = heater.getElapsedTime() / 1000.0f;   // Sekunden
+        if (IRLog.length() > 0) IRLog += ",";
+        IRLog += String(t, 1) + ":" + String(val);
+    });
+
+    hs.isHeating.addListener([&](bool isHeating) {
+        if (!isHeating) {
+            logPrint("IRLog", IRLog);
+            logPrint("KLog", KLog);
+
+            IRLog = "";
+            KLog = "";
+        }
+    });*/
+
 }
 
 String formatConsumption(float consumption) {
@@ -72,9 +99,6 @@ void FireScreen::draw() {
         drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
         drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
         drawStats(s, 160, 0, "Gestern", formatConsumption(state.consumption.yesterday));
-        //FireScreen::drawSessionRow(s.sprite, "Session", state.consumption.session, 0, COLOR_BG_2, COLOR_BG_2, COLOR_TEXT_PRIMARY, (state.heater.currentCycle == 1));
-        //FireScreen::drawSessionRow(s.sprite, "Heute", state.consumption.today, 55, COLOR_BG_3, COLOR_BG_2, COLOR_TEXT_PRIMARY);
-        //FireScreen::drawSessionRow(s.sprite, "Gestern", state.consumption.yesterday, 105, COLOR_BG, COLOR_BG, COLOR_TEXT_PRIMARY, false, true);
     });
 
     // Current Temp
@@ -170,11 +194,15 @@ bool triggeredTwice(uint32_t intervalMs) {
     return false;
 }
 
+bool button(InputEvent event, InputButton button, InputEventType type) {
+    return event.button == button && event.type == type;
+}
+
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
 
     
-    if (event.button == LEFT || event.button == RIGHT) {
+    if (event.button == LEFT || event.button == RIGHT && event.type == PRESS) {
         uint8_t delta = event.button == LEFT ? -1 : 1;
         ds.irEmissivity.update([delta](uint8_t val) { 
             uint8_t newVal = val + delta;
@@ -199,7 +227,6 @@ void FireScreen::handleInput(InputEvent event) {
 
     if (event.button == CENTER && event.type == PRESS) {
         HeaterCycle::next();
-        dirty();
         return;
     }
 
@@ -234,8 +261,7 @@ void FireScreen::handleInput(InputEvent event) {
 }
 
 
-void FireScreen::_handleHeatingTrigger(bool shouldStartHeating)
-{
+void FireScreen::_handleHeatingTrigger(bool shouldStartHeating) {
     if (shouldStartHeating) {
         heater.startHeating();
     } else if (heater.isHeating()) {

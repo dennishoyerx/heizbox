@@ -78,6 +78,7 @@ void HeaterController::startHeating() {
         startTime = millis() - (pauseTime - startTime);
 
         zvsDriver->setEnabled(true);
+        hs().isHeating.set(true);
         
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating resumed");
@@ -88,6 +89,7 @@ void HeaterController::stopHeating(bool finalize) {
     if (state != State::HEATING) return;
 
     zvsDriver->setEnabled(false);
+    hs().isHeating.set(false);
 
     if (finalize) {
         const uint32_t duration = millis() - startTime;
@@ -102,7 +104,6 @@ void HeaterController::stopHeating(bool finalize) {
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
-        hs().isHeating.set(false);
         hs().startTime.set(0);
         
         EventBus::instance().publish<HeaterStoppedData>(
@@ -151,7 +152,7 @@ void HeaterController::update() {
 
 void HeaterController::updateTemperature() {
     if (temperature.update(IR)) hs().tempIR.set(temperature.get(IR));
-    if (!isHeating() && temperature.update(K)) hs().tempK.set(temperature.get(K));
+    if (temperature.update(K)) hs().tempK.set(temperature.get(K));
 }
 
 HeaterController::State HeaterController::getState() const {

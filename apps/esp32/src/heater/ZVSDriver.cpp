@@ -47,6 +47,7 @@ void ZVSDriver::update() {
         return;
     }
     
+    if (sensorOffTimeMs == 0) return;
     const uint32_t now = millis();
     const uint32_t elapsed = now - phaseStartTime;
     
@@ -74,7 +75,7 @@ void ZVSDriver::update() {
                 const uint32_t offTime = calculateOffTime();
                 
                 // Check if we should enter sensor window
-                if (!tempMeasureCalled && elapsed >= (offTime - sensorOffTimeMs)) {
+                if (tempMeasureCalled && elapsed >= (offTime - sensorOffTimeMs)) {
                     transitionPhase(Phase::SENSOR_WINDOW);
                 }
                 

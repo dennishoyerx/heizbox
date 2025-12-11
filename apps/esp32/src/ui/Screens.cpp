@@ -65,13 +65,16 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     auto heaterMenuItems = MenuBuilder()
-         .addHeadline("ZVS ADVANCED")
-         .addObservableRange("IR Emissivity", state.irEmissivity, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "%")
+         .addHeadline("ZVS")
          .addObservableRange("Power", state.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
-         .addObservableRange("Temp Offset", state.temperatureOffset, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "°C")
+         .addObservableRangeMs("Sensor Off Time", state.tempSensorOffTime, 0, 220, 20, true)
          .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
-         .addObservableRangeMs("Temp Sensor", state.tempSensorOffTime, 50, 220, 10, true)
-         .build();
+         .addObservableToggle("Debug", state.zvsDebug)
+         .addHeadline("Temp Sensor")
+         .addObservableRangeMs("Read interval", state.tempSensorReadInterval, 50, 220, 10, true)
+         .addObservableRange("IR Emissivity", state.irEmissivity, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "%")
+         .addObservableRange("Temp Offset", state.temperatureOffset, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "°C")
+          .build();
     this->heaterMenuScreen = std::make_unique<GenericMenuScreen>("HEATER", std::move(heaterMenuItems));
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());
     
