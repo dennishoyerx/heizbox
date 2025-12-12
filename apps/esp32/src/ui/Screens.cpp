@@ -24,7 +24,7 @@ void Screens::setup(ScreenManager& screenManager) {
         screenManager.switchScreen(ScreenType::FIRE);
     });
     EventBus::instance().subscribe(EventType::OTA_UPDATE_FAILED, [&](const Event& event) {
-        screenManager.switchScreen(ScreenType::FIRE);
+        //screenManager.switchScreen(ScreenType::FIRE);
     });
 };
 

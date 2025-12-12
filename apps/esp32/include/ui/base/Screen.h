@@ -50,6 +50,13 @@ protected:
         });
     }
 
+    template <typename T>
+    void redrawOn(Observable<T>& observable) {
+        observable.addListener([this](T v) {
+            dirty();
+        });
+    }
+
 private:
 };
 

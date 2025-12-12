@@ -53,6 +53,15 @@ public:
     }
 
     // ---------------------------
+    // Typed Publish (komfortabel)
+    // ---------------------------
+    template<typename T>
+    void publish(EventType type, const T& payload) {
+        Event ev{ type, std::make_shared<T>(payload) };
+        publish(ev);
+    }
+
+    // ---------------------------
     // Untyped Publish
     // ---------------------------
     void publish(const Event& event) {
@@ -103,15 +112,6 @@ public:
                 );
             }
         }
-    }
-
-    // ---------------------------
-    // Typed Publish (komfortabel)
-    // ---------------------------
-    template<typename T>
-    void publish(EventType type, const T& payload) {
-        Event ev{ type, std::make_shared<T>(payload) };
-        publish(ev);
     }
 
     static EventBus& instance();

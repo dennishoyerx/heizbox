@@ -1,5 +1,6 @@
 #include "core/StateBinder.h"
 #include "core/DeviceState.h"
+#include "heater/HeaterState.h"
 #include "DisplayDriver.h"
 
 // ============================================================================
@@ -34,6 +35,7 @@ void StateBinder::bindDarkMode(DisplayDriver* display) {
 
 void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
+    auto& hs = HeaterState::instance();
 
     heater->setPower(state.power.get());
     state.power.addListener([heater](uint8_t val) {
@@ -45,11 +47,15 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->setAutoStopTime(time);
     });
 
-    state.targetTemperature.set(state.currentCycle == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
-    state.currentCycle.addListener([&state](uint8_t val) {
-        state.targetTemperature.set(val == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
+    hs.tempLimit.set(state.currentCycle == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
+    state.currentCycle.addListener([&hs, &state](uint8_t val) {
+        hs.tempLimit.set(val == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
     });
 
+    hs.tempCorrection.set(state.heatingTempOffset);
+    state.heatingTempOffset.addListener([&hs](int16_t val) {
+        hs.tempCorrection.set(val);
+    });
 
     heater->getIRTempSensor()->setEmissivity(state.irEmissivity  / 100.0f);
     state.irEmissivity.addListener([heater](uint8_t val) {

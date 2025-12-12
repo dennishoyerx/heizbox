@@ -41,9 +41,9 @@ void Device::setup() {
 }
 
 void Device::loop() {
+    heater.update();
     network->update();
     ui.update();
-    heater.update();
 
     heaterMonitor->checkHeatingStatus();
     heaterMonitor->checkHeatCycle();

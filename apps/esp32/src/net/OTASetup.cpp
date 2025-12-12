@@ -23,7 +23,8 @@ void OTASetup::setup() {
             case OTA_RECEIVE_ERROR: logPrint("OTA", "ERROR: Receive Failed"); break;
             case OTA_END_ERROR:     logPrint("OTA", "ERROR: End Failed"); break;
         }
-        EventBus::instance().publish(EventType::OTA_UPDATE_FAILED, &error);
+        EventBus::instance().publish<ota_error_t>(EventType::OTA_UPDATE_FAILED, error);
+
     });
 
     ArduinoOTA.begin();

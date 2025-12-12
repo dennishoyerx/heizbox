@@ -13,4 +13,6 @@ public:
     ScreenType getType() const override { return ScreenType::OTA_UPDATE; }
 
 private:
+    bool hasFailed = false;
+
 };

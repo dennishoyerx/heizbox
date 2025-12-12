@@ -13,6 +13,7 @@
 #include "heater/HeaterState.h"
 
 #include "utils/Logger.h"
+#include "utils/Format.h"
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
@@ -21,10 +22,18 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.consumption.session, ds.sessionConsumption);
     bindTo(state.consumption.today, ds.todayConsumption);
     bindTo(state.consumption.yesterday, ds.yesterdayConsumption);
-    bindTo(state.heater.targetTemp, ds.targetTemperature);
-    bindTo(state.heater.power, ds.power);
-    bindTo(state.heater.currentCycle, ds.currentCycle);
-    bindTo(state.heater.isHeating, hs.isHeating);
+    
+    redrawOn(ds.currentCycle);
+    redrawOn(hs.tempLimit);
+    redrawOn(hs.temp);
+    redrawOn(hs.tempIR);
+    redrawOn(hs.tempK);
+    redrawOn(hs.isHeating);
+    redrawOn(hs.power);
+
+    hs.isHeating.addListener([&](bool isHeating) {
+        if (!isHeating) _ui->clear();
+    });
 /*
     String KLog;
     hs.tempK.addListener([&](uint16_t val) {
@@ -54,34 +63,16 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 
 }
 
-String formatConsumption(float consumption) {
-        char consumptionStr[10];
-        int integer = (int)consumption;
-        int decimal = ((int)(consumption * 100 + 0.5f)) % 100;
-        if (integer > 0) {
-            sprintf(consumptionStr, "%d.%02dg", integer, decimal);
-        }
-        else {
-            sprintf(consumptionStr, ".%02dg", decimal);
-        }
-    return (String) consumptionStr;
-}
-
-void drawStats(RenderSurface& s, int x, int y, String label, String value) {
-    //s.sprite->setTextDatum(MC_DATUM);
-    s.text(x, y, value);
-    s.text(x, y + 24, label, TextSize::sm);
-}
 
 void FireScreen::draw() {
-    if (state.heater.isHeating) {
-        ZVSDriver* zvs = heater.getZVSDriver();
-        HeatUI::render(_ui, state.heater, zvs);
+    auto& hs = HeaterState::instance();
 
+    if (hs.isHeating) {
+        HeatUI::render(_ui, heater.getZVSDriver());
         return;
     }
 
-    _ui->withSurface(48, 48, 15, 110, [this](RenderSurface& s) {
+    _ui->withSurface(48, 48, 132, 130, [this](RenderSurface& s) {
         if (HeaterCycle::is(1)) {
             s.sprite->drawBitmap(0, 0, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
         } else {
@@ -91,10 +82,10 @@ void FireScreen::draw() {
     
     // Consumption
     _ui->withSurface(250, 50, 15, 190, {
-        {"isHeating", state.heater.isHeating},
+        {"isHeating", hs.isHeating},
         {"consumption", state.consumption.session},
         {"todayConsumption", state.consumption.today},
-        {"currentCycle", state.heater.currentCycle}
+        {"currentCycle", HeaterCycle::current()}
     }, [this](RenderSurface& s) {
         drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
         drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
@@ -102,32 +93,31 @@ void FireScreen::draw() {
     });
 
     // Current Temp
-    _ui->withSurface(88, 50, 0, 45, {
-        {"irTemp", state.heater.temp},
-        {"irTemp", state.heater.irTemp},
-        {"thermoTemp", state.heater.thermoTemp}
-    }, [this](RenderSurface& s) {
+    _ui->withSurface(88, 80, 0, 45, {
+        {"temp", hs.temp},
+        {"irTemp", hs.tempIR},
+        {"thermoTemp", hs.tempK}
+    }, [&hs](RenderSurface& s) {
         s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, 0, String(state.heater.temp), TextSize::lg);
-        s.text(30, 30, String(state.heater.thermoTemp), TextSize::lg);
-        s.text(30, 60, String(state.heater.irTemp), TextSize::md);
+        s.text(30, 0, String(hs.temp), TextSize::lg);
+        s.text(30, 30, String(hs.tempK), TextSize::lg);
+        s.text(30, 60, String(hs.tempIR), TextSize::md);
     });
 
     // Target Temp
     _ui->withSurface(104, 50, 84, 45, {
-        {"targetTemp", state.heater.targetTemp},
-        {"currentCycle", state.heater.currentCycle}
-    }, [this](RenderSurface& s) {
+        {"targetTemp", hs.tempLimit},
+    }, [&hs](RenderSurface& s) {
         s.sprite->drawBitmap(0, 0, image_target_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(40, 6, String(state.heater.targetTemp), TextSize::lg);
+        s.text(40, 6, String(hs.tempLimit), TextSize::lg);
     });
 
     // Power
     _ui->withSurface(100, 40, 192, 45, {
-        {"power", state.heater.power}
-    }, [this](RenderSurface& s) {
+        {"power", hs.power}
+    }, [&hs](RenderSurface& s) {
         s.sprite->drawBitmap(-10, 0, image_power_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, String(state.heater.power), TextSize::lg);
+        s.text(30, 6, String(hs.power), TextSize::lg);
     });
 return;
     // Seperator
@@ -138,54 +128,8 @@ return;
 }
 
 void FireScreen::update() {
-    auto& ds = DeviceState::instance();
-    state.heater.isHeating = heater.isHeating();
-
-    if (heater.getTemperature() != state.heater.temp) dirty();
-    if (heater.getIRTemperature() != state.heater.irTemp) dirty();
-
-    state.heater.thermoTemp =  heater.getTemperature();
-    state.heater.irTemp = heater.getIRTemperature();
-
-    state.heater.temp = state.heater.thermoTemp;
-    if (state.heater.isHeating) state.heater.temp += ds.heatingTempOffset;              // Apply Offset while heating; encounters EMI
-
-    if (state.heater.isHeating) {
-        state.heater.elapsedSeconds = heater.getElapsedTime() / 1000;
-        state.heater.progress = (float)state.heater.temp / state.heater.targetTemp;
-
-        if (state.heater.progress > 1.0f) state.heater.progress = 1.0f;
-
-        if (state.heater.temp > state.heater.targetTemp) {
-            _handleHeatingTrigger(false);
-            dirty();
-        }
-
-        static uint32_t lastSecond = 0;
-        if (state.heater.elapsedSeconds != lastSecond) {
-            lastSecond = state.heater.elapsedSeconds;
-            dirty();
-        }
-        dirty();
-    }
-
-    static bool wasHeating = false;
-    if (!state.heater.isHeating && wasHeating) {
-        _ui->clear();
-        dirty();
-    }
-    wasHeating = state.heater.isHeating;
-}
-
-std::vector<std::unique_ptr<MenuItem>>  FireScreen::buildMenu() {
-    auto& state = DeviceState::instance();
-
-    return MenuBuilder()
-         .addHeadline("ZVS ADVANCED")
-            .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100)
-            .addObservableRangeMs("Temp Sensor", state.tempSensorOffTime, 50, 220, 10)
-         
-         .build();
+    auto& hs = HeaterState::instance();
+     if (hs.isHeating) dirty();
 }
 
 bool triggeredTwice(uint32_t intervalMs) {
@@ -205,6 +149,7 @@ bool button(InputEvent event, InputButton button, InputEventType type) {
 
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
+    auto& hs = HeaterState::instance();
 
     
     if (event.button == LEFT || event.button == RIGHT && event.type == PRESS) {
@@ -226,7 +171,7 @@ void FireScreen::handleInput(InputEvent event) {
         PersistedObservable<uint16_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
         uint16_t temp = cycleTemp->update([delta](uint16_t val) { return val + delta; });
 
-        ds.targetTemperature.set(temp);
+        hs.tempLimit.set(temp);
         return;
     }
 
@@ -244,12 +189,12 @@ void FireScreen::handleInput(InputEvent event) {
 
     if (event.button == FIRE && event.type == HOLD_ONCE) {
         _handleHeatingTrigger(true);
-        ds.targetTemperature.set(HeaterConfig::MAX_TEMPERATURE);
+        hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
         return;
     }
     if (event.button == FIRE && event.type == RELEASE) {
         _handleHeatingTrigger(false);
-        ds.targetTemperature.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
+        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
     }
     

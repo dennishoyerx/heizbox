@@ -63,6 +63,7 @@ uint16_t HeaterController::getIRTemperature() {
 }
 
 void HeaterController::startHeating() {
+    auto& hs = HeaterState::instance();
     if (state == State::IDLE) {
         startTime = millis();
         
@@ -71,14 +72,14 @@ void HeaterController::startHeating() {
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating started");
 
-        hs().isHeating.set(true);
-        hs().startTime.set(startTime);
+        hs.isHeating.set(true);
+        hs.startTime.set(startTime);
         EventBus::instance().publish(EventType::HEATER_STARTED, nullptr);
     } else if (state == State::PAUSED) {
         startTime = millis() - (pauseTime - startTime);
 
         zvsDriver->setEnabled(true);
-        hs().isHeating.set(true);
+        hs.isHeating.set(true);
         
         transitionTo(State::HEATING);
         Serial.println("🔥 Heating resumed");
@@ -87,9 +88,10 @@ void HeaterController::startHeating() {
 
 void HeaterController::stopHeating(bool finalize) {
     if (state != State::HEATING) return;
+    auto& hs = HeaterState::instance();
 
     zvsDriver->setEnabled(false);
-    hs().isHeating.set(false);
+    hs.isHeating.set(false);
 
     if (finalize) {
         const uint32_t duration = millis() - startTime;
@@ -104,7 +106,7 @@ void HeaterController::stopHeating(bool finalize) {
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
-        hs().startTime.set(0);
+        hs.startTime.set(0);
         
         EventBus::instance().publish<HeaterStoppedData>(
             EventType::HEATER_STOPPED, {duration, startTime}
@@ -117,11 +119,15 @@ void HeaterController::stopHeating(bool finalize) {
 }
 
 void HeaterController::update() {
+    auto& hs = HeaterState::instance();
+    
     updateTemperature();
+    if (hs.temp > hs.tempLimit) stopHeating();
+
     zvsDriver->update();
     
     const uint32_t elapsed = getElapsedTime();
-    hs().timer.set(elapsed / 1000);
+    hs.timer.set(elapsed / 1000);
 
     switch (state) {
         case State::HEATING:
@@ -151,8 +157,16 @@ void HeaterController::update() {
 }
 
 void HeaterController::updateTemperature() {
-    if (temperature.update(IR)) hs().tempIR.set(temperature.get(IR));
-    if (temperature.update(K)) hs().tempK.set(temperature.get(K));
+    auto& hs = HeaterState::instance();
+    uint16_t temp;
+
+    if (temperature.update(IR)) hs.tempIR.set(temperature.get(IR));
+    if (temperature.update(K)) {
+        temp = hs.tempK.set(temperature.get(K));
+        if (temp <= 3) return;
+        if (isHeating()) temp += hs.tempCorrection;
+        hs.temp.set(temp);
+    }
 }
 
 HeaterController::State HeaterController::getState() const {

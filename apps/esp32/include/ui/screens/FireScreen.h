@@ -21,7 +21,6 @@ public:
     void handleInput(InputEvent event) override;
     ScreenType getType() const override { return ScreenType::FIRE; }
     void _handleHeatingTrigger(bool shouldStartHeating);
-    std::vector<std::unique_ptr<MenuItem>>  buildMenu();
 
 private:
     HeaterController& heater;
@@ -29,6 +28,5 @@ private:
     
     struct {
         Consumption consumption;
-        HeatState heater;
     } state;
 };
