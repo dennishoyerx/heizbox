@@ -1,4 +1,5 @@
 #include "heater/HeaterMonitor.h"
+#include "heater/HeaterCycle.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 
@@ -21,8 +22,8 @@ void HeaterMonitor::checkHeatCycle() {
         const uint32_t durationMs = heater.getLastCycleDuration();
         const uint32_t durationSec = durationMs / 1000;
 
-        uint8_t currentCycle = DeviceState::instance().currentCycle.get();
-        DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+        uint8_t currentCycle = HeaterCycle::current();
+        HeaterCycle::next();
 
         heater.clearCycleFinishedFlag();
 

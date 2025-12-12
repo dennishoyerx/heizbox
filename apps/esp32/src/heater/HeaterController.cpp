@@ -122,7 +122,7 @@ void HeaterController::update() {
     auto& hs = HeaterState::instance();
     
     updateTemperature();
-    if (hs.temp > hs.tempLimit) stopHeating();
+    if (hs.temp > hs.tempLimit) stopHeating(true);
 
     zvsDriver->update();
     

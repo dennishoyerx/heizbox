@@ -72,24 +72,16 @@ void FireScreen::draw() {
         return;
     }
 
-    _ui->withSurface(48, 48, 132, 130, [this](RenderSurface& s) {
+    _ui->withSurface(200, 70, 15, 130, [this](RenderSurface& s) {
+        s.text(0, 0, "Off Time");
+    });
+
+    _ui->withSurface(48, 48, 232, 130, [this](RenderSurface& s) {
         if (HeaterCycle::is(1)) {
             s.sprite->drawBitmap(0, 0, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
         } else {
             s.sprite->fillRect(0, 0, 48, 48, COLOR_BG);
         }
-    });
-    
-    // Consumption
-    _ui->withSurface(250, 50, 15, 190, {
-        {"isHeating", hs.isHeating},
-        {"consumption", state.consumption.session},
-        {"todayConsumption", state.consumption.today},
-        {"currentCycle", HeaterCycle::current()}
-    }, [this](RenderSurface& s) {
-        drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
-        drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
-        drawStats(s, 160, 0, "Gestern", formatConsumption(state.consumption.yesterday));
     });
 
     // Current Temp
@@ -119,6 +111,18 @@ void FireScreen::draw() {
         s.sprite->drawBitmap(-10, 0, image_power_40, 40, 40, COLOR_TEXT_PRIMARY);
         s.text(30, 6, String(hs.power), TextSize::lg);
     });
+    
+    // Consumption
+    _ui->withSurface(250, 50, 15, 190, {
+        {"isHeating", hs.isHeating},
+        {"consumption", state.consumption.session},
+        {"todayConsumption", state.consumption.today},
+        {"currentCycle", HeaterCycle::current()}
+    }, [this](RenderSurface& s) {
+        drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
+        drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
+        drawStats(s, 160, 0, "Gestern", formatConsumption(state.consumption.yesterday));
+    });
 return;
     // Seperator
     _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
@@ -143,16 +147,33 @@ bool triggeredTwice(uint32_t intervalMs) {
     return false;
 }
 
-bool button(InputEvent event, InputButton button, InputEventType type) {
-    return event.button == button && event.type == type;
+bool button(InputEvent event,
+            std::initializer_list<InputButton> buttons,
+            std::initializer_list<InputEventType> types) {
+    bool bMatch = false;
+    for (auto b : buttons) {
+        if (event.button == b) {
+            bMatch = true;
+            break;
+        }
+    }
+
+    if (!bMatch) return false;
+
+    for (auto t : types) {
+        if (event.type == t) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
-    
-    if (event.button == LEFT || event.button == RIGHT && event.type == PRESS) {
+    if (button(event, {LEFT, RIGHT}, {PRESS})) {
         uint8_t delta = event.button == LEFT ? -1 : 1;
         ds.irEmissivity.update([delta](uint8_t val) { 
             uint8_t newVal = val + delta;
@@ -164,8 +185,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     
-    if ((event.button == UP || event.button == DOWN) && 
-        (event.type == PRESS || event.type == HOLD)) {
+    if (button(event, {UP, DOWN}, {PRESS, HOLD})) {
         float delta = event.button == UP ? 1 : -1;
         
         PersistedObservable<uint16_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
@@ -175,24 +195,24 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (event.button == CENTER && event.type == PRESS) {
+    if (button(event, {CENTER}, {PRESS})) {
         HeaterCycle::next();
         return;
     }
 
 
     static uint32_t _temp;
-    if (event.button == FIRE && event.type == PRESSED) {
+    if (button(event, {FIRE}, {PRESSED})) {
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }
 
-    if (event.button == FIRE && event.type == HOLD_ONCE) {
+    if (button(event, {FIRE}, {HOLD_ONCE})) {
         _handleHeatingTrigger(true);
         hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
         return;
     }
-    if (event.button == FIRE && event.type == RELEASE) {
+    if (button(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
         hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
