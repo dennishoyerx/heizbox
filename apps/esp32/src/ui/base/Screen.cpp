@@ -32,8 +32,47 @@ void Screen::dirty() {
     }
 }
 
-/*
-void Screen::Input(InputEventType type, InputButton button, std::function<void()> callback) {
 
+bool Screen::input(InputEvent event,
+            std::initializer_list<InputButton> buttons,
+            std::initializer_list<InputEventType> types) {
+    bool bMatch = false;
+    for (auto b : buttons) {
+        if (event.button == b) {
+            bMatch = true;
+            break;
+        }
+    }
+
+    if (!bMatch) return false;
+
+    for (auto t : types) {
+        if (event.type == t) {
+            return true;
+        }
+    }
+
+    return false;
 }
-*/
+
+template <typename... Ts>
+void Screen::bindMultiple(Observable<Ts>&... observables) {
+    (bind(observables), ...);
+}
+
+template <typename T>
+void Screen::bind(Observable<T>& observable) {
+    observable.addListener([this](T v) {
+        dirty();
+    });
+}
+
+
+template <typename T>
+void Screen::bindTo(T& member, Observable<T>& observable) {
+    member = observable.get();
+    observable.addListener([this, &member](T v) {
+        member = v;
+        dirty();
+    });
+}

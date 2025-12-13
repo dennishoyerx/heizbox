@@ -20,10 +20,6 @@ struct DeviceState {
     PersistedObservable<uint16_t> targetTemperature{"heater", "temperature", 170};
     PersistedObservable<uint16_t> targetTemperatureCycle1{"heater", "temperatureCycle1", 200};
     PersistedObservable<uint16_t> targetTemperatureCycle2{"heater", "temperatureCycle2", 220};
-    PersistedObservable<uint8_t> heatCycleTempDelta{"heater", "heatCycleTempDelta", 15};
-    PersistedObservable<uint8_t> temperatureOffset{"heater", "temperatureOffset", 0};
-    PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
-    PersistedObservable<int8_t> heatingTempOffset{"temp", "heatingOffset", 0};
 
 
     // System Settings
@@ -39,14 +35,10 @@ struct DeviceState {
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
 
-    PersistedObservable<bool> zvsDebug{"zvs", "debug", false};
-    PersistedObservable<bool> oscDebug{"zvs", "osc", false};
-    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
-    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
-    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorReadInterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
-
     // Debug
     Observable<bool> debugInput{false};
+    PersistedObservable<bool> zvsDebug{"zvs", "debug", false};
+    PersistedObservable<bool> oscDebug{"zvs", "osc", false};
 
 
     // Session State

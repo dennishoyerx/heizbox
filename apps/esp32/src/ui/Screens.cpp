@@ -69,17 +69,16 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     auto heaterMenuItems = MenuBuilder()
          .addHeadline("ZVS")
-         .addObservableRange("Power", state.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
-         .addObservableRangeMs("Off Period", state.tempSensorOffTime, 0, 220, 20, true)
-         .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
+         .addObservableRange("Power", hs.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
+         .addObservableRangeMs("Off Period", hs.tempSensorOffTime, 0, 220, 20, true)
+         .addObservableRangeMs("Duty Period", hs.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
          .addObservableToggle("Debug", state.zvsDebug)
          .addHeadline("Heat Cycle")
          .addObservableRangeMs("Timeout", hs.cycleTimeout, 10000, 1200000, 5000)
          .addHeadline("Temperature")
-         .addObservableRange("Heating Offset", state.heatingTempOffset, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
-         .addObservableRangeMs("Read interval", state.tempSensorReadInterval, 50, 220, 10, true)
-         .addObservableRange("IR Emissivity", state.irEmissivity, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "%")
-         .addObservableRange("Temp Offset", state.temperatureOffset, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "°C")
+         .addObservableRange("Heating Offset", hs.tempCorrection, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
+         .addObservableRangeMs("Read interval", hs.tempSensorReadInterval, 50, 220, 10, true)
+         .addObservableRange("IR Emissivity", hs.irEmissivity, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "%")
           .build();
     this->heaterMenuScreen = std::make_unique<GenericMenuScreen>("HEATER", std::move(heaterMenuItems));
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());

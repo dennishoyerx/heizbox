@@ -3,15 +3,7 @@
 #include "Observable.h"
 #include "Config.h"
 
-enum Test {
-    TEST1,
-    TEST2,
-    TEST3
-};
-
-
 struct HeaterState {
-    Observable<Test> xx{TEST1};
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint32_t> cycleTimeout{"heater", "cycleTimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     
@@ -25,7 +17,14 @@ struct HeaterState {
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
     Observable<uint16_t> tempLimit{0};
-    Observable<int8_t> tempCorrection{0};
+
+    PersistedObservable<int8_t> tempCorrection{"heater", "tempCorrection", 0};
+    PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
+    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
+    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
+    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorReadInterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
+
+
 
     static HeaterState& instance();
 

@@ -45,29 +45,23 @@ void StateBinder::bindHeater(HeaterController* heater) {
         if(HeaterCycle::is(2)) hs.tempLimit.set(val);
     });
 
-
-    hs.tempCorrection.set(state.heatingTempOffset);
-    state.heatingTempOffset.addListener([&hs](int16_t val) {
-        hs.tempCorrection.set(val);
-    });
-
-    heater->getIRTempSensor()->setEmissivity(state.irEmissivity  / 100.0f);
-    state.irEmissivity.addListener([heater](uint8_t val) {
+    heater->getIRTempSensor()->setEmissivity(hs.irEmissivity  / 100.0f);
+    hs.irEmissivity.addListener([heater](uint8_t val) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });
     
-    heater->getTempSensor()->setReadInterval(state.tempSensorReadInterval.get());
-    state.tempSensorReadInterval.addListener([heater](uint32_t time) {
+    heater->getTempSensor()->setReadInterval(hs.tempSensorReadInterval.get());
+    hs.tempSensorReadInterval.addListener([heater](uint32_t time) {
         heater->getTempSensor()->setReadInterval(time);
     });
     
-    heater->getZVSDriver()->setSensorOffTime(state.tempSensorOffTime.get());
-    state.tempSensorOffTime.addListener([heater](uint32_t time) {
+    heater->getZVSDriver()->setSensorOffTime(hs.tempSensorOffTime.get());
+    hs.tempSensorOffTime.addListener([heater](uint32_t time) {
         heater->getZVSDriver()->setSensorOffTime(time);
     });
 
-    heater->getZVSDriver()->setPeriod(state.zvsDutyCyclePeriodMs.get());
-    state.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
+    heater->getZVSDriver()->setPeriod(hs.zvsDutyCyclePeriodMs.get());
+    hs.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
         heater->getZVSDriver()->setPeriod(val);
     });
 }

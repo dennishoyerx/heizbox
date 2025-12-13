@@ -42,21 +42,18 @@ protected:
     //void Input(InputEventType type, InputButton button, std::function<void()> callback);
 
     template <typename T>
-    void bindTo(T& member, Observable<T>& observable) {
-        member = observable.get();
-        observable.addListener([this, &member](T v) {
-            member = v;
-            dirty();
-        });
-    }
+    void bindTo(T& member, Observable<T>& observable);
 
     template <typename T>
-    void redrawOn(Observable<T>& observable) {
-        observable.addListener([this](T v) {
-            dirty();
-        });
-    }
+    void bind(Observable<T>& observable);
 
+    template <typename... Ts>
+    void bindMultiple(Observable<Ts>&... observables);
+
+protected:
+    bool input(InputEvent event,
+            std::initializer_list<InputButton> buttons,
+            std::initializer_list<InputEventType> types);
 private:
 };
 

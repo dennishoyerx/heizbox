@@ -4,6 +4,7 @@
 #include "ui/base/Screen.h"
 #include "ui/components/ZVSOscilloscope.h"
 #include "heater/HeaterState.h"
+#include "heater/HeaterCycle.h"
 #include <algorithm>
 
 float smoothProgress(float target) {
@@ -71,14 +72,12 @@ void HeatUI::Temperature(RenderSurface s) {
     s.text(45, 100, String(hs.tempIR), TextSize::lg);
 
     s.text(150, 30, String(hs.tempLimit), TextSize::xl);
-    s.text(150, 70, String(DeviceState::instance().irEmissivity / 100.0f), TextSize::sm);
+    s.text(150, 70, String(hs.irEmissivity / 100.0f), TextSize::sm);
 }
 
 
 void HeatUI::Cycle(RenderSurface s) {
-    if (DeviceState::instance().currentCycle == 1) {
-        s.sprite->drawBitmap(s.width() - 48, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
-    }
+    if (HeaterCycle::is(1)) s.sprite->drawBitmap(s.width() - 48, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
 }
 
 void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {

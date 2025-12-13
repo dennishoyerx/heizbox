@@ -25,13 +25,9 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.consumption.today, ds.todayConsumption);
     bindTo(state.consumption.yesterday, ds.yesterdayConsumption);
     
-    redrawOn(ds.currentCycle);
-    redrawOn(hs.tempLimit);
-    redrawOn(hs.temp);
-    redrawOn(hs.tempIR);
-    redrawOn(hs.tempK);
-    redrawOn(hs.isHeating);
-    redrawOn(hs.power);
+    bindMultiple(hs.isHeating, hs.power, ds.currentCycle, 
+        hs.tempLimit, hs.temp, hs.tempIR, hs.tempK
+    );
 
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
@@ -53,17 +49,17 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "IR Emissivity", ds.irEmissivity, 0, 100, 1,
+        "IR Emissivity", hs.irEmissivity, 0, 100, 1,
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
-        "Temp Sensor Off Time", ds.tempSensorOffTime, 0, 220, 20,
+        "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,
         [](const uint32_t& v){ return (String) v + "ms"; }
     ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
-        "Temp Read Interval", ds.tempSensorReadInterval, 0, 220, 20,
+        "Temp Read Interval", hs.tempSensorReadInterval, 0, 220, 20,
         [](const uint32_t& v){ return (String) v + "ms"; }
     ));
 
@@ -200,104 +196,49 @@ bool triggeredTwice(uint32_t intervalMs) {
     return false;
 }
 
-bool button(InputEvent event,
-            std::initializer_list<InputButton> buttons,
-            std::initializer_list<InputEventType> types) {
-    bool bMatch = false;
-    for (auto b : buttons) {
-        if (event.button == b) {
-            bMatch = true;
-            break;
-        }
-    }
-
-    if (!bMatch) return false;
-
-    for (auto t : types) {
-        if (event.type == t) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
     static uint32_t _temp;
-    if (button(event, {FIRE}, {PRESSED})) {
+    if (input(event, {FIRE}, {PRESSED})) {
         _handleHeatingTrigger(!heater.isHeating());
         return;
     }
 
-    if (button(event, {FIRE}, {HOLD_ONCE})) {
+    if (input(event, {FIRE}, {HOLD_ONCE})) {
         _handleHeatingTrigger(true);
         hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
         return;
     }
-    if (button(event, {FIRE}, {RELEASE})) {
+    if (input(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
         hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
         return;
     }
     
-    if (button(event, {CENTER}, {PRESS})) {
+    if (input(event, {CENTER}, {PRESS})) {
         HeaterCycle::next();
         return;
     }
 
-    if (button(event, {LEFT}, {PRESS, PRESSED, HOLD})) {
+    if (input(event, {LEFT}, {PRESS, PRESSED, HOLD})) {
         menu.prevOption();
         dirty();
     }
-    if (button(event, {RIGHT}, {PRESS})) {
+    if (input(event, {RIGHT}, {PRESS})) {
         menu.nextOption();
         dirty();
     }
 
-    if (button(event, {UP}, {PRESS, HOLD})) {
+    if (input(event, {UP}, {PRESS, HOLD})) {
         menu.increment();
+        dirty();
     }
-    if (button(event, {DOWN}, {PRESS, HOLD})) {
+    if (input(event, {DOWN}, {PRESS, HOLD})) {
         menu.decrement();
+        dirty();
     }
-
-    return;
-    if (button(event, {LEFT, RIGHT}, {PRESS})) {
-        uint8_t delta = event.button == LEFT ? -1 : 1;
-        ds.irEmissivity.update([delta](uint8_t val) { 
-            uint8_t newVal = val + delta;
-            if (newVal == 0) newVal = 1;
-            if (newVal == 101) newVal = 100;
-            return newVal; 
-        });
-        return;
-    }
-
-    
-    if (button(event, {UP, DOWN}, {PRESS, HOLD})) {
-        float delta = event.button == UP ? 1 : -1;
-        
-        PersistedObservable<uint16_t>* cycleTemp = HeaterCycle::is(1) ? &ds.targetTemperatureCycle1 : &ds.targetTemperatureCycle2;
-        uint16_t temp = cycleTemp->update([delta](uint16_t val) { return val + delta; });
-
-        hs.tempLimit.set(temp);
-        return;
-    }
-
-
-    /*if (event.button == LEFT || event.button == RIGHT) {
-        uint8_t delta = event.button == LEFT ? -10 : 10;
-        ds.power.update([delta](uint8_t val) { 
-            uint8_t newVal = val + delta;
-            if (newVal < 30) newVal = 30;
-            if (newVal > 100) newVal = 100;
-            return newVal; 
-        });
-        return;
-    }*/
 }
 
 
