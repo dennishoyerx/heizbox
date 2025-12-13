@@ -15,6 +15,8 @@
 #include "utils/Logger.h"
 #include "utils/Format.h"
 
+#include <ObservableMenuItem.h>
+
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
@@ -34,7 +36,22 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
     });
-/*
+    
+    menu.addItem(std::make_unique<ObservableValueItem<float>>(
+        "tempLimit",
+        hs.tempLimit,
+        0.0f, 100.0f, 0.5f,
+        [](const float& v){ char buf[16]; snprintf(buf, sizeof(buf), "%.1fC", v); return std::string(buf); }
+    ));
+    
+    menu.addItem(std::make_unique<ObservableValueItem<int>>(
+        "Power",
+        hs.power,
+        0, 100, 10,
+        [](const int& v){ return std::to_string(v) + std::string("%"); }
+    ));
+
+    /*
     String KLog;
     hs.tempK.addListener([&](uint16_t val) {
         if (!heater.isHeating()) return;
@@ -72,8 +89,13 @@ void FireScreen::draw() {
         return;
     }
 
-    _ui->withSurface(200, 70, 15, 130, [this](RenderSurface& s) {
-        s.text(0, 0, "Off Time");
+    _ui->withSurface(200, 70, 15, 122, [this](RenderSurface& s) {
+        const IMenuItem* cur = menu.current();
+        const IMenuItem* left = menu.at((menu.index() + menu.count() - 1) % (menu.count() ? menu.count() : 1));
+        const IMenuItem* right = menu.at((menu.index() + 1) % (menu.count() ? menu.count() : 1));
+
+        s.text(0, 0, cur->name());
+        s.text(0, 30, cur->valueString());
     });
 
     _ui->withSurface(48, 48, 232, 130, [this](RenderSurface& s) {
@@ -173,6 +195,45 @@ void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
+    static uint32_t _temp;
+    if (button(event, {FIRE}, {PRESSED})) {
+        _handleHeatingTrigger(!heater.isHeating());
+        return;
+    }
+
+    if (button(event, {FIRE}, {HOLD_ONCE})) {
+        _handleHeatingTrigger(true);
+        hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
+        return;
+    }
+    if (button(event, {FIRE}, {RELEASE})) {
+        _handleHeatingTrigger(false);
+        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
+        return;
+    }
+    
+    if (button(event, {CENTER}, {PRESS})) {
+        HeaterCycle::next();
+        return;
+    }
+
+    if (button(event, {LEFT}, {PRESS})) {
+        menu.prevOption();
+        dirty();
+    }
+    if (button(event, {RIGHT}, {PRESS})) {
+        menu.nextOption();
+        dirty();
+    }
+
+    if (button(event, {UP}, {PRESS, HOLD})) {
+        menu.increment();
+    }
+    if (button(event, {DOWN}, {PRESS, HOLD})) {
+        menu.decrement();
+    }
+
+    return;
     if (button(event, {LEFT, RIGHT}, {PRESS})) {
         uint8_t delta = event.button == LEFT ? -1 : 1;
         ds.irEmissivity.update([delta](uint8_t val) { 
@@ -195,29 +256,7 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (button(event, {CENTER}, {PRESS})) {
-        HeaterCycle::next();
-        return;
-    }
 
-
-    static uint32_t _temp;
-    if (button(event, {FIRE}, {PRESSED})) {
-        _handleHeatingTrigger(!heater.isHeating());
-        return;
-    }
-
-    if (button(event, {FIRE}, {HOLD_ONCE})) {
-        _handleHeatingTrigger(true);
-        hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
-        return;
-    }
-    if (button(event, {FIRE}, {RELEASE})) {
-        _handleHeatingTrigger(false);
-        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
-        return;
-    }
-    
     /*if (event.button == LEFT || event.button == RIGHT) {
         uint8_t delta = event.button == LEFT ? -10 : 10;
         ds.power.update([delta](uint8_t val) { 

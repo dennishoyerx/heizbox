@@ -5,6 +5,8 @@
 #include "heater/HeaterController.h"
 #include "ui/base/GenericMenuScreen.h"
 #include <functional>
+#include <Menu.h>
+
 
 struct Consumption {
     float session;
@@ -25,7 +27,8 @@ public:
 private:
     HeaterController& heater;
     std::unique_ptr<GenericMenuScreen> heaterMenuScreen;
-    
+    MenuManager menu;
+
     struct {
         Consumption consumption;
     } state;
