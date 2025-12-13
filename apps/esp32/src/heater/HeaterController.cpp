@@ -9,11 +9,7 @@ HeaterController::HeaterController()
       power(100),
       startTime(0), 
       pauseTime(0),
-      autoStopTime(60000), 
-      lastCycleDuration(0), 
-      cycleFinishedFlag(false)
-{
-    // Initialize ZVS driver
+      autoStopTime(60000) {
     zvsDriver = new ZVSDriver(
         HardwareConfig::HEATER_MOSFET_PIN,
         HardwareConfig::STATUS_LED_PIN
@@ -21,19 +17,23 @@ HeaterController::HeaterController()
 }
 
 void HeaterController::init() {
-    // Initialize ZVS driver
     zvsDriver->init();
     zvsDriver->setPeriod(HeaterConfig::DUTY_CYCLE_PERIOD_MS);
     zvsDriver->setSensorOffTime(HeaterConfig::SENSOR_OFF_TIME_MS);
     zvsDriver->setPower(power);
     
-    // Register temperature measurement callback
+    temperature.init();
+
+    zvsDriver->onPhaseChange([this](ZVSDriver::Phase phase) {
+        auto& hs = HeaterState::instance();
+        hs.zvsOn.set(phase == ZVSDriver::Phase::ON_PHASE);
+    });
+
     zvsDriver->onTempMeasure([this]() {
         // This is called during the OFF phase - safe to measure temperature
         temperature.update(K, true);
     });
     
-    temperature.init();
     
     Serial.println("🔥 Heater initialized with ZVS driver");
 }
@@ -74,7 +74,6 @@ void HeaterController::startHeating() {
 
         hs.isHeating.set(true);
         hs.startTime.set(startTime);
-        EventBus::instance().publish(EventType::HEATER_STARTED, nullptr);
     } else if (state == State::PAUSED) {
         startTime = millis() - (pauseTime - startTime);
 
@@ -95,22 +94,11 @@ void HeaterController::stopHeating(bool finalize) {
 
     if (finalize) {
         const uint32_t duration = millis() - startTime;
-        lastCycleDuration = duration;
-
-        // Only count cycles longer than a minimum threshold
-        if (duration >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
-            cycleCounter++;
-            cycleFinishedFlag = true;
-        }
-
+        
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
         hs.startTime.set(0);
-        
-        EventBus::instance().publish<HeaterStoppedData>(
-            EventType::HEATER_STOPPED, {duration, startTime}
-        );
     } else {
         pauseTime = millis();
         transitionTo(State::PAUSED);
@@ -122,7 +110,7 @@ void HeaterController::update() {
     auto& hs = HeaterState::instance();
     
     updateTemperature();
-    if (hs.temp > hs.tempLimit) stopHeating(true);
+    if (hs.temp > hs.tempLimit) stopHeating(false);
 
     zvsDriver->update();
     
@@ -138,12 +126,14 @@ void HeaterController::update() {
             break;
 
         case State::PAUSED:
-            if (millis() - pauseTime >= HeaterConfig::HEATCYCLE_MIN_DURATION_MS) {
+            if (millis() - pauseTime >= hs.cycleTimeout) {
                 Serial.println("Pause timeout, finalizing cycle.");
                 const uint32_t duration = pauseTime - startTime;
-                lastCycleDuration = duration;
-                cycleCounter++;
-                cycleFinishedFlag = true;
+                
+                EventBus::instance().publish<CycleFinishedData>(
+                    EventType::CYCLE_FINISHED, {duration, startTime}
+                );
+
                 startTime = millis();
                 transitionTo(State::IDLE);
             }
@@ -198,16 +188,4 @@ void HeaterController::setAutoStopTime(uint32_t time) {
 
 uint32_t HeaterController::getAutoStopTime() const {
     return autoStopTime;
-}
-
-uint32_t HeaterController::getLastCycleDuration() const {
-    return lastCycleDuration;
-}
-
-bool HeaterController::isCycleFinished() const {
-    return cycleFinishedFlag;
-}
-
-void HeaterController::clearCycleFinishedFlag() {
-    cycleFinishedFlag = false;
 }

@@ -34,6 +34,16 @@ void Device::setup() {
 
     StateBinder::bindAll(&ui, &heater);
 
+    
+    EventBus::instance().subscribe<CycleFinishedData>(
+        EventType::CYCLE_FINISHED,
+        [](const CycleFinishedData& d){
+            std::string msg = "Stopped: " + std::to_string(d.duration) +
+                  " ms, started: " + std::to_string(d.startedAt) + "\n";
+            logPrint("Heater", msg);
+        }
+    );
+
     network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
     ota->setup();
 
@@ -46,7 +56,6 @@ void Device::loop() {
     ui.update();
 
     heaterMonitor->checkHeatingStatus();
-    heaterMonitor->checkHeatCycle();
 
     ota->handle();
 }

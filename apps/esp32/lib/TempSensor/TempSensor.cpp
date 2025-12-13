@@ -4,7 +4,7 @@
 
 TempSensor::TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs)
     : sckPin(sck_pin), csPin(cs_pin), soPin(so_pin),
-      lastValidTemp(NAN), clickThreshold(190.0f), clickReached(false),
+      lastValidTemp(NAN), 
       errorCount(0), lastReadTime(0), readInterval(readIntervalMs)
 {
     thermocouple = new MAX6675(sck_pin, cs_pin, so_pin);
@@ -70,18 +70,4 @@ bool TempSensor::validateReading(float temp) const {
 
 bool TempSensor::hasError() const {
     return isnan(lastValidTemp);
-}
-
-void TempSensor::setClickThreshold(float clickTemp) {
-    clickThreshold = clickTemp;
-}
-
-bool TempSensor::hasReachedClickTemp() {
-    float temp = getTemperature();
-    if (!isnan(temp) && temp >= clickThreshold && !clickReached) {
-        clickReached = true;
-        return true;
-    }
-    if (temp < clickThreshold) clickReached = false;
-    return false;
 }

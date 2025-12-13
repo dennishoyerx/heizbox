@@ -13,31 +13,9 @@
  */
 class StateBinder {
 public:
-    /**
-     * @brief Binds the display brightness state to the DisplayDriver.
-     * @param display Pointer to the DisplayDriver instance.
-     */
-    static void bindBrightness(DisplayDriver* display);
-
-    /**
-     * @brief Binds the dark mode state to the DisplayDriver.
-     * @param display Pointer to the DisplayDriver instance.
-     */
-    static void bindDarkMode(DisplayDriver* display);
-
-    /**
-     * @brief Binds the auto-stop time state to the HeaterController.
-     * @param heater Pointer to the HeaterController instance.
-     */
+    static void bindDisplay(DisplayDriver* display);
     static void bindHeater(HeaterController* heater);
-
     static void bindDebug(DeviceUI* ui);
 
-    /**
-     * @brief Binds all relevant states to their respective managers.
-     * @param display Pointer to the DisplayDriver instance.
-     * @param clock Pointer to the ClockManager instance.
-     * @param heater Pointer to the HeaterController instance.
-     */
     static void bindAll(DeviceUI* ui, HeaterController* heater);
 };

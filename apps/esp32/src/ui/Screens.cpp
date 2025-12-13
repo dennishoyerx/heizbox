@@ -1,5 +1,6 @@
 #include "ui/Screens.h"
 #include "core/EventBus.h"
+#include "heater/HeaterState.h"
 
 Screens::Screens(HeaterController& heater): heater(heater) {}
 
@@ -30,6 +31,8 @@ void Screens::setup(ScreenManager& screenManager) {
 
 void Screens::setupMenus(ScreenManager& screenManager) {
     auto& state = DeviceState::instance();
+    auto& hs = HeaterState::instance();
+
 
     auto menuItems = MenuBuilder()
          .addAction("Debug", [&]() {
@@ -70,6 +73,8 @@ void Screens::setupMenus(ScreenManager& screenManager) {
          .addObservableRangeMs("Off Period", state.tempSensorOffTime, 0, 220, 20, true)
          .addObservableRangeMs("Duty Period", state.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
          .addObservableToggle("Debug", state.zvsDebug)
+         .addHeadline("Heat Cycle")
+         .addObservableRangeMs("Timeout", hs.cycleTimeout, 10000, 1200000, 5000)
          .addHeadline("Temperature")
          .addObservableRange("Heating Offset", state.heatingTempOffset, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
          .addObservableRangeMs("Read interval", state.tempSensorReadInterval, 50, 220, 10, true)

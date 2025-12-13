@@ -39,6 +39,7 @@ struct HeaterConfig {
     static constexpr uint16_t MAX_TEMPERATURE = 260;
     static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 220;
 
+    static constexpr uint32_t CYCLE_TIMEOUT_MS = 120000;
     static constexpr uint32_t HEATCYCLE_MIN_DURATION_MS = 120000;
     static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
     static constexpr uint32_t SENSOR_OFF_TIME_MS = 200;

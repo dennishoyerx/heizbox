@@ -4,35 +4,19 @@
 #include "heater/HeaterCycle.h"
 #include "DisplayDriver.h"
 
-// ============================================================================
-// State Bindings - UI ↔ State Synchronisation
-// ============================================================================
+void StateBinder::bindDisplay(DisplayDriver* display) {
+    auto& ds = DeviceState::instance();
 
-void StateBinder::bindBrightness(DisplayDriver* display) {
-    auto& state = DeviceState::instance();
-
-    // Initial sync
-    display->setBrightness(state.brightness.get());
-
-    // Listen to state changes
-    state.brightness.addListener([display](uint8_t value) {
+    display->setBrightness(ds.brightness.get());
+    ds.brightness.addListener([display](uint8_t value) {
         display->setBrightness(value);
     });
-}
 
-void StateBinder::bindDarkMode(DisplayDriver* display) {
-    auto& state = DeviceState::instance();
-
-    // Initial sync
-    //display->setDarkMode(state.darkMode.get());
-
-    // Listen to state changes
-    state.darkMode.addListener([display](bool enabled) {
+    //display->setDarkMode(ds.darkMode.get());
+    ds.darkMode.addListener([display](bool enabled) {
         //display->setDarkMode(enabled);
     });
 }
-
-
 
 void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
@@ -96,8 +80,7 @@ void StateBinder::bindDebug(DeviceUI* ui) {
 }
 
 void StateBinder::bindAll(DeviceUI* ui, HeaterController* heater) {
-    bindBrightness(ui->getDisplay());
-    bindDarkMode(ui->getDisplay());
+    bindDisplay(ui->getDisplay());
     bindHeater(heater);
     bindDebug(ui);
 }

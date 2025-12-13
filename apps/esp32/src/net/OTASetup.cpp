@@ -16,15 +16,7 @@ void OTASetup::setup() {
     });
 
     ArduinoOTA.onError([this](ota_error_t error) {
-        switch (error) {
-            case OTA_AUTH_ERROR:    logPrint("OTA", "ERROR: Auth Failed"); break;   
-            case OTA_BEGIN_ERROR:   logPrint("OTA", "ERROR: Begin Failed"); break;
-            case OTA_CONNECT_ERROR: logPrint("OTA", "ERROR: Connect Failed"); break;
-            case OTA_RECEIVE_ERROR: logPrint("OTA", "ERROR: Receive Failed"); break;
-            case OTA_END_ERROR:     logPrint("OTA", "ERROR: End Failed"); break;
-        }
         EventBus::instance().publish<ota_error_t>(EventType::OTA_UPDATE_FAILED, error);
-
     });
 
     ArduinoOTA.begin();

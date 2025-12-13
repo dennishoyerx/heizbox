@@ -11,8 +11,7 @@ public:
     );
 
     void checkHeatingStatus();
-
-    void checkHeatCycle();
+    void heatCycleCompleted(uint32_t duration);
 
 private:
     HeaterController& heater;

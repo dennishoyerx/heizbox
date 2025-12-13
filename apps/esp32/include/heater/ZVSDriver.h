@@ -14,7 +14,18 @@
  */
 class ZVSDriver {
 public:
+    /**
+     * @brief Get current duty cycle phase
+     */
+    enum class Phase : uint8_t {
+        OFF_IDLE,       // Disabled, MOSFET off
+        ON_PHASE,       // Active heating, MOSFET on
+        OFF_PHASE,      // Duty cycle off time, MOSFET off
+        SENSOR_WINDOW   // Sensor measurement window during off phase
+    };
+    
     using TempMeasureCallback = std::function<void()>;
+    using PhaseChangeCallback = std::function<void(Phase phase)>;
     
     /**
      * @brief Construct ZVS driver
@@ -64,6 +75,8 @@ public:
      * @param callback Function to call for temp measurement
      */
     void onTempMeasure(TempMeasureCallback callback);
+
+    void onPhaseChange(PhaseChangeCallback callback);
     
     /**
      * @brief Check if ZVS is currently enabled
@@ -80,15 +93,6 @@ public:
      */
     uint8_t getPower() const { return power; }
     
-    /**
-     * @brief Get current duty cycle phase
-     */
-    enum class Phase : uint8_t {
-        OFF_IDLE,       // Disabled, MOSFET off
-        ON_PHASE,       // Active heating, MOSFET on
-        OFF_PHASE,      // Duty cycle off time, MOSFET off
-        SENSOR_WINDOW   // Sensor measurement window during off phase
-    };
     
     Phase getCurrentPhase() const { return currentPhase; }
     
@@ -128,6 +132,7 @@ private:
     uint32_t phaseStartTime;
     
     // Callback
+    PhaseChangeCallback phaseChangeCallback;
     TempMeasureCallback tempMeasureCallback;
     bool tempMeasureCalled;     // Flag to call callback only once per cycle
     

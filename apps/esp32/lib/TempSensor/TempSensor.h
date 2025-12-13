@@ -9,8 +9,6 @@ public:
     float getTemperature();
     bool update(bool ignoreInterval = false);
 
-    void setClickThreshold(float clickTemp);
-    bool hasReachedClickTemp();
     bool hasError() const;
 
     void setReadInterval(uint16_t interval);
@@ -20,8 +18,6 @@ private:
     MAX6675* thermocouple;
     uint8_t sckPin, csPin, soPin;
     float lastValidTemp;
-    float clickThreshold;
-    bool clickReached;
     uint8_t errorCount;
 
     unsigned long lastReadTime;

@@ -20,11 +20,11 @@ public:
     TempSensor* getKSensor() { return &kSensor; }
     IRTempSensor* getIRSensor() { return &irSensor; }
 
+    bool limitReached();
 
 private:
     TempSensor kSensor;
     IRTempSensor irSensor;
-
     float lastTemperature;
 
     uint16_t validate(uint16_t temp);

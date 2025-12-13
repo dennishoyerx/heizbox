@@ -2,10 +2,24 @@
 #include "heater/HeaterCycle.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
+#include "core/EventBus.h"
 
 HeaterMonitor::HeaterMonitor(HeaterController& heater, WebSocketManager& webSocket): 
     heater(heater),
-    webSocket(webSocket) {}
+    webSocket(webSocket) {
+        
+    EventBus::instance().subscribe<CycleFinishedData>(
+        EventType::CYCLE_FINISHED, [this](const CycleFinishedData& d){
+            heatCycleCompleted(d.duration / 1000);
+        }
+    );
+
+}
+
+void HeaterMonitor::heatCycleCompleted(uint32_t duration) {
+    webSocket.sendHeatCycleCompleted(duration, HeaterCycle::current());
+    HeaterCycle::next();
+}
 
 void HeaterMonitor::checkHeatingStatus() {
     const bool currentHeatingStatus = heater.isHeating();
@@ -16,22 +30,3 @@ void HeaterMonitor::checkHeatingStatus() {
         lastHeatingStatusSent = currentHeatingStatus;
     }
 }
-
-void HeaterMonitor::checkHeatCycle() {
-    if (heater.isCycleFinished()) {
-        const uint32_t durationMs = heater.getLastCycleDuration();
-        const uint32_t durationSec = durationMs / 1000;
-
-        uint8_t currentCycle = HeaterCycle::current();
-        HeaterCycle::next();
-
-        heater.clearCycleFinishedFlag();
-
-        // Send to backend
-        webSocket.sendHeatCycleCompleted(durationSec, currentCycle);
-
-        Serial.printf("✅ Heat cycle completed: %lu seconds (cycle %d)\n",
-                     durationSec, currentCycle);
-    }
-}
-

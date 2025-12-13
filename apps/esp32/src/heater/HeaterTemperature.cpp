@@ -1,4 +1,5 @@
 #include "heater\HeaterTemperature.h"
+#include "heater\HeaterState.h"
 #include "core/DeviceState.h"
 #include "Config.h"
 
@@ -26,4 +27,8 @@ uint16_t HeaterTemperature::get(HeaterTemperatures type) {
 
 uint16_t HeaterTemperature::validate(uint16_t temp) {
     return temp < 300 ? temp : 3;
+}
+
+bool HeaterTemperature::limitReached() {
+    return false;
 }

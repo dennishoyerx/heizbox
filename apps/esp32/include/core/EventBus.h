@@ -12,6 +12,7 @@ enum class EventType {
     OTA_UPDATE_FINISHED,
     OTA_UPDATE_FAILED,
     SENSOR_TRIGGERED,
+    CYCLE_FINISHED,
     HEATER_STARTED,
     HEATER_STOPPED,
     SCREEN_CHANGED,
@@ -19,6 +20,13 @@ enum class EventType {
     WIFI_DISCONNECTED,
     STATS_UPDATED
 };
+
+
+struct CycleFinishedData {
+    uint32_t duration;
+    uint32_t startedAt;
+};
+
 
 struct Event {
     EventType type;

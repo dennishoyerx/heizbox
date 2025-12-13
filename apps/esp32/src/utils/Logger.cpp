@@ -36,6 +36,13 @@ void logPrint(const char* type, const char* format, ...) {
     va_end(args);
 }
 
+void cflog(const char* type, const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vlogPrint(type, format, args);
+    va_end(args);
+}
+
 // Function to log messages to Serial and WebSocket with default type "log"
 void logPrint(const char* format, ...) {
     va_list args;

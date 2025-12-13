@@ -27,7 +27,7 @@ void DeviceUI::setup() {
         [](const HeaterStoppedData& d){
             std::string msg = "Stopped: " + std::to_string(d.duration) +
                   " ms, started: " + std::to_string(d.startedAt) + "\n";
-            logPrint("Heater", msg);
+            //logPrint("Heater", msg);
         }
     );
 

@@ -29,14 +29,10 @@ public:
     bool isHeating() const;
     bool isPaused() const;
     uint32_t getElapsedTime() const;
-    uint32_t getLastCycleDuration() const;
-    bool isCycleFinished() const;
-    void clearCycleFinishedFlag();
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
     uint16_t getTemperature();
     uint16_t getIRTemperature();
-    HeaterState hs() { return HeaterState::instance(); };
 
     // Expose components
     TempSensor* getTempSensor() { return temperature.getKSensor(); }
@@ -54,9 +50,6 @@ private:
     uint32_t startTime = 0;
     uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000;
-    uint32_t cycleCounter = 0;
-    uint32_t lastCycleDuration = 0;
-    bool cycleFinishedFlag = false;
 };
 
 
