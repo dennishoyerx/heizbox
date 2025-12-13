@@ -87,10 +87,11 @@ const GFXfont* getFontForSize(TextSize ts);
 
 struct RenderSurface {
   TFT_eSprite *sprite = nullptr;
+  bool clean = true;
   RenderStateHash stateHash;
   std::map<std::string, StateValue> state;
 
-  RenderSurface(TFT_eSprite* s = nullptr) : sprite(s) {}
+  RenderSurface(TFT_eSprite* s = nullptr, bool clear = true) : sprite(s), clean(clear) {}
 
   int16_t width() const { return sprite ? sprite->width() : 0; }
   int16_t height() const { return sprite ? sprite->height() : 0; }
@@ -104,7 +105,7 @@ struct RenderSurface {
 
 
   void clear(uint16_t color = TFT_BLACK) {
-    if (sprite) sprite->fillSprite(color);
+    if (sprite && clean) sprite->fillSprite(color);
   }
 
   void blitToScreen(int16_t x, int16_t y) {
@@ -137,16 +138,16 @@ public:
   SurfaceFactory(TFT_eSPI* tft) : _tft(tft), _usePsram(false), _forceRedraw(false) {}
   ~SurfaceFactory();
 
-  RenderSurface createSurface(int16_t w, int16_t h);
+  RenderSurface createSurface(int16_t w, int16_t h, bool clear = true);
   void releaseSurface(RenderSurface& s);
 
   // Original withSurface - always renders
-  void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb);
+  void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb, bool clear = true);
 
   // New withSurface with state tracking - only renders if state changed
   void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, 
                    const std::unordered_map<std::string, StateValue>& state,
-                   SurfaceCallback cb);
+                   SurfaceCallback cb, bool clear = true);
 
   void usePSRAM(bool en) { _usePsram = en; }
   

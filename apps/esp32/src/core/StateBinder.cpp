@@ -1,6 +1,7 @@
 #include "core/StateBinder.h"
 #include "core/DeviceState.h"
 #include "heater/HeaterState.h"
+#include "heater/HeaterCycle.h"
 #include "DisplayDriver.h"
 
 // ============================================================================
@@ -51,6 +52,15 @@ void StateBinder::bindHeater(HeaterController* heater) {
     state.currentCycle.addListener([&hs, &state](uint8_t val) {
         hs.tempLimit.set(val == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
     });
+
+    state.targetTemperatureCycle1.addListener([&hs](uint16_t val) {
+        if(HeaterCycle::is(1)) hs.tempLimit.set(val);
+    });
+
+    state.targetTemperatureCycle2.addListener([&hs](uint16_t val) {
+        if(HeaterCycle::is(2)) hs.tempLimit.set(val);
+    });
+
 
     hs.tempCorrection.set(state.heatingTempOffset);
     state.heatingTempOffset.addListener([&hs](int16_t val) {

@@ -81,6 +81,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     
     auto debugMenuItems = MenuBuilder()
          .addObservableToggle("Input", state.debugInput)
+         .addObservableToggle("OSC Debug", state.oscDebug)
          .addObservableToggle("ZVS Debug", state.zvsDebug)
          .build();
     this->debugMenuScreen = std::make_unique<GenericMenuScreen>("DEBUG", std::move(debugMenuItems));

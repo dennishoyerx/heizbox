@@ -18,14 +18,14 @@ void UI::releaseSurface(RenderSurface& s) {
     _surfaceFactory.releaseSurface(s);
 }
 
-void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb) {
-    _surfaceFactory.withSurface(w, h, targetX, targetY, cb);
+void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb, bool clear) {
+    _surfaceFactory.withSurface(w, h, targetX, targetY, cb, clear);
 }
 
 void UI::withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY,
                      const std::unordered_map<std::string, StateValue>& state,
-                     SurfaceCallback cb) {
-    _surfaceFactory.withSurface(w, h, targetX, targetY, state, cb);
+                     SurfaceCallback cb, bool clear) {
+    _surfaceFactory.withSurface(w, h, targetX, targetY, state, cb, clear);
 }
 
 void UI::clear() {

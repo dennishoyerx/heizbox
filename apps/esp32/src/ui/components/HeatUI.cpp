@@ -135,7 +135,7 @@ void HeatUI::render(UI* _ui, ZVSDriver* zvs) {
         float progress = std::min(1.0f, (float)hs.temp / hs.tempLimit);
         Background(s, smoothProgress(progress), 15);
         
-        if (DeviceState::instance().zvsDebug) ZVSOscilloscopeUI(s, zvs);
+        if (DeviceState::instance().oscDebug) ZVSOscilloscopeUI(s, zvs);
 
         Timer(s, hs.timer);
         

@@ -30,9 +30,10 @@ public:
             // precision decision: if step < 1.0 show 1..2 decimals
             int prec = (step_ < 0.1) ? 2 : (step_ < 1.0 ? 1 : 0);
             os << std::fixed << std::setprecision(prec) << v;
-            return os.str();
+            return String(os.str().c_str());
         } else {
-            return std::to_string(static_cast<long long>(v));
+            return String(std::to_string(static_cast<long long>(v)).c_str());
+
         }
     }
 

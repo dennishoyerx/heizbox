@@ -37,18 +37,39 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         if (!isHeating) _ui->clear();
     });
     
-    menu.addItem(std::make_unique<ObservableValueItem<float>>(
-        "tempLimit",
-        hs.tempLimit,
-        0.0f, 100.0f, 0.5f,
-        [](const float& v){ char buf[16]; snprintf(buf, sizeof(buf), "%.1fC", v); return std::string(buf); }
+    menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
+        "Temp Cycle 1", ds.targetTemperatureCycle1, 100, 260, 1,
+        [](const uint16_t& v){ return (String) v + "°"; }
     ));
     
-    menu.addItem(std::make_unique<ObservableValueItem<int>>(
-        "Power",
-        hs.power,
-        0, 100, 10,
-        [](const int& v){ return std::to_string(v) + std::string("%"); }
+    menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
+        "Temp Cycle 2", ds.targetTemperatureCycle2, 100, 260, 1,
+        [](const uint16_t& v){ return (String) v + "°"; }
+    ));
+    
+    menu.addItem(std::make_unique<ObservableValueItem<int8_t>>(
+        "Temp Correction", hs.tempCorrection, -50, 50, 1,
+        [](const int8_t& v){ return (String) v + "°"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "IR Emissivity", ds.irEmissivity, 0, 100, 1,
+        [](const uint8_t& v){ return (String) v + "%"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
+        "Temp Sensor Off Time", ds.tempSensorOffTime, 0, 220, 20,
+        [](const uint32_t& v){ return (String) v + "ms"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
+        "Temp Read Interval", ds.tempSensorReadInterval, 0, 220, 20,
+        [](const uint32_t& v){ return (String) v + "ms"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "Power", hs.power, 0, 100, 10,
+        [](const uint8_t& v){ return (String) v + "%"; }
     ));
 
     /*
@@ -86,10 +107,20 @@ void FireScreen::draw() {
 
     if (hs.isHeating) {
         HeatUI::render(_ui, heater.getZVSDriver());
+        
+
+    _ui->withSurface(200, 60, 15, 170, [this](RenderSurface& s) {
+        const IMenuItem* cur = menu.current();
+        const IMenuItem* left = menu.at((menu.index() + menu.count() - 1) % (menu.count() ? menu.count() : 1));
+        const IMenuItem* right = menu.at((menu.index() + 1) % (menu.count() ? menu.count() : 1));
+
+        s.text(0, 0, cur->name());
+        s.text(0, 30, cur->valueString());
+    }, false);
         return;
     }
 
-    _ui->withSurface(200, 70, 15, 122, [this](RenderSurface& s) {
+    _ui->withSurface(200, 60, 15, 130, [this](RenderSurface& s) {
         const IMenuItem* cur = menu.current();
         const IMenuItem* left = menu.at((menu.index() + menu.count() - 1) % (menu.count() ? menu.count() : 1));
         const IMenuItem* right = menu.at((menu.index() + 1) % (menu.count() ? menu.count() : 1));
@@ -217,7 +248,7 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (button(event, {LEFT}, {PRESS})) {
+    if (button(event, {LEFT}, {PRESS, PRESSED, HOLD})) {
         menu.prevOption();
         dirty();
     }

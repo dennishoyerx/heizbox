@@ -13,7 +13,7 @@ struct HeaterState {
     Observable<uint16_t> temp{0};
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
-    Observable<uint16_t> tempCorrection{0};
+    Observable<int8_t> tempCorrection{0};
 
     static HeaterState& instance();
 
