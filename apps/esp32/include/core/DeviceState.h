@@ -14,9 +14,6 @@ struct DeviceState {
 
     // Heater Settings
     PersistedObservable<uint32_t> autoStopTime{"heater", "autostop", 90000};
-    PersistedObservable<uint8_t> currentCycle{"heater", "cycle", 1};
-    PersistedObservable<bool> smart{"heater", "smart", false};
-    PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint16_t> targetTemperature{"heater", "temperature", 170};
     PersistedObservable<uint16_t> targetTemperatureCycle1{"heater", "temperatureCycle1", 200};
     PersistedObservable<uint16_t> targetTemperatureCycle2{"heater", "temperatureCycle2", 220};
@@ -31,9 +28,6 @@ struct DeviceState {
     Observable<bool> isHeating{false};
     Observable<bool> isOnline{false};
     Observable<uint32_t> heatingStartTime{0};
-    Observable<uint16_t> temp{0};
-    Observable<uint16_t> tempK{0};
-    Observable<uint16_t> tempIR{0};
 
     // Debug
     Observable<bool> debugInput{false};

@@ -1,5 +1,5 @@
 #include "heater\HeaterCycle.h"
-#include "core/DeviceState.h"
+#include "heater\HeaterState.h"
 
 enum HeaterCycleMode {
     TEMP_DELTA,
@@ -15,19 +15,19 @@ void HeaterCycle::update() {
 }
 
 uint8_t HeaterCycle::current() {
-    return DeviceState::instance().currentCycle.get();
+    return HeaterState::instance().cycle;
 }
 
 uint8_t HeaterCycle::set(uint8_t cycle) {
-    return DeviceState::instance().currentCycle.set(cycle);
+    return HeaterState::instance().cycle.set(cycle);
 }
 
 uint8_t HeaterCycle::next() {
-    return DeviceState::instance().currentCycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
+    return HeaterState::instance().cycle.update([](uint8_t val) { return val == 1 ? 2 : 1; });
 }
 
 bool HeaterCycle::is(uint8_t cycle) {
-    return DeviceState::instance().currentCycle.get() == cycle;
+    return HeaterState::instance().cycle == cycle;
 }
 
 HeaterCycle& HeaterCycle::instance() {

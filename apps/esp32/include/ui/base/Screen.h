@@ -39,8 +39,6 @@ protected:
 
     void dirty();
 
-    //void Input(InputEventType type, InputButton button, std::function<void()> callback);
-
     template <typename T>
     void bindTo(T& member, Observable<T>& observable);
 

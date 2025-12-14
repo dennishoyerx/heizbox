@@ -39,9 +39,9 @@ void CapacitiveSensor::update() {
         if (rawState != state.capDetected) {
             state.capDetected = rawState;
 
-            if (DeviceState::instance().smart.get()) {
+            /*if (DeviceState::instance().smart.get()) {
                 onHeatingTrigger(state.capDetected);
-            }
+            }*/
         }
     }
 

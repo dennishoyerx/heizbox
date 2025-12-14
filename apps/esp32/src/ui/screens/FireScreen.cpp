@@ -25,8 +25,10 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     bindTo(state.consumption.today, ds.todayConsumption);
     bindTo(state.consumption.yesterday, ds.yesterdayConsumption);
     
-    bindMultiple(hs.isHeating, hs.power, ds.currentCycle, 
-        hs.tempLimit, hs.temp, hs.tempIR, hs.tempK
+    bindMultiple(hs.isHeating, hs.power, hs.cycle, 
+        hs.tempLimit, hs.temp, hs.tempIR, hs.tempK, 
+        hs.tempSensorOffTime, hs.tempSensorReadInterval, 
+        hs.irEmissivity, hs.tempCorrection
     );
 
     hs.isHeating.addListener([&](bool isHeating) {

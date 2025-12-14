@@ -47,8 +47,6 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
         .addObservableToggle("Dark Mode", state.darkMode)
-        .addObservableToggle("Smart Mode", state.smart)
-        .addObservableToggle("Center Heat", state.enableCenterButtonForHeating)
         .addAction("Timezone", [&]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
         })

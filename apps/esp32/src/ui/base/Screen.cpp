@@ -20,16 +20,12 @@ void Screen::setUI(UI* ui) {
 }
 
 void Screen::clear() {
-    if (_ui) {
-        _ui->clear();
-    }
+    if (_ui) _ui->clear();
     dirty();
 }
 
 void Screen::dirty() {
-    if (manager) {
-        manager->setDirty();
-    }
+    if (manager)manager->setDirty();
 }
 
 
