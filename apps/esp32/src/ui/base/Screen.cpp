@@ -51,24 +51,4 @@ bool Screen::input(InputEvent event,
     return false;
 }
 
-template <typename... Ts>
-void Screen::bindMultiple(Observable<Ts>&... observables) {
-    (bind(observables), ...);
-}
 
-template <typename T>
-void Screen::bind(Observable<T>& observable) {
-    observable.addListener([this](T v) {
-        dirty();
-    });
-}
-
-
-template <typename T>
-void Screen::bindTo(T& member, Observable<T>& observable) {
-    member = observable.get();
-    observable.addListener([this, &member](T v) {
-        member = v;
-        dirty();
-    });
-}

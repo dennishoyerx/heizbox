@@ -40,13 +40,26 @@ protected:
     void dirty();
 
     template <typename T>
-    void bindTo(T& member, Observable<T>& observable);
+    void Screen::bindTo(T& member, Observable<T>& observable) {
+        member = observable.get();
+        observable.addListener([this, &member](T v) {
+            member = v;
+            dirty();
+        });
+    }
 
     template <typename T>
-    void bind(Observable<T>& observable);
+    void Screen::bind(Observable<T>& observable) {
+        observable.addListener([this](T v) {
+            dirty();
+        });
+    }
 
     template <typename... Ts>
-    void bindMultiple(Observable<Ts>&... observables);
+    void Screen::bindMultiple(Observable<Ts>&... observables) {
+        (bind(observables), ...);
+    }
+
 
 protected:
     bool input(InputEvent event,
