@@ -126,7 +126,7 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 }
 
 
-void HeatUI::render(UI* _ui, ZVSDriver* zvs) {
+void HeatUI::render(UI* _ui, ZVSDriver* zvs, MenuManager* menu) {
     auto& hs = HeaterState::instance();
 
     _ui->withSurface(280, 205, 0, 35, [&](RenderSurface& s) {
@@ -142,5 +142,12 @@ void HeatUI::render(UI* _ui, ZVSDriver* zvs) {
         Temperature(s);
 
         if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
+
+        
+        const IMenuItem* cur = menu->current();
+        const IMenuItem* left = menu->at((menu->index() + menu->count() - 1) % (menu->count() ? menu->count() : 1));
+        const IMenuItem* right = menu->at((menu->index() + 1) % (menu->count() ? menu->count() : 1));
+        s.text(15, 160, cur->name());
+        s.text(15, 190, cur->valueString());
     });
-};
+}; 

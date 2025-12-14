@@ -4,6 +4,7 @@
 #include "ui/base/UI.h"
 #include "heater/ZVSDriver.h"
 #include "core/DeviceState.h"
+#include <Menu.h>
 
 void drawStats(RenderSurface& s, int x, int y, String label, String value);
 
@@ -17,7 +18,7 @@ protected:
 
 class HeatUI : public UIComponent {
 public:
-    static void render(UI* _ui, ZVSDriver* zvs);
+    static void render(UI* _ui, ZVSDriver* zvs, MenuManager* menu);
 private:
     static void Temperature(RenderSurface s);
     static void Cycle(RenderSurface s);

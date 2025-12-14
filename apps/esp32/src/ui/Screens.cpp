@@ -73,6 +73,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
          .addObservableToggle("Debug", state.zvsDebug)
          .addHeadline("Heat Cycle")
          .addObservableRangeMs("Timeout", hs.cycleTimeout, 10000, 1200000, 5000)
+         .addObservableToggle("Always Measure", hs.alwaysMeasure)
          .addHeadline("Temperature")
          .addObservableRange("Heating Offset", hs.tempCorrection, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
          .addObservableRangeMs("Read interval", hs.tempSensorReadInterval, 50, 220, 10, true)

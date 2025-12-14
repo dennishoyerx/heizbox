@@ -19,6 +19,7 @@ struct HeaterState {
     Observable<uint16_t> tempIR{0};
     Observable<uint16_t> tempLimit{0};
 
+    PersistedObservable<bool> alwaysMeasure{"heater", "alwaysMeasure", false};
     PersistedObservable<int8_t> tempCorrection{"heater", "tempCorrection", 0};
     PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
     PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};

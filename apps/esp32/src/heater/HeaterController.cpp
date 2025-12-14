@@ -151,6 +151,9 @@ void HeaterController::updateTemperature() {
     uint16_t temp;
 
     if (temperature.update(IR)) hs.tempIR.set(temperature.get(IR));
+
+    if (!hs.alwaysMeasure && hs.zvsOn) return;
+
     if (temperature.update(K)) {
         temp = hs.tempK.set(temperature.get(K));
         if (temp <= 3) return;

@@ -104,17 +104,17 @@ void FireScreen::draw() {
     auto& hs = HeaterState::instance();
 
     if (hs.isHeating) {
-        HeatUI::render(_ui, heater.getZVSDriver());
+        HeatUI::render(_ui, heater.getZVSDriver(), &menu);
         
 
-    _ui->withSurface(200, 60, 15, 170, [this](RenderSurface& s) {
+    /*_ui->withSurface(200, 60, 15, 175, [this](RenderSurface& s) {
         const IMenuItem* cur = menu.current();
         const IMenuItem* left = menu.at((menu.index() + menu.count() - 1) % (menu.count() ? menu.count() : 1));
         const IMenuItem* right = menu.at((menu.index() + 1) % (menu.count() ? menu.count() : 1));
-
+        s.sprite->fillRect(0, 0, 200, 60, COLOR_BG);
         s.text(0, 0, cur->name());
         s.text(0, 30, cur->valueString());
-    }, false);
+    });*/
         return;
     }
 
@@ -219,7 +219,7 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
     
-    if (input(event, {CENTER}, {PRESS})) {
+    if (input(event, {CENTER}, {PRESSED})) {
         HeaterCycle::next();
         return;
     }

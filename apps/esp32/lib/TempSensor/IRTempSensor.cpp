@@ -58,7 +58,7 @@ float IRTempSensor::getTemperature() {
 bool IRTempSensor::validateReading(float t) const {
     // MLX liefert valide Messwerte in sinnvoller Range:
     if (isnan(t)) return false;
-    if (t < -40 || t > 300) return false;
+    if (t < -40 || t > 500) return false;
     return true;
 }
 
