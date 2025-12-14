@@ -1,21 +1,14 @@
 #include "core/Device.h"
 #include "Config.h"
-#include "core/DeviceState.h"
 #include "credentials.h"
+#include "core/DeviceState.h"
+#include "net/Network.h"
+#include "core/EventBus.h"
 #include <utility>
 
-// Network
-#include "net/Network.h"
-#include "net/WebSocketManager.h"
-#include "net/WiFiManager.h"
-
-#include "core/EventBus.h"
-
 Device::Device()
-    : heater(), ui(heater),
-      wifi(), webSocket(), network(std::make_unique<Network>(wifi, webSocket)),
-      ota(),
-      heaterMonitor(std::make_unique<HeaterMonitor>(heater, webSocket)) {}
+    : heater(), ui(heater), network(),
+      heaterMonitor(std::make_unique<HeaterMonitor>(heater)) {}
 
 Device::~Device() {}
 
@@ -28,34 +21,19 @@ void Device::setup() {
         nvs_flash_init();
     }
 
-    // Initialize core components
     heater.init();
-    ui.setup();
+    ui.init();
+    network.init(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
 
     StateBinder::bindAll(&ui, &heater);
-
     
-    EventBus::instance().subscribe<CycleFinishedData>(
-        EventType::CYCLE_FINISHED,
-        [](const CycleFinishedData& d){
-            std::string msg = "Stopped: " + std::to_string(d.duration) +
-                  " ms, started: " + std::to_string(d.startedAt) + "\n";
-            logPrint("Heater", msg);
-        }
-    );
-
-    network->setup(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
-    ota->setup();
-
     Serial.println("✅ Device initialized");
 }
 
 void Device::loop() {
     heater.update();
-    network->update();
+    network.update();
     ui.update();
 
     heaterMonitor->checkHeatingStatus();
-
-    ota->handle();
 }

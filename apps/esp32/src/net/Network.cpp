@@ -4,17 +4,12 @@
 #include "Config.h"
 #include <time.h>
 #include "core/EventBus.h"
+#include "SysModule.h"
 
-Network::Network(
-    WiFiManager& wifi,
-    WebSocketManager& webSocket
-)
-    : wifi(wifi),
-      webSocket(webSocket),
-      initialized(false)
-{}
+Network::Network() : wifi(), webSocket(), ota(), initialized(false) {}
 
-void Network::setup(const char* ssid, const char* password, const char* hostname) {
+void Network::init(const char* ssid, const char* password, const char* hostname) {
+    auto booted = SysModules::booting("net");
     setupWifi(ssid, password, hostname);
 
     // Setup WebSocket
@@ -24,21 +19,29 @@ void Network::setup(const char* ssid, const char* password, const char* hostname
 
     webSocket.onConnectionChange([this](bool connected) {
         Serial.printf("🔌 WebSocket %s\n", connected ? "connected" : "disconnected");
-        if (connected) {
-            if (wifi.isConnected() && onReadyCallback) {
-                onReadyCallback();
+        static bool submitted = false;
+        if (!submitted && connected) {
+            std::vector<SysModuleBoot> modules = SysModules::instance().get();
+            
+            for (const auto& boot : modules) {
+                logPrint("boot", "%s %lu", boot.key, boot.time);
             }
+
+            submitted = true;
         }
     });
+
+    ota.setup();
+    booted();
 }
 
 void Network::update() {
     wifi.update();
     webSocket.update();
+    ota.handle();
 }
 
 void Network::setupWifi(const char* ssid, const char* password, const char* hostname) {
-
     wifi.init(ssid, password, hostname);
     wifi.onConnectionChange([this](bool connected) {
         EventBus::instance().publish(Event{connected ? EventType::WIFI_CONNECTED : EventType::WIFI_DISCONNECTED, nullptr});
@@ -48,11 +51,6 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
             initialized = true;
         }
     });
-}
-
-
-void Network::onReady(std::function<void()> callback) {
-    onReadyCallback = callback;
 }
 
 void Network::handleWebSocketMessage(const char* type, const JsonDocument& doc) {

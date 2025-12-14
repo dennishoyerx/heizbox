@@ -1,12 +1,9 @@
-// include/WebSocketManager.h
 #ifndef WEBSOCKETMANAGER_H
 #define WEBSOCKETMANAGER_H
 
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include <functional>
-
-
 
 class WebSocketManager {
 public:
@@ -30,7 +27,7 @@ public:
     void onMessage(MessageCallback callback);
     void onConnectionChange(ConnectionCallback callback);
 
-    static WebSocketManager* getInstance();
+    static WebSocketManager* instance();
 
 public:
     WebSocketsClient webSocket;
@@ -56,7 +53,7 @@ private:
 
     // Static wrapper für WebSocket-Callback
     static void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length);
-    static WebSocketManager* instance;
+    static WebSocketManager* _instance;
 
     bool connected;
 };

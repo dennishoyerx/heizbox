@@ -5,6 +5,7 @@
 #include "core/EventBus.h"
 #include "heater/HeaterController.h"
 #include "utils/Logger.h"
+#include "SysModule.h"
 
 DeviceUI::DeviceUI(HeaterController& heater): 
     display(std::make_unique<DisplayDriver>(DisplayConfig::WIDTH, DisplayConfig::HEIGHT,
@@ -14,7 +15,8 @@ DeviceUI::DeviceUI(HeaterController& heater):
     screenManager(*display, input),
     inputHandler(std::make_unique<InputHandler>(screenManager)) {};
 
-void DeviceUI::setup() {
+void DeviceUI::init() {
+    auto booted = SysModules::booting("ui");
     display->init();
 
     screens.setup(screenManager);
@@ -33,6 +35,7 @@ void DeviceUI::setup() {
 
     input.setup();
     input.setCallback([this](InputEvent event) { inputHandler->handleInput(event); });
+    booted();
 };
 
 void DeviceUI::update() {

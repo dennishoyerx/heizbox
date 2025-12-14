@@ -12,8 +12,7 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
     {HardwareConfig::FIRE_BUTTON_PIN, FIRE}
 };
 
-InputManager::InputManager()
-    : callback(nullptr) {
+InputManager::InputManager(): callback(nullptr) {
 }
 
 void InputManager::setup() {

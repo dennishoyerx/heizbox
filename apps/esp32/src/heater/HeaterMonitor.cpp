@@ -4,20 +4,16 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 
-HeaterMonitor::HeaterMonitor(HeaterController& heater, WebSocketManager& webSocket): 
-    heater(heater),
-    webSocket(webSocket) {
-        
+HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
     EventBus::instance().subscribe<CycleFinishedData>(
         EventType::CYCLE_FINISHED, [this](const CycleFinishedData& d){
             heatCycleCompleted(d.duration / 1000);
         }
     );
-
 }
 
 void HeaterMonitor::heatCycleCompleted(uint32_t duration) {
-    webSocket.sendHeatCycleCompleted(duration, HeaterCycle::current());
+    WebSocketManager::instance()->sendHeatCycleCompleted(duration, HeaterCycle::current());
     HeaterCycle::next();
 }
 
@@ -26,7 +22,7 @@ void HeaterMonitor::checkHeatingStatus() {
 
     if (currentHeatingStatus != lastHeatingStatusSent) {
         DeviceState::instance().isHeating.set(currentHeatingStatus);
-        WebSocketManager::getInstance()->sendStatusUpdate(true, currentHeatingStatus);
+        WebSocketManager::instance()->sendStatusUpdate(true, currentHeatingStatus);
         lastHeatingStatusSent = currentHeatingStatus;
     }
 }

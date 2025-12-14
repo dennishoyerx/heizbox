@@ -28,11 +28,8 @@ public:
 
 private:
     HeaterController heater;
-    WiFiManager wifi;
-    WebSocketManager webSocket;
     DeviceUI ui;
-
-    std::unique_ptr<Network> network;
-    std::unique_ptr<OTASetup> ota;
+    Network network;
+    
     std::unique_ptr<HeaterMonitor> heaterMonitor;
 };

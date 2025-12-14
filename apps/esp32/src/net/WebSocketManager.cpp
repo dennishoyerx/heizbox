@@ -1,9 +1,9 @@
 #include "net/WebSocketManager.h"
 
-WebSocketManager* WebSocketManager::instance = nullptr;
+WebSocketManager* WebSocketManager::_instance = nullptr;
 
-WebSocketManager* WebSocketManager::getInstance() {
-    return instance;
+WebSocketManager* WebSocketManager::instance() {
+    return _instance;
 }
 
 WebSocketManager::WebSocketManager()
@@ -15,7 +15,7 @@ WebSocketManager::WebSocketManager()
     state.lastHeartbeat = 0;
     state.reconnectAttempts = 0;
 
-    instance = this;
+    _instance = this;
 }
 
 void WebSocketManager::init(const char* url, const char* deviceId, const char* clientType) {
@@ -169,7 +169,7 @@ void WebSocketManager::onConnectionChange(ConnectionCallback callback) {
 }
 
 void WebSocketManager::onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
-    if (instance) {
-        instance->handleEvent(type, payload, length);
+    if (_instance) {
+        _instance->handleEvent(type, payload, length);
     }
 }

@@ -1,5 +1,4 @@
-#ifndef INPUTMANAGER_H
-#define INPUTMANAGER_H
+#pragma once
 
 #include <functional>
 #include <Arduino.h>
@@ -66,5 +65,3 @@ private:
         else holdSentMask &= ~(1 << idx);
     }
 };
-
-#endif

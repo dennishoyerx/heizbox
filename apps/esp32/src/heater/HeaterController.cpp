@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include "utils/Logger.h"
 #include "core/EventBus.h"
+#include "SysModule.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -17,6 +18,7 @@ HeaterController::HeaterController()
 }
 
 void HeaterController::init() {
+    auto booted = SysModules::booting("heater");
     zvsDriver->init();
     zvsDriver->setPeriod(HeaterConfig::DUTY_CYCLE_PERIOD_MS);
     zvsDriver->setSensorOffTime(HeaterConfig::SENSOR_OFF_TIME_MS);
@@ -30,12 +32,12 @@ void HeaterController::init() {
     });
 
     zvsDriver->onTempMeasure([this]() {
-        // This is called during the OFF phase - safe to measure temperature
         temperature.update(K, true);
     });
     
     
     Serial.println("🔥 Heater initialized with ZVS driver");
+    booted();
 }
 
 void HeaterController::setPower(uint8_t _power) {

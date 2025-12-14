@@ -11,7 +11,7 @@
 class DeviceUI {
 public:
     DeviceUI(HeaterController& heater);
-    void setup();
+    void init();
     void update();
 
     DisplayDriver* getDisplay();

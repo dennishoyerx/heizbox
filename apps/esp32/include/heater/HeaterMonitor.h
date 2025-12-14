@@ -5,16 +5,12 @@
 
 class HeaterMonitor {
 public:
-    HeaterMonitor(
-        HeaterController& heater,
-        WebSocketManager& webSocket
-    );
+    HeaterMonitor(HeaterController& heater);
 
     void checkHeatingStatus();
     void heatCycleCompleted(uint32_t duration);
 
 private:
     HeaterController& heater;
-    WebSocketManager& webSocket;
     bool lastHeatingStatusSent = false;
 };
