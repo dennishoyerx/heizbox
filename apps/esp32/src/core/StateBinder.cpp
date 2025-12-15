@@ -50,9 +50,9 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });
     
-    heater->getTempSensor()->setReadInterval(hs.tempSensorReadInterval);
+    heater->getTempSensor(K)->setReadInterval(hs.tempSensorReadInterval);
     hs.tempSensorReadInterval.addListener([heater](uint32_t time) {
-        heater->getTempSensor()->setReadInterval(time);
+        heater->getTempSensor(K)->setReadInterval(time);
     });
     
     heater->getZVSDriver()->setSensorOffTime(hs.tempSensorOffTime);

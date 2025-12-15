@@ -1,21 +1,21 @@
 #pragma once
 #include <TempSensor.h>
 #include <IRTempSensor.h>
-
-enum HeaterTemperatures {
-    MAIN,
-    K,
-    IR
-};
-
+#include <ITemperatureSensor.h>
 
 class HeaterTemperature {
 public:
+    enum Sensor {
+        K,
+        IR
+    };
     HeaterTemperature();
     void init();
-    bool update(HeaterTemperatures type = MAIN, bool ignoreInterval = false);
+    bool update(Sensor type = Sensor::K, bool ignoreInterval = false);
 
-    uint16_t get(HeaterTemperatures type = MAIN);
+    uint16_t get(Sensor type = Sensor::K);
+
+    ITemperatureSensor* getSensor(Sensor type = Sensor::K);
 
     TempSensor* getKSensor() { return &kSensor; }
     IRTempSensor* getIRSensor() { return &irSensor; }

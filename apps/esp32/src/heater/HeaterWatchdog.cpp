@@ -11,5 +11,4 @@ void HeaterWatchdog::update() {
 }
 
 void HeaterWatchdog::checkTemperature() {
-    if (heater.getTemperature()) {}
 }

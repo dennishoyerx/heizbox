@@ -3,9 +3,7 @@
 #include <Arduino.h>
 
 TempSensor::TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs)
-    : sckPin(sck_pin), csPin(cs_pin), soPin(so_pin),
-      lastValidTemp(NAN), 
-      errorCount(0), lastReadTime(0), readInterval(readIntervalMs)
+    : sckPin(sck_pin), csPin(cs_pin), soPin(so_pin), ITemperatureSensor(readIntervalMs)
 {
     thermocouple = new MAX6675(sck_pin, cs_pin, so_pin);
 }
@@ -37,37 +35,6 @@ bool TempSensor::update(bool ignoreInterval) {
     return false;
 }
 
-void TempSensor::setReadInterval(uint16_t interval) {
-    readInterval = interval;
-}
-
-uint16_t TempSensor::getReadInterval() const {
-    return readInterval;
-}
-
-
 float TempSensor::getTemperature() {
     return lastValidTemp;
-}
-
-bool TempSensor::validateReading(float temp) const {
-    if (isnan(temp)) return false;
-    if (temp < -20 || temp > 500) return false;
-
-    // Plausibilitätsprüfung: Max. Änderung
-    if (!isnan(lastValidTemp)) {
-        float delta = temp - lastValidTemp;
-        if (delta < -8.0f) {  // keine 8°C Sekundeneinbruch während Heizen
-            return false;
-        }
-        if (delta > 50.0f) { // keine 50°C Sprünge nach oben
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool TempSensor::hasError() const {
-    return isnan(lastValidTemp);
 }

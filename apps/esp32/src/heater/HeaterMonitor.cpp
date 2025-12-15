@@ -1,5 +1,6 @@
 #include "heater/HeaterMonitor.h"
 #include "heater/HeaterCycle.h"
+#include "heater/HeaterState.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 #include "core/EventBus.h"
@@ -10,6 +11,8 @@ HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
             heatCycleCompleted(d.duration / 1000);
         }
     );
+
+//    auto& hs = HeaterState::instance();
 }
 
 void HeaterMonitor::heatCycleCompleted(uint32_t duration) {

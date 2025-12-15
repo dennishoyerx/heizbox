@@ -4,11 +4,7 @@
 IRTempSensor::IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readIntervalMs)
     : sdaPin(sda_pin),
       sclPin(scl_pin),
-      lastValidTemp(NAN),
-      errorCount(0),
-      lastReadTime(0),
-      readInterval(readIntervalMs)
-{
+      ITemperatureSensor(readIntervalMs) {
     pinMode(sda_pin, INPUT_PULLUP);
     pinMode(scl_pin, INPUT_PULLUP);
 }
@@ -55,24 +51,6 @@ float IRTempSensor::getTemperature() {
     return lastValidTemp;
 }
 
-bool IRTempSensor::validateReading(float t) const {
-    // MLX liefert valide Messwerte in sinnvoller Range:
-    if (isnan(t)) return false;
-    if (t < -40 || t > 500) return false;
-    return true;
-}
-
-bool IRTempSensor::hasError() const {
-    return errorCount > 3;
-}
-
-void IRTempSensor::setReadInterval(uint16_t interval) {
-    readInterval = interval;
-}
-
-uint16_t IRTempSensor::getReadInterval() const {
-    return readInterval;
-}
 
 
 bool IRTempSensor::setEmissivity(float emissivity) {

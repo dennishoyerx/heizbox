@@ -32,7 +32,7 @@ void HeaterController::init() {
     });
 
     zvsDriver->onTempMeasure([this]() {
-        temperature.update(K, true);
+        temperature.update(HeaterTemperature::Sensor::K, true);
     });
     
     
@@ -53,15 +53,6 @@ void HeaterController::transitionTo(State newState) {
 
     Serial.printf("🔥 State: %d -> %d\n", static_cast<int>(state), static_cast<int>(newState));
     state = newState;
-}
-
-uint16_t HeaterController::getTemperature() {
-    return temperature.get(K);
-}
-
-
-uint16_t HeaterController::getIRTemperature() {
-    return temperature.get(IR);
 }
 
 void HeaterController::startHeating() {
@@ -152,12 +143,12 @@ void HeaterController::updateTemperature() {
     auto& hs = HeaterState::instance();
     uint16_t temp;
 
-    if (temperature.update(IR)) hs.tempIR.set(temperature.get(IR));
+    if (temperature.update(HeaterTemperature::Sensor::IR)) hs.tempIR.set(temperature.get(HeaterTemperature::Sensor::IR));
 
     if (!hs.alwaysMeasure && hs.zvsOn) return;
 
-    if (temperature.update(K)) {
-        temp = hs.tempK.set(temperature.get(K));
+    if (temperature.update(HeaterTemperature::Sensor::K)) {
+        temp = hs.tempK.set(temperature.get(HeaterTemperature::Sensor::K));
         if (temp <= 3) return;
         if (isHeating()) temp += hs.tempCorrection;
         hs.temp.set(temp);

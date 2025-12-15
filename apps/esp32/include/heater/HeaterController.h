@@ -6,6 +6,7 @@
 #include "heater/ZVSDriver.h"
 #include "heater/HeaterTemperature.h"
 #include "heater/HeaterState.h"
+#include "ITemperatureSensor.h"
 
 class HeaterController {
 public:
@@ -31,11 +32,10 @@ public:
     uint32_t getElapsedTime() const;
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
-    uint16_t getTemperature();
-    uint16_t getIRTemperature();
 
     // Expose components
-    TempSensor* getTempSensor() { return temperature.getKSensor(); }
+    ITemperatureSensor* getTempSensor(TemperatureSensors sensor = MAIN) { return temperature.getSensor(sensor); }
+    TempSensor* getKTempSensor() { return temperature.getKSensor(); }
     IRTempSensor* getIRTempSensor() { return temperature.getIRSensor(); }
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 

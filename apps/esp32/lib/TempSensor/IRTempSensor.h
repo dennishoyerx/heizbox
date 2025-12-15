@@ -1,19 +1,18 @@
 #pragma once
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
+#include "ITemperatureSensor.h"
 
-class IRTempSensor {
+class IRTempSensor: public ITemperatureSensor {
 public:
     IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readIntervalMs = 100);
 
     bool begin();
     bool update();
-    bool hasError() const;
-
-    void setReadInterval(uint16_t interval);
-    uint16_t getReadInterval() const;
     
+    float read() override { return getTemperature(); }
     float getTemperature();
+
 
     bool setEmissivity(float emissivity);
     float getEmissivity();
@@ -23,12 +22,4 @@ private:
 
     uint8_t sdaPin;
     uint8_t sclPin;
-
-    float lastValidTemp;
-    uint8_t errorCount;
-
-    unsigned long lastReadTime;
-    uint16_t readInterval;
-
-    bool validateReading(float temp) const;
 };
