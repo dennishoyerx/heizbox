@@ -6,18 +6,19 @@
 #include "core/EventBus.h"
 #include "SysModule.h"
 
-Network::Network() : wifi(), webSocket(), ota(), initialized(false) {}
+Network::Network() : wifi(), ota(), initialized(false) {}
 
 void Network::init(const char* ssid, const char* password, const char* hostname) {
     auto booted = SysModules::booting("net");
     setupWifi(ssid, password, hostname);
+    WebSocketManager& ws = WebSocketManager::instance();
 
     // Setup WebSocket
-    webSocket.onMessage([this](const char* type, const JsonDocument& doc) {
+    ws.onMessage([this](const char* type, const JsonDocument& doc) {
         handleWebSocketMessage(type, doc);
     });
 
-    webSocket.onConnectionChange([this](bool connected) {
+    ws.onConnectionChange([this](bool connected) {
         Serial.printf("🔌 WebSocket %s\n", connected ? "connected" : "disconnected");
         static bool submitted = false;
         if (!submitted && connected) {
@@ -37,7 +38,7 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
 
 void Network::update() {
     wifi.update();
-    webSocket.update();
+    WebSocketManager::instance().update();
     ota.handle();
 }
 
@@ -47,7 +48,7 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
         EventBus::instance().publish(Event{connected ? EventType::WIFI_CONNECTED : EventType::WIFI_DISCONNECTED, nullptr});
         if (!initialized && connected) {
             configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
-            webSocket.init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
+            WebSocketManager::instance().init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
             initialized = true;
         }
     });

@@ -10,12 +10,10 @@ public:
     using MessageCallback = std::function<void(const char* type, const JsonDocument& doc)>;
     using ConnectionCallback = std::function<void(bool connected)>;
 
-    WebSocketManager();
-
     void init(const char* url, const char* deviceId, const char* clientType = "device");
     void update();
 
-    bool isConnected() const { return connected; }
+    bool isConnected() const { return state.connected; }
 
     // Send methods
     bool sendHeartbeat();
@@ -27,17 +25,17 @@ public:
     void onMessage(MessageCallback callback);
     void onConnectionChange(ConnectionCallback callback);
 
-    static WebSocketManager* instance();
-
-public:
     WebSocketsClient webSocket;
 
+    static WebSocketManager& instance();
+
 private:
+    WebSocketManager() = default;
 
     struct State {
-        bool connected;
-        uint32_t lastHeartbeat;
-        uint32_t reconnectAttempts;
+        bool connected = false;
+        uint32_t lastHeartbeat = 0;
+        uint32_t reconnectAttempts = 0;
     } state;
 
     MessageCallback messageCallback;
@@ -53,9 +51,6 @@ private:
 
     // Static wrapper für WebSocket-Callback
     static void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length);
-    static WebSocketManager* _instance;
-
-    bool connected;
 };
 
 

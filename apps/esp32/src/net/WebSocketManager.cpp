@@ -1,23 +1,5 @@
 #include "net/WebSocketManager.h"
 
-WebSocketManager* WebSocketManager::_instance = nullptr;
-
-WebSocketManager* WebSocketManager::instance() {
-    return _instance;
-}
-
-WebSocketManager::WebSocketManager()
-    : messageCallback(nullptr),
-      connectionCallback(nullptr),
-      connected(false)
-{
-    state.connected = false;
-    state.lastHeartbeat = 0;
-    state.reconnectAttempts = 0;
-
-    _instance = this;
-}
-
 void WebSocketManager::init(const char* url, const char* deviceId, const char* clientType) {
     // Parse URL: wss://host/path
     String urlStr(url);
@@ -47,7 +29,7 @@ void WebSocketManager::update() {
     webSocket.loop();
 
     // Auto heartbeat
-    if (connected && (millis() - state.lastHeartbeat >= HEARTBEAT_INTERVAL_MS)) {
+    if (state.connected && (millis() - state.lastHeartbeat >= HEARTBEAT_INTERVAL_MS)) {
         sendHeartbeat();
     }
 }
@@ -57,7 +39,7 @@ void WebSocketManager::update() {
 // ============================================================================
 
 bool WebSocketManager::sendJson(const JsonDocument& doc) {
-    if (!connected) {
+    if (!state.connected) {
         Serial.println("WebSocket not connected");
         return false;
     }
@@ -118,13 +100,13 @@ void WebSocketManager::handleEvent(WStype_t type, uint8_t* payload, size_t lengt
     switch (type) {
         case WStype_DISCONNECTED:
             Serial.println("WebSocket disconnected");
-            connected = false;
+            state.connected = false;
             if (connectionCallback) connectionCallback(false);
             break;
 
         case WStype_CONNECTED:
             Serial.printf("WebSocket connected: %s\n", payload);
-            connected = true;
+            state.connected = true;
             state.reconnectAttempts = 0;
             state.lastHeartbeat = millis();
 
@@ -169,7 +151,6 @@ void WebSocketManager::onConnectionChange(ConnectionCallback callback) {
 }
 
 void WebSocketManager::onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
-    if (_instance) {
-        _instance->handleEvent(type, payload, length);
-    }
+    WebSocketManager& ws = WebSocketManager::instance();
+    ws.handleEvent(type, payload, length);
 }

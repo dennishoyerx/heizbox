@@ -20,7 +20,6 @@ public:
 
 private:
     WiFiManager wifi;
-    WebSocketManager webSocket;
     OTASetup ota;
 
     bool initialized = false;
