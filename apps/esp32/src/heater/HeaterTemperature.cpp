@@ -18,16 +18,9 @@ bool HeaterTemperature::update(Sensor type, bool ignoreInterval) {
 }
 
 uint16_t HeaterTemperature::get(Sensor type) {
-    uint16_t temp;
-    if (type == Sensor::K) temp = kSensor.getCelsius();
-    if (type == Sensor::IR) temp = irSensor.getCelsius();
-
-    return validate(temp);
+    return getSensor(type)->getCelsius();
 }
 
-uint16_t HeaterTemperature::validate(uint16_t temp) {
-    return temp < 300 ? temp : 3;
-}
 
 bool HeaterTemperature::limitReached() {
     return false;

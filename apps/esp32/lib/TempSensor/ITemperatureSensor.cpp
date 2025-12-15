@@ -2,15 +2,21 @@
 #include "ITemperatureSensor.h"
 #include <Arduino.h>
 
-void ITemperatureSensor::setReadInterval(uint16_t interval) {
-    readInterval = interval;
-}
+bool ITemperatureSensor::update(bool ignoreInterval) {
+    unsigned long now = millis();
+    if (ignoreInterval || now - lastReadTime >= readInterval) {
+        lastReadTime = now;
+        float temp = read();
 
-uint16_t ITemperatureSensor::getReadInterval() const {
-    return readInterval;
-}
-
-bool ITemperatureSensor::hasError() const {
+        if (validateReading(temp)) {
+            lastValidTemp = temp;
+            errorCount = 0;
+            return true;
+        } else {
+            errorCount++;
+            if (errorCount >= 5) lastValidTemp = NAN; // persistent error
+        }
+    }
     return false;
 }
 
@@ -33,4 +39,16 @@ bool ITemperatureSensor::validateReading(float temp) const {
 
 float ITemperatureSensor::getCelsius() {
     return lastValidTemp;
+}
+
+void ITemperatureSensor::setReadInterval(uint16_t interval) {
+    readInterval = interval;
+}
+
+uint16_t ITemperatureSensor::getReadInterval() const {
+    return readInterval;
+}
+
+bool ITemperatureSensor::hasError() const {
+    return false;
 }

@@ -26,31 +26,12 @@ bool IRTempSensor::begin() {
     return true;
 }
 
-bool IRTempSensor::update() {
-    unsigned long now = millis();
-    if (now - lastReadTime < readInterval) return false;
-
-    lastReadTime = now;
-
+float IRTempSensor::read() {
     float reading = mlx.readObjectTempC();
-    float ambient = mlx.readAmbientTempC();
+    //float ambient = mlx.readAmbientTempC();
     //reading -= (ambient - 25) * 0.2;
-
-    if (validateReading(reading)) {
-        lastValidTemp = reading;
-        errorCount = 0;
-        return true;
-    } else {
-        errorCount++;
-    }
-
-    return false;
+    return reading;
 }
-
-float IRTempSensor::getTemperature() {
-    return lastValidTemp;
-}
-
 
 
 bool IRTempSensor::setEmissivity(float emissivity) {

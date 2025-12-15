@@ -8,11 +8,8 @@ public:
     IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readIntervalMs = 100);
 
     bool begin();
-    bool update();
     
-    float read() override { return getTemperature(); }
-    float getTemperature();
-
+    float read() override;
 
     bool setEmissivity(float emissivity);
     float getEmissivity();

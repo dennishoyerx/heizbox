@@ -14,6 +14,8 @@ public:
     void setReadInterval(uint16_t interval);
     uint16_t getReadInterval() const;
 
+    bool update(bool ignoreInterval = false);
+
 protected:
     float lastValidTemp;
     uint8_t errorCount;

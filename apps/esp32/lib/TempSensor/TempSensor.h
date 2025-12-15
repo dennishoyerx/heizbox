@@ -7,9 +7,7 @@ class TempSensor: public ITemperatureSensor {
 public:
     TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs = 500);
     bool begin();
-    float read() override { return getTemperature(); }
-    float getTemperature();
-    bool update(bool ignoreInterval = false);
+    float read() override;
 
 private:
     MAX6675* thermocouple;

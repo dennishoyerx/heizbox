@@ -16,25 +16,6 @@ bool TempSensor::begin() {
     return true;
 }
 
-// Nicht-blockierendes Update
-bool TempSensor::update(bool ignoreInterval) {
-    unsigned long now = millis();
-    if (ignoreInterval || now - lastReadTime >= readInterval) {
-        lastReadTime = now;
-        float temp = thermocouple->readCelsius();
-
-        if (validateReading(temp)) {
-            lastValidTemp = temp;
-            errorCount = 0;
-            return true;
-        } else {
-            errorCount++;
-            if (errorCount >= 5) lastValidTemp = NAN; // persistent error
-        }
-    }
-    return false;
-}
-
-float TempSensor::getTemperature() {
-    return lastValidTemp;
+float TempSensor::read() {
+    return thermocouple->readCelsius();
 }
