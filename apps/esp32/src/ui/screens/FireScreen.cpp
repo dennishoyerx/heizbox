@@ -214,11 +214,11 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (input(event, {LEFT}, {PRESS, PRESSED, HOLD})) {
+    if (input(event, {LEFT}, {PRESSED})) {
         menu.prevOption();
         dirty();
     }
-    if (input(event, {RIGHT}, {PRESS})) {
+    if (input(event, {RIGHT}, {PRESSED})) {
         menu.nextOption();
         dirty();
     }

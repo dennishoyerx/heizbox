@@ -4,6 +4,7 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 #include "SysModule.h"
+#include "heater\HeatData.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -59,7 +60,8 @@ void HeaterController::startHeating() {
     auto& hs = HeaterState::instance();
     if (state == State::IDLE) {
         startTime = millis();
-        
+        //HeatLog::instance().start();
+
         zvsDriver->setEnabled(true);
         
         transitionTo(State::HEATING);
@@ -145,7 +147,13 @@ void HeaterController::updateTemperature() {
 
     if (temperature.update(HeaterTemperature::Sensor::IR)) hs.tempIR.set(temperature.get(HeaterTemperature::Sensor::IR));
 
-    if (!hs.alwaysMeasure && hs.zvsOn) return;
+    if (hs.tempSensorOffTime > 0 && hs.zvsOn) return;
+
+    static u32_t lastTempUpdate = 0;
+
+    if (millis() - lastTempUpdate < hs.tempSensorReadInterval) return;
+    lastTempUpdate = millis();
+
 
     if (temperature.update(HeaterTemperature::Sensor::K)) {
         temp = hs.tempK.set(temperature.get(HeaterTemperature::Sensor::K));

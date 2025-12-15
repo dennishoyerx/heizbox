@@ -4,6 +4,7 @@
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 #include "core/EventBus.h"
+#include "heater\HeatData.h"
 
 HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
     EventBus::instance().subscribe<CycleFinishedData>(
@@ -17,6 +18,8 @@ HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
 
 void HeaterMonitor::heatCycleCompleted(uint32_t duration) {
     WebSocketManager::instance()->sendHeatCycleCompleted(duration, HeaterCycle::current());
+    //logPrint("log-k", HeatLog::instance().getKData());
+    //logPrint("log-ir", HeatLog::instance().getKData());
     HeaterCycle::next();
 }
 
