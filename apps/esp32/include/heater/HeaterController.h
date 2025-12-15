@@ -34,7 +34,7 @@ public:
     uint32_t getAutoStopTime() const;
 
     // Expose components
-    ITemperatureSensor* getTempSensor(TemperatureSensors sensor = MAIN) { return temperature.getSensor(sensor); }
+    ITemperatureSensor* getTempSensor(HeaterTemperature::Sensor sensor = HeaterTemperature::Sensor::K) { return temperature.getSensor(sensor); }
     TempSensor* getKTempSensor() { return temperature.getKSensor(); }
     IRTempSensor* getIRTempSensor() { return temperature.getIRSensor(); }
     ZVSDriver* getZVSDriver() { return zvsDriver; }

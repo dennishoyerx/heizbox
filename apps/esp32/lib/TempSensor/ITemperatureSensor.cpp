@@ -1,6 +1,11 @@
-#pragma once
 #include "ITemperatureSensor.h"
 #include <Arduino.h>
+
+ITemperatureSensor::ITemperatureSensor(uint16_t readIntervalMs)
+    : lastValidTemp(NAN),
+      errorCount(0),
+      lastReadTime(0),
+      readInterval(readIntervalMs) {}
 
 bool ITemperatureSensor::update(bool ignoreInterval) {
     unsigned long now = millis();
