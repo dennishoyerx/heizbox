@@ -3,13 +3,13 @@
 #include <IRTempSensor.h>
 #include <ITemperatureSensor.h>
 
-class HeaterTemperature {
+class Sensors {
 public:
     enum Sensor {
         K,
         IR
     };
-    HeaterTemperature();
+    Sensors();
     void init();
     bool update(Sensor type = Sensor::K, bool ignoreInterval = false);
 

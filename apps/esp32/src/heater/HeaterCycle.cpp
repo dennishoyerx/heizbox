@@ -36,16 +36,16 @@ HeaterCycle& HeaterCycle::instance() {
 }
 
 /*
-HeaterTemperature::HeaterTemperature() {}
+Sensors::Sensors() {}
 
-uint8_t HeaterTemperature::current() {
+uint8_t Sensors::current() {
     return 0;// DeviceState::instance().currentTemperature.get();
 }
 
-uint8_t HeaterTemperature::target() {
+uint8_t Sensors::target() {
     return DeviceState::instance().targetTemperature.get();
 }
 
-uint8_t HeaterTemperature::setTarget(uint8_t cycle) {
+uint8_t Sensors::setTarget(uint8_t cycle) {
     return DeviceState::instance().targetTemperature.set(cycle);
 }*/

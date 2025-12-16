@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include <Heater/HeaterTemperature.h>
+#include <Heater/Sensors.h>
 
 
 
@@ -11,11 +11,11 @@ public:
         return instance;
     }
 
-    void log(HeaterTemperature::Sensor sensor, uint16_t temp) {
+    void log(Sensors::Sensor sensor, uint16_t temp) {
         float time = (millis() - startTime) / 1000.0f;
         String data = String(time, 1) + ":" + String(temp) + ",";
-        if (sensor == HeaterTemperature::Sensor::K) kData += data;
-        if (sensor == HeaterTemperature::Sensor::IR) irData += data;
+        if (sensor == Sensors::Sensor::K) kData += data;
+        if (sensor == Sensors::Sensor::IR) irData += data;
     }
 
     void start() {

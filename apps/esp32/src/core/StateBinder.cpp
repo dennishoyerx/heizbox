@@ -2,7 +2,7 @@
 #include "core/DeviceState.h"
 #include "heater/HeaterState.h"
 #include "heater/HeaterCycle.h"
-#include "heater/HeaterTemperature.h"
+#include "heater/Sensors.h"
 #include "DisplayDriver.h"
 
 void StateBinder::bindDisplay(DisplayDriver* display) {
@@ -51,9 +51,9 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });
     
-    heater->getTempSensor(HeaterTemperature::Sensor::K)->setReadInterval(hs.tempSensorReadInterval);
+    heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(hs.tempSensorReadInterval);
     hs.tempSensorReadInterval.addListener([heater](uint32_t time) {
-        heater->getTempSensor(HeaterTemperature::Sensor::K)->setReadInterval(time);
+        heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(time);
     });
     
     heater->getZVSDriver()->setSensorOffTime(hs.tempSensorOffTime);

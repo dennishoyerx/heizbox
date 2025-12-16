@@ -16,9 +16,9 @@ public:
 private:
 };
 /*
-class HeaterTemperature {
+class Sensors {
 public:
-    HeaterTemperature();
+    Sensors();
 
     static uint8_t current();
     static uint8_t target();

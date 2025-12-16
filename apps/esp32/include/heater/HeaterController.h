@@ -4,7 +4,7 @@
 #include "TempSensor.h"
 #include "IRTempSensor.h"
 #include "heater/ZVSDriver.h"
-#include "heater/HeaterTemperature.h"
+#include "heater/Sensors.h"
 #include "heater/HeaterState.h"
 #include "heater/HeatCycle.h"
 #include "ITemperatureSensor.h"
@@ -35,13 +35,13 @@ public:
     uint32_t getAutoStopTime() const;
 
     // Expose components
-    ITemperatureSensor* getTempSensor(HeaterTemperature::Sensor sensor = HeaterTemperature::Sensor::K) { return temperature.getSensor(sensor); }
+    ITemperatureSensor* getTempSensor(Sensors::Sensor sensor = Sensors::Sensor::K) { return temperature.getSensor(sensor); }
     TempSensor* getKTempSensor() { return temperature.getKSensor(); }
     IRTempSensor* getIRTempSensor() { return temperature.getIRSensor(); }
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 
 private:
-    HeaterTemperature temperature;
+    Sensors temperature;
     ZVSDriver* zvsDriver;
 
     HeatCycle heatCycle;

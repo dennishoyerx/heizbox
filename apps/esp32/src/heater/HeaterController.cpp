@@ -34,7 +34,7 @@ void HeaterController::init() {
     });
 
     zvsDriver->onTempMeasure([this]() {
-        temperature.update(HeaterTemperature::Sensor::K, true);
+        temperature.update(Sensors::Sensor::K, true);
     });
     
     
@@ -145,7 +145,7 @@ void HeaterController::updateTemperature() {
     auto& hs = HeaterState::instance();
     uint16_t temp;
 
-    if (temperature.update(HeaterTemperature::Sensor::IR)) hs.tempIR.set(temperature.get(HeaterTemperature::Sensor::IR));
+    if (temperature.update(Sensors::Sensor::IR)) hs.tempIR.set(temperature.get(Sensors::Sensor::IR));
 
     if (hs.tempSensorOffTime > 0 && hs.zvsOn) return;
 
@@ -155,8 +155,8 @@ void HeaterController::updateTemperature() {
     lastTempUpdate = millis();
 
 
-    if (temperature.update(HeaterTemperature::Sensor::K)) {
-        temp = hs.tempK.set(temperature.get(HeaterTemperature::Sensor::K));
+    if (temperature.update(Sensors::Sensor::K)) {
+        temp = hs.tempK.set(temperature.get(Sensors::Sensor::K));
         if (temp <= 3) return;
         if (isHeating()) temp += hs.tempCorrection;
         hs.temp.set(temp);

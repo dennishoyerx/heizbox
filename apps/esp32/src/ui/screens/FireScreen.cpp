@@ -34,6 +34,13 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
     });
+
+    hs.cycle.addListener([&](uint8_t cycle) {        
+        if (cycle == 1 && menu.current()->name() == "Temp Cycle 2") menu.prevOption();
+        else if (cycle == 2 && menu.current()->name() == "Temp Cycle 1") menu.nextOption(); 
+    });
+
+
     
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
         "Temp Cycle 1", ds.targetTemperatureCycle1, 100, 260, 1,
@@ -69,34 +76,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         "Power", hs.power, 0, 100, 10,
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
-
-    /*
-    String KLog;
-    hs.tempK.addListener([&](uint16_t val) {
-        if (!heater.isHeating()) return;
-        float t = heater.getElapsedTime() / 1000.0f;   // Sekunden
-        if (KLog.length() > 0) KLog += ",";
-        KLog += String(t, 1) + ":" + String(val);
-    });
-    
-    String IRLog;
-    hs.tempIR.addListener([&](uint16_t val) {
-        if (!heater.isHeating()) return;
-        float t = heater.getElapsedTime() / 1000.0f;   // Sekunden
-        if (IRLog.length() > 0) IRLog += ",";
-        IRLog += String(t, 1) + ":" + String(val);
-    });
-
-    hs.isHeating.addListener([&](bool isHeating) {
-        if (!isHeating) {
-            logPrint("IRLog", IRLog);
-            logPrint("KLog", KLog);
-
-            IRLog = "";
-            KLog = "";
-        }
-    });*/
-
 }
 
 
@@ -205,14 +184,12 @@ void FireScreen::handleInput(InputEvent event) {
     }
     if (input(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
-        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1.get() : ds.targetTemperatureCycle2.get());
+        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1 : ds.targetTemperatureCycle2);
         return;
     }
     
     if (input(event, {CENTER}, {PRESSED})) {
         uint8_t cycle = HeaterCycle::next();
-        if (cycle == 1 && menu.current()->name() == "Temp Cycle 2") menu.prevOption();
-        else if (cycle == 2 && menu.current()->name() == "Temp Cycle 1") menu.nextOption();
 
         return;
     }
