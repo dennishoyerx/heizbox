@@ -5,6 +5,7 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 #include "heater\HeatData.h"
+#include "net/WebSocketManager.h"
 
 HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
     EventBus::instance().subscribe<CycleFinishedData>(

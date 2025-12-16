@@ -2,6 +2,7 @@
 #include "Fonts/GFXFF/gfxfont.h"
 #include "bitmaps.h"
 #include "net/WiFiManager.h"
+#include "net/WebSocketManager.h"
 #include "utils/clock.h"
 #include "ui/ColorPalette.h"
 
@@ -73,6 +74,7 @@ void StatusBar::drawWifiRegion(RenderSurface s) {
     const int16_t iconY = height / 2 - iconRadius;
     s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BLACK);
 
+    if (!WebSocketManager::instance().isConnected()) s.sprite->fillCircle(iconX + iconRadius + 15, iconY + iconRadius, iconRadius, COLOR_BLUE);
     if (state.wifiStatus != WL_CONNECTED) return;
 
     // Render WiFi-Icon

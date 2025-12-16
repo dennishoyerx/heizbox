@@ -5,6 +5,7 @@
 #include "core/EventBus.h"
 #include "SysModule.h"
 #include "heater\HeatData.h"
+#include "heater\HeatCycle.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -58,7 +59,9 @@ void HeaterController::transitionTo(State newState) {
 
 void HeaterController::startHeating() {
     auto& hs = HeaterState::instance();
+    
     if (state == State::IDLE) {
+        heatCycle.resume();
         startTime = millis();
         //HeatLog::instance().start();
 
@@ -70,6 +73,7 @@ void HeaterController::startHeating() {
         hs.isHeating.set(true);
         hs.startTime.set(startTime);
     } else if (state == State::PAUSED) {
+        heatCycle.resume();
         startTime = millis() - (pauseTime - startTime);
 
         zvsDriver->setEnabled(true);
@@ -88,13 +92,13 @@ void HeaterController::stopHeating(bool finalize) {
     hs.isHeating.set(false);
 
     if (finalize) {
-        const uint32_t duration = millis() - startTime;
-        
+        heatCycle.submit();
         startTime = millis();
         transitionTo(State::IDLE);
         Serial.println("🔥 Heating stopped (finalized)");
         hs.startTime.set(0);
     } else {
+        heatCycle.pause();
         pauseTime = millis();
         transitionTo(State::PAUSED);
         Serial.println("🔥 Heating paused");
@@ -116,18 +120,19 @@ void HeaterController::update() {
         case State::HEATING:
             if (elapsed >= autoStopTime) {
                 Serial.println("Auto-stop triggered.");
-                stopHeating();
+                stopHeating(false);
             }
             break;
 
         case State::PAUSED:
             if (millis() - pauseTime >= hs.cycleTimeout) {
                 Serial.println("Pause timeout, finalizing cycle.");
-                const uint32_t duration = pauseTime - startTime;
-                
+            logPrint("x2");
+                heatCycle.submit();
+                /*const uint32_t duration = pauseTime - startTime;
                 EventBus::instance().publish<CycleFinishedData>(
                     EventType::CYCLE_FINISHED, {duration, startTime}
-                );
+                );*/
 
                 startTime = millis();
                 transitionTo(State::IDLE);

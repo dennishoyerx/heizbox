@@ -210,7 +210,10 @@ void FireScreen::handleInput(InputEvent event) {
     }
     
     if (input(event, {CENTER}, {PRESSED})) {
-        HeaterCycle::next();
+        uint8_t cycle = HeaterCycle::next();
+        if (cycle == 1 && menu.current()->name() == "Temp Cycle 2") menu.prevOption();
+        else if (cycle == 2 && menu.current()->name() == "Temp Cycle 1") menu.nextOption();
+
         return;
     }
 

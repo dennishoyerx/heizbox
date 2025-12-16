@@ -1,5 +1,4 @@
-#ifndef WEBSOCKETMANAGER_H
-#define WEBSOCKETMANAGER_H
+#pragma once
 
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
@@ -52,7 +51,3 @@ private:
     // Static wrapper für WebSocket-Callback
     static void onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length);
 };
-
-
-
-#endif

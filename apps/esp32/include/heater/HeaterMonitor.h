@@ -1,7 +1,6 @@
 #pragma once
 
 #include "heater/HeaterController.h"
-#include "net/WebSocketManager.h"
 
 class HeaterMonitor {
 public:

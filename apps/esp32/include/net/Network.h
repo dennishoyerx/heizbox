@@ -1,7 +1,6 @@
 #pragma once
 
 #include "net/WiFiManager.h"
-#include "net/WebSocketManager.h"
 #include "net/OTASetup.h"
 #include "Config.h"
 #include <ArduinoJson.h>

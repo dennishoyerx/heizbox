@@ -5,6 +5,7 @@
 #include <time.h>
 #include "core/EventBus.h"
 #include "SysModule.h"
+#include "net/WebSocketManager.h"
 
 Network::Network() : wifi(), ota(), initialized(false) {}
 

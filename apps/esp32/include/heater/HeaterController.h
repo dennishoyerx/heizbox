@@ -6,6 +6,7 @@
 #include "heater/ZVSDriver.h"
 #include "heater/HeaterTemperature.h"
 #include "heater/HeaterState.h"
+#include "heater/HeatCycle.h"
 #include "ITemperatureSensor.h"
 
 class HeaterController {
@@ -42,6 +43,8 @@ public:
 private:
     HeaterTemperature temperature;
     ZVSDriver* zvsDriver;
+
+    HeatCycle heatCycle;
 
     void transitionTo(State newState);
 

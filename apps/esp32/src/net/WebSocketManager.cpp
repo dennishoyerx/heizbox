@@ -1,5 +1,10 @@
 #include "net/WebSocketManager.h"
 
+WebSocketManager& WebSocketManager::instance() {
+    static WebSocketManager instance;
+    return instance;
+}
+
 void WebSocketManager::init(const char* url, const char* deviceId, const char* clientType) {
     // Parse URL: wss://host/path
     String urlStr(url);
@@ -151,6 +156,5 @@ void WebSocketManager::onConnectionChange(ConnectionCallback callback) {
 }
 
 void WebSocketManager::onWebSocketEvent(WStype_t type, uint8_t* payload, size_t length) {
-    WebSocketManager& ws = WebSocketManager::instance();
-    ws.handleEvent(type, payload, length);
+    WebSocketManager::instance().handleEvent(type, payload, length);
 }
