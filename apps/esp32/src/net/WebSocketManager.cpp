@@ -6,7 +6,6 @@ WebSocketManager& WebSocketManager::instance() {
 }
 
 void WebSocketManager::init(const char* url, const char* deviceId, const char* clientType) {
-    // Parse URL: wss://host/path
     String urlStr(url);
 
     const char* protocol = "wss://";
@@ -23,9 +22,13 @@ void WebSocketManager::init(const char* url, const char* deviceId, const char* c
     // Append query params
     path += "?deviceId=" + String(deviceId) + "&type=" + String(clientType);
 
-    Serial.printf("WebSocket connecting to: %s%s\n", host.c_str(), path.c_str());
+    host = host.c_str();
+    path = path.c_str();
 
-    webSocket.beginSSL(host.c_str(), 443, path.c_str(), "", "/");
+    Serial.printf("WebSocket connecting to: %s%s\n", host, path);
+    
+    webSocket.begin(host.c_str(), 80, path.c_str()); 
+    //webSocket.beginSSL(host, 443, path, "", "");
     webSocket.onEvent(onWebSocketEvent);
     webSocket.setReconnectInterval(5000);
 }
@@ -37,6 +40,14 @@ void WebSocketManager::update() {
     if (state.connected && (millis() - state.lastHeartbeat >= HEARTBEAT_INTERVAL_MS)) {
         sendHeartbeat();
     }
+
+    // Manual reconnect
+    /*if (!state.connected && (millis() - state.lastReconnectAttempt >= 5000)) {
+        Serial.println("Attempting WebSocket reconnect...");
+        webSocket.beginSSL(host, 443, path, "", "/");
+        webSocket.onEvent(onWebSocketEvent);
+        state.lastReconnectAttempt = millis();
+    }*/
 }
 
 // ============================================================================
@@ -80,6 +91,12 @@ bool WebSocketManager::sendStatusUpdate(bool isOn, bool isHeating) {
 }
 
 bool WebSocketManager::sendHeatCycleCompleted(uint32_t durationSec, uint8_t cycle) {
+    if (!state.connected) {
+        Serial.println("WebSocket disconnected, buffering heatCycleCompleted");
+        //pendingHeatCycles.push_back({durationSec, cycle});
+        return false;
+    }
+
     JsonDocument doc;
     doc["type"] = "heatCycleCompleted";
     doc["duration"] = durationSec;
@@ -110,13 +127,20 @@ void WebSocketManager::handleEvent(WStype_t type, uint8_t* payload, size_t lengt
             break;
 
         case WStype_CONNECTED:
-            Serial.printf("WebSocket connected: %s\n", payload);
+            Serial.printf("WebSocket connected");
             state.connected = true;
             state.reconnectAttempts = 0;
             state.lastHeartbeat = millis();
 
             // Send initial status
             sendStatusUpdate(true, false);
+
+            // pending heatCycleCompleted Messages senden
+            /*while (!pendingHeatCycles.empty()) {
+                auto msg = pendingHeatCycles.front();
+                pendingHeatCycles.pop_front();
+                sendHeatCycleCompleted(msg.durationSec, msg.cycle);
+            }*/
 
             if (connectionCallback) connectionCallback(true);
             break;

@@ -127,12 +127,7 @@ void HeaterController::update() {
         case State::PAUSED:
             if (millis() - pauseTime >= hs.cycleTimeout) {
                 Serial.println("Pause timeout, finalizing cycle.");
-            logPrint("x2");
                 heatCycle.submit();
-                /*const uint32_t duration = pauseTime - startTime;
-                EventBus::instance().publish<CycleFinishedData>(
-                    EventType::CYCLE_FINISHED, {duration, startTime}
-                );*/
 
                 startTime = millis();
                 transitionTo(State::IDLE);

@@ -3,9 +3,17 @@
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include <functional>
+//#include <deque>
+
+
+struct HeatCycleMsg {
+    uint32_t durationSec;
+    uint8_t cycle;
+};
 
 class WebSocketManager {
 public:
+    //std::deque<HeatCycleMsg> pendingHeatCycles;
     using MessageCallback = std::function<void(const char* type, const JsonDocument& doc)>;
     using ConnectionCallback = std::function<void(bool connected)>;
 
@@ -33,9 +41,15 @@ private:
 
     struct State {
         bool connected = false;
+        bool initialized = false;
         uint32_t lastHeartbeat = 0;
         uint32_t reconnectAttempts = 0;
+        uint32_t lastReconnectAttempt = 0;
     } state;
+
+    const char* host;
+    const char* path;
+
 
     MessageCallback messageCallback;
     ConnectionCallback connectionCallback;

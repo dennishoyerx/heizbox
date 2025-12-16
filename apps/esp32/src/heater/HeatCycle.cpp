@@ -17,4 +17,5 @@ void HeatCycle::submit() {
     WebSocketManager::instance().sendHeatCycleCompleted(durationMs / 1000, HeaterCycle::current());
     startedAt = 0;
     durationMs = 0;
+    HeaterCycle::next();
 }
