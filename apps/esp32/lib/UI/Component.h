@@ -1,10 +1,11 @@
 #pragma once
 
-#include <DisplayDriver.h>
-#include <ui/base/SurfaceFactory.h>
+#include <Arduino.h>
 #include <unordered_map>
 #include <string>
 
+#include "RenderSurface.h"
+#include <Observable.h>
 
 struct Position {
     int16_t x;
@@ -15,12 +16,7 @@ struct Dimension {
     int16_t h;
 };
 
-struct State {
-
-};
-
 using CompCallback = std::function<void(RenderSurface&)>;
-std::function<int(int, int)> callback = [](int a, int b) { return a + b; };
 
 
 template<typename T>
@@ -92,62 +88,4 @@ private:
     void renderExecute() {
         //_ui->withSurface(dimension.w, dimension.h, position.x, position.y, callback); 
     };
-};
-
-class Components {
-public:
-    Components(SurfaceFactory* factory): _surfaceFactory(factory) {
-
-    };
-
-    void add(std::string key, Component comp) {
-        comps[key] = comp;
-    };
-
-    void renderComponent(const std::string& key) {
-        auto it = comps.find(key);
-        if (it != comps.end()) {
-            // it->second ist die Comp-Instanz
-            // it->second.renderExecute(); // Dies könnte die beabsichtigte Aktion sein
-        }
-    };
-
-private: 
-    SurfaceFactory* _surfaceFactory;
-    std::unordered_map<std::string, Component> comps;
-};
-
-
-class UI {
-public:
-    UI(DisplayDriver* driver);
-
-    // Surface
-    RenderSurface createSurface(int16_t w, int16_t h);
-    void releaseSurface(RenderSurface& s);
-    void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY, SurfaceCallback cb, bool clear = true);
-    void withSurface(int16_t w, int16_t h, int16_t targetX, int16_t targetY,
-                     const std::unordered_map<std::string, StateValue>& state,
-                     SurfaceCallback cb, bool clear = true);
-
-    void clear();
-    
-    // Force all surfaces to redraw on next render cycle
-    void forceRedraw();
-    
-    // Invalidate all cached surface states
-    void invalidateAll();
-
-    Component createComp(Position pos = {0, 0}, Dimension dim = {0, 0}, CompCallback cb = nullptr) {
-        Component comp = Component(pos, dim, cb);
-
-        _comps.push_back(comp);
-
-        return comp;
-    };
-
-private:
-    DisplayDriver* _driver;
-    SurfaceFactory _surfaceFactory;
-    std::vector<Component> _comps;
 };
