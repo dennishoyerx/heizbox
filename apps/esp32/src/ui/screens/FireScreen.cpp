@@ -79,6 +79,37 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 }
 
 
+namespace FireUI {
+    void Temperature(UI* _ui, Position pos, Dimension dim) {
+        auto& hs = HeaterState::instance();
+
+        Comp(pos, dim, [&hs](RenderSurface& s) {
+            s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
+            s.text(30, 0, String(hs.temp), TextSize::lg);
+            s.text(30, 30, String(hs.tempK), TextSize::lg);
+            s.text(30, 60, String(hs.tempIR), TextSize::md);
+        }).attachState(hs.temp);
+        
+
+        c.use(hs.temp);
+/*
+        _ui->withSurface(dim.w, dim.h, pos.x, pos.y, {
+            {"temp", hs.temp},
+            {"irTemp", hs.tempIR},
+            {"thermoTemp", hs.tempK}
+        }, [&hs](RenderSurface& s) {
+            s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
+            s.text(30, 0, String(hs.temp), TextSize::lg);
+            s.text(30, 30, String(hs.tempK), TextSize::lg);
+            s.text(30, 60, String(hs.tempIR), TextSize::md);
+        });*/
+    };
+};
+
+namespace IdleUI {
+
+};
+
 void FireScreen::draw() {
     auto& hs = HeaterState::instance();
 
@@ -189,8 +220,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
     
     if (input(event, {CENTER}, {PRESSED})) {
-        uint8_t cycle = HeaterCycle::next();
-
+        HeaterCycle::next();
         return;
     }
 
