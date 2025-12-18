@@ -2,7 +2,7 @@
 #include "heater/HeaterState.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
-
+/*
 struct IdleUI {
     Component* Temperature(Position pos, Dimension dim) {
         auto& hs = HeaterState::instance();
@@ -28,4 +28,4 @@ namespace FireUI {
             s.text(30, 60, String(hs.tempIR), TextSize::md);
         }).attachStates(hs.temp, hs.tempIR, hs.tempK);
     };
-};
+};*/

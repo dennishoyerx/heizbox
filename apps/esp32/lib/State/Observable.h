@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <vector>
+#include <map>
 #include <Preferences.h>
 #include <type_traits>
 #include <nvs_flash.h> 
@@ -9,6 +10,7 @@
 template<typename T>
 class Observable {
 public:
+    using ListenerId = uint32_t;
     using Listener = std::function<void(const T&)>;
 
     Observable() = default;
@@ -36,8 +38,14 @@ public:
     operator const T&() const { return value_; }
 
     // Listener registrieren
-    void addListener(Listener listener) {
-        listeners_.push_back(std::move(listener));
+    ListenerId addListener(Listener listener) {
+        ListenerId id = nextListenerId_++;
+        listeners_[id] = std::move(listener);
+        return id;
+    }
+
+    void removeListener(ListenerId id) {
+        listeners_.erase(id);
     }
 
     // Update mit Transformation
@@ -50,13 +58,14 @@ public:
 
 private:
     void notifyListeners() {
-        for (auto& listener : listeners_) {
+        for (auto const& [id, listener] : listeners_) {
             listener(value_);
         }
     }
 
     T value_;
-    std::vector<Listener> listeners_;
+    std::map<ListenerId, Listener> listeners_;
+    ListenerId nextListenerId_ = 0;
 };
 
 // ============================================================================ 
