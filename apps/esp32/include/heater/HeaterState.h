@@ -7,6 +7,7 @@ struct HeaterState {
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint32_t> cycleTimeout{"heater", "cycleTimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};
+
     
     Observable<bool> zvsOn{false};
     Observable<bool> isHeating{false};
@@ -17,7 +18,9 @@ struct HeaterState {
     Observable<uint16_t> temp{0};
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
-    Observable<uint16_t> tempLimit{0};
+    Observable<uint16_t> tempLimit{210};
+    PersistedObservable<uint16_t> tempLimitCycle1{"temp", "cycle1", 210};
+    PersistedObservable<uint16_t> tempLimitCycle2{"temp", "cycle2", 225};
 
     PersistedObservable<bool> alwaysMeasure{"heater", "alwaysMeasure", false};
     PersistedObservable<int8_t> tempCorrection{"heater", "tempCorrection", 0};

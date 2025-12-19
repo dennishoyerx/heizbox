@@ -33,17 +33,14 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->setAutoStopTime(time);
     });
 
-    hs.tempLimit.set(hs.cycle == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
-    hs.cycle.addListener([&hs, &state](uint8_t val) {
-        hs.tempLimit.set(val == 1 ? state.targetTemperatureCycle1 : state.targetTemperatureCycle2);
+    hs.tempLimit.set(hs.cycle == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
+    hs.cycle.addListener([&hs](uint16_t val) {
+        hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
-    state.targetTemperatureCycle1.addListener([&hs](uint16_t val) {
-        if(HeaterCycle::is(1)) hs.tempLimit.set(val);
-    });
-
-    state.targetTemperatureCycle2.addListener([&hs](uint16_t val) {
-        if(HeaterCycle::is(2)) hs.tempLimit.set(val);
+    hs.tempLimit.addListener([&hs](uint16_t val) {
+        if(HeaterCycle::is(1)) hs.tempLimitCycle1.set(val);
+        else hs.tempLimitCycle2.set(val);
     });
 
     heater->getIRTempSensor()->setEmissivity(hs.irEmissivity  / 100.0f);

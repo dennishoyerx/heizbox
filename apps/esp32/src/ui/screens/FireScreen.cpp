@@ -35,33 +35,24 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         if (!isHeating) _ui->clear();
     });
 
-    hs.cycle.addListener([&](uint8_t cycle) {        
-        if (cycle == 1 && menu.current()->name() == "Temp Cycle 2") menu.prevOption();
+    /*hs.cycle.addListener([&](uint8_t cycle) {        
+        if (cycle == 1 && menu.current()->() == "Temp Cycle 2") menu.prevOption();
         else if (cycle == 2 && menu.current()->name() == "Temp Cycle 1") menu.nextOption(); 
     });
-
-
+*/
     
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
-        "Temp Cycle 1", ds.targetTemperatureCycle1, 100, 260, 1,
+        "Temperature", hs.tempLimit, 100, 260, 1,
         [](const uint16_t& v){ return (String) v + "°"; }
     ));
     
-    menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
-        "Temp Cycle 2", ds.targetTemperatureCycle2, 100, 260, 1,
-        [](const uint16_t& v){ return (String) v + "°"; }
-    ));
     
-    menu.addItem(std::make_unique<ObservableValueItem<int8_t>>(
-        "Temp Correction", hs.tempCorrection, -50, 50, 1,
-        [](const int8_t& v){ return (String) v + "°"; }
-    ));
-
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
         "IR Emissivity", hs.irEmissivity, 0, 100, 1,
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
 
+    /*
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
         "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,
         [](const uint32_t& v){ return (String) v + "ms"; }
@@ -76,6 +67,7 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         "Power", hs.power, 0, 100, 10,
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
+    */
 }
 
 void FireScreen::draw() {
@@ -183,7 +175,7 @@ void FireScreen::handleInput(InputEvent event) {
     }
     if (input(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
-        hs.tempLimit.set(HeaterCycle::is(1) ? ds.targetTemperatureCycle1 : ds.targetTemperatureCycle2);
+        hs.tempLimit.set(HeaterCycle::is(1) ? hs.tempLimitCycle1: hs.tempLimitCycle2);
         return;
     }
     
