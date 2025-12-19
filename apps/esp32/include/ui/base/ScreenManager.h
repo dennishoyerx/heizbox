@@ -1,10 +1,12 @@
 #pragma once
 
-#include "ui/base/Screen.h"
+#include "forward.h"
+
+#include "ui/base/Screen.h" // CONVERTED: Use forward.h
 #include "ui/base/UI.h"
 #include "ui/components/StatusBar.h"
-#include "hardware/input/InputManager.h"
-#include "DisplayDriver.h"
+#include "hardware/input/InputManager.h" // CONVERTED: Use forward.h
+#include "DisplayDriver.h" // CONVERTED: Use forward.h
 #include "ui/base/ScreenTransition.h"
 
 class ScreenManager {

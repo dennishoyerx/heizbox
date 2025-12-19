@@ -1,8 +1,10 @@
 #pragma once
 
-#include "ui/DeviceUI.h"
-#include "DisplayDriver.h"
-#include "heater/HeaterController.h"
+#include "forward.h"
+
+#include "ui/DeviceUI.h" // CONVERTED: Use forward.h
+#include "DisplayDriver.h" // CONVERTED: Use forward.h
+#include "heater/HeaterController.h" // CONVERTED: Use forward.h
 
 /**
  * @brief Manages the binding of DeviceState observables to various hardware and system managers.

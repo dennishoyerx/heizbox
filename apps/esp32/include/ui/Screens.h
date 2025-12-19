@@ -1,5 +1,7 @@
 #pragma once
 
+#include "forward.h"
+
 #include <memory>
 #include "ui/screens/FireScreen.h"
 #include "ui/screens/ScreensaverScreen.h"
@@ -10,7 +12,7 @@
 #include "ui/components/MenuBuilder.h"
 #include "base/GenericMenuScreen.h"
 
-#include "heater/HeaterController.h"
+#include "heater/HeaterController.h" // CONVERTED: Use forward.h
 
 class Screens {
 public:

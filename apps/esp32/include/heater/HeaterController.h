@@ -1,9 +1,11 @@
 #pragma once
 
+#include "forward.h"
+
 #include <cstdint>
-#include "TempSensor.h"
-#include "IRTempSensor.h"
-#include "heater/ZVSDriver.h"
+#include "TempSensor.h" // CONVERTED: Use forward.h
+#include "IRTempSensor.h" // CONVERTED: Use forward.h
+#include "heater/ZVSDriver.h" // CONVERTED: Use forward.h
 #include "heater/Sensors.h"
 #include "heater/HeaterState.h"
 #include "heater/HeatCycle.h"

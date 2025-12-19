@@ -1,6 +1,8 @@
 #pragma once
 
-#include "heater/ZVSDriver.h"
+#include "forward.h"
+
+#include "heater/ZVSDriver.h" // CONVERTED: Use forward.h
 #include "ui/ColorPalette.h"
 #include "ui/base/Screen.h"
 

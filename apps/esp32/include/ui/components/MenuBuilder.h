@@ -7,7 +7,7 @@
 #include <memory>
 #include <utility> // For std::make_unique
 #include <Arduino.h> // For constrain
-#include "ui/base/Screen.h"
+#include "ui/base/Screen.h" // CONVERTED: Use forward.h
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "DisplayDriver.h" // For DisplayManager and TFT_ colors
 #include "hardware/input/InputManager.h" // For InputEvent

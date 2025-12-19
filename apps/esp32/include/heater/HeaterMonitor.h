@@ -1,6 +1,8 @@
 #pragma once
 
-#include "heater/HeaterController.h"
+#include "forward.h"
+
+#include "heater/HeaterController.h" // CONVERTED: Use forward.h
 
 class HeaterMonitor {
 public:
