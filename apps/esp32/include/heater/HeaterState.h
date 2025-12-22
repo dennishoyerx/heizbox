@@ -36,5 +36,3 @@ struct HeaterState {
 private:
     HeaterState() = default;
 };
-
-HeaterState& hs();
