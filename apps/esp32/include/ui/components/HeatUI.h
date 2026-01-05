@@ -21,7 +21,7 @@ protected:
 class HeatUI : public UIComponent {
 public:
     static void render(UI* _ui, ZVSDriver* zvs, MenuManager* menu);
-private:
     static void Temperature(RenderSurface s);
+private:
     static void Cycle(RenderSurface s);
 };

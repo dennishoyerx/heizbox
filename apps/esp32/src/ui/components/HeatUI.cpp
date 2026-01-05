@@ -28,8 +28,7 @@ float smoothProgress(float target) {
 
 
 void drawStats(RenderSurface& s, int x, int y, String label, String value) {
-    //s.sprite->setTextDatum(MC_DATUM);
-    s.text(x, y, value);
+    s.text(x, y, value, TextSize::bmd);
     s.text(x, y + 24, label, TextSize::sm);
 }
 
@@ -61,18 +60,18 @@ void Timer(RenderSurface s, uint32_t time) {
 
 void HeatUI::Temperature(RenderSurface s) {
     auto& hs = HeaterState::instance();
+    int padding = 16;
 
-    s.sprite->drawBitmap(0, 15, image_temp_48, 48, 48, COLOR_TEXT_PRIMARY);
-    s.text(45, 30, String(hs.temp), TextSize::bxl);
-    
-    s.text(32, 70, "k", TextSize::sm);
-    s.text(45, 70, String(hs.tempK), TextSize::lg);
+    s.text(16, padding + 0, "KTyp", TextSize::sm);
+    s.text(16, padding + 24, String(hs.tempK), TextSize::blg);
 
-    s.text(32, 100, "ir", TextSize::sm);
-    s.text(45, 100, String(hs.tempIR), TextSize::lg);
-
-    s.text(150, 30, String(hs.tempLimit), TextSize::xl);
-    s.text(150, 70, String(hs.irEmissivity / 100.0f), TextSize::sm);
+    String tempIR = hs.tempIR > 500 ? "--" : String(hs.tempIR);
+        
+    s.text(88, padding + 0, "IR", TextSize::sm);
+    s.text(88, padding + 24, tempIR, TextSize::blg);
+        
+    s.text(160, padding + 0, "Limit", TextSize::sm);
+    s.text(160, padding + 24, String(hs.tempLimit), TextSize::bxl);
 }
 
 
@@ -129,7 +128,7 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 void HeatUI::render(UI* _ui, ZVSDriver* zvs, MenuManager* menu) {
     auto& hs = HeaterState::instance();
 
-    _ui->withSurface(280, 205, 0, 35, [&](RenderSurface& s) {
+    _ui->withSurface(280, 200, 0, 0, [&](RenderSurface& s) {
         s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(hs.temp, true));
         float progress = std::min(1.0f, (float)hs.temp / hs.tempLimit);
         Background(s, smoothProgress(progress), 15);

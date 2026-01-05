@@ -26,7 +26,6 @@ void Device::setup() {
     network.init(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
 
     StateBinder::bindAll(&ui, &heater);
-    
     Serial.println("✅ Device initialized");
 }
 

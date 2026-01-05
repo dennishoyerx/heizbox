@@ -1,8 +1,7 @@
-#include "heater\HeatCycle.h"
+#include "heater/HeatCycle.h"
 #include "heater/HeaterCycle.h"
 
-HeatCycle::HeatCycle() {
-}
+HeatCycle::HeatCycle() {}
 
 void HeatCycle::pause() {
     durationMs += millis() - startedAt;

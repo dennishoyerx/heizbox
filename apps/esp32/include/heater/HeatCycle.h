@@ -6,6 +6,7 @@ class HeatCycle {
 public:
     HeatCycle();
 
+    void start();
     void pause();
     void resume();
     void submit();

@@ -2,6 +2,21 @@
 
 #include <Arduino.h>
 
+struct InputConfig {
+    struct RotaryEncoder {
+        static constexpr uint8_t CLK = 16;
+        static constexpr uint8_t DT = 16;
+        static constexpr uint8_t SW = 16;
+    };
+    static constexpr uint8_t FIRE_BUTTON = 16;
+
+    
+    static constexpr uint32_t HOLD_THRESHOLD_MS = 300;
+    static constexpr uint32_t HOLDING_INTERVAL_MS = 150;
+    static constexpr uint32_t DEBOUNCE_MS = 50;
+};
+
+
 struct HardwareConfig {
     static constexpr uint8_t TFT_BL_PIN = 16;
     static constexpr uint8_t STATUS_LED_PIN = 2;
@@ -56,12 +71,3 @@ struct Timing {
     static constexpr uint32_t NVS_FLUSH_INTERVAL_MS = 5000;
     static constexpr uint32_t SCREENSAVER_TIMEOUT_MS = 600000;
 };
-
-
-struct InputConfig {
-    static constexpr uint32_t HOLD_THRESHOLD_MS = 300;
-    static constexpr uint32_t HOLDING_INTERVAL_MS = 150;
-    static constexpr uint32_t DEBOUNCE_MS = 50;
-};
-
-

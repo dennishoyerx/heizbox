@@ -6,6 +6,7 @@
 
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"
+
 ScreenManager::ScreenManager(DisplayDriver& disp, InputManager& inp)
     : display(disp),
       input(inp),

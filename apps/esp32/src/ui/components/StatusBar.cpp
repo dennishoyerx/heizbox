@@ -43,12 +43,12 @@ void StatusBar::draw(UI* ui) {
         dirty.wifi = true;
     }
 
-    ui->withSurface(280, 35, 0, 0, {
+    ui->withSurface(80, 40, 0, 200, {
         {"time", state.time},
         {"wifiStatus", state.wifiStatus},
         {"wifiStrength", state.wifiStrength}
     },[this](RenderSurface& s) {
-        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BLACK);
+        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
         drawTimeRegion(s);
         drawWifiRegion(s);
     });
@@ -56,21 +56,23 @@ void StatusBar::draw(UI* ui) {
 
 void StatusBar::drawTimeRegion(RenderSurface s) {
     // Clear nur Zeit-Bereich
-    s.sprite->fillRect(280/2 - s.sprite->textWidth(state.time)/2, 0, s.sprite->textWidth(state.time), height, COLOR_BLACK);
+    s.sprite->fillRect(16, 0, s.sprite->textWidth(state.time), height, COLOR_BG_2);
 
     // Render Zeit
-    s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-    s.sprite->setFreeFont(&FreeSans12pt7b);
+
+    s.text(16, 0, String(state.time));
+    /*s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
+    s.sprite->setFreeFont(&FreeSans18pt7b);
     s.sprite->setTextSize(1);
     s.sprite->setCursor(280/2 - s.sprite->textWidth(state.time)/2, s.sprite->fontHeight() - 4);
-    s.sprite->print(state.time);
+    s.sprite->print(state.time);*/
 }
 
 void StatusBar::drawWifiRegion(RenderSurface s) {
     // Clear nur WiFi-Icon Bereich
     const int8_t iconSize = 10;
     const int8_t iconRadius = iconSize / 2;
-    const int16_t iconX = (280/2 + s.sprite->textWidth(state.time)/2) + 10;
+    const int16_t iconX = 16 + s.sprite->textWidth(state.time) + 10;
     const int16_t iconY = height / 2 - iconRadius;
     s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BLACK);
 

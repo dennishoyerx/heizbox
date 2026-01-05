@@ -34,12 +34,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
     });
-
-    /*hs.cycle.addListener([&](uint8_t cycle) {        
-        if (cycle == 1 && menu.current()->() == "Temp Cycle 2") menu.prevOption();
-        else if (cycle == 2 && menu.current()->name() == "Temp Cycle 1") menu.nextOption(); 
-    });
-*/
     
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
         "Temperature", hs.tempLimit, 100, 260, 1,
@@ -69,6 +63,59 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ));
     */
 }
+/*
+struct Column {
+    int16_t x;
+    int16_t y;
+    int16_t w;
+    int16_t h;
+};
+
+class Row {
+    public:
+    Row(int8_t cols, int16_t w, int16_t h, int16_t x, int16_t y);
+
+    Column col(int8_t col) {
+        Column c;
+       // c.x = 
+       // c.y = cols[col].y;
+        c.w = cols[col].w;
+        c.h = h;
+        return c;
+    };
+
+    private:
+    int8_t cols;
+    int16_t w;
+    int16_t h;
+    int16_t x;
+    int16_t y;
+    struct col {
+        int16_t w;
+        int16_t h;
+    };
+};*/
+
+struct TemperatureProps {
+    int limit;
+    int ktyp;
+    int ir;
+};
+
+void TemperatureComponent(RenderSurface& s, TemperatureProps props) {
+        int padding = 16;
+        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
+        s.text(16, padding + 0, "KTyp", TextSize::sm);
+        s.text(16, padding + 24, String(props.ktyp), TextSize::blg);
+
+        String tempIR = props.ir > 500 ? "--" : String(props.ir);
+        
+        s.text(88, padding + 0, "IR", TextSize::sm);
+        s.text(88, padding + 24, tempIR, TextSize::blg);
+        
+        s.text(160, padding + 0, "Limit", TextSize::sm);
+        s.text(160, padding + 24, String(props.limit), TextSize::bxl);
+    };
 
 void FireScreen::draw() {
     auto& hs = HeaterState::instance();
@@ -78,7 +125,7 @@ void FireScreen::draw() {
         return;
     }
 
-    _ui->withSurface(200, 60, 15, 130, [this](RenderSurface& s) {
+    _ui->withSurface(200, 60, 15, 100, [this](RenderSurface& s) {
         const IMenuItem* cur = menu.current();
         const IMenuItem* left = menu.at((menu.index() + menu.count() - 1) % (menu.count() ? menu.count() : 1));
         const IMenuItem* right = menu.at((menu.index() + 1) % (menu.count() ? menu.count() : 1));
@@ -96,43 +143,27 @@ void FireScreen::draw() {
     });
 
     // Current Temp
-    _ui->withSurface(88, 80, 0, 45, {
+    _ui->withSurface(280, 88, 0, 0, {
+        {"targetTemp", hs.tempLimit},
         {"temp", hs.temp},
         {"irTemp", hs.tempIR},
         {"thermoTemp", hs.tempK}
     }, [&hs](RenderSurface& s) {
-        s.sprite->drawBitmap(-5, 0, image_temp_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, 0, String(hs.temp), TextSize::lg);
-        s.text(30, 30, String(hs.tempK), TextSize::lg);
-        s.text(30, 60, String(hs.tempIR), TextSize::md);
-    });
+        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
+        HeatUI::Temperature(s);
+    }); 
 
-    // Target Temp
-    _ui->withSurface(104, 50, 84, 45, {
-        {"targetTemp", hs.tempLimit},
-    }, [&hs](RenderSurface& s) {
-        s.sprite->drawBitmap(0, 0, image_target_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(40, 6, String(hs.tempLimit), TextSize::lg);
-    });
-
-    // Power
-    _ui->withSurface(100, 40, 192, 45, {
-        {"power", hs.power}
-    }, [&hs](RenderSurface& s) {
-        s.sprite->drawBitmap(-10, 0, image_power_40, 40, 40, COLOR_TEXT_PRIMARY);
-        s.text(30, 6, String(hs.power), TextSize::lg);
-    });
-    
     // Consumption
-    _ui->withSurface(250, 50, 15, 190, {
+    _ui->withSurface(200, 50, 80, 190, {
         {"isHeating", hs.isHeating},
         {"consumption", state.consumption.session},
         {"todayConsumption", state.consumption.today},
         {"currentCycle", HeaterCycle::current()}
     }, [this](RenderSurface& s) {
+        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
         drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
         drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
-        drawStats(s, 160, 0, "Gestern", formatConsumption(state.consumption.yesterday));
+        drawStats(s, 148, 0, "Gestern", formatConsumption(state.consumption.yesterday));
     });
 return;
     // Seperator

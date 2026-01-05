@@ -59,7 +59,7 @@ const uint16_t heizbox_palette[16] = {
 
 const uint16_t heizbox_palette_dark[16] = {
     rgb888to565(35, 0, 70),       //  0: COLOR_BG
-    rgb888to565(66, 44, 100),  //  1: COLOR_BG_2
+    rgb888to565(23, 0, 46),  //  1: COLOR_BG_2
     rgb888to565(43, 22, 82),  //  2: COLOR_BG_3
 
     rgb888to565(234, 226, 243), //  3: COLOR_TEXT_PRIMARY - Fast weiß

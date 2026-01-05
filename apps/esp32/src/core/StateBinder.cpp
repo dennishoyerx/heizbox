@@ -39,6 +39,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
     });
 
     hs.tempLimit.addListener([&hs](uint16_t val) {
+        if (val == 260) return;
         if(HeaterCycle::is(1)) hs.tempLimitCycle1.set(val);
         else hs.tempLimitCycle2.set(val);
     });
