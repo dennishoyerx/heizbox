@@ -2,7 +2,7 @@
 
 #include "Observable.h"
 #include "Config.h"
-
+/*
 enum HeaterMode {
     TEMP_TARGET_CUTOFF,
     TEMP_TARGET
@@ -15,7 +15,7 @@ struct HeaterSettings {
         PersistedObservable<uint16_t> limitCycle1{"temp", "cycle1", 210};
         PersistedObservable<uint16_t> limitCycle2{"temp", "cycle2", 225};
     };
-};
+};*/
 
 struct HeaterState {
     PersistedObservable<uint8_t> power{"heater", "power", 100};

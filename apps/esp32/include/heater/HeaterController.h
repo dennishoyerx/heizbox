@@ -1,6 +1,6 @@
 #pragma once
 
-#include "forward.h"
+//#include "forward.h"
 
 #include <cstdint>
 #include "TempSensor.h" // CONVERTED: Use forward.h
