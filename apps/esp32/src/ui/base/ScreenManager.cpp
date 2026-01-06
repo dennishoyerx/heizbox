@@ -7,6 +7,23 @@
 #include "hardware/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"
 
+class RenderArea {
+    public:
+    RenderArea(int16_t x, int16_t y, int16_t w, int16_t h) : _x(x), _y(y), _w(w), _h(h) {}
+
+    int16_t getX() const { return _x; }
+    int16_t getY() const { return _y; }
+    int16_t getWidth() const { return _w; }
+    int16_t getHeight() const { return _h; }
+
+    private:
+    int16_t _x;
+    int16_t _y;
+    int16_t _w;
+    int16_t _h;
+
+};
+
 ScreenManager::ScreenManager(DisplayDriver& disp, InputManager& inp)
     : display(disp),
       input(inp),
