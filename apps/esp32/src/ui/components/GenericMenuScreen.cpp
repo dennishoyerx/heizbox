@@ -19,7 +19,7 @@ GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_
 // Implementations of methods declared in GenericMenuScreen.h
 void GenericMenuScreen::draw() {
     _ui->clear();    
-    _ui->withSurface(280, 190, 0, 50, [this](RenderSurface& s) {
+    _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
 
     //centerText(s.sprite, 10, title_, COLOR_TEXT_PRIMARY, 2);

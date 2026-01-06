@@ -22,6 +22,7 @@ public:
 
     void draw() override;
     void update() override;
+    void onEnter() override;
     void handleInput(InputEvent event) override;
     ScreenType getType() const override { return ScreenType::FIRE; }
     void _handleHeatingTrigger(bool shouldStartHeating);

@@ -33,6 +33,7 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
+        manager->setStatusbarVisible(!isHeating);
     });
     
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
@@ -96,26 +97,15 @@ class Row {
     };
 };*/
 
+void FireScreen::onEnter() {
+    manager->setStatusbarVisible(true);
+}
+
 struct TemperatureProps {
     int limit;
     int ktyp;
     int ir;
 };
-
-void TemperatureComponent(RenderSurface& s, TemperatureProps props) {
-        int padding = 16;
-        s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
-        s.text(16, padding + 0, "KTyp", TextSize::sm);
-        s.text(16, padding + 24, String(props.ktyp), TextSize::blg);
-
-        String tempIR = props.ir > 500 ? "--" : String(props.ir);
-        
-        s.text(88, padding + 0, "IR", TextSize::sm);
-        s.text(88, padding + 24, tempIR, TextSize::blg);
-        
-        s.text(160, padding + 0, "Limit", TextSize::sm);
-        s.text(160, padding + 24, String(props.limit), TextSize::bxl);
-    };
 
 void FireScreen::draw() {
     auto& hs = HeaterState::instance();
@@ -154,7 +144,7 @@ void FireScreen::draw() {
     }); 
 
     // Consumption
-    _ui->withSurface(200, 50, 80, 190, {
+    _ui->withSurface(200, 50, 96, 190, {
         {"isHeating", hs.isHeating},
         {"consumption", state.consumption.session},
         {"todayConsumption", state.consumption.today},
@@ -162,8 +152,8 @@ void FireScreen::draw() {
     }, [this](RenderSurface& s) {
         s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
         drawStats(s, 0, 0, "Session", formatConsumption(state.consumption.session));
-        drawStats(s, 80, 0, "Heute", formatConsumption(state.consumption.today));
-        drawStats(s, 148, 0, "Gestern", formatConsumption(state.consumption.yesterday));
+        drawStats(s, 72, 0, "Heute", formatConsumption(state.consumption.today));
+        drawStats(s, 132, 0, "Gestern", formatConsumption(state.consumption.yesterday));
     });
 return;
     // Seperator

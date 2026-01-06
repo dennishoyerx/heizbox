@@ -113,7 +113,7 @@ void ScreenManager::draw() {
         const uint32_t startTime = micros();
 
         currentScreen->draw();
-        statusBar->draw(ui);
+        if (statusbarVisible) statusBar->draw(ui);
         const uint32_t drawTime = micros() - startTime;
         lastDrawTime = drawTime;
         dirty = false;
@@ -190,7 +190,7 @@ void ScreenManager::completeTransition() {
     if (currentScreen) {
         currentScreen->clear();
         currentScreen->draw();
-        statusBar->draw(ui);
+        if (statusbarVisible) statusBar->draw(ui);
     }
 
     dirty = false;

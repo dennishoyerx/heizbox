@@ -55,23 +55,26 @@ void Timer(RenderSurface s, uint32_t time) {
     s.sprite->setTextSize(2);
     s.sprite->setFreeFont(&FreeSansBold18pt7b);
     s.sprite->drawString(timeStr, s.centerX(), s.centerY(), 1);
+    s.sprite->setTextSize(1);
     s.sprite->setTextDatum(ML_DATUM);
 }
+struct RenderProps {
+    RenderSurface s;
+    int x;
+    int y;
+};
 
-void HeatUI::Temperature(RenderSurface s) {
+void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
+    p.s.text(p.x, p.y, label, TextSize::sm);
+    p.s.text(p.x, p.y + 24, String(value), size);
+};
+
+void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
-    int padding = 16;
-
-    s.text(16, padding + 0, "KTyp", TextSize::sm);
-    s.text(16, padding + 24, String(hs.tempK), TextSize::blg);
-
-    String tempIR = hs.tempIR > 500 ? "--" : String(hs.tempIR);
-        
-    s.text(88, padding + 0, "IR", TextSize::sm);
-    s.text(88, padding + 24, tempIR, TextSize::blg);
-        
-    s.text(160, padding + 0, "Limit", TextSize::sm);
-    s.text(160, padding + 24, String(hs.tempLimit), TextSize::bxl);
+    
+    Temp({s, 16, 16}, "KTyp", hs.tempK, heating ? TextSize::bxl : TextSize::blg);
+    if (hs.tempIR < 1000) Temp({s, 104, 16}, "IR", hs.tempIR);
+    Temp({s, 180, 16}, "Limit", hs.tempLimit, heating ? TextSize::blg : TextSize::bxl);
 }
 
 
@@ -128,17 +131,17 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
 void HeatUI::render(UI* _ui, ZVSDriver* zvs, MenuManager* menu) {
     auto& hs = HeaterState::instance();
 
-    _ui->withSurface(280, 200, 0, 0, [&](RenderSurface& s) {
+    _ui->withSurface(280, 240, 0, 0, [&](RenderSurface& s) {
         s.sprite->setPaletteColor(15, ColorUtils::getTemperatureColor565(hs.temp, true));
         float progress = std::min(1.0f, (float)hs.temp / hs.tempLimit);
         Background(s, smoothProgress(progress), 15);
         
         if (DeviceState::instance().oscDebug) ZVSOscilloscopeUI(s, zvs);
+        Temperature(s, true);
 
         Timer(s, hs.timer);
         
         Cycle(s);
-        Temperature(s);
 
         if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
 

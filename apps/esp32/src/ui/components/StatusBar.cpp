@@ -25,25 +25,15 @@ void StatusBar::draw(UI* ui) {
 
     // Check Time (nur alle 5s prüfen)
     if (now - state.lastUpdate >= TIME_UPDATE_INTERVAL_MS || state.lastUpdate == 0) {
-        String timeStr = Utils::getFormattedTime();
-        if (timeStr != state.time) {
-            state.time = timeStr;
-            dirty.time = true;
-        }
+        state.time = Utils::getFormattedTime();
         state.lastUpdate = now;
     }
 
     // Check WiFi (nur bei Änderungen)
-    const wl_status_t currentStatus = WiFi.status();
-    const int8_t currentStrength = getWifiStrength();
+    state.wifiStatus = WiFi.status();
+    state.wifiStrength = getWifiStrength();
 
-    if (currentStatus != state.wifiStatus || currentStrength != state.wifiStrength) {
-        state.wifiStatus = currentStatus;
-        state.wifiStrength = currentStrength;
-        dirty.wifi = true;
-    }
-
-    ui->withSurface(80, 40, 0, 200, {
+    ui->withSurface(96, 50, 0, 190, {
         {"time", state.time},
         {"wifiStatus", state.wifiStatus},
         {"wifiStrength", state.wifiStrength}
@@ -56,11 +46,11 @@ void StatusBar::draw(UI* ui) {
 
 void StatusBar::drawTimeRegion(RenderSurface s) {
     // Clear nur Zeit-Bereich
-    s.sprite->fillRect(16, 0, s.sprite->textWidth(state.time), height, COLOR_BG_2);
+    //s.sprite->fillRect(16, 0, s.sprite->textWidth(state.time), height, COLOR_BG_2);
 
     // Render Zeit
 
-    s.text(16, 0, String(state.time));
+    s.text(8, 0, String(state.time), TextSize::lg);
     /*s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
     s.sprite->setFreeFont(&FreeSans18pt7b);
     s.sprite->setTextSize(1);

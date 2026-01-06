@@ -33,6 +33,7 @@ public:
 
     UI* getUI() const { return ui; }
 
+    void setStatusbarVisible(bool visible) { statusbarVisible = visible; }
     
 
 private:
@@ -51,6 +52,7 @@ private:
     // Rendering state
     bool dirty;
     uint32_t lastDrawTime;
+    bool statusbarVisible = false;
 
     // Transition state
     struct TransitionState {

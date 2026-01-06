@@ -20,7 +20,7 @@ OtaUpdateScreen::OtaUpdateScreen() {
 void OtaUpdateScreen::draw()
 {
     _ui->clear();
-    _ui->withSurface(102, 128, 25, 100, [this](RenderSurface& s) {
+    _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
         s.sprite->drawBitmap(0, 0, ota_icon, 102, 128, COLOR_TEXT_PRIMARY);
         if (hasFailed) s.text(0, 0, "Failed", TextSize::bxl, COLOR_ERROR);
     });
