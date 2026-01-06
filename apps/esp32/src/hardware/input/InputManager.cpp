@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include "Config.h"
 
-
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
     {HardwareConfig::JOY_UP_PIN, UP},
     {HardwareConfig::JOY_DOWN_PIN, DOWN},
@@ -12,8 +11,7 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
     {HardwareConfig::FIRE_BUTTON_PIN, FIRE}
 };
 
-InputManager::InputManager(): callback(nullptr) {
-}
+InputManager::InputManager(): callback(nullptr) {}
 
 void InputManager::setup() {
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
