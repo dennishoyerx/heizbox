@@ -47,6 +47,12 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
 
+    
+    menu.addItem(std::make_unique<ObservableValueItem<float>>(
+        "IR Ambient Correction", hs.ambientCorrection, 0, 1, 0.01,
+        [](const float& v){ return (String) v + "%"; }
+    ));
+
     /*
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
         "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,

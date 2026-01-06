@@ -29,7 +29,6 @@ class UI;
 // UI Screens
 class FireScreen;
 class StartupScreen;
-class ScreensaverScreen;
 class OtaUpdateScreen;
 class TimezoneScreen;
 class GenericMenuScreen;

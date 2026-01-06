@@ -1,5 +1,4 @@
-#ifndef BITMAPS_H
-#define BITMAPS_H
+#pragma once
 
 #include <pgmspace.h> // For PROGMEM
 
@@ -7,16 +6,3 @@
 #include "icons/cap-48.h"
 #include "icons/cap-fill-48.h"
 #include "icons/cat-96.h"
-#include "icons/fire-48.h"
-#include "icons/power-40.h"
-#include "icons/session-48.h"
-#include "icons/target-40.h"
-#include "icons/target-48.h"
-#include "icons/temp-40.h"
-#include "icons/temp-48.h"
-#include "icons/wifi-high-bold-40.h"
-#include "icons/wifi-low-bold-40.h"
-#include "icons/wifi-medium-bold-40.h"
-#include "icons/wifi-slash-bold-40.h"
-
-#endif // BITMAPS_H

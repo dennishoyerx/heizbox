@@ -4,7 +4,6 @@
 
 #include <memory>
 #include "ui/screens/FireScreen.h"
-#include "ui/screens/ScreensaverScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"
 #include "ui/screens/TimezoneScreen.h"
 #include "ui/screens/StartupScreen.h"
@@ -23,7 +22,6 @@ public:
 private:
     HeaterController& heater;
     std::unique_ptr<FireScreen> fireScreen;
-    std::unique_ptr<ScreensaverScreen> screensaverScreen;
     std::unique_ptr<OtaUpdateScreen> otaUpdateScreen;
     std::unique_ptr<TimezoneScreen> timezoneScreen;
     std::unique_ptr<StartupScreen> startupScreen;

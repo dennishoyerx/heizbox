@@ -1,5 +1,4 @@
 #pragma once
-
 #include "RenderSurface.h"
 
 const GFXfont* getFontForSize(TextSize ts) {

@@ -21,6 +21,7 @@ struct HeaterState {
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint32_t> cycleTimeout{"heater", "cycleTimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};
+    PersistedObservable<float> ambientCorrection{"heater", "ambientCorrection", 0.15};
 
 
     Observable<bool> zvsOn{false};

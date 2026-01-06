@@ -48,6 +48,11 @@ void StateBinder::bindHeater(HeaterController* heater) {
     hs.irEmissivity.addListener([heater](uint8_t val) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });
+
+    heater->getIRTempSensor()->enableAmbientCorrection(hs.ambientCorrection);
+    hs.ambientCorrection.addListener([heater](float val) {
+        heater->getIRTempSensor()->enableAmbientCorrection(val);
+    });
     
     heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(hs.tempSensorReadInterval);
     hs.tempSensorReadInterval.addListener([heater](uint32_t time) {

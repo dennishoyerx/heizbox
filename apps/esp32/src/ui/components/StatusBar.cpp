@@ -1,5 +1,4 @@
 #include "ui/components/StatusBar.h"
-#include "Fonts/GFXFF/gfxfont.h"
 #include "bitmaps.h"
 #include "net/WiFiManager.h"
 #include "net/WebSocketManager.h"
