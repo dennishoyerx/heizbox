@@ -14,10 +14,22 @@ public:
 
     bool setEmissivity(float emissivity);
     float getEmissivity();
+    
+    void enableAmbientCorrection(bool enable, float coefficient = 0.15);
+    float getLastAmbientTemp();
 
 private:
     Adafruit_MLX90614 mlx;
 
     uint8_t sdaPin;
     uint8_t sclPin;
+
+    bool emissivityJustChanged;
+    unsigned long emissivityChangeTime;
+    static const unsigned long STABILIZATION_TIME_MS = 1000;
+        
+    bool ambientCorrectionEnabled;
+    float ambientCorrectionCoeff;
+    float referenceAmbient;
+    float lastAmbient;
 };

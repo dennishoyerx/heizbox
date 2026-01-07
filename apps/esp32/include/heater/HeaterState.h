@@ -7,7 +7,7 @@ enum HeaterMode {
     TEMP_TARGET_CUTOFF,
     TEMP_TARGET
 };
-
+/*
 struct HeaterSettings {
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::TEMP_TARGET_CUTOFF};
 
@@ -15,12 +15,13 @@ struct HeaterSettings {
         PersistedObservable<uint16_t> limitCycle1{"temp", "cycle1", 210};
         PersistedObservable<uint16_t> limitCycle2{"temp", "cycle2", 225};
     };
-};
+};*/
 
 struct HeaterState {
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint32_t> cycleTimeout{"heater", "cycleTimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};
+    PersistedObservable<uint8_t> ambientCorrection{"heater", "ambcorrection", 15};
 
 
     Observable<bool> zvsOn{false};
