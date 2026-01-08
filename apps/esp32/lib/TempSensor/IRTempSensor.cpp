@@ -5,7 +5,7 @@ IRTempSensor::IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readInterv
       sclPin(scl_pin),
       emissivityJustChanged(false),
       emissivityChangeTime(0),
-      ambientCorrectionEnabled(false),
+      ambientCorrectionEnabled(true),
       ambientCorrectionCoeff(0.15),
       referenceAmbient(25.0),
       lastAmbient(25.0),

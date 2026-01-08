@@ -66,6 +66,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     auto heaterMenuItems = MenuBuilder()
+         .addObservableToggle("IR Cutoff", hs.cutoffIr)
          .addHeadline("ZVS")
          .addObservableRange("Power", hs.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
          .addObservableRangeMs("Off Period", hs.tempSensorOffTime, 0, 220, 20, true)

@@ -37,6 +37,16 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     });
     
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
+        "IR Correction", hs.irCorrection, 0, 200, 1,
+        [](const uint16_t& v){ return (String) v + "°"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "IR Amb Correction", hs.ambientCorrection, 0, 100, 1,
+        [](const uint8_t& v){ return (String) v + "%"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
         "Temperature", hs.tempLimit, 100, 260, 1,
         [](const uint16_t& v){ return (String) v + "°"; }
     ));
@@ -48,11 +58,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ));
 
     
-    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "IR Amb Correction", hs.ambientCorrection, 0, 100, 1,
-        [](const uint8_t& v){ return (String) v + "%"; }
-    ));
-
     /*
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
         "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,
@@ -139,12 +144,7 @@ void FireScreen::draw() {
     });
 
     // Current Temp
-    _ui->withSurface(280, 88, 0, 0, {
-        {"targetTemp", hs.tempLimit},
-        {"temp", hs.temp},
-        {"irTemp", hs.tempIR},
-        {"thermoTemp", hs.tempK}
-    }, [&hs](RenderSurface& s) {
+    _ui->withSurface(280, 88, 0, 0, [&hs](RenderSurface& s) {
         s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
         HeatUI::Temperature(s);
     }); 
@@ -171,7 +171,20 @@ return;
 
 void FireScreen::update() {
     auto& hs = HeaterState::instance();
-     if (hs.isHeating) dirty();
+    static uint32_t lastDirty = 0; // Zeitpunkt des letzten dirty-Aufrufs
+    uint32_t now = millis();
+
+    if (!hs.isHeating) {
+        // alle 200 ms, wenn nicht heizt
+        if (now - lastDirty >= 200) {
+            dirty();
+            lastDirty = now;
+        }
+    } else {
+        // beim Heizen: sofort dirty() aufrufen
+        dirty();
+        lastDirty = now; // optional, falls Intervall-Logik später noch wichtig
+    }
 }
 
 bool triggeredTwice(uint32_t intervalMs) {

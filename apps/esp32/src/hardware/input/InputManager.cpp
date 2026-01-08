@@ -13,6 +13,7 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
 };
 
 InputManager::InputManager(): callback(nullptr) {
+    buttonSource = new Pcf8574ButtonSource(0x20);
 }
 
 void InputManager::setup() {
@@ -27,6 +28,7 @@ void InputManager::update() {
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
+        //const bool isLow = cfg.button != RIGHT || cfg.button != LEFT ? digitalRead(cfg.pin) == LOW : buttonSource->isPressed(i);
         const bool isLow = digitalRead(cfg.pin) == LOW;
         const bool wasPressed = isPressed(i);
 

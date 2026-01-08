@@ -4,8 +4,6 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 #include "SysModule.h"
-#include "heater\HeatData.h"
-#include "heater\HeatCycle.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -141,25 +139,41 @@ void HeaterController::update() {
     }
 }
 
+class HeaterTemperature {
+    
+};
+
 void HeaterController::updateTemperature() {
     auto& hs = HeaterState::instance();
-    uint16_t temp;
+    uint16_t irTemp = 0;
+    uint16_t kTemp = 0;
 
-    if (temperature.update(Sensors::Sensor::IR)) hs.tempIR.set(temperature.get(Sensors::Sensor::IR));
 
-    if (hs.tempSensorOffTime > 0 && hs.zvsOn) return;
+    // IR Sensor
+    if (temperature.update(Sensors::Sensor::IR)) {
+        float factor = 1.0f + (hs.irCorrection / 100.0f);
+        irTemp = static_cast<uint16_t>(temperature.get(Sensors::Sensor::IR) * factor + 0.5f); // Rundung
+        hs.tempIR.set(irTemp);
+    }
 
+    // K-Sensor, nur wenn Intervall erreicht
     static u32_t lastTempUpdate = 0;
+    if (hs.tempSensorOffTime < 0 && !hs.zvsOn &&
+        millis() - lastTempUpdate >= hs.tempSensorReadInterval) {
+        lastTempUpdate = millis();
 
-    if (millis() - lastTempUpdate < hs.tempSensorReadInterval) return;
-    lastTempUpdate = millis();
+        if (temperature.update(Sensors::Sensor::K)) {
+            int16_t correction = isHeating() ? hs.tempCorrection : 0;
+            kTemp = static_cast<uint16_t>(temperature.get(Sensors::Sensor::K) + correction);
+            hs.tempK.set(kTemp);
+        }
+    }
 
-
-    if (temperature.update(Sensors::Sensor::K)) {
-        temp = hs.tempK.set(temperature.get(Sensors::Sensor::K));
-        if (temp <= 3) return;
-        if (isHeating()) temp += hs.tempCorrection;
-        hs.temp.set(temp);
+    // Temperatur setzen
+    if (hs.cutoffIr && irTemp > hs.tempK) {
+        hs.temp.set(irTemp);
+    } else if (kTemp > 0) {
+        hs.temp.set(kTemp);
     }
 }
 

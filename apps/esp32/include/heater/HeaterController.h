@@ -8,7 +8,7 @@
 #include "heater/ZVSDriver.h" // CONVERTED: Use forward.h
 #include "heater/Sensors.h"
 #include "heater/HeaterState.h"
-#include "heater/HeatCycle.h"
+#include "app/HeatCycle.h"
 #include "ITemperatureSensor.h"
 
 class HeaterController {
