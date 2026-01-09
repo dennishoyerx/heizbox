@@ -34,7 +34,6 @@ public:
 };
 
 */
-
 class ButtonSource {
 public:
     virtual bool isPressed(uint8_t index) = 0;

@@ -116,18 +116,11 @@ void FireScreen::draw() {
         s.text(0, 30, cur->valueString());
     });
 
-    _ui->withSurface(48, 48, 232, 130, [this](RenderSurface& s) {
-        if (HeaterCycle::is(1)) {
-            s.sprite->drawBitmap(0, 0, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
-        } else {
-            s.sprite->fillRect(0, 0, 48, 48, COLOR_BG);
-        }
-    });
-
     // Current Temp
     _ui->withSurface(280, 88, 0, 0, [&hs](RenderSurface& s) {
         s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
         HeatUI::Temperature(s);
+        HeatUI::Cycle(s);
     }); 
 
     // Consumption
@@ -150,7 +143,7 @@ void FireScreen::draw() {
             s.text(4, 8, s_overlayText);
         });
     }
-
+return;
     // Seperator
     _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
         s.sprite->drawRect(0, 0, 280, 1, COLOR_BG_2);

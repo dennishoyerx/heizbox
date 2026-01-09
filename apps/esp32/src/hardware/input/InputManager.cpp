@@ -13,28 +13,36 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
 };
 
 InputManager::InputManager(): callback(nullptr) {
-    buttonSource = new Pcf8574ButtonSource(0x20);
 }
 
 void InputManager::setup() {
+    buttonSource = new Pcf8574ButtonSource(0x20);
+    buttonSource->begin();
+
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
-        pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
+        if (BUTTON_PINS[i].button != RIGHT) pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }
+
 
     Serial.println("🎮 InputManager initialized");
 }
 
 void InputManager::update() {
     const uint32_t now = millis();
+    static uint32_t lastPCFUpdate;
+    if (now - lastPCFUpdate > 1000) {
+        lastPCFUpdate = now;
+        //buttonSource->update();
+    }
+
+    //buttonSource->update();
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
         //const bool isLow = cfg.button != RIGHT || cfg.button != LEFT ? digitalRead(cfg.pin) == LOW : buttonSource->isPressed(i);
         bool isLow;
-        if (cfg.button == RIGHT) {
-            //buttonSource->update();
-            //isLow = buttonSource->isPressed(i);
-        } else if (cfg.button == FIRE) isLow = digitalRead(cfg.pin) == LOW;
+        isLow = digitalRead(cfg.pin) == LOW;
+        //bool isLow = digitalRead(cfg.pin) == LOW;
 
         const bool wasPressed = isPressed(i);
 

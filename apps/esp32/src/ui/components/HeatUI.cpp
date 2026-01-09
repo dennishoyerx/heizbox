@@ -66,20 +66,22 @@ struct RenderProps {
 
 void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
     p.s.text(p.x, p.y, label, TextSize::sm);
-    p.s.text(p.x, p.y + 24, value != 420 ? String(value): "OFF", size);
+    p.s.text(p.x, p.y + 32, value != 420 ? String(value): "OFF", size);
 };
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
     
     //Temp({s, 16, 16}, "KTyp", hs.tempK, heating ? TextSize::bxl : TextSize::blg);
-    if (hs.tempIR < 1000) Temp({s, 104, 16}, "IR", hs.tempIR, heating ? TextSize::blg : TextSize::bxl);
-    Temp({s, 180, 16}, "Limit", hs.tempLimit, heating ? TextSize::blg : TextSize::bxl);
+    s.sprite->setTextDatum(MR_DATUM);
+    if (hs.tempIR < 1000) Temp({s, 112, 16}, "IR", hs.tempIR, TextSize::bxl);
+    s.sprite->setTextDatum(ML_DATUM);
+    Temp({s, 132, 16}, "Limit", hs.tempLimit, TextSize::bxl);
 }
 
 
 void HeatUI::Cycle(RenderSurface s) {
-    if (HeaterCycle::is(1)) s.sprite->drawBitmap(s.width() - 48, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
+    if (HeaterCycle::is(1)) s.sprite->drawBitmap(s.width() - 56, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
 }
 
 void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {

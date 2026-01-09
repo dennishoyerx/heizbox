@@ -13,6 +13,8 @@ struct InputConfig {
         static constexpr uint8_t DT = 16;
         static constexpr uint8_t SW = 16;
     };
+
+
     static constexpr uint8_t FIRE_BUTTON = 16;
 
     
@@ -29,7 +31,7 @@ struct HardwareConfig {
     static constexpr uint8_t JOY_UP_PIN = 14; // green
     static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
     static constexpr uint8_t JOY_LEFT_PIN = 21; // purple
-    static constexpr uint8_t JOY_RIGHT_PIN = 4; // white
+    static constexpr uint8_t JOY_RIGHT_PIN = 22; // white
     static constexpr uint8_t JOY_PRESS_PIN = 33; // orange
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;
