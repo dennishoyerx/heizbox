@@ -9,7 +9,7 @@ kSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareC
 irSensor(HardwareConfig::IR_SDA_PIN, HardwareConfig::IR_SDL_PIN) {}
 
 void Sensors::init() {
-    if (!kSensor.begin()) Serial.println("⚠️ K-Type temperature sensor initialization failed");
+    //if (!kSensor.begin()) Serial.println("⚠️ K-Type temperature sensor initialization failed");
     if (!irSensor.begin(HeaterState::instance().irEmissivity / 100.0f)) Serial.println("⚠️ IR Temperature sensor initialization failed");
 }
 

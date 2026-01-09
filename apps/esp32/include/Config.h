@@ -3,6 +3,11 @@
 #include <Arduino.h>
 
 struct InputConfig {
+    struct PCF8574 {
+        static constexpr uint8_t SDA = 26;
+        static constexpr uint8_t SCL = 27;
+    };
+
     struct RotaryEncoder {
         static constexpr uint8_t CLK = 16;
         static constexpr uint8_t DT = 16;
@@ -24,16 +29,16 @@ struct HardwareConfig {
     static constexpr uint8_t JOY_UP_PIN = 14; // green
     static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
     static constexpr uint8_t JOY_LEFT_PIN = 21; // purple
-    static constexpr uint8_t JOY_RIGHT_PIN = 22; // white
+    static constexpr uint8_t JOY_RIGHT_PIN = 4; // white
     static constexpr uint8_t JOY_PRESS_PIN = 33; // orange
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;
 
     static constexpr uint8_t HEATER_MOSFET_PIN = 32;
 
-    static constexpr uint8_t THERMO_SO_PIN = 26; // O
-    static constexpr uint8_t THERMO_CS_PIN = 27; // Y
-    static constexpr uint8_t THERMO_SCK_PIN = 25; // G 
+    static constexpr uint8_t THERMO_SO_PIN = 0; // O
+    static constexpr uint8_t THERMO_CS_PIN = 0; // Y
+    static constexpr uint8_t THERMO_SCK_PIN = 0; // G 
 
     static constexpr uint8_t IR_SDL_PIN = 19; // White
     static constexpr uint8_t IR_SDA_PIN = 15; // Purple

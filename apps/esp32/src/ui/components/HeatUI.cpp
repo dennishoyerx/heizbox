@@ -72,8 +72,8 @@ void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg)
 void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
     
-    Temp({s, 16, 16}, "KTyp", hs.tempK, heating ? TextSize::bxl : TextSize::blg);
-    if (hs.tempIR < 1000) Temp({s, 104, 16}, "IR", hs.tempIR);
+    //Temp({s, 16, 16}, "KTyp", hs.tempK, heating ? TextSize::bxl : TextSize::blg);
+    if (hs.tempIR < 1000) Temp({s, 104, 16}, "IR", hs.tempIR, heating ? TextSize::blg : TextSize::bxl);
     Temp({s, 180, 16}, "Limit", hs.tempLimit, heating ? TextSize::blg : TextSize::bxl);
 }
 

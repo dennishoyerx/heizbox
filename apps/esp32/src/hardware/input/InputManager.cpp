@@ -20,6 +20,7 @@ void InputManager::setup() {
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }
+
     Serial.println("🎮 InputManager initialized");
 }
 
@@ -29,7 +30,12 @@ void InputManager::update() {
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
         //const bool isLow = cfg.button != RIGHT || cfg.button != LEFT ? digitalRead(cfg.pin) == LOW : buttonSource->isPressed(i);
-        const bool isLow = digitalRead(cfg.pin) == LOW;
+        bool isLow;
+        if (cfg.button == RIGHT) {
+            //buttonSource->update();
+            //isLow = buttonSource->isPressed(i);
+        } else if (cfg.button == FIRE) isLow = digitalRead(cfg.pin) == LOW;
+
         const bool wasPressed = isPressed(i);
 
         // --- State Change Detection ---

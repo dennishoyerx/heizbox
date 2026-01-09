@@ -44,6 +44,10 @@ class Pcf8574ButtonSource : public ButtonSource {
 public:
     Pcf8574ButtonSource(uint8_t addr) : address(addr) {}
 
+    void begin() {
+        Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
+    }
+
     void update() {
         Wire.requestFrom(address, (uint8_t)1);
         state = Wire.read();
@@ -100,7 +104,7 @@ public:
     static const ButtonConfig BUTTON_PINS[NUM_BUTTONS];
 
 private:
-    ButtonSource* buttonSource;
+    Pcf8574ButtonSource* buttonSource;
     EventCallback callback = nullptr;
 
     uint8_t pressedMask = 0;
