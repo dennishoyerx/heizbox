@@ -51,13 +51,19 @@ struct DisplayConfig {
 
 struct HeaterConfig {
     static constexpr uint16_t MAX_TEMPERATURE = 420;
-    static constexpr uint16_t SENSOR_TEMPERATURE_READ_INTERVAL_MS = 220;
 
     static constexpr uint32_t CYCLE_TIMEOUT = 120;
     static constexpr uint32_t CYCLE_TIMEOUT_MS = 120000;
     static constexpr uint32_t HEATCYCLE_MIN_DURATION_MS = 120000;
-    static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
-    static constexpr uint32_t SENSOR_OFF_TIME_MS = 200;
+
+    struct IRSensor {};
+    struct KSensor {
+        static constexpr uint16_t READ_INTERVAL_MS = 220;
+        static constexpr uint32_t OFF_TIME_MS = 0; // set to 200 when ktyp in use
+    };
+    struct ZVS {
+        static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
+    };
 };
 
 struct NetworkConfig {

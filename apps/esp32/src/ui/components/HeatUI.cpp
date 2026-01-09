@@ -18,7 +18,7 @@ float smoothProgress(float target) {
     // Ziel: in exact DUTY_CYCLE_PERIOD_MS (1 s) zu ~95% am Ziel sein.
     // -> Klassischer RC-Filter: tau = Periode / 3
     // Dadurch 95% nach 1 Periode.
-    const float tau = (HeaterConfig::DUTY_CYCLE_PERIOD_MS / 1000.0f) / 3.0f;
+    const float tau = (HeaterConfig::ZVS::DUTY_CYCLE_PERIOD_MS / 1000.0f) / 3.0f;
 
     float alpha = 1.0f - expf(-dt / tau);
 

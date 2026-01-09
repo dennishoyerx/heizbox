@@ -42,9 +42,9 @@ struct HeaterState {
     PersistedObservable<bool> alwaysMeasure{"heater", "alwaysmeasure", false};
     PersistedObservable<int8_t> tempCorrection{"temp", "correction", 0};
     PersistedObservable<bool> cutoffIr{"heater", "cutoffIr", true};
-    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutycycleperiodms", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
-    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorofftime", HeaterConfig::SENSOR_OFF_TIME_MS};
-    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorreadinterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
+    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutycycleperiodms", HeaterConfig::ZVS::DUTY_CYCLE_PERIOD_MS};
+    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorofftime", HeaterConfig::KSensor::OFF_TIME_MS};
+    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorreadinterval", HeaterConfig::KSensor::READ_INTERVAL_MS};
 
     // IR calibration (2-point)
     // gespeicherte, gemessene IR‑Werte bei zwei bekannten Referenztemperaturen

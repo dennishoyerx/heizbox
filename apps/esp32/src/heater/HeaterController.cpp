@@ -20,8 +20,8 @@ HeaterController::HeaterController()
 void HeaterController::init() {
     auto booted = SysModules::booting("heater");
     zvsDriver->init();
-    zvsDriver->setPeriod(HeaterConfig::DUTY_CYCLE_PERIOD_MS);
-    zvsDriver->setSensorOffTime(HeaterConfig::SENSOR_OFF_TIME_MS);
+    zvsDriver->setPeriod(HeaterConfig::ZVS::DUTY_CYCLE_PERIOD_MS);
+    zvsDriver->setSensorOffTime(HeaterConfig::KSensor::OFF_TIME_MS);
     zvsDriver->setPower(power);
     
     temperature.init();

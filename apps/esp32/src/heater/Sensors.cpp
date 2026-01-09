@@ -5,7 +5,7 @@
 #include "Config.h"
 
 Sensors::Sensors(): 
-kSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HeaterConfig::SENSOR_OFF_TIME_MS),
+kSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HeaterConfig::KSensor::OFF_TIME_MS),
 irSensor(HardwareConfig::IR_SDA_PIN, HardwareConfig::IR_SDL_PIN) {}
 
 void Sensors::init() {
