@@ -47,10 +47,10 @@ float IRTempSensor::read() {
     float ambTemp = mlx.readAmbientTempC();
     lastAmbient = ambTemp;
     
-    // Optional: Ambient-Korrektur anwenden
     if (ambientCorrectionEnabled) {
-        float ambientDelta = ambTemp - referenceAmbient;
-        objTemp -= ambientDelta * ambientCorrectionCoeff;
+        float ambientRatio = ambTemp / referenceAmbient;
+        float factor = 1.0f + (ambientRatio - 1.0f) * ambientCorrectionCoeff;
+        objTemp *= factor;
     }
     
     return objTemp; 
