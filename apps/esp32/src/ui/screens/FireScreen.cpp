@@ -50,63 +50,25 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         "Temperature", hs.tempLimit, 100, 260, 1,
         [](const uint16_t& v){ return (String) v + "°"; }
     ));
-    
-    
-    /*
-    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "IR Emissivity", hs.irEmissivity, 0, 100, 1,
-        [](const uint8_t& v){ return (String) v + "%"; }
-    ));
 
-    
-    menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
-        "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,
-        [](const uint32_t& v){ return (String) v + "ms"; }
-    ));
-
-    menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
-        "Temp Read Interval", hs.tempSensorReadInterval, 0, 220, 20,
-        [](const uint32_t& v){ return (String) v + "ms"; }
-    ));
+    // --- IR calibration menu actions (select + CENTER to trigger) ---
+    static Observable<uint8_t> menuIRCalA{0};
+    static Observable<uint8_t> menuIRCalB{0};
+    static Observable<uint8_t> menuIRCalClear{0};
 
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "Power", hs.power, 0, 100, 10,
-        [](const uint8_t& v){ return (String) v + "%"; }
+        "IR Cal A", menuIRCalA, 0, 1, 1,
+        [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
     ));
-    */
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "IR Cal B", menuIRCalB, 0, 1, 1,
+        [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
+    ));
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "IR Cal Clear", menuIRCalClear, 0, 1, 1,
+        [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
+    ));
 }
-/*
-struct Column {
-    int16_t x;
-    int16_t y;
-    int16_t w;
-    int16_t h;
-};
-
-class Row {
-    public:
-    Row(int8_t cols, int16_t w, int16_t h, int16_t x, int16_t y);
-
-    Column col(int8_t col) {
-        Column c;
-       // c.x = 
-       // c.y = cols[col].y;
-        c.w = cols[col].w;
-        c.h = h;
-        return c;
-    };
-
-    private:
-    int8_t cols;
-    int16_t w;
-    int16_t h;
-    int16_t x;
-    int16_t y;
-    struct col {
-        int16_t w;
-        int16_t h;
-    };
-};*/
 
 void FireScreen::onEnter() {
     manager->setStatusbarVisible(true);
@@ -118,11 +80,30 @@ struct TemperatureProps {
     int ir;
 };
 
+// Overlay state for confirmation messages
+static String s_overlayText = "";
+static uint32_t s_overlayUntil = 0;
+static const uint32_t OVERLAY_DEFAULT_MS = 1500;
+
+static void showOverlay(const String &text, uint32_t durationMs = OVERLAY_DEFAULT_MS) {
+    s_overlayText = text;
+    s_overlayUntil = millis() + durationMs;
+}
+
 void FireScreen::draw() {
     auto& hs = HeaterState::instance();
 
+    // If heating, use HeatUI (this also updates frequently)
     if (hs.isHeating) {
         HeatUI::render(_ui, heater.getZVSDriver(), &menu);
+
+        // Draw overlay on top if active
+        if (s_overlayUntil != 0 && millis() < s_overlayUntil) {
+            _ui->withSurface(240, 30, 15, 180, [](RenderSurface& s) {
+                s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
+                s.text(4, 8, s_overlayText);
+            });
+        }
         return;
     }
 
@@ -161,12 +142,19 @@ void FireScreen::draw() {
         drawStats(s, 72, 0, "Heute", formatConsumption(state.consumption.today));
         drawStats(s, 132, 0, "Gestern", formatConsumption(state.consumption.yesterday));
     });
-return;
+
+    // Draw overlay if active (when not heating)
+    if (s_overlayUntil != 0 && millis() < s_overlayUntil) {
+        _ui->withSurface(240, 30, 15, 180, [](RenderSurface& s) {
+            s.sprite->fillRect(0, 0, s.width(), s.height(), COLOR_BG_2);
+            s.text(4, 8, s_overlayText);
+        });
+    }
+
     // Seperator
     _ui->withSurface(280, 1, 0, 95, [this](RenderSurface& s) {
         s.sprite->drawRect(0, 0, 280, 1, COLOR_BG_2);
     });
-
 }
 
 void FireScreen::update() {
@@ -219,7 +207,58 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
     
+    // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
+        const IMenuItem* cur = menu.current();
+        String curName = cur ? String(cur->name()) : String();
+
+        if (curName == "IR Cal A") {
+            // trigger calibration A
+            if (!heater.isHeating()) {
+                Serial.println("IR click ignored: not heating.");
+                showOverlay("IR click ignored: not heating", 1200);
+            } else {
+                uint16_t actualTemp = hs.irCalActualA;
+                Serial.printf("Menu: Storing IR Cal A for actual=%u\n", actualTemp);
+                int res = heater.markIRClick(actualTemp);
+                if (res == 0) {
+                    showOverlay("IR click failed (no valid samples)", 1500);
+                } else {
+                    uint16_t measured = hs.irCalMeasuredA.get();
+                    showOverlay(String("IR Cal A: ") + String(measured) + "°", 1500);
+                }
+
+                menu.nextOption();
+            }
+            dirty();
+            return;
+        } else if (curName == "IR Cal B") {
+            // trigger calibration B
+            if (!heater.isHeating()) {
+                Serial.println("IR click ignored: not heating.");
+                showOverlay("IR click ignored: not heating", 1200);
+            } else {
+                uint16_t actualTemp = hs.irCalActualB;
+                Serial.printf("Menu: Storing IR Cal B for actual=%u\n", actualTemp);
+                int res = heater.markIRClick(actualTemp);
+                if (res == 0) {
+                    showOverlay("IR click failed (no valid samples)", 1500);
+                } else {
+                    uint16_t measured = hs.irCalMeasuredB.get();
+                    showOverlay(String("IR Cal B: ") + String(measured) + "°", 1500);
+                }
+                menu.prevOption();
+            }
+            dirty();
+            return;
+        } else if (curName == "IR Cal Clear") {
+            heater.clearIRCalibration();
+            showOverlay("IR Calibration cleared", 1400);
+            dirty();
+            return;
+        }
+
+        // default CENTER behavior (cycle)
         HeaterCycle::next();
         return;
     }

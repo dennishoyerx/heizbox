@@ -46,7 +46,16 @@ struct HeaterState {
     PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorofftime", HeaterConfig::SENSOR_OFF_TIME_MS};
     PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorreadinterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
 
-
+    // IR calibration (2-point)
+    // gespeicherte, gemessene IR‑Werte bei zwei bekannten Referenztemperaturen
+    PersistedObservable<uint16_t> irCalMeasuredA{"ir", "cal_meas_a", 0};
+    PersistedObservable<uint16_t> irCalMeasuredB{"ir", "cal_meas_b", 0};
+    // die zugehörigen tatsächlichen Temperaturen (z.B. 150 und 200)
+    PersistedObservable<uint16_t> irCalActualA{"ir", "cal_act_a", 150};
+    PersistedObservable<uint16_t> irCalActualB{"ir", "cal_act_b", 200};
+    // berechnete Kalibrierungsparameter: Temp_true = slope * Temp_measured + offset
+    PersistedObservable<float> irCalSlope{"ir", "cal_slope", 1.0f};
+    PersistedObservable<float> irCalOffset{"ir", "cal_offset", 0.0f};
 
     static HeaterState& instance();
 

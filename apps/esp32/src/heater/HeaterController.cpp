@@ -41,6 +41,7 @@ void HeaterController::init() {
 }
 
 void HeaterController::setPower(uint8_t _power) {
+    power = _power;
     zvsDriver->setPower(power);
 }
 
@@ -177,8 +178,16 @@ void HeaterController::updateTemperature() {
         if (!isfinite(raw) || raw < 0.0f || raw > 1000.0f) {
             return; // Messung verwerfen
         }
+        // apply ambient correction if enabled in the sensor / state (existing behavior)
         float factor = 1.0f + (hs.irCorrection / 100.0f);
-        irTemp = static_cast<uint16_t>(raw * factor + 0.5f); // Rundung
+        float adjusted = raw * factor;
+
+        // apply two-point calibration if present
+        float slope = hs.irCalSlope;
+        float offset = hs.irCalOffset;
+        float calibrated = adjusted * slope + offset;
+
+        irTemp = static_cast<uint16_t>(calibrated + 0.5f); // Rundung
         hs.tempIR.set(irTemp);
     }
 
@@ -232,4 +241,88 @@ void HeaterController::setAutoStopTime(uint32_t time) {
 
 uint32_t HeaterController::getAutoStopTime() const {
     return autoStopTime;
+}
+
+// --- calibration helpers ---
+
+int16_t HeaterController::markIRClick(uint16_t actualTemp) {
+    auto& hs = HeaterState::instance();
+
+    // Force an immediate IR read (ignore interval) to capture current measurement
+    temperature.update(Sensors::Sensor::IR, true);
+    float raw = temperature.get(Sensors::Sensor::IR);
+
+    if (!isfinite(raw) || raw <= 0.0f || raw > 1000.0f) {
+        Serial.println("IR click: invalid measurement, ignored.");
+        return -1;
+    }
+    uint16_t measured = static_cast<uint16_t>(raw + 0.5f);
+    int16_t returnVal = -1;
+
+    // If actualTemp matches one of the stored actuals, use that slot. Otherwise pick an empty slot (A first).
+    if (actualTemp == hs.irCalActualA) {
+        returnVal = hs.irCalMeasuredA.set(measured);
+        Serial.printf("IR click stored in A: measured=%u actual=%u\n", measured, actualTemp);
+    } else if (actualTemp == hs.irCalActualB) {
+        returnVal = hs.irCalMeasuredB.set(measured);
+        Serial.printf("IR click stored in B: measured=%u actual=%u\n", measured, actualTemp);
+    } else {
+        if (hs.irCalMeasuredA == 0) {
+            returnVal = hs.irCalMeasuredA.set(measured);
+            hs.irCalActualA.set(actualTemp);
+            Serial.printf("IR click stored in A (new actual): measured=%u actual=%u\n", measured, actualTemp);
+        } else {
+            returnVal = hs.irCalMeasuredB.set(measured);
+            hs.irCalActualB.set(actualTemp);
+            Serial.printf("IR click stored in B (new actual): measured=%u actual=%u\n", measured, actualTemp);
+        }
+    }
+
+    computeIRCalibration();
+    return returnVal;
+}
+
+void HeaterController::computeIRCalibration() {
+    auto& hs = HeaterState::instance();
+    uint16_t mA = hs.irCalMeasuredA;
+    uint16_t mB = hs.irCalMeasuredB;
+    uint16_t aA = hs.irCalActualA;
+    uint16_t aB = hs.irCalActualB;
+
+    if (mA == 0 || mB == 0) {
+        Serial.println("IR calibration: need two measured points.");
+        return;
+    }
+    if (mA == mB) {
+        Serial.println("IR calibration: measured points identical, cannot compute.");
+        return;
+    }
+
+    float slope = float(aB - aA) / float(mB - mA);
+    float offset = float(aA) - slope * float(mA);
+
+    hs.irCalSlope.set(slope);
+    hs.irCalOffset.set(offset);
+
+    Serial.printf("IR calibration computed: slope=%.6f offset=%.2f (mA=%u,aA=%u mB=%u,aB=%u)\n",
+                  slope, offset, mA, aA, mB, aB);
+}
+
+void HeaterController::clearIRCalibration() {
+    auto& hs = HeaterState::instance();
+    hs.irCalMeasuredA.set(0);
+    hs.irCalMeasuredB.set(0);
+    hs.irCalActualA.set(150);
+    hs.irCalActualB.set(200);
+    hs.irCalSlope.set(1.0f);
+    hs.irCalOffset.set(0.0f);
+    Serial.println("IR calibration cleared.");
+}
+
+float HeaterController::getIRCalibrationSlope() const {
+    return HeaterState::instance().irCalSlope;
+}
+
+float HeaterController::getIRCalibrationOffset() const {
+    return HeaterState::instance().irCalOffset;
 }
