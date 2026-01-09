@@ -7,7 +7,7 @@ enum HeaterMode {
     TEMP_TARGET_CUTOFF,
     TEMP_TARGET
 };
-/*
+
 struct HeaterSettings {
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::TEMP_TARGET_CUTOFF};
 
@@ -15,14 +15,16 @@ struct HeaterSettings {
         PersistedObservable<uint16_t> limitCycle1{"temp", "cycle1", 210};
         PersistedObservable<uint16_t> limitCycle2{"temp", "cycle2", 225};
     };
-};*/
+};
 
 struct HeaterState {
     PersistedObservable<uint8_t> power{"heater", "power", 100};
-    PersistedObservable<uint32_t> cycleTimeout{"heater", "cycleTimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
+    PersistedObservable<uint32_t> cycleTimeout{"heater", "cycletimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};
-    PersistedObservable<uint8_t> ambientCorrection{"heater", "ambcorrection", 15};
 
+    PersistedObservable<int8_t> ambientCorrection{"ir", "ambcorrection", 0};
+    PersistedObservable<uint8_t> irEmissivity{"ir", "emissivity", 96};
+    PersistedObservable<int16_t> irCorrection{"ir", "correction", 0};
 
     Observable<bool> zvsOn{false};
     Observable<bool> isHeating{false};
@@ -34,17 +36,15 @@ struct HeaterState {
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
     Observable<uint16_t> tempLimit{210};
-    PersistedObservable<uint16_t> tempLimitCycle1{"temp", "cycle1", 210};
-    PersistedObservable<uint16_t> tempLimitCycle2{"temp", "cycle2", 225};
+    PersistedObservable<uint16_t> tempLimitCycle1{"temp", "cyclea", 210};
+    PersistedObservable<uint16_t> tempLimitCycle2{"temp", "cycleb", 225};
 
-    PersistedObservable<bool> alwaysMeasure{"heater", "alwaysMeasure", false};
-    PersistedObservable<int8_t> tempCorrection{"heater", "tempCorrection", 0};
-    PersistedObservable<uint8_t> irEmissivity{"heater", "irEmissivity", 95};
-    PersistedObservable<uint16_t> irCorrection{"heater", "irCorrection", 37};
+    PersistedObservable<bool> alwaysMeasure{"heater", "alwaysmeasure", false};
+    PersistedObservable<int8_t> tempCorrection{"temp", "correction", 0};
     PersistedObservable<bool> cutoffIr{"heater", "cutoffIr", true};
-    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutyCyclePeriodMs", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
-    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorOffTime", HeaterConfig::SENSOR_OFF_TIME_MS};
-    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorReadInterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
+    PersistedObservable<uint32_t> zvsDutyCyclePeriodMs{"zvs", "dutycycleperiodms", HeaterConfig::DUTY_CYCLE_PERIOD_MS};
+    PersistedObservable<uint32_t> tempSensorOffTime{"heater", "tempSensorofftime", HeaterConfig::SENSOR_OFF_TIME_MS};
+    PersistedObservable<uint32_t> tempSensorReadInterval{"heater", "tempSensorreadinterval", HeaterConfig::SENSOR_TEMPERATURE_READ_INTERVAL_MS};
 
 
 

@@ -39,19 +39,20 @@ void StateBinder::bindHeater(HeaterController* heater) {
     });
 
     hs.tempLimit.addListener([&hs](uint16_t val) {
-        if (val == 260) return;
+        if (val == HeaterConfig::MAX_TEMPERATURE) return;
         if(HeaterCycle::is(1)) hs.tempLimitCycle1.set(val);
         else hs.tempLimitCycle2.set(val);
     });
 
-    heater->getIRTempSensor()->setEmissivity(hs.irEmissivity  / 100.0f);
+    /*heater->getIRTempSensor()->setEmissivity(hs.irEmissivity  / 100.0f);
     hs.irEmissivity.addListener([heater](uint8_t val) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
-    });
+    });*/
 
-    heater->getIRTempSensor()->enableAmbientCorrection(true, hs.ambientCorrection / 100.0f);
-    hs.irEmissivity.addListener([heater](uint8_t val) {
-        heater->getIRTempSensor()->enableAmbientCorrection(true, val / 100.0f);
+    heater->getIRTempSensor()->enableAmbientCorrection(hs.ambientCorrection != 0, hs.ambientCorrection / 100.0f);
+    hs.ambientCorrection.addListener([heater](int8_t val) {
+        if (val == 0) heater->getIRTempSensor()->enableAmbientCorrection(false, 0.0f);
+        else heater->getIRTempSensor()->enableAmbientCorrection(true, val / 100.0f);
     });
     
     heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(hs.tempSensorReadInterval);

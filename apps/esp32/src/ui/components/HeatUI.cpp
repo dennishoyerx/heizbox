@@ -66,7 +66,7 @@ struct RenderProps {
 
 void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
     p.s.text(p.x, p.y, label, TextSize::sm);
-    p.s.text(p.x, p.y + 24, String(value), size);
+    p.s.text(p.x, p.y + 24, value != 420 ? String(value): "OFF", size);
 };
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {

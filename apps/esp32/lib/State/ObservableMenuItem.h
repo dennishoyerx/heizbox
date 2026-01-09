@@ -52,8 +52,8 @@ public:
 
 private:
     T clamp(T v) const {
-        if (v < min_) return min_;
-        if (v > max_) return max_;
+        if (v <= min_) return min_;
+        if (v >= max_) return max_;
         return v;
     }
 

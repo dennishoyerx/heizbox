@@ -96,9 +96,9 @@ public:
 
         if (std::is_same<T, bool>::value) {
             value = prefs.getBool(key_, value);
-        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, int16_t>::value || std::is_same<T, uint8_t>::value) {
+        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, int16_t>::value || std::is_same<T, int8_t>::value) {
             value = prefs.getInt(key_, value);
-        } else if (std::is_same<T, uint32_t>::value) {
+        } else if (std::is_same<T, uint32_t>::value || std::is_same<T, uint16_t>::value || std::is_same<T, uint8_t>::value) {
             value = prefs.getUInt(key_, value);
         } else if (std::is_same<T, float>::value) {
             value = prefs.getFloat(key_, value);
@@ -121,9 +121,9 @@ public:
         size_t bytesWritten = 0;
         if (std::is_same<T, bool>::value) {
             bytesWritten = prefs.putBool(key_, value);
-        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, uint8_t>::value) {
+        } else if (std::is_same<T, int>::value || std::is_same<T, int32_t>::value || std::is_same<T, int16_t>::value || std::is_same<T, int8_t>::value) {
             bytesWritten = prefs.putInt(key_, value);
-        } else if (std::is_same<T, uint32_t>::value) {
+        } else if (std::is_same<T, uint32_t>::value || std::is_same<T, uint16_t>::value || std::is_same<T, uint8_t>::value) {
             bytesWritten = prefs.putUInt(key_, value);
         } else if (std::is_same<T, float>::value) {
             bytesWritten = prefs.putFloat(key_, value);

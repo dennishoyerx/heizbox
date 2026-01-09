@@ -36,14 +36,14 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         manager->setStatusbarVisible(!isHeating);
     });
     
-    menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
-        "IR Correction", hs.irCorrection, 0, 200, 1,
-        [](const uint16_t& v){ return (String) v + "°"; }
+    menu.addItem(std::make_unique<ObservableValueItem<int16_t>>(
+        "IR Correction", hs.irCorrection, -100, 100, 1,
+        [](const int16_t& v){ return (String) v + "°"; }
     ));
 
-    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "IR Amb Correction", hs.ambientCorrection, 0, 100, 1,
-        [](const uint8_t& v){ return (String) v + "%"; }
+    menu.addItem(std::make_unique<ObservableValueItem<int8_t>>(
+        "IR Amb Correction", hs.ambientCorrection, -100, 100, 1,
+        [](const int8_t& v){ return v == 0 ? "OFF" : (String) v + "%"; }
     ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
@@ -52,13 +52,13 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ));
     
     
+    /*
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
         "IR Emissivity", hs.irEmissivity, 0, 100, 1,
         [](const uint8_t& v){ return (String) v + "%"; }
     ));
 
     
-    /*
     menu.addItem(std::make_unique<ObservableValueItem<uint32_t>>(
         "Temp Sensor Off Time", hs.tempSensorOffTime, 0, 220, 20,
         [](const uint32_t& v){ return (String) v + "ms"; }
