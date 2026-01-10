@@ -35,11 +35,11 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
 
     auto menuItems = MenuBuilder()
-         .addAction("Debug", [&]() {
-             screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::FADE);
-         })
          .addAction("Heater", [&]() {
              screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
+         })
+         .addAction("Debug", [&]() {
+             screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::FADE);
          })
         .addHeadline("DISPLAY")
         .addObservableRange("Brightness", state.brightness,
@@ -66,15 +66,17 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     auto heaterMenuItems = MenuBuilder()
-         .addObservableToggle("IR Cutoff", hs.cutoffIr)
+         .addHeadline("Calibration")
+         .addObservableRange("Click 1 Temp", hs.irCalActualA, static_cast<uint16_t>(150), static_cast<uint16_t>(180), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 1 Measured", hs.irCalMeasuredA, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 2 Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 2 Measured", hs.irCalMeasuredB, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
+         .addAction("Reset Calibration", [&]() {
+         })
          .addHeadline("ZVS")
          .addObservableRange("Power", hs.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
          .addObservableRangeMs("Off Period", hs.tempSensorOffTime, 0, 220, 20, true)
          .addObservableRangeMs("Duty Period", hs.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
-         .addObservableToggle("Debug", state.zvsDebug)
-         .addHeadline("Heat Cycle")
-         .addObservableRangeMs("Timeout", hs.cycleTimeout, 10000, 1200000, 5000)
-         .addObservableToggle("Always Measure", hs.alwaysMeasure)
          .addHeadline("Temperature")
          .addObservableRange("Heating Offset", hs.tempCorrection, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
          .addObservableRangeMs("Read interval", hs.tempSensorReadInterval, 50, 220, 10, true)

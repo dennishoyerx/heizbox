@@ -4,36 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "Config.h"
-/*
-struct Button {
-    uint8_t pin;
-    InputButton button;
-    ButtonSources source;
-};
 
-struct Buttons {
-    Button up{HardwareConfig::JOY_UP_PIN, UP, GPIO};
-    Button down{HardwareConfig::JOY_DOWN_PIN, DOWN, GPIO};
-    Button left{HardwareConfig::JOY_LEFT_PIN, LEFT, GPIO};
-    Button right{HardwareConfig::JOY_RIGHT_PIN, RIGHT, GPIO};
-    Button center{HardwareConfig::JOY_PRESS_PIN, CENTER, GPIO};
-    Button fire{HardwareConfig::FIRE_BUTTON_PIN, FIRE, GPIO};
-};
-
-enum ButtonSources {
-    GPIO,
-    PCF8574
-};
-
-
-class GpioButtonSource : public ButtonSource {
-public:
-    bool isPressed(uint8_t idx) override {
-        return digitalRead(InputManager::BUTTON_PINS[idx].pin) == LOW;
-    }
-};
-
-*/
 class ButtonSource {
 public:
     virtual bool isPressed(uint8_t index) = 0;
@@ -45,11 +16,16 @@ public:
 
     void begin() {
         Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
+        // Erhöhe I2C-Frequenz, damit requestFrom weniger blockt
+        Wire.setClock(400000);
     }
 
     void update() {
         Wire.requestFrom(address, (uint8_t)1);
-        state = Wire.read();
+        // Nur lesen, wenn wirklich Daten verfügbar sind → verhindert Blockieren/Fehler
+        if (Wire.available()) {
+            state = Wire.read();
+        }
     }
 
     bool isPressed(uint8_t idx) override {
@@ -103,7 +79,7 @@ public:
     static const ButtonConfig BUTTON_PINS[NUM_BUTTONS];
 
 private:
-    Pcf8574ButtonSource* buttonSource;
+    Pcf8574ButtonSource* buttonSource = nullptr;
     EventCallback callback = nullptr;
 
     uint8_t pressedMask = 0;
@@ -111,6 +87,10 @@ private:
     uint32_t pressTimes[NUM_BUTTONS] = {0};
     uint32_t lastDebounce[NUM_BUTTONS] = {0};
     uint32_t lastHoldStep[NUM_BUTTONS] = {0};
+
+    // --- Interrupt-Flag für PCF8574 (wird in ISR gesetzt) ---
+    static volatile bool pcfInterruptFlag;
+    static void IRAM_ATTR pcfIsr();
 
     // --- Inline helper functions for bitmask manipulation ---
     inline bool isPressed(uint8_t idx) const { return pressedMask & (1 << idx); }

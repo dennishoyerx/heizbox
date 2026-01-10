@@ -6,6 +6,7 @@ struct InputConfig {
     struct PCF8574 {
         static constexpr uint8_t SDA = 26;
         static constexpr uint8_t SCL = 27;
+        static constexpr uint8_t INT_PIN = 25;
     };
 
     struct RotaryEncoder {
@@ -31,7 +32,7 @@ struct HardwareConfig {
     static constexpr uint8_t JOY_UP_PIN = 14; // green
     static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
     static constexpr uint8_t JOY_LEFT_PIN = 21; // purple
-    static constexpr uint8_t JOY_RIGHT_PIN = 22; // white
+    static constexpr uint8_t JOY_RIGHT_PIN = 4; // white
     static constexpr uint8_t JOY_PRESS_PIN = 33; // orange
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;

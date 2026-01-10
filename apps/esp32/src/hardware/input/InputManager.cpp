@@ -12,37 +12,64 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
     {HardwareConfig::FIRE_BUTTON_PIN, FIRE}
 };
 
+// Initialisiere statisches Interrupt-Flag
+volatile bool InputManager::pcfInterruptFlag = false;
+
+// ISR: nur Flag setzen — kein I2C, keine heavy Arbeit
+void IRAM_ATTR InputManager::pcfIsr() {
+    InputManager::pcfInterruptFlag = true;
+}
+
 InputManager::InputManager(): callback(nullptr) {
 }
 
 void InputManager::setup() {
     buttonSource = new Pcf8574ButtonSource(0x20);
-    buttonSource->begin();
+    //buttonSource->begin();
+
+    // INT-Pin konfigurieren (PCF8574 INT ist open-drain → Pullup nutzen)
+    //pinMode(InputConfig::PCF8574::INT_PIN, INPUT_PULLUP);
+    // ISR registrieren: FALLING da INT low geht bei Änderung
+    //attachInterrupt(digitalPinToInterrupt(InputConfig::PCF8574::INT_PIN), InputManager::pcfIsr, FALLING);
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
+        // RIGHT (oder andere über Expander) wird vom PCF gelesen, daher kein pinMode
         if (BUTTON_PINS[i].button != RIGHT) pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }
 
-
-    Serial.println("🎮 InputManager initialized");
+    Serial.println("🎮 InputManager initialized (PCF8574 INT enabled)");
 }
 
 void InputManager::update() {
     const uint32_t now = millis();
-    static uint32_t lastPCFUpdate;
-    if (now - lastPCFUpdate > 1000) {
+    static uint32_t lastPCFUpdate = 0;
+
+    // Wenn ISR ein Flag gesetzt hat → lese Expander aus (schnell und nur bei Bedarf)
+    if (pcfInterruptFlag) {
+        // clear flag before handling to avoid losing neue Interrupts während update läuft
+        pcfInterruptFlag = false;
+        //if (buttonSource) buttonSource->update();
         lastPCFUpdate = now;
-        //buttonSource->update();
     }
 
-    //buttonSource->update();
+    // Fallback: falls kein Interrupt kommt, trotzdem periodisch prüfen (z.B. bei HW-Fehlern)
+    constexpr uint32_t PCF_FALLBACK_MS = 1000;
+    if (!pcfInterruptFlag && (now - lastPCFUpdate > PCF_FALLBACK_MS)) {
+        lastPCFUpdate = now;
+        //if (buttonSource) buttonSource->update();
+    }
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
-        //const bool isLow = cfg.button != RIGHT || cfg.button != LEFT ? digitalRead(cfg.pin) == LOW : buttonSource->isPressed(i);
+
+        // Buttons, die über den PCF8574 laufen (hier: RIGHT) vom expander lesen,
+        // andere vom GPIO.
         bool isLow;
-        isLow = digitalRead(cfg.pin) == LOW;
-        //bool isLow = digitalRead(cfg.pin) == LOW;
+        if (cfg.button == RIGHT && buttonSource) {
+            isLow = false; //buttonSource->isPressed(i);
+        } else {
+            isLow = digitalRead(cfg.pin) == LOW;
+        }
 
         const bool wasPressed = isPressed(i);
 
@@ -65,7 +92,6 @@ void InputManager::update() {
                callback({RELEASE, cfg.button});
             } else  if (callback) {
                 callback({PRESSED, cfg.button});
-               // callback({RELEASE, cfg.button});
             }
 
             // Reset Hold-Flag, damit erneutes Halten wieder funktioniert
@@ -89,5 +115,3 @@ void InputManager::update() {
 void InputManager::setCallback(EventCallback cb) {
     callback = cb;
 }
-
-
