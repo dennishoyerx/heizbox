@@ -55,9 +55,9 @@ void StateBinder::bindHeater(HeaterController* heater) {
         else heater->getIRTempSensor()->enableAmbientCorrection(true, val / 100.0f);
     });
     
-    heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(hs.tempSensorReadInterval);
+    heater->getTempSensor(Sensors::Type::K)->setReadInterval(hs.tempSensorReadInterval);
     hs.tempSensorReadInterval.addListener([heater](uint32_t time) {
-        heater->getTempSensor(Sensors::Sensor::K)->setReadInterval(time);
+        heater->getTempSensor(Sensors::Type::K)->setReadInterval(time);
     });
     
     heater->getZVSDriver()->setSensorOffTime(hs.tempSensorOffTime);

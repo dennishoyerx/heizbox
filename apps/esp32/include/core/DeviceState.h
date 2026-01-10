@@ -25,6 +25,7 @@ struct DeviceState {
     PersistedObservable<bool> enableCenterButtonForHeating{"system", "enableCenterBtn", false};
 
     // Runtime State (nicht persistiert)
+    Observable<bool> locked{false};
     Observable<bool> isHeating{false};
     Observable<bool> isOnline{false};
     Observable<uint32_t> heatingStartTime{0};

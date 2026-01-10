@@ -1,10 +1,25 @@
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include "heater/Sensors.h"
 
-class TemperatureControl {
-    TemperatureControl();
+namespace Temperature {
+    struct State {
+        uint16_t current;
+        uint16_t limit;
+        uint16_t ambient;
+        float raw;
+    };
 
-private:
-    uint16_t cutoffTemp;
+    class Controller {
+        Controller();
+        void init();
+        void update();
+        bool limitReached();
+
+    private:
+        State state;
+        Sensors sensors;
+        uint16_t cutoffTemp;
+    };
 };

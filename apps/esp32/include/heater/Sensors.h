@@ -5,17 +5,17 @@
 
 class Sensors {
 public:
-    enum Sensor {
+    enum Type {
         K,
         IR
     };
     Sensors();
     void init();
-    bool update(Sensor type = Sensor::K, bool ignoreInterval = false);
+    bool update(Type type = Type::K, bool ignoreInterval = false);
 
-    uint16_t get(Sensor type = Sensor::K);
+    uint16_t get(Type type = Type::K);
 
-    ITemperatureSensor* getSensor(Sensor type = Sensor::K);
+    ITemperatureSensor* getSensor(Type type = Type::K);
 
     TempSensor* getKSensor() { return &kSensor; }
     IRTempSensor* getIRSensor() { return &irSensor; }

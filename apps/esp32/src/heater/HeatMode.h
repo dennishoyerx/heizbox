@@ -7,7 +7,7 @@ public:
     TemperatureControl();
     void setTargetTemperature(uint16_t temp);
     void setCutoffTemperature(uint16_t temp);
-    bool checkTemperature(Sensors::Sensor sensorType);
+    bool checkTemperature(Sensors::Type sensorType);
     uint16_t getCurrentTemperature() const;
     
 private:

@@ -65,18 +65,21 @@ struct RenderProps {
 };
 
 void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
+    int textH = size == TextSize::bmd ? 24 : 32;
+    int valueY = p.y + textH;
+    
     p.s.text(p.x, p.y, label, TextSize::sm);
-    p.s.text(p.x, p.y + 32, value != 420 ? String(value): "OFF", size);
+    p.s.text(p.x, valueY, value != 420 ? String(value): "OFF", size);
 };
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
     
-    //Temp({s, 16, 16}, "KTyp", hs.tempK, heating ? TextSize::bxl : TextSize::blg);
+    Temp({s, 12, 16}, "Raw", hs.tempIRRaw, TextSize::bmd);
     s.sprite->setTextDatum(MR_DATUM);
-    if (hs.tempIR < 1000) Temp({s, 112, 16}, "IR", hs.tempIR, TextSize::bxl);
+    if (hs.tempIR < 1000) Temp({s, 134, 16}, "IR", hs.tempIR, TextSize::bxl);
     s.sprite->setTextDatum(ML_DATUM);
-    Temp({s, 132, 16}, "Limit", hs.tempLimit, TextSize::bxl);
+    Temp({s, 146, 16}, "Limit", hs.tempLimit, TextSize::bxl);
 }
 
 
@@ -151,7 +154,7 @@ void HeatUI::render(UI* _ui, ZVSDriver* zvs, MenuManager* menu) {
         const IMenuItem* cur = menu->current();
         const IMenuItem* left = menu->at((menu->index() + menu->count() - 1) % (menu->count() ? menu->count() : 1));
         const IMenuItem* right = menu->at((menu->index() + 1) % (menu->count() ? menu->count() : 1));
-        s.text(15, 160, cur->name());
-        s.text(15, 190, cur->valueString());
+        s.text(15, 188, cur->name());
+        s.text(15, 212, cur->valueString());
     });
 }; 

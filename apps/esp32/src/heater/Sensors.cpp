@@ -13,12 +13,12 @@ void Sensors::init() {
     if (!irSensor.begin(HeaterState::instance().irEmissivity / 100.0f)) Serial.println("⚠️ IR Temperature sensor initialization failed");
 }
 
-bool Sensors::update(Sensor type, bool ignoreInterval) {
-    if (type == Sensor::IR) return irSensor.update();
+bool Sensors::update(Type type, bool ignoreInterval) {
+    if (type == Type::IR) return irSensor.update();
     return kSensor.update(ignoreInterval);
 }
 
-uint16_t Sensors::get(Sensor type) {
+uint16_t Sensors::get(Type type) {
     uint16_t temp = getSensor(type)->getCelsius();
     HeatLog::instance().log(type, temp);
     return temp;
@@ -29,8 +29,8 @@ bool Sensors::limitReached() {
     return false;
 }
 
-ITemperatureSensor* Sensors::getSensor(Sensor type) {
-    if (type == Sensor::K) return &kSensor;
-    if (type == Sensor::IR) return &irSensor;
+ITemperatureSensor* Sensors::getSensor(Type type) {
+    if (type == Type::K) return &kSensor;
+    if (type == Type::IR) return &irSensor;
     return nullptr;
 }

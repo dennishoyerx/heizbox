@@ -80,9 +80,9 @@ public:
         load();
     }
 
-    T set(T newValue) {
+    T set(T newValue, bool persist = true) {
         Observable<T>::set(newValue);
-        save();
+        if (persist) save();
         return newValue;
     }
 

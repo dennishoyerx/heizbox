@@ -71,6 +71,8 @@ void Screens::setupMenus(ScreenManager& screenManager) {
          .addObservableRange("Click 1 Measured", hs.irCalMeasuredA, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Click 2 Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Click 2 Measured", hs.irCalMeasuredB, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Slope", hs.irCalSlope, static_cast<float>(0), static_cast<float>(1), static_cast<float>(0.01), "")
+         .addObservableRange("Offset", hs.irCalOffset, static_cast<float>(0), static_cast<float>(1), static_cast<float>(0.01), "")
          .addAction("Reset Calibration", [&]() {
          })
          .addHeadline("ZVS")

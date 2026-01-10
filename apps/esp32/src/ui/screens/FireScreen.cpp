@@ -183,6 +183,16 @@ void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
+
+    if (input(event, {FIRE}, {PRESSED, HOLD}) && input(event, {CENTER}, {PRESSED, HOLD})) {
+        bool locked = ds.locked.set(!ds.locked);
+        static uint8_t initialBrightness;
+        if (locked) initialBrightness = ds.brightness;
+        ds.brightness.set(locked ? 10 : initialBrightness ? initialBrightness : 100, false);
+        return;
+    }
+    if (ds.locked) return;
+
     static uint32_t _temp;
     if (input(event, {FIRE}, {PRESSED})) {
         _handleHeatingTrigger(!heater.isHeating());

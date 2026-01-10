@@ -121,7 +121,7 @@ namespace Safety {
         return false;
     };
 
-    bool check() {
+    bool checkFailed() {
         return cutoffTemperatureReached();
     };
 };
@@ -130,7 +130,7 @@ void HeaterController::update() {
     auto& hs = HeaterState::instance();
     
     updateTemperature();
-    if (Safety::check()) stopHeating(false);
+    if (Safety::checkFailed()) stopHeating(false);
 
     zvsDriver->update();
     
@@ -162,22 +162,20 @@ void HeaterController::update() {
     }
 }
 
-class HeaterTemperature {
-    
-};
-
 void HeaterController::updateTemperature() {
     auto& hs = HeaterState::instance();
     uint16_t irTemp = 0;
     uint16_t kTemp = 0;
 
     // IR Sensor
-    if (temperature.update(Sensors::Sensor::IR)) {
-        float raw = temperature.get(Sensors::Sensor::IR);
-
+    if (temperature.update(Sensors::Type::IR)) {
+        float raw = temperature.get(Sensors::Type::IR);
         if (!isfinite(raw) || raw < 0.0f || raw > 1000.0f) {
             return; // Messung verwerfen
         }
+
+        hs.tempIRRaw.set(static_cast<uint16_t>(raw + 0.5f));
+
         // apply ambient correction if enabled in the sensor / state (existing behavior)
         float factor = 1.0f + (hs.irCorrection / 100.0f);
         float adjusted = raw * factor;
@@ -250,8 +248,8 @@ int16_t HeaterController::markIRClick(uint16_t actualTemp) {
     auto& hs = HeaterState::instance();
 
     // Force an immediate IR read (ignore interval) to capture current measurement
-    temperature.update(Sensors::Sensor::IR, true);
-    float raw = temperature.get(Sensors::Sensor::IR);
+    temperature.update(Sensors::Type::IR, true);
+    float raw = temperature.get(Sensors::Type::IR);
 
     if (!isfinite(raw) || raw <= 0.0f || raw > 1000.0f) {
         Serial.println("IR click: invalid measurement, ignored.");

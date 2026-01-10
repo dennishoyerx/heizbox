@@ -35,6 +35,8 @@ struct HeaterState {
     Observable<uint16_t> temp{0};
     Observable<uint16_t> tempK{0};
     Observable<uint16_t> tempIR{0};
+    Observable<uint16_t> tempIRRaw{0};
+    Observable<uint16_t> tempIRAmb{0};
     Observable<uint16_t> tempLimit{210};
     PersistedObservable<uint16_t> tempLimitCycle1{"temp", "cyclea", 210};
     PersistedObservable<uint16_t> tempLimitCycle2{"temp", "cycleb", 225};

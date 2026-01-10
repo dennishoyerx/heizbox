@@ -11,11 +11,11 @@ public:
         return instance;
     }
 
-    void log(Sensors::Sensor sensor, uint16_t temp) {
+    void log(Sensors::Type sensor, uint16_t temp) {
         float time = (millis() - startTime) / 1000.0f;
         String data = String(time, 1) + ":" + String(temp) + ",";
-        if (sensor == Sensors::Sensor::K) kData += data;
-        if (sensor == Sensors::Sensor::IR) irData += data;
+        if (sensor == Sensors::Type::K) kData += data;
+        if (sensor == Sensors::Type::IR) irData += data;
     }
 
     void start() {

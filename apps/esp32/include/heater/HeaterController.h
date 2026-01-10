@@ -10,6 +10,7 @@
 #include "heater/HeaterState.h"
 #include "app/HeatCycle.h"
 #include "ITemperatureSensor.h"
+#include "heater/Temperature.h"
 
 class HeaterController {
 public:
@@ -48,12 +49,13 @@ public:
     uint32_t getAutoStopTime() const;
 
     // Expose components
-    ITemperatureSensor* getTempSensor(Sensors::Sensor sensor = Sensors::Sensor::K) { return temperature.getSensor(sensor); }
+    ITemperatureSensor* getTempSensor(Sensors::Type sensor = Sensors::Type::K) { return temperature.getSensor(sensor); }
     TempSensor* getKTempSensor() { return temperature.getKSensor(); }
     IRTempSensor* getIRTempSensor() { return temperature.getIRSensor(); }
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 
 private:
+    //Temperature::Controller temp;
     Sensors temperature;
     ZVSDriver* zvsDriver;
 
