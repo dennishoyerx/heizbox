@@ -15,6 +15,8 @@ HeaterController::HeaterController()
         HardwareConfig::HEATER_MOSFET_PIN,
         HardwareConfig::STATUS_LED_PIN
     );
+
+    mode = new HeatMode();
 }
 
 void HeaterController::init() {
@@ -60,7 +62,7 @@ void HeaterController::startHeating() {
     auto& hs = HeaterState::instance();
     
     if (state == State::IDLE) {
-        heatCycle.resume();
+        heatCycle.start();
         startTime = millis();
         //HeatLog::instance().start();
 
@@ -72,7 +74,7 @@ void HeaterController::startHeating() {
         hs.isHeating.set(true);
         hs.startTime.set(startTime);
     } else if (state == State::PAUSED) {
-        heatCycle.resume();
+        heatCycle.start();
         startTime = millis() - (pauseTime - startTime);
 
         zvsDriver->setEnabled(true);
@@ -97,7 +99,7 @@ void HeaterController::stopHeating(bool finalize) {
         Serial.println("🔥 Heating stopped (finalized)");
         hs.startTime.set(0);
     } else {
-        heatCycle.pause();
+        heatCycle.stop();
         pauseTime = millis();
         transitionTo(State::PAUSED);
         Serial.println("🔥 Heating paused");

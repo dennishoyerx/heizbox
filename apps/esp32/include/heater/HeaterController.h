@@ -11,6 +11,7 @@
 #include "app/HeatCycle.h"
 #include "ITemperatureSensor.h"
 #include "heater/Temperature.h"
+#include "heater/HeatMode.h"
 
 class HeaterController {
 public:
@@ -30,16 +31,11 @@ public:
     void update();
     void updateTemperature();
 
-    // Mark a click event for IR calibration.
-    // Pass the actual (known) temperature of the click, e.g. 150 or 200.
-    // This will store the current IR measurement and recompute the 2‑point calibration if possible.
     int16_t markIRClick(uint16_t actualTemp);
-
-    // Reset calibration to default (slope=1, offset=0)
     void clearIRCalibration();
-
     float getIRCalibrationSlope() const;
     float getIRCalibrationOffset() const;
+    void computeIRCalibration();
 
     State getState() const;
     bool isHeating() const;
@@ -48,6 +44,7 @@ public:
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
 
+    
     // Expose components
     ITemperatureSensor* getTempSensor(Sensors::Type sensor = Sensors::Type::K) { return temperature.getSensor(sensor); }
     TempSensor* getKTempSensor() { return temperature.getKSensor(); }
@@ -58,13 +55,12 @@ private:
     //Temperature::Controller temp;
     Sensors temperature;
     ZVSDriver* zvsDriver;
+    HeatMode* mode;
 
     HeatCycle heatCycle;
 
     void transitionTo(State newState);
 
-    // compute calibration once two points exist
-    void computeIRCalibration();
 
     State state = State::IDLE;
     uint8_t power = 0;

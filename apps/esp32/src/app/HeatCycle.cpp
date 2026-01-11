@@ -1,20 +1,26 @@
 #include "app/HeatCycle.h"
 #include "heater/HeaterCycle.h"
 
-HeatCycle::HeatCycle() {}
+Timer::Timer() {}
 
-void HeatCycle::pause() {
+void Timer::start() {
+    startedAt = millis();
+}
+
+void Timer::stop() {
     durationMs += millis() - startedAt;
     startedAt = 0;
 }
 
-void HeatCycle::resume() {
-    startedAt = millis();
+void Timer::reset() {
+    startedAt = 0;
+    durationMs = 0;
 }
+
+HeatCycle::HeatCycle() {}
 
 void HeatCycle::submit() {
     WebSocketManager::instance().sendHeatCycleCompleted(durationMs / 1000, HeaterCycle::current());
-    startedAt = 0;
-    durationMs = 0;
     HeaterCycle::next();
+    reset();
 }

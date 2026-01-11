@@ -42,6 +42,8 @@ struct DeviceState {
     Observable<float> todayConsumption{0};
     Observable<float> yesterdayConsumption{0};
 
+        PersistedObservable<bool> showRawTemp{"debug", "show_raw_temp", false};
+
     static DeviceState& instance();
 
 private:

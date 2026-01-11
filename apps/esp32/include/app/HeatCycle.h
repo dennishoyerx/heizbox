@@ -2,16 +2,21 @@
 #include "Arduino.h"
 #include "net/WebSocketManager.h"
 
-class HeatCycle {
+class Timer {
 public:
-    HeatCycle();
+    Timer();
 
     void start();
-    void pause();
-    void resume();
-    void submit();
+    void stop();
+    void reset();
 
-private:
+protected:
     uint32_t durationMs;
     uint32_t startedAt;
+};
+
+class HeatCycle: public Timer {
+public:
+    HeatCycle();
+    void submit();
 };

@@ -67,13 +67,17 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     auto heaterMenuItems = MenuBuilder()
          .addHeadline("Calibration")
-         .addObservableRange("Click 1 Temp", hs.irCalActualA, static_cast<uint16_t>(150), static_cast<uint16_t>(180), static_cast<uint16_t>(1), "°C")
-         .addObservableRange("Click 1 Measured", hs.irCalMeasuredA, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
-         .addObservableRange("Click 2 Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
-         .addObservableRange("Click 2 Measured", hs.irCalMeasuredB, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 1 DV Temp", hs.irCalActualA, static_cast<uint16_t>(150), static_cast<uint16_t>(180), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 2 DV Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 1 IR Temp", hs.irCalMeasuredA, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
+         .addObservableRange("Click 2 IR Temp", hs.irCalMeasuredB, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Slope", hs.irCalSlope, static_cast<float>(0), static_cast<float>(1), static_cast<float>(0.01), "")
          .addObservableRange("Offset", hs.irCalOffset, static_cast<float>(0), static_cast<float>(1), static_cast<float>(0.01), "")
-         .addAction("Reset Calibration", [&]() {
+         .addAction("Recalculate", [&]() {
+             heater.computeIRCalibration();
+         })
+         .addAction("Clear Calibration", [&]() {
+             heater.clearIRCalibration();
          })
          .addHeadline("ZVS")
          .addObservableRange("Power", hs.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
@@ -88,9 +92,10 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());
     
     auto debugMenuItems = MenuBuilder()
-         .addObservableToggle("Input", state.debugInput)
-         .addObservableToggle("OSC Debug", state.oscDebug)
+         .addObservableToggle("Input logging", state.debugInput)
+         .addObservableToggle("ZVS OSC", state.oscDebug)
          .addObservableToggle("ZVS Debug", state.zvsDebug)
+         .addObservableToggle("Raw Temp", state.showRawTemp)
          .build();
     this->debugMenuScreen = std::make_unique<GenericMenuScreen>("DEBUG", std::move(debugMenuItems));
     screenManager.registerScreen(ScreenType::DEBUG_MENU, this->debugMenuScreen.get());
