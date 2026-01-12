@@ -26,7 +26,7 @@ void HeaterController::init() {
     zvsDriver->setSensorOffTime(HeaterConfig::KSensor::OFF_TIME_MS);
     zvsDriver->setPower(power);
     
-    temperature.init();
+    temperature.init(); // Use _temperature for initialization
 
     zvsDriver->onPhaseChange([this](ZVSDriver::Phase phase) {
         auto& hs = HeaterState::instance();
@@ -249,7 +249,6 @@ uint32_t HeaterController::getAutoStopTime() const {
 int16_t HeaterController::markIRClick(uint16_t actualTemp) {
     auto& hs = HeaterState::instance();
 
-    // Force an immediate IR read (ignore interval) to capture current measurement
     temperature.update(Sensors::Type::IR, true);
     float raw = temperature.get(Sensors::Type::IR);
 

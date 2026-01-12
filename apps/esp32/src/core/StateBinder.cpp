@@ -34,38 +34,55 @@ void StateBinder::bindHeater(HeaterController* heater) {
     });
 
     
-        if (hs.mode == HeaterMode::PRESET) {
+        
+        /*if (hs.mode == HeaterMode::PRESET) {
             uint8_t preset = hs.cycle == 1 ? hs.cycle1preset : hs.cycle2preset;
             hs.currentPreset.set(preset);
+            
+            switch (preset) {
+            case 0:
+                hs.tempLimit.set(hs.preset1Temp);
+                break;
+            case 1:
+                hs.tempLimit.set(hs.preset2Temp);
+                break;
+            case 2:
+                hs.tempLimit.set(hs.preset3Temp);
+                break;
+            case 3:
+                hs.tempLimit.set(hs.preset4Temp);
+                break;
+            }
+            
             return;
-        } else hs.tempLimit.set(hs.cycle == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
+        } else hs.tempLimit.set(hs.cycle == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);*/
     hs.cycle.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) {
             uint8_t preset = val == 1 ? hs.cycle1preset : hs.cycle2preset;
             hs.currentPreset.set(preset);
+            
+            switch (preset) {
+            case 0:
+                hs.tempLimit.set(hs.preset1Temp);
+                break;
+            case 1:
+                hs.tempLimit.set(hs.preset2Temp);
+                break;
+            case 2:
+                hs.tempLimit.set(hs.preset3Temp);
+                break;
+            case 3: 
+                hs.tempLimit.set(hs.preset4Temp);
+                break;
+            }
+            
             return;
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
     hs.tempLimit.addListener([&hs](uint16_t val) {
-        if (hs.mode == HeaterMode::PRESET) {
-             switch (hs.currentPreset) {
-            case 0:
-                hs.preset1Temp.set(val);
-                break;
-            case 1:
-                hs.preset2Temp.set(val);
-                break;
-            case 2:
-                hs.preset3Temp.set(val);
-                break;
-            case 3:
-                hs.preset4Temp.set(val);
-                break;
-            }
-            return;
-        }
-        if (val == HeaterConfig::MAX_TEMPERATURE) return;
+        if (hs.mode == HeaterMode::PRESET) return;
+        if (val == HeaterConfig::MAX_TEMPERATURE) return;   
         if(HeaterCycle::is(1)) hs.tempLimitCycle1.set(val);
         else hs.tempLimitCycle2.set(val);
     });
@@ -95,7 +112,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
     hs.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
         heater->getZVSDriver()->setPeriod(val);
     });
-
+    
     hs.currentPreset.addListener([&hs](uint8_t val) {
         if (hs.mode != HeaterMode::PRESET) return;
         
@@ -113,9 +130,6 @@ void StateBinder::bindHeater(HeaterController* heater) {
             hs.tempLimit.set(hs.preset4Temp);
             break;
         }
-
-        //if (HeaterCycle::is(1)) hs.cycle1preset.set(val);
-        //else hs.cycle2preset.set(val);
     });
 }
 void StateBinder::bindDebug(DeviceUI* ui) {

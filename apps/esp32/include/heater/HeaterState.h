@@ -11,7 +11,7 @@ enum HeaterMode {
 struct HeaterState {
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::PRESET};
 
-        PersistedObservable<uint8_t> currentPreset{"preset", "current", 0};
+        Observable<uint8_t> currentPreset{0};
         PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 170};
         PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 185};
         PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};

@@ -1,6 +1,29 @@
 #pragma once
 #include <Arduino.h>
 
+namespace HeatStrategy {
+    enum Strategies {
+        TEMP,
+        PRESET
+    };
+
+    class Controller {};
+    class Interface {
+        virtual void start();
+        virtual void stopped();
+        virtual void update();
+    };
+};
+
+class TemperatureHeatStrategy: public HeatStrategy::Interface {
+    void start();
+    void stopped();
+    void update();
+
+};
+
+
+
 /*
 enum Mode {
     TEMP,

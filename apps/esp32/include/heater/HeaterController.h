@@ -52,7 +52,7 @@ public:
     ZVSDriver* getZVSDriver() { return zvsDriver; }
 
 private:
-    //Temperature::Controller temp;
+    Temperature::Controller _temperature;
     Sensors temperature;
     ZVSDriver* zvsDriver;
     //HeatMode* mode;

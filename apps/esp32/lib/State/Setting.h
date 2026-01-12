@@ -1,11 +1,23 @@
 #pragma once
 
+#include <Arduino.h>
 
 template<typename T>
-class Setting {
+struct Setting {
+    String ns;
+    String key;
+    T initialValue;
+};
+
+struct Settings {
+    Setting<bool> isOnline{"device", "online", false};
+};
+
+template<typename T>
+class Settingx {
 public:
-    Setting() = default;
-    explicit Setting(T initialValue) : value_(std::move(initialValue)) {}
+    Settingx() = default;
+    explicit Settingx(T initialValue) : value_(std::move(initialValue)) {}
 
     // Wert setzen und Listener benachrichtigen
     virtual T set(T newValue) {

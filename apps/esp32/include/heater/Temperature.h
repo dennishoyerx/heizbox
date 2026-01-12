@@ -12,6 +12,7 @@ namespace Temperature {
     };
 
     class Controller {
+    public:
         Controller();
         void init();
         void update();

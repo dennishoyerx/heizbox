@@ -1,5 +1,3 @@
-#pragma once
-
 #include "heater/Temperature.h"
 #include "heater/HeaterState.h"
 
