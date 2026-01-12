@@ -4,20 +4,22 @@
 #include "Config.h"
 
 enum HeaterMode {
-    TEMP_TARGET_CUTOFF,
-    TEMP_TARGET
-};
-
-struct HeaterSettings {
-    PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::TEMP_TARGET_CUTOFF};
-
-    struct Temperature {
-        PersistedObservable<uint16_t> limitCycle1{"temp", "cycle1", 210};
-        PersistedObservable<uint16_t> limitCycle2{"temp", "cycle2", 225};
-    };
+    TEMP,
+    PRESET
 };
 
 struct HeaterState {
+    PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::PRESET};
+
+        PersistedObservable<uint8_t> currentPreset{"preset", "current", 0};
+        PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 170};
+        PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 185};
+        PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
+        PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
+        PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};
+        PersistedObservable<uint8_t> cycle2preset{"preset", "cycle_2", 2};
+
+
     PersistedObservable<uint8_t> power{"heater", "power", 100};
     PersistedObservable<uint32_t> cycleTimeout{"heater", "cycletimeout", HeaterConfig::CYCLE_TIMEOUT_MS};
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};

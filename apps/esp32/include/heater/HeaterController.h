@@ -55,7 +55,7 @@ private:
     //Temperature::Controller temp;
     Sensors temperature;
     ZVSDriver* zvsDriver;
-    HeatMode* mode;
+    //HeatMode* mode;
 
     HeatCycle heatCycle;
 

@@ -94,32 +94,40 @@ public:
         else if (temp < 200) return COLOR_HEAT_HIGH;
         else return COLOR_HEAT_EXTREME;
     }
-
     static uint16_t getTemperatureColor565(float temp, bool darkMode = false) {
-        struct RGB { uint8_t r,g,b; };
-        const RGB cold     = {64,119,209};    // Blau
-        const RGB low      = {71,213,166};    // Cyan
-        const RGB medium   = {215,172,97};    // Grün
-        const RGB high     = {217,74,74};     // Rot-Orange
-        const RGB extreme  = {106,78,128};    // Lila
+        struct RGB { uint8_t r, g, b; };
+
+        // Perzeptiv saubere Farben
+        const RGB cold     = { 30, 202, 211 };  // Türkis
+        const RGB flavor   = { 46, 204, 113 };  // Grün
+        const RGB balanced = { 241, 196,  15 }; // Gelb
+        const RGB extract  = { 230, 126,  34 }; // Orange
+        const RGB critical = { 192,  57,  43 }; // Dunkelrot
+
+        const int tCold     = 160;
+        const int tFlavor   = 170;
+        const int tBalanced = 190;
+        const int tExtract  = 210;
+        const int tCritical = 225;
 
         RGB start, end;
         float t = 0.0f;
 
-        if(temp < 155) {
-            start = cold; end = low;
-            t = (temp - 0.0f) / (155.0f - 0.0f);
-        } else if(temp < 180) {
-            start = low; end = medium;
-            t = (temp - 155.0f) / (180.0f - 155.0f);
-        } else if(temp < 200) {
-            start = medium; end = high;
-            t = (temp - 180.0f) / (200.0f - 180.0f);
-        } else if(temp < 240) {
-            start = high; end = extreme;
-            t = (temp - 200.0f) / (240.0f - 200.0f);
+        if (temp < tFlavor) {
+            start = cold; end = flavor;
+            t = (temp - tCold) / float(tFlavor - tCold);
+        } else if (temp < tBalanced) {
+            start = flavor; end = balanced;
+            t = (temp - tFlavor) / float(tBalanced - tFlavor);
+        } else if (temp < tExtract) {
+            start = balanced; end = extract;
+            t = (temp - tBalanced) / float(tExtract - tBalanced);
+        } else if (temp < tCritical) {
+            start = extract; end = critical;
+            t = (temp - tExtract) / float(tCritical - tExtract);
         } else {
-            return rgb888to565(extreme.r, extreme.g, extreme.b);
+            // Ab 225 °C fest Rot (keine weitere Eskalation)
+            return rgb888to565(critical.r, critical.g, critical.b);
         }
 
         t = constrain(t, 0.0f, 1.0f);
@@ -128,7 +136,14 @@ public:
         uint8_t g = start.g + (end.g - start.g) * t;
         uint8_t b = start.b + (end.b - start.b) * t;
 
-        return rgb888to565(r,g,b);
+        // Optional: DarkMode minimal abdunkeln
+        /*if (darkMode) {
+            r = r * 0.75f;
+            g = g * 0.75f;
+            b = b * 0.75f;
+        }*/
+
+        return rgb888to565(r, g, b);
     }
 
     /*

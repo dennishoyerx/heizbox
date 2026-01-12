@@ -1,6 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
+/*
 enum Mode {
     TEMP,
     PRESET
@@ -50,19 +51,19 @@ private:
     uint16_t limit;
 };
 
-enum Presets {
+enum TempPresets {
     FLAVOR,
     BALANCED,
     EXTRACTION,
     FULL,
 };
 
-struct Preset {
+struct TempPreset {
     uint16_t temp;
     String name;
 };
 
-Preset presets[] = {
+TempPreset TempPresets[] = {
     { 170, "FLAVOR" },
     { 180, "BALANCED" },
     { 200, "EXTRACTION" },
@@ -72,4 +73,4 @@ Preset presets[] = {
 class PresetC {
 public:
     PresetC();
-};
+};*/

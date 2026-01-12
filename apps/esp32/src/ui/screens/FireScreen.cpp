@@ -11,9 +11,11 @@
  #include <Wire.h>
 #include <utility>
 #include "heater/HeaterState.h"
+#include "heater/Presets.h"
 
 #include "utils/Logger.h"
 #include "utils/Format.h"
+
 
 #include <ObservableMenuItem.h>
 
@@ -35,20 +37,15 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         if (!isHeating) _ui->clear();
         manager->setStatusbarVisible(!isHeating);
     });
-    
-    menu.addItem(std::make_unique<ObservableValueItem<int16_t>>(
-        "IR Correction", hs.irCorrection, -100, 100, 1,
-        [](const int16_t& v){ return (String) v + "°"; }
-    ));
-
-    menu.addItem(std::make_unique<ObservableValueItem<int8_t>>(
-        "IR Amb Correction", hs.ambientCorrection, -100, 100, 1,
-        [](const int8_t& v){ return v == 0 ? "OFF" : (String) v + "%"; }
-    ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
         "Temperature", hs.tempLimit, 100, 260, 1,
         [](const uint16_t& v){ return (String) v + "°"; }
+    ));
+
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "Preset", hs.currentPreset, 0, 3, 1,
+        [](const uint8_t& v){ return (String) TempPresets[v].name; }
     ));
 
     // --- IR calibration menu actions (select + CENTER to trigger) ---
@@ -62,10 +59,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     ));
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
         "IR Cal B", menuIRCalB, 0, 1, 1,
-        [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
-    ));
-    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
-        "IR Cal Clear", menuIRCalClear, 0, 1, 1,
         [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
     ));
 }
@@ -266,11 +259,11 @@ void FireScreen::handleInput(InputEvent event) {
         return;
     }
 
-    if (input(event, {LEFT}, {PRESSED})) {
+    if (input(event, {LEFT}, {PRESS})) {
         menu.prevOption();
         dirty();
     }
-    if (input(event, {RIGHT}, {PRESSED})) {
+    if (input(event, {RIGHT}, {PRESS})) {
         menu.nextOption();
         dirty();
     }

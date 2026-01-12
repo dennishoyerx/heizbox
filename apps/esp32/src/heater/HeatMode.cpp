@@ -1,6 +1,6 @@
 #include "heater/HeatMode.h"
 #include "heater/HeaterState.h"
-
+/*
 HeaterControls heater;
 
 
@@ -16,4 +16,4 @@ void TempControl::update() {
     auto& hs = HeaterState::instance();
 
     if (hs.temp < hs.tempLimit) heater.off();
-}
+}*/

@@ -16,7 +16,7 @@ HeaterController::HeaterController()
         HardwareConfig::STATUS_LED_PIN
     );
 
-    mode = new HeatMode();
+    //mode = new HeatMode();
 }
 
 void HeaterController::init() {

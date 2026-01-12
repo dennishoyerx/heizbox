@@ -66,6 +66,12 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     auto heaterMenuItems = MenuBuilder()
+         .addHeadline("Presets")
+         .addObservableRange("Mode", hs.mode, static_cast<uint8_t>(0), static_cast<uint8_t>(1), static_cast<uint8_t>(1), "")
+         .addObservableRange("Flavor Temp", hs.preset1Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
+         .addObservableRange("Balanced Temp", hs.preset2Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
+         .addObservableRange("Extraction Temp", hs.preset3Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
+         .addObservableRange("Full Temp", hs.preset4Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
          .addHeadline("Calibration")
          .addObservableRange("Click 1 DV Temp", hs.irCalActualA, static_cast<uint16_t>(150), static_cast<uint16_t>(180), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Click 2 DV Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
