@@ -3,6 +3,7 @@
 #include "heater/HeaterState.h"
 #include "heater/HeaterCycle.h"
 #include "heater/Sensors.h"
+#include "heater/Presets.h"
 #include "DisplayDriver.h"
 
 void StateBinder::bindDisplay(DisplayDriver* display) {
@@ -60,22 +61,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
         if (hs.mode == HeaterMode::PRESET) {
             uint8_t preset = val == 1 ? hs.cycle1preset : hs.cycle2preset;
             hs.currentPreset.set(preset);
-            
-            switch (preset) {
-            case 0:
-                hs.tempLimit.set(hs.preset1Temp);
-                break;
-            case 1:
-                hs.tempLimit.set(hs.preset2Temp);
-                break;
-            case 2:
-                hs.tempLimit.set(hs.preset3Temp);
-                break;
-            case 3: 
-                hs.tempLimit.set(hs.preset4Temp);
-                break;
-            }
-            
+            hs.tempLimit.set(Presets::getPresetTemp(preset));            
             return;
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
@@ -115,21 +101,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
     
     hs.currentPreset.addListener([&hs](uint8_t val) {
         if (hs.mode != HeaterMode::PRESET) return;
-        
-        switch (val) {
-        case 0:
-            hs.tempLimit.set(hs.preset1Temp);
-            break;
-        case 1:
-            hs.tempLimit.set(hs.preset2Temp);
-            break;
-        case 2:
-            hs.tempLimit.set(hs.preset3Temp);
-            break;
-        case 3:
-            hs.tempLimit.set(hs.preset4Temp);
-            break;
-        }
+        hs.tempLimit.set(Presets::getPresetTemp(val));            
     });
 }
 void StateBinder::bindDebug(DeviceUI* ui) {

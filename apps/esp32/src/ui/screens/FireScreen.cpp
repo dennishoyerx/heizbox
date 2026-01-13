@@ -40,7 +40,10 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
 
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
         "Temperature", hs.tempLimit, 100, 260, 1,
-        [](const uint16_t& v){ return (String) v + "°"; }
+        [&hs](const uint16_t& v){ 
+            if (hs.mode == HeaterMode::PRESET) return (String) v + " (" + TempPresets[hs.currentPreset].name  + ")";
+            return (String) v + "°";
+         }
     ));
 
     menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
@@ -175,7 +178,6 @@ bool triggeredTwice(uint32_t intervalMs) {
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
-
 
     if (input(event, {FIRE}, {PRESSED, HOLD}) && input(event, {CENTER}, {PRESSED, HOLD})) {
         bool locked = ds.locked.set(!ds.locked);

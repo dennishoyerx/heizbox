@@ -8,7 +8,19 @@ enum HeaterMode {
     PRESET
 };
 
+struct Preset {
+    Observable<uint8_t> currentPreset{0};
+    PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 170};
+    PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 185};
+    PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
+    PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
+    PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};
+    PersistedObservable<uint8_t> cycle2preset{"preset", "cycle_2", 2};
+};
+
 struct HeaterState {
+    //Preset preset;
+
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::PRESET};
 
         Observable<uint8_t> currentPreset{0};
@@ -25,7 +37,7 @@ struct HeaterState {
     PersistedObservable<uint8_t> cycle{"heater", "cycle", 1};
 
     PersistedObservable<int8_t> ambientCorrection{"ir", "ambcorrection", 0};
-    PersistedObservable<uint8_t> irEmissivity{"ir", "emissivity", 96};
+    PersistedObservable<uint8_t> irEmissivity{"ir", "emissivity", 97};
     PersistedObservable<int16_t> irCorrection{"ir", "correction", 0};
 
     Observable<bool> zvsOn{false};
