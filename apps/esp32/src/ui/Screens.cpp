@@ -9,6 +9,7 @@ void Screens::setup(ScreenManager& screenManager) {
     otaUpdateScreen = std::make_unique<OtaUpdateScreen>();
     timezoneScreen = std::make_unique<TimezoneScreen>();
     startupScreen = std::make_unique<StartupScreen>([&]() {
+        screenManager.setStatusbarVisible(true);
         screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::FADE);
     });
 

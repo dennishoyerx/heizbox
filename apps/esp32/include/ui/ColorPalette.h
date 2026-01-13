@@ -36,7 +36,26 @@ inline uint16_t rgb888to565(uint8_t r, uint8_t g, uint8_t b) {
 }
 
 const uint16_t heizbox_palette[16] = {
-    rgb888to565(255, 105, 0),   //  0: COLOR_PRIMARY COLOR_BG
+    rgb888to565(35, 0, 70),       //  0: COLOR_BG
+    rgb888to565(23, 0, 46),  //  1: COLOR_BG_2
+    rgb888to565(43, 22, 82),  //  2: COLOR_BG_3
+
+    rgb888to565(234, 226, 243), //  3: COLOR_TEXT_PRIMARY - Fast weiß
+    rgb888to565(180, 180, 190), //  4: COLOR_TEXT_SECONDARY - Helles Grau
+
+    rgb888to565(64,119,209),      // 5: Blue
+    rgb888to565(71,213,166),  //  6: COLOR_SUCCESS - Grün
+    rgb888to565(215,172,97),  //  7: COLOR_WARNING - Gelb/Orange
+    rgb888to565(217,74,74),   //  8: COLOR_ERROR - Rot
+    rgb888to565(106,78,128),      // 9: Purple
+    
+    rgb888to565(0, 0, 0),        // 10: 
+    rgb888to565(0, 0, 0),       // 11: Schwarz
+    rgb888to565(60, 60, 70),    //  12: 
+    rgb888to565(255, 105, 0),   //  13: COLOR_ACCENT - Orange/Rot Akzent
+    rgb888to565(106,78,128),      // 14
+    rgb888to565(230, 95, 0),     // 15
+/*    rgb888to565(255, 105, 0),   //  0: COLOR_PRIMARY COLOR_BG
     rgb888to565(255, 143, 64),  //  1: COLOR_BG_2
     rgb888to565(255, 128, 38),  //  2: COLOR_BG_3
 
@@ -55,6 +74,7 @@ const uint16_t heizbox_palette[16] = {
     rgb888to565(255, 105, 0),   //  13: COLOR_ACCENT - Orange/Rot Akzent
     rgb888to565(240, 240, 245),      // 14
     rgb888to565(230, 95, 0),     // 15
+*/
 };
 
 const uint16_t heizbox_palette_dark[16] = {

@@ -16,6 +16,8 @@
 #include "utils/Logger.h"
 #include "utils/Format.h"
 
+#include <Wire.h>
+#include "utils/Logger.h"
 
 #include <ObservableMenuItem.h>
 
@@ -65,16 +67,6 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         [](const uint8_t& v){ return v == 0 ? "" : "Press"; }
     ));
 }
-
-void FireScreen::onEnter() {
-    manager->setStatusbarVisible(true);
-}
-
-struct TemperatureProps {
-    int limit;
-    int ktyp;
-    int ir;
-};
 
 // Overlay state for confirmation messages
 static String s_overlayText = "";
@@ -207,6 +199,14 @@ void FireScreen::handleInput(InputEvent event) {
     
     // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
+        Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
+        for (uint8_t addr = 1; addr < 127; addr++) {
+  Wire.beginTransmission(addr);
+  if (Wire.endTransmission() == 0) {char buf[6];
+snprintf(buf, sizeof(buf), "0x%02X", addr);
+    logPrint(buf);
+  }
+}
         const IMenuItem* cur = menu.current();
         String curName = cur ? String(cur->name()) : String();
 

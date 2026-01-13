@@ -1,5 +1,6 @@
 #pragma once
 #include <Arduino.h>
+#include "Config.h"
 
 struct SysModuleBoot {
     String key;
@@ -10,6 +11,7 @@ class SysModules {
 public:
     using bootCallback = std::function<void()>;
     void add(SysModuleBoot boot) {
+        if (!DebugFlags::LOG_BOOT) return;
         modules.push_back(boot);
     }
 

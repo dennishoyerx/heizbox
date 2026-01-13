@@ -61,8 +61,8 @@ void StatusBar::drawWifiRegion(RenderSurface s) {
     // Clear nur WiFi-Icon Bereich
     const int8_t iconSize = 10;
     const int8_t iconRadius = iconSize / 2;
-    const int16_t iconX = 16 + s.sprite->textWidth(state.time) + 10;
-    const int16_t iconY = height / 2 - iconRadius;
+    const int16_t iconX = 16; //16 + s.sprite->textWidth(state.time) + 10;
+    const int16_t iconY = height - 4 - iconRadius; // height / 2 - iconRadius;
     s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BLACK);
 
     if (!WebSocketManager::instance().isConnected()) s.sprite->fillCircle(iconX + iconRadius + 15, iconY + iconRadius, iconRadius, COLOR_BLUE);

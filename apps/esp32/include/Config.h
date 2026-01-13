@@ -2,10 +2,14 @@
 
 #include <Arduino.h>
 
+struct DebugFlags {
+    static constexpr bool LOG_BOOT = false;
+};
+
 struct InputConfig {
     struct PCF8574 {
-        static constexpr uint8_t SDA = 26;
-        static constexpr uint8_t SCL = 27;
+        static constexpr uint8_t SDA = 27;
+        static constexpr uint8_t SCL = 26;
         static constexpr uint8_t INT_PIN = 25;
         static constexpr uint32_t UPDATE_MS = 200;
     };
