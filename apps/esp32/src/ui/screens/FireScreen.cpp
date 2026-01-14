@@ -193,20 +193,24 @@ void FireScreen::handleInput(InputEvent event) {
     }
     if (input(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
-        hs.tempLimit.set(HeaterCycle::is(1) ? hs.tempLimitCycle1: hs.tempLimitCycle2);
+        if (hs.mode == HeaterMode::PRESET) hs.tempLimit.set(Presets::getPresetTemp(hs.currentPreset));
+        else hs.tempLimit.set(HeaterCycle::is(1) ? hs.tempLimitCycle1: hs.tempLimitCycle2);
         return;
     }
     
     // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
         Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
+Wire.setClock(100000);
         for (uint8_t addr = 1; addr < 127; addr++) {
-  Wire.beginTransmission(addr);
-  if (Wire.endTransmission() == 0) {char buf[6];
-snprintf(buf, sizeof(buf), "0x%02X", addr);
-    logPrint(buf);
-  }
-}
+            Wire.beginTransmission(addr);
+            if (Wire.endTransmission() == 0) {
+                char buf[6];
+                snprintf(buf, sizeof(buf), "0x%02X", addr);
+                logPrint(buf);
+            }
+        }
+
         const IMenuItem* cur = menu.current();
         String curName = cur ? String(cur->name()) : String();
 

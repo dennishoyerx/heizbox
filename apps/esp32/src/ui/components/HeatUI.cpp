@@ -76,6 +76,7 @@ void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
     
     Temp({s, 12, 16}, "Raw", hs.tempIRRaw, TextSize::bmd);
+    Temp({s, 12, 48}, "Amb", hs.tempIRAmb, TextSize::bmd);
     s.sprite->setTextDatum(MR_DATUM);
     if (hs.tempIR < 1000) Temp({s, 134, 16}, "IR", hs.tempIR, TextSize::bxl);
     s.sprite->setTextDatum(ML_DATUM);

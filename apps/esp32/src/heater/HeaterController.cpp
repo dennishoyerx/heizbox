@@ -15,8 +15,6 @@ HeaterController::HeaterController()
         HardwareConfig::HEATER_MOSFET_PIN,
         HardwareConfig::STATUS_LED_PIN
     );
-
-    //mode = new HeatMode();
 }
 
 void HeaterController::init() {
@@ -26,7 +24,7 @@ void HeaterController::init() {
     zvsDriver->setSensorOffTime(HeaterConfig::KSensor::OFF_TIME_MS);
     zvsDriver->setPower(power);
     
-    temperature.init(); // Use _temperature for initialization
+    temperature.init();
 
     zvsDriver->onPhaseChange([this](ZVSDriver::Phase phase) {
         auto& hs = HeaterState::instance();
@@ -171,6 +169,8 @@ void HeaterController::updateTemperature() {
 
     // IR Sensor
     if (temperature.update(Sensors::Type::IR)) {
+        //hs.tempIRAmb.set(static_cast<uint16_t>(temperature.getIRSensor()->getLastAmbientTemp() + 0.5f));
+
         float raw = temperature.get(Sensors::Type::IR);
         if (!isfinite(raw) || raw < 0.0f || raw > 1000.0f) {
             return; // Messung verwerfen

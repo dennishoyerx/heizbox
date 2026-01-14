@@ -10,13 +10,32 @@ enum HeaterMode {
 
 struct Preset {
     Observable<uint8_t> currentPreset{0};
-    PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 170};
-    PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 195};
+    PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 185};
+    PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 200};
     PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
     PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
     PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};
     PersistedObservable<uint8_t> cycle2preset{"preset", "cycle_2", 2};
 };
+
+/*
+struct IRSensor {
+    PersistedObservable<int8_t> ambientCorrection{"ir", "ambcorrection", 0};
+    PersistedObservable<uint8_t> emissivity{"ir", "emissivity", 97};
+    PersistedObservable<int16_t> correction{"ir", "correction", 0};
+
+    // IR calibration (2-point)
+    // gespeicherte, gemessene IR‑Werte bei zwei bekannten Referenztemperaturen
+    PersistedObservable<uint16_t> irCalMeasuredA{"ir", "cal_meas_a", 0};
+    PersistedObservable<uint16_t> irCalMeasuredB{"ir", "cal_meas_b", 0};
+    // die zugehörigen tatsächlichen Temperaturen (z.B. 150 und 200)
+    PersistedObservable<uint16_t> irCalActualA{"ir", "cal_act_a", 150};
+    PersistedObservable<uint16_t> irCalActualB{"ir", "cal_act_b", 200};
+    // berechnete Kalibrierungsparameter: Temp_true = slope * Temp_measured + offset
+    PersistedObservable<float> irCalSlope{"ir", "cal_slope", 1.0f};
+    PersistedObservable<float> irCalOffset{"ir", "cal_offset", 0.0f};
+};*/
+
 
 struct HeaterState {
     //Preset preset;
@@ -24,8 +43,8 @@ struct HeaterState {
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::PRESET};
 
         Observable<uint8_t> currentPreset{0};
-        PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 170};
-        PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 195};
+        PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 185};
+        PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 200};
         PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
         PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
         PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};

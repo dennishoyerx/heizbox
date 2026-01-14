@@ -8,8 +8,8 @@ struct DebugFlags {
 
 struct InputConfig {
     struct PCF8574 {
-        static constexpr uint8_t SDA = 27;
-        static constexpr uint8_t SCL = 26;
+        static constexpr uint8_t SDA = 15;
+        static constexpr uint8_t SCL = 15;
         static constexpr uint8_t INT_PIN = 25;
         static constexpr uint32_t UPDATE_MS = 200;
     };
@@ -37,7 +37,7 @@ struct HardwareConfig {
     static constexpr uint8_t JOY_UP_PIN = 14; // green
     static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
     static constexpr uint8_t JOY_LEFT_PIN = 21; // purple
-    static constexpr uint8_t JOY_RIGHT_PIN = 22; // white
+    static constexpr uint8_t JOY_RIGHT_PIN = 19; // white
     static constexpr uint8_t JOY_PRESS_PIN = 33; // orange
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;
@@ -48,8 +48,8 @@ struct HardwareConfig {
     static constexpr uint8_t THERMO_CS_PIN = 0; // Y
     static constexpr uint8_t THERMO_SCK_PIN = 0; // G 
 
-    static constexpr uint8_t IR_SDL_PIN = 19; // White
-    static constexpr uint8_t IR_SDA_PIN = 15; // Purple
+    static constexpr uint8_t IR_SDL_PIN = 26; // White
+    static constexpr uint8_t IR_SDA_PIN = 27; // Purple
 };
 
 struct DisplayConfig {

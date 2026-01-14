@@ -44,25 +44,15 @@ void StatusBar::draw(UI* ui) {
 }
 
 void StatusBar::drawTimeRegion(RenderSurface s) {
-    // Clear nur Zeit-Bereich
-    //s.sprite->fillRect(16, 0, s.sprite->textWidth(state.time), height, COLOR_BG_2);
-
-    // Render Zeit
-
     s.text(8, 0, String(state.time), TextSize::lg);
-    /*s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
-    s.sprite->setFreeFont(&FreeSans18pt7b);
-    s.sprite->setTextSize(1);
-    s.sprite->setCursor(280/2 - s.sprite->textWidth(state.time)/2, s.sprite->fontHeight() - 4);
-    s.sprite->print(state.time);*/
 }
 
 void StatusBar::drawWifiRegion(RenderSurface s) {
     // Clear nur WiFi-Icon Bereich
-    const int8_t iconSize = 10;
+    const int8_t iconSize = 6;
     const int8_t iconRadius = iconSize / 2;
     const int16_t iconX = 16; //16 + s.sprite->textWidth(state.time) + 10;
-    const int16_t iconY = height - 4 - iconRadius; // height / 2 - iconRadius;
+    const int16_t iconY = height - 6 - iconRadius; // height / 2 - iconRadius;
     s.sprite->fillRect(iconX, iconY, iconSize, iconSize, COLOR_BLACK);
 
     if (!WebSocketManager::instance().isConnected()) s.sprite->fillCircle(iconX + iconRadius + 15, iconY + iconRadius, iconRadius, COLOR_BLUE);

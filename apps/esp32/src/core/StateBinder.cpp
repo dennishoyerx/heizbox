@@ -66,6 +66,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
+    if (hs.mode == HeaterMode::PRESET) hs.tempLimit.set(Presets::getPresetTemp(hs.currentPreset));
     hs.tempLimit.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) return;
         if (val == HeaterConfig::MAX_TEMPERATURE) return;   
@@ -104,6 +105,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
         hs.tempLimit.set(Presets::getPresetTemp(val));            
     });
 }
+
 void StateBinder::bindDebug(DeviceUI* ui) {
     auto& state = DeviceState::instance();
 
