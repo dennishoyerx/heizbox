@@ -6,9 +6,7 @@
 #include "hardware/Audio.h"
 #include <utility>
 
-Device::Device()
-    : heater(), ui(heater), network(),
-      heaterMonitor(std::make_unique<HeaterMonitor>(heater)) {}
+Device::Device(): heater(), ui(heater), network() {}
 
 Device::~Device() {}
 
@@ -37,6 +35,4 @@ void Device::loop() {
     heater.update();
     network.update();
     ui.update();
-
-    heaterMonitor->checkHeatingStatus();
 }

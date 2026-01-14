@@ -9,7 +9,6 @@
 #include "heater/HeaterController.h"
 #include "net/Network.h"
 #include "ui/DeviceUI.h"
-#include "app/HeaterMonitor.h"
 
 class Device {
 
@@ -23,6 +22,4 @@ private:
     HeaterController heater;
     DeviceUI ui;
     Network network;
-    
-    std::unique_ptr<HeaterMonitor> heaterMonitor;
 };
