@@ -1,7 +1,28 @@
-// Audio.cpp
-#include "Audio.h"
+ #include "Audio.h"
 #include "Config.h"
 #include <Preferences.h>
+
+
+Speaker::Driver::Driver(int pin_, int channel_, int resolution_) {
+    pin = pin_;
+    channel = channel_;
+    resolution = resolution_;
+}
+
+void Speaker::Driver::init() {
+    pinMode(pin, OUTPUT);
+    ledcSetup(channel, 2000, resolution);
+    ledcAttachPin(pin, channel);
+}
+
+void Speaker::Driver::setVolume(uint8_t volumePercent) {
+    masterVolume = constrain(volumePercent, 0, 100);
+}
+
+void Speaker::Driver::setMute(bool mute) {
+    muted = mute;
+}
+
 
 
 namespace Audio {
@@ -40,22 +61,10 @@ namespace Audio {
     
     void mute() {
         audioMuted = true;
-        
-        Preferences prefs;
-        if (prefs.begin("audio", false)) {
-            prefs.putBool("muted", true);
-            prefs.end();
-        }
     }
     
     void unmute() {
         audioMuted = false;
-        
-        Preferences prefs;
-        if (prefs.begin("audio", false)) {
-            prefs.putBool("muted", false);
-            prefs.end();
-        }
     }
     
     bool isMuted() {

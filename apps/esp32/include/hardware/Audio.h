@@ -1,6 +1,27 @@
-// Audio.h
 #pragma once
 #include <Arduino.h>
+
+
+namespace Speaker {
+    const int CH = 0;
+    const int RESOLUTION = 8;
+    const uint8_t MAX_VOLUME = 255;
+    const uint8_t DEFAULT_VOLUME = 200; 
+
+    class Driver {
+        Driver(int pin_, int channel_ = CH, int resolution_ = RESOLUTION);
+        void init();
+        void setVolume(uint8_t volumePercent);
+        void setMute(bool mute);
+
+    private:
+        uint8_t pin;
+        uint8_t channel;
+        uint8_t resolution;
+        uint8_t masterVolume = 10;
+        bool muted = false;
+    };
+};
 
 namespace Audio {
     // Musikalische Noten in Hz (C4-C6)
