@@ -5,6 +5,7 @@
 #include "heater/Sensors.h"
 #include "heater/Presets.h"
 #include "DisplayDriver.h"
+#include "hardware/Audio.h"
 
 void StateBinder::bindDisplay(DisplayDriver* display) {
     auto& ds = DeviceState::instance();
@@ -23,6 +24,11 @@ void StateBinder::bindDisplay(DisplayDriver* display) {
 void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
     auto& hs = HeaterState::instance();
+
+    Audio::setVolume(state.audio.volume);
+    state.audio.volume.addListener([&](uint8_t val) {
+        Audio::setVolume(val);
+    });
 
     heater->setPower(hs.power);
     hs.power.addListener([heater](uint8_t val) {

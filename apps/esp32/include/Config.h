@@ -31,6 +31,7 @@ struct InputConfig {
 
 
 struct HardwareConfig {
+    static constexpr uint8_t SPEAKER_PIN = 25;
     static constexpr uint8_t TFT_BL_PIN = 16;
     static constexpr uint8_t STATUS_LED_PIN = 2;
 

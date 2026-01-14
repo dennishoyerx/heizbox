@@ -4,6 +4,7 @@
 #include "core/DeviceState.h"
 #include "net/Network.h"
 #include "core/EventBus.h"
+#include "hardware/Audio.h"
 #include <utility>
 
 Device::Device()
@@ -21,9 +22,13 @@ void Device::setup() {
         nvs_flash_init();
     }
 
+    Audio::init();
+
     heater.init();
     ui.init();
     network.init(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
+
+    Audio::beepStartup();
 
     StateBinder::bindAll(&ui, &heater);
     Serial.println("✅ Device initialized");

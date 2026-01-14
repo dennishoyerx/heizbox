@@ -7,7 +7,14 @@
 
 class DisplayDriver; // Forward declaration
 
+struct AudioSettings {
+    PersistedObservable<uint8_t> volume{"audio", "volume", 100};
+};
+
+
 struct DeviceState {
+    AudioSettings audio;
+
     // Display Settings
     PersistedObservable<uint8_t> brightness{"display", "brightness", 100};
     PersistedObservable<bool> darkMode{"display", "darkMode", true};

@@ -4,6 +4,7 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 #include "SysModule.h"
+#include "hardware/Audio.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
@@ -59,6 +60,7 @@ void HeaterController::transitionTo(State newState) {
 void HeaterController::startHeating() {
     auto& hs = HeaterState::instance();
     
+    Audio::beepHeatStart();
     if (state == State::IDLE) {
         heatCycle.start();
         startTime = millis();
@@ -97,6 +99,7 @@ void HeaterController::stopHeating(bool finalize) {
         Serial.println("🔥 Heating stopped (finalized)");
         hs.startTime.set(0);
     } else {
+        Audio::beepHeatFinish();
         heatCycle.stop();
         pauseTime = millis();
         transitionTo(State::PAUSED);

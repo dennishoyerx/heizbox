@@ -12,6 +12,7 @@
 #include <utility>
 #include "heater/HeaterState.h"
 #include "heater/Presets.h"
+#include "hardware/Audio.h"
 
 #include "utils/Logger.h"
 #include "utils/Format.h"
@@ -200,8 +201,7 @@ void FireScreen::handleInput(InputEvent event) {
     
     // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
-        Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
-Wire.setClock(100000);
+        /*Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
         for (uint8_t addr = 1; addr < 127; addr++) {
             Wire.beginTransmission(addr);
             if (Wire.endTransmission() == 0) {
@@ -209,7 +209,7 @@ Wire.setClock(100000);
                 snprintf(buf, sizeof(buf), "0x%02X", addr);
                 logPrint(buf);
             }
-        }
+        }*/
 
         const IMenuItem* cur = menu.current();
         String curName = cur ? String(cur->name()) : String();
@@ -219,15 +219,18 @@ Wire.setClock(100000);
             if (!heater.isHeating()) {
                 Serial.println("IR click ignored: not heating.");
                 showOverlay("IR click ignored: not heating", 1200);
+                    Audio::beepError();
             } else {
                 uint16_t actualTemp = hs.irCalActualA;
                 Serial.printf("Menu: Storing IR Cal A for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
                 if (res == 0) {
                     showOverlay("IR click failed (no valid samples)", 1500);
+                    Audio::beepError();
                 } else {
                     uint16_t measured = hs.irCalMeasuredA.get();
                     showOverlay(String("IR Cal A: ") + String(measured) + "°", 1500);
+                    Audio::beepSuccess();
                 }
 
                 menu.nextOption();
@@ -239,15 +242,18 @@ Wire.setClock(100000);
             if (!heater.isHeating()) {
                 Serial.println("IR click ignored: not heating.");
                 showOverlay("IR click ignored: not heating", 1200);
+                    Audio::beepError();
             } else {
                 uint16_t actualTemp = hs.irCalActualB;
                 Serial.printf("Menu: Storing IR Cal B for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
                 if (res == 0) {
                     showOverlay("IR click failed (no valid samples)", 1500);
+                    Audio::beepError();
                 } else {
                     uint16_t measured = hs.irCalMeasuredB.get();
                     showOverlay(String("IR Cal B: ") + String(measured) + "°", 1500);
+                    Audio::beepSuccess();
                 }
                 menu.prevOption();
             }
@@ -256,30 +262,36 @@ Wire.setClock(100000);
         } else if (curName == "IR Cal Clear") {
             heater.clearIRCalibration();
             showOverlay("IR Calibration cleared", 1400);
+            Audio::beepWarning();
             dirty();
             return;
         }
 
         // default CENTER behavior (cycle)
         HeaterCycle::next();
+        Audio::robotSound();
         return;
     }
 
     if (input(event, {LEFT}, {PRESS})) {
         menu.prevOption();
+        Audio::beepMenu();
         dirty();
     }
     if (input(event, {RIGHT}, {PRESS})) {
         menu.nextOption();
+        Audio::beepMenu();
         dirty();
     }
 
     if (input(event, {UP}, {PRESS, HOLD})) {
         menu.increment();
+        Audio::beepMenu();
         dirty();
     }
     if (input(event, {DOWN}, {PRESS, HOLD})) {
         menu.decrement();
+        Audio::beepMenu();
         dirty();
     }
 }

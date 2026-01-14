@@ -47,6 +47,11 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(20),
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
+                           
+        .addObservableRange("Volume", state.audio.volume,
+                           static_cast<uint8_t>(0),
+                           static_cast<uint8_t>(100),
+                           static_cast<uint8_t>(10), "%")
         .addObservableToggle("Dark Mode", state.darkMode)
         .addAction("Timezone", [&]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
