@@ -5,11 +5,14 @@ Timer::Timer() {}
 
 void Timer::start() {
     startedAt = millis();
+    WebSocketManager::instance().sendStatusUpdate(true, true);
 }
 
 void Timer::stop() {
     durationMs += millis() - startedAt;
     startedAt = 0;
+    
+    WebSocketManager::instance().sendStatusUpdate(true, stop);
 }
 
 void Timer::reset() {

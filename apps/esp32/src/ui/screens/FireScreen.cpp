@@ -269,7 +269,7 @@ void FireScreen::handleInput(InputEvent event) {
 
         // default CENTER behavior (cycle)
         HeaterCycle::next();
-        Audio::robotSound();
+        //Audio::robotSound();
         return;
     }
 

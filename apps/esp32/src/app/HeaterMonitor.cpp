@@ -4,7 +4,7 @@
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 #include "core/EventBus.h"
-#include "app\HeatData.h"
+#include "app/HeatData.h"
 #include "net/WebSocketManager.h"
 
 HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
@@ -14,14 +14,10 @@ HeaterMonitor::HeaterMonitor(HeaterController& heater): heater(heater) {
             logPrint("x1");
         }
     );
-
-//    auto& hs = HeaterState::instance();
 }
 
 void HeaterMonitor::heatCycleCompleted(uint32_t duration) {
     WebSocketManager::instance().sendHeatCycleCompleted(duration, HeaterCycle::current());
-    //logPrint("log-k", HeatLog::instance().getKData());
-    //logPrint("log-ir", HeatLog::instance().getKData());
     HeaterCycle::next();
 }
 
