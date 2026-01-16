@@ -35,5 +35,5 @@ private:
     uint16_t backgroundColor = 0x00;
     uint16_t width;
     uint16_t height;
-    uint8_t orientation = 0;
+    uint8_t orientation;
 };

@@ -20,8 +20,6 @@ void InputManager::setup() {
     pcf8574 = new PCF8574(0x20);
     pcf8574->begin();
 
-   
-
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         if (BUTTON_PINS[i].source == ButtonSources::PCF) pcf8574->pinMode(BUTTON_PINS[i].pin, INPUT);
         if (BUTTON_PINS[i].source == ButtonSources::ESP32_GPIO) pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
