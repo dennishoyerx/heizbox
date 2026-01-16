@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include "Config.h"
 #include "hardware/input/ButtonSource.h"
+#define PCF8574_LOW_MEMORY
 #include "PCF8574.h"
 
 enum InputEventType {
@@ -29,7 +30,6 @@ struct InputEvent {
     InputButton button;
 };
 
-void keyChangedOnPCF8574();
 
 class InputManager {
 public:

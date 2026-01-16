@@ -129,28 +129,62 @@ void mute(bool on) {
 
 // ===== Sounds =====
 void beepMenu() {
-    tone(1800, 40, 60);
+    tone(A4, 35, 15);
+
+    /*tone(1800, 40, 60);
     silence(20);
-    tone(2200, 30, 40);
+    tone(2200, 30, 40);*/
+}
+
+void beepHeatCycleSwitch() {
+    
+    chirp(300, 650, 180, 45);
+
+    return;
+    tone(A4, 45, 65);
+    silence(25);
+    tone(C5, 45, 70);
 }
 
 void beepHeatStart() {
-    tone(C4, 60, 80);
-    tone(E4, 60, 80);
-    tone(G4, 80, 90);
-    tone(C5, 150, 100);
+    chirp(300, 900, 220, 75);
+    tone(1200, 120, 65);
+
+    return;
+    tone(E4, 60, 80);              // Kick
+    silence(20);
+    chirp(G4, E5, 220, 90);  
 }
 
 void beepHeatFinish() {
-    tone(E5, 100, 90);
-    tone(G5, 100, 90);
-    tone(C6, 200, 100);
+    
+    // Wasserblub (tiefer, leicht moduliert)
+    chirp(180, 140, 90, 55);
+    silence(20);
+    chirp(180, 140, 90, 55);
+    silence(30);
+
+    // Inhale (langer, smoother Sweep)
+    chirp(400, 1200, 280, 70);
+
+    // Release / Ausatmen
+    tone(600, 220, 45, true);
+
+    return;
+    // Blub
+    tone(C4, 40, 55);
+    silence(25);
+    tone(C4, 40, 55);
+    silence(35);
+
+    // Zug / Release
+    chirp(E4, C5, 220, 70);
+    tone(A4, 180, 50, true);
 }
 
 void beepError() {
-    tone(400, 150, 100);
-    silence(50);
-    tone(300, 200, 100);
+    chirp(E5, A4, 200, 80);
+    tone(E4, 180, 60, true);  
 }
 
 void beepSuccess() {
@@ -162,9 +196,10 @@ void beepSuccess() {
 }
 
 void beepStartup() {
-    chirp(500, 2000, 400, 100);
-    silence(100);
-    tone(C6, 150, 100, true);
+    
+    chirp(C4, G4, 180, 60);   // sanfter Aufstieg
+    silence(40);
+    tone(C5, 120, 55, true); 
 }
 
 void beepClick() {

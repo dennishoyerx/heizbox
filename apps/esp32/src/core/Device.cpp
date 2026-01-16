@@ -4,6 +4,7 @@
 #include "net/Network.h"
 #include "app/App.h"
 #include "hardware/Audio.h"
+#include <Wire.h>
 #include <utility>
 
 Device::Device(): heater(), ui(heater), network() {}
@@ -20,6 +21,9 @@ void Device::setup() {
     }
 
     network.init(WIFI_SSID, WIFI_PASSWORD, NetworkConfig::HOSTNAME);
+    
+    Wire.begin(HardwareConfig::SDA_PIN, HardwareConfig::SCL_PIN);
+    
     heater.init();
     ui.init();
 

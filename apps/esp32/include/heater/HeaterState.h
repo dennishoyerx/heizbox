@@ -42,7 +42,7 @@ struct HeaterState {
 
     PersistedObservable<uint8_t> mode{"heater", "mode", HeaterMode::PRESET};
 
-        Observable<uint8_t> currentPreset{0};
+        Observable<uint8_t> currentPreset{1};
         PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 185};
         PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 200};
         PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};

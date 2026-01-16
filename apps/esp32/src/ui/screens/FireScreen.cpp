@@ -39,6 +39,8 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     hs.isHeating.addListener([&](bool isHeating) {
         if (!isHeating) _ui->clear();
         manager->setStatusbarVisible(!isHeating);
+
+
     });
 
     menu.addItem(std::make_unique<ObservableValueItem<uint16_t>>(
@@ -188,8 +190,8 @@ void FireScreen::handleInput(InputEvent event) {
     }
 
     if (input(event, {FIRE}, {HOLD_ONCE})) {
-        _handleHeatingTrigger(true);
         hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
+        _handleHeatingTrigger(true);
         return;
     }
     if (input(event, {FIRE}, {RELEASE})) {
@@ -201,7 +203,6 @@ void FireScreen::handleInput(InputEvent event) {
     
     // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
-        /*Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
         for (uint8_t addr = 1; addr < 127; addr++) {
             Wire.beginTransmission(addr);
             if (Wire.endTransmission() == 0) {
@@ -209,7 +210,7 @@ void FireScreen::handleInput(InputEvent event) {
                 snprintf(buf, sizeof(buf), "0x%02X", addr);
                 logPrint(buf);
             }
-        }*/
+        }
 
         const IMenuItem* cur = menu.current();
         String curName = cur ? String(cur->name()) : String();
@@ -269,7 +270,7 @@ void FireScreen::handleInput(InputEvent event) {
 
         // default CENTER behavior (cycle)
         HeaterCycle::next();
-        //Audio::robotSound();
+        Audio::beepHeatCycleSwitch();
         return;
     }
 

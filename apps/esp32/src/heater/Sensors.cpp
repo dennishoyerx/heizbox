@@ -6,7 +6,7 @@
 
 Sensors::Sensors(): 
 kSensor(HardwareConfig::THERMO_SCK_PIN, HardwareConfig::THERMO_CS_PIN, HardwareConfig::THERMO_SO_PIN, HeaterConfig::KSensor::OFF_TIME_MS),
-irSensor(HardwareConfig::IR_SDA_PIN, HardwareConfig::IR_SDL_PIN) {}
+irSensor(HardwareConfig::SDA_PIN, HardwareConfig::SCL_PIN) {}
 
 void Sensors::init() {
     //if (!kSensor.begin()) Serial.println("⚠️ K-Type temperature sensor initialization failed");

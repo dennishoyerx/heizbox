@@ -10,10 +10,14 @@ class DisplayDriver; // Forward declaration
 struct AudioSettings {
     PersistedObservable<uint8_t> volume{"audio", "volume", 100};
 };
+struct DisplaySettings {
+    PersistedObservable<bool> flipOrientation{"display", "flip", false};
+};
 
 
 struct DeviceState {
     AudioSettings audio;
+    DisplaySettings display;
 
     // Display Settings
     PersistedObservable<uint8_t> brightness{"display", "brightness", 100};

@@ -10,12 +10,12 @@ IRTempSensor::IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readInterv
       referenceAmbient(25.0),
       lastAmbient(25.0),
       ITemperatureSensor(readIntervalMs) {
-    pinMode(sda_pin, INPUT_PULLUP);
-    pinMode(scl_pin, INPUT_PULLUP);
+    //pinMode(sda_pin, INPUT_PULLUP);
+    //pinMode(scl_pin, INPUT_PULLUP);
 }
 
 bool IRTempSensor::begin(float emissivity) {
-    Wire.begin(sdaPin, sclPin);
+    //Wire.begin(sdaPin, sclPin);
 
     if (!mlx.begin()) {
         errorCount++;
@@ -72,10 +72,10 @@ bool IRTempSensor::setEmissivity(float emissivity) {
     
     // Sensor-Reset triggern (falls die Library das unterstützt)
     // Alternativ: I2C-Bus kurz resetten
-    Wire.end();
-    delay(50);
-    Wire.begin(sdaPin, sclPin);
-    delay(50);
+    //Wire.end();
+    //delay(50);
+    //Wire.begin(sdaPin, sclPin);
+    //delay(50);
     
     if (!mlx.begin()) {
         return false;

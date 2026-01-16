@@ -21,7 +21,7 @@ public:
     Pcf8574ButtonSource(uint8_t addr) : address(addr) {}
 
     void begin() {
-        Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
+        //Wire.begin(InputConfig::PCF8574::SDA, InputConfig::PCF8574::SCL);
         // Set a sane clock for I2C (ESP32 TwoWire supports setClock)
         #if defined(TWO_WIRE_H) || defined(TWOWIRE_H)
         Wire.setClock(100000);

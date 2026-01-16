@@ -4,11 +4,11 @@
 
 
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
-    {HardwareConfig::JOY_UP_PIN, UP, ButtonSources::ESP32_GPIO},
-    {HardwareConfig::JOY_DOWN_PIN, DOWN, ButtonSources::ESP32_GPIO},
-    {HardwareConfig::JOY_LEFT_PIN, LEFT, ButtonSources::ESP32_GPIO},
-    {HardwareConfig::JOY_RIGHT_PIN, RIGHT, ButtonSources::ESP32_GPIO},
-    {HardwareConfig::JOY_PRESS_PIN, CENTER, ButtonSources::ESP32_GPIO},
+    {HardwareConfig::JOY_UP_PIN, UP, ButtonSources::PCF},
+    {HardwareConfig::JOY_DOWN_PIN, DOWN, ButtonSources::PCF},
+    {HardwareConfig::JOY_LEFT_PIN, LEFT, ButtonSources::PCF},
+    {HardwareConfig::JOY_RIGHT_PIN, RIGHT, ButtonSources::PCF},
+    {HardwareConfig::JOY_PRESS_PIN, CENTER, ButtonSources::PCF},
     {HardwareConfig::FIRE_BUTTON_PIN, FIRE, ButtonSources::ESP32_GPIO}
 };
 
@@ -18,25 +18,31 @@ InputManager::InputManager(): callback(nullptr) {}
 
 void InputManager::setup() {
     pcf8574 = new PCF8574(0x20);
+    pcf8574->begin();
+
+   
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
-        //if (BUTTON_PINS[i].source == ButtonSources::PCF) pcf8574->pinMode(BUTTON_PINS[i].pin, INPUT);
+        if (BUTTON_PINS[i].source == ButtonSources::PCF) pcf8574->pinMode(BUTTON_PINS[i].pin, INPUT);
         if (BUTTON_PINS[i].source == ButtonSources::ESP32_GPIO) pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }
 
-    pcf8574->begin();
 
     Serial.println("🎮 InputManager initialized (PCF8574 INT enabled)");
 }
 
 void InputManager::update() {
     const uint32_t now = millis();
+    //byte state = pcf8574->digitalReadAll();
+    //Serial.printf("PCF state: %02X\n", state);
+
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
         bool isLow;
 
         if (cfg.source == ButtonSources::PCF) {
-            //isLow = pcf8574.digitalRead(cfg.pin) == HIGH;
+            isLow = pcf8574->digitalRead(cfg.pin, true) == LOW;
+            //Serial.printf("PCF state: %02X\n", pcf8574->digitalRead(cfg.pin, true));
         } else {
             isLow = digitalRead(cfg.pin) == LOW;
         }

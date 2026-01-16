@@ -8,8 +8,8 @@ struct DebugFlags {
 
 struct InputConfig {
     struct PCF8574 {
-        static constexpr uint8_t SDA = 15;
-        static constexpr uint8_t SCL = 15;
+        static constexpr uint8_t SCL = 27;
+        static constexpr uint8_t SDA = 26;
         static constexpr uint8_t INT_PIN = 25;
         static constexpr uint32_t UPDATE_MS = 200;
     };
@@ -31,15 +31,23 @@ struct InputConfig {
 
 
 struct HardwareConfig {
+    static constexpr uint8_t SDA_PIN = 27;
+    static constexpr uint8_t SCL_PIN = 26;
+    
     static constexpr uint8_t SPEAKER_PIN = 25;
     static constexpr uint8_t TFT_BL_PIN = 16;
     static constexpr uint8_t STATUS_LED_PIN = 2;
 
-    static constexpr uint8_t JOY_UP_PIN = 14; // green
-    static constexpr uint8_t JOY_DOWN_PIN = 12; // blue
-    static constexpr uint8_t JOY_LEFT_PIN = 21; // purple
-    static constexpr uint8_t JOY_RIGHT_PIN = 19; // white
-    static constexpr uint8_t JOY_PRESS_PIN = 33; // orange
+    static constexpr uint8_t JOY_UP_PIN = 1;
+    static constexpr uint8_t JOY_DOWN_PIN = 0; 
+    static constexpr uint8_t JOY_LEFT_PIN = 2; 
+    static constexpr uint8_t JOY_RIGHT_PIN = 3; 
+    static constexpr uint8_t JOY_PRESS_PIN = 4;
+    /*static constexpr uint8_t JOY_UP_PIN = 14;
+    static constexpr uint8_t JOY_DOWN_PIN = 0; 
+    static constexpr uint8_t JOY_LEFT_PIN = 21; 
+    static constexpr uint8_t JOY_RIGHT_PIN = 19; 
+    static constexpr uint8_t JOY_PRESS_PIN = 33;*/
 
     static constexpr uint8_t FIRE_BUTTON_PIN = 13;
 
@@ -48,9 +56,6 @@ struct HardwareConfig {
     static constexpr uint8_t THERMO_SO_PIN = 0; // O
     static constexpr uint8_t THERMO_CS_PIN = 0; // Y
     static constexpr uint8_t THERMO_SCK_PIN = 0; // G 
-
-    static constexpr uint8_t IR_SDL_PIN = 26; // White
-    static constexpr uint8_t IR_SDA_PIN = 27; // Purple
 };
 
 struct DisplayConfig {

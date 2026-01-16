@@ -20,6 +20,7 @@ void mute(bool on);
 
 // ===== Sounds =====
 void beepMenu();
+void beepHeatCycleSwitch();
 void beepHeatStart();
 void beepHeatFinish();
 void beepError();

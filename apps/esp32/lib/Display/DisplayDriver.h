@@ -25,6 +25,9 @@ public:
     int getTFTHeight() const { return height; }
 
     void setBackgroundColor(uint16_t color) { backgroundColor = color; }
+    
+    void setOrientation(uint8_t orientation) { this->orientation = orientation; }
+    uint8_t getOrientation() const { return orientation; }
 
 private:
     std::unique_ptr<ITFTDriver> tft;
@@ -32,4 +35,5 @@ private:
     uint16_t backgroundColor = 0x00;
     uint16_t width;
     uint16_t height;
+    uint8_t orientation = 0;
 };

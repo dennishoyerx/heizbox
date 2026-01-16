@@ -19,6 +19,11 @@ void StateBinder::bindDisplay(DisplayDriver* display) {
     ds.darkMode.addListener([display](bool enabled) {
         //display->setDarkMode(enabled);
     });
+
+    /*display->setOrientation(ds.display.flipOrientation ? 1 : 0);
+    ds.display.flipOrientation.addListener([display](bool enabled) {
+        display->setOrientation(enabled ? 1 : 0);
+    });*/
 }
 
 void StateBinder::bindHeater(HeaterController* heater) {
@@ -41,28 +46,6 @@ void StateBinder::bindHeater(HeaterController* heater) {
     });
 
     
-        
-        /*if (hs.mode == HeaterMode::PRESET) {
-            uint8_t preset = hs.cycle == 1 ? hs.cycle1preset : hs.cycle2preset;
-            hs.currentPreset.set(preset);
-            
-            switch (preset) {
-            case 0:
-                hs.tempLimit.set(hs.preset1Temp);
-                break;
-            case 1:
-                hs.tempLimit.set(hs.preset2Temp);
-                break;
-            case 2:
-                hs.tempLimit.set(hs.preset3Temp);
-                break;
-            case 3:
-                hs.tempLimit.set(hs.preset4Temp);
-                break;
-            }
-            
-            return;
-        } else hs.tempLimit.set(hs.cycle == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);*/
     hs.cycle.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) {
             uint8_t preset = val == 1 ? hs.cycle1preset : hs.cycle2preset;
@@ -72,6 +55,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
+//    hs.currentPreset.set(Presets::)
     if (hs.mode == HeaterMode::PRESET) hs.tempLimit.set(Presets::getPresetTemp(hs.currentPreset));
     hs.tempLimit.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) return;
