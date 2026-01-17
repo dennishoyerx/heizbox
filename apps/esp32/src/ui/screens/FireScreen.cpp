@@ -285,15 +285,25 @@ void FireScreen::handleInput(InputEvent event) {
         dirty();
     }
 
+    
     if (input(event, {UP}, {PRESS, HOLD})) {
         menu.increment();
         Audio::beepMenu();
         dirty();
     }
+    
     if (input(event, {DOWN}, {PRESS, HOLD})) {
         menu.decrement();
         Audio::beepMenu();
         dirty();
+    }
+
+    if (input(event, {ROTARY_ENCODER}, {ROTARY_CW, ROTARY_CCW})) {
+        int delta = event.type == ROTARY_CW ? 1 : -1;
+        
+        hs.tempLimit.set(hs.tempLimit.get() + delta);
+        dirty();
+    
     }
 }
 

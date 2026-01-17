@@ -15,7 +15,7 @@ DisplayDriver::~DisplayDriver() {}
 
 void DisplayDriver::init() {
     tft->init();
-    tft->setRotation(orientation);
+    tft->setRotation(3);
     backlight->init();
 
     tft->fillScreen(backgroundColor);

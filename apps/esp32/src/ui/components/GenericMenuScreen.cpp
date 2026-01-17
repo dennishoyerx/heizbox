@@ -73,7 +73,7 @@ void GenericMenuScreen::draw() {
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {
-    if (event.type != PRESSED) return;
+    if (event.type != PRESSED && event.type != HOLD && event.type != HOLD_ONCE && event.type != ROTARY_CCW && event.type != ROTARY_CW) return;
     
     if (adjustMode_) {
         handleAdjustMode(event);
@@ -85,6 +85,7 @@ void GenericMenuScreen::handleInput(InputEvent event) {
 void GenericMenuScreen::handleNavigationMode(InputEvent event) {
     switch (event.button) {
                 case DOWN:
+                case ROTARY_CW:
             do {
                 selectedIndex_ = (selectedIndex_ + 1) % items_.size();
             } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
@@ -92,6 +93,7 @@ void GenericMenuScreen::handleNavigationMode(InputEvent event) {
             break;
 
         case UP:
+        case ROTARY_CCW:
             do {
                 selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
             } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
@@ -117,6 +119,15 @@ void GenericMenuScreen::handleNavigationMode(InputEvent event) {
 }
 
 void GenericMenuScreen::handleAdjustMode(InputEvent event) {
+    if (event.type == ROTARY_CW) {
+        items_[selectedIndex_]->adjust(10);
+        dirty();
+        return;
+    } else if (event.type == ROTARY_CCW) {
+        items_[selectedIndex_]->adjust(-10);
+        dirty();
+        return;
+    } 
     switch (event.button) {
         case LEFT:
         case DOWN:

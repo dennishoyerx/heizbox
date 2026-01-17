@@ -15,6 +15,10 @@ void RotaryEncoder::begin() {
     pinMode(_pinSW, INPUT_PULLUP);
   }
 
+  // Initialen Zustand lesen
+  _lastCLK = digitalRead(_pinCLK);
+  _lastDT = digitalRead(_pinDT);
+
   attachInterrupt(digitalPinToInterrupt(_pinCLK), isr, CHANGE);
 }
 
@@ -25,12 +29,32 @@ void IRAM_ATTR RotaryEncoder::isr() {
 }
 
 void RotaryEncoder::handleRotation() {
-  if (digitalRead(_pinCLK) == digitalRead(_pinDT)) {
-    _position++;
-  } else {
-    _position--;
+  static unsigned long lastInterruptTime = 0;
+  unsigned long interruptTime = micros();
+  
+  // Debounce: Ignoriere Interrupts die schneller als 1ms aufeinander folgen
+  if (interruptTime - lastInterruptTime < 1000) {
+    return;
   }
-  _rotated = true;
+  
+  bool currentCLK = digitalRead(_pinCLK);
+  bool currentDT = digitalRead(_pinDT);
+  
+  // Nur auf Zustandswechsel von CLK reagieren
+  if (currentCLK != _lastCLK) {
+    // Wenn CLK und DT unterschiedlich sind -> CW
+    // Wenn CLK und DT gleich sind -> CCW
+    if (currentCLK != currentDT) {
+      _position++;
+    } else {
+      _position--;
+    }
+    _rotated = true;
+  }
+  
+  _lastCLK = currentCLK;
+  _lastDT = currentDT;
+  lastInterruptTime = interruptTime;
 }
 
 void RotaryEncoder::update() {

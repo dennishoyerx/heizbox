@@ -83,8 +83,8 @@ struct HeaterState {
 
     // IR calibration (2-point)
     // gespeicherte, gemessene IR‑Werte bei zwei bekannten Referenztemperaturen
-    PersistedObservable<uint16_t> irCalMeasuredA{"ir", "cal_meas_a", 0};
-    PersistedObservable<uint16_t> irCalMeasuredB{"ir", "cal_meas_b", 0};
+    PersistedObservable<uint16_t> irCalMeasuredA{"ir", "cal_meas_a", 111};
+    PersistedObservable<uint16_t> irCalMeasuredB{"ir", "cal_meas_b", 173};
     // die zugehörigen tatsächlichen Temperaturen (z.B. 150 und 200)
     PersistedObservable<uint16_t> irCalActualA{"ir", "cal_act_a", 150};
     PersistedObservable<uint16_t> irCalActualB{"ir", "cal_act_b", 200};

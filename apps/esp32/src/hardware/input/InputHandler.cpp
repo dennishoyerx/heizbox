@@ -7,12 +7,20 @@ InputHandler::InputHandler(ScreenManager& screenManager)
 
 void InputHandler::handleInput(InputEvent event) {
     const char* typeStr = (event.type == PRESS) ? "PRESS" :
-                         (event.type == RELEASE) ? "RELEASE" : "HOLD";
+                     (event.type == PRESSED) ? "PRESSED" :
+                     (event.type == RELEASE) ? "RELEASE" : 
+                     (event.type == HOLD) ? "HOLD" :
+                     (event.type == HOLD_ONCE) ? "HOLD_ONCE" :
+                     (event.type == ROTARY_CW) ? "ROTARY_CW" :
+                     (event.type == ROTARY_CCW) ? "ROTARY_CCW" : "UNKNOWN";
+
     const char* btnStr = (event.button == UP) ? "UP" :
-                        (event.button == DOWN) ? "DOWN" :
-                        (event.button == LEFT) ? "LEFT" :
-                        (event.button == RIGHT) ? "RIGHT" :
-                        (event.button == CENTER) ? "CENTER" : "FIRE";
+                    (event.button == DOWN) ? "DOWN" :
+                    (event.button == LEFT) ? "LEFT" :
+                    (event.button == RIGHT) ? "RIGHT" :
+                    (event.button == CENTER) ? "CENTER" :
+                    (event.button == FIRE) ? "FIRE" :
+                    (event.button == ROTARY_ENCODER) ? "ROTARY_ENCODER" : "UNKNOWN";
 
     Serial.printf("Input: %s %s\n", btnStr, typeStr);
     if (debug) logPrint("Input", "%s %s\n", btnStr, typeStr);

@@ -15,9 +15,9 @@ struct InputConfig {
     };
 
     struct RotaryEncoder {
-        static constexpr uint8_t CLK = 16;
-        static constexpr uint8_t DT = 16;
-        static constexpr uint8_t SW = 16;
+        static constexpr uint8_t CLK = 21;
+        static constexpr uint8_t DT = 19;
+        static constexpr uint8_t SW = 22;
     };
 
 
@@ -40,8 +40,8 @@ struct HardwareConfig {
 
     static constexpr uint8_t JOY_UP_PIN = 1;
     static constexpr uint8_t JOY_DOWN_PIN = 0; 
-    static constexpr uint8_t JOY_LEFT_PIN = 2; 
-    static constexpr uint8_t JOY_RIGHT_PIN = 3; 
+    static constexpr uint8_t JOY_LEFT_PIN = 3; 
+    static constexpr uint8_t JOY_RIGHT_PIN = 2; 
     static constexpr uint8_t JOY_PRESS_PIN = 4;
     /*static constexpr uint8_t JOY_UP_PIN = 14;
     static constexpr uint8_t JOY_DOWN_PIN = 0; 

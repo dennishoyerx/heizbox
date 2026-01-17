@@ -25,7 +25,7 @@ void Screen::clear() {
 }
 
 void Screen::dirty() {
-    if (manager)manager->setDirty();
+    if (manager && manager->getCurrentScreenType() == getType()) manager->setDirty();
 }
 
 

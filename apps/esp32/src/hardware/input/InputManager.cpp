@@ -14,33 +14,51 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
 
 
 
+void knobCallback( long value )
+{
+    // This gets executed every time the knob is turned
+
+    Serial.printf( "Value: %i\n", value );
+}
+
+
 InputManager::InputManager(): callback(nullptr) {}
+
+void InputManager::onTurn(long value) {
+    if (callback) callback({ROTARY_CW, ROTARY_ENCODER});
+}
 
 void InputManager::setup() {
     pcf8574 = new PCF8574(0x20);
     pcf8574->begin();
+
+    rotaryEncoder = new RotaryEncoder(InputConfig::RotaryEncoder::CLK, InputConfig::RotaryEncoder::DT);
+	rotaryEncoder->setEncoderType( EncoderType::HAS_PULLUP );
+	rotaryEncoder->setBoundaries( 1, 2, false );
+    rotaryEncoder->onTurned([ this ](long value) { 
+        if (callback) callback({ value  == 1 ? ROTARY_CCW : ROTARY_CW, ROTARY_ENCODER}); 
+    });
+    rotaryEncoder->begin();
 
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         if (BUTTON_PINS[i].source == ButtonSources::PCF) pcf8574->pinMode(BUTTON_PINS[i].pin, INPUT);
         if (BUTTON_PINS[i].source == ButtonSources::ESP32_GPIO) pinMode(BUTTON_PINS[i].pin, INPUT_PULLUP);
     }
 
-
-    Serial.println("🎮 InputManager initialized (PCF8574 INT enabled)");
+    Serial.println("🎮 InputManager initialized (PCF8574 + Rotary Encoder)");
 }
+
 
 void InputManager::update() {
     const uint32_t now = millis();
-    //byte state = pcf8574->digitalReadAll();
-    //Serial.printf("PCF state: %02X\n", state);
 
+    // --- Normale Buttons ---
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         const auto& cfg = BUTTON_PINS[i];
         bool isLow;
 
         if (cfg.source == ButtonSources::PCF) {
             isLow = pcf8574->digitalRead(cfg.pin, true) == LOW;
-            //Serial.printf("PCF state: %02X\n", pcf8574->digitalRead(cfg.pin, true));
         } else {
             isLow = digitalRead(cfg.pin) == LOW;
         }
@@ -64,7 +82,7 @@ void InputManager::update() {
             // RELEASE nur senden, wenn HOLD getriggert wurde
             if (isHoldSent(i) && callback) {
                callback({RELEASE, cfg.button});
-            } else  if (callback) {
+            } else if (callback) {
                 callback({PRESSED, cfg.button});
             }
 
