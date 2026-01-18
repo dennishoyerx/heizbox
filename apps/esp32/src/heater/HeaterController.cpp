@@ -123,9 +123,19 @@ namespace Safety {
         hs.temp;
         return false;
     };
+    
+    bool timeLimit() {
+        auto& hs = HeaterState::instance();
+        return hs.timer >= hs.cycleTimeout;
+    };
+
 
     bool checkFailed() {
-        return cutoffTemperatureReached();
+        if (cutoffTemperatureReached()) return true;
+        if (noTempClimb()) return true;
+        if (timeLimit()) return true;
+
+        return false;
     };
 };
 
@@ -133,35 +143,22 @@ void HeaterController::update() {
     auto& hs = HeaterState::instance();
     
     updateTemperature();
-    if (Safety::checkFailed()) stopHeating(false);
 
-    zvsDriver->update();
-    
-    const uint32_t elapsed = getElapsedTime();
-    hs.timer.set(elapsed / 1000);
+    if (state == State::HEATING) {
+        if (Safety::checkFailed()) stopHeating(false);
+        zvsDriver->update();
+        hs.timer.set(heatCycle.getTimer());
+        return;
+    }
 
-    switch (state) {
-        case State::HEATING:
-            if (elapsed >= autoStopTime) {
-                Serial.println("Auto-stop triggered.");
-                stopHeating(false);
-            }
-            break;
+    if (state == State::PAUSED) {
+        if (millis() - pauseTime >= hs.cycleTimeout) {
+            Serial.println("Pause timeout, finalizing cycle.");
+            heatCycle.submit();
 
-        case State::PAUSED:
-            if (millis() - pauseTime >= hs.cycleTimeout) {
-                Serial.println("Pause timeout, finalizing cycle.");
-                heatCycle.submit();
-
-                startTime = millis();
-                transitionTo(State::IDLE);
-            }
-            break;
-
-        case State::IDLE:
-        case State::ERROR:
-            // No automatic transitions from these states
-            break;
+            startTime = millis();
+            transitionTo(State::IDLE);
+        }
     }
 }
 
@@ -227,17 +224,6 @@ bool HeaterController::isHeating() const {
 bool HeaterController::isPaused() const {
     return state == State::PAUSED;
 }
-
-uint32_t HeaterController::getElapsedTime() const {
-    if (state == State::HEATING) {
-        return millis() - startTime;
-    }
-    if (state == State::PAUSED) {
-        return pauseTime - startTime;
-    }
-    return 0;
-}
-
 
 void HeaterController::setAutoStopTime(uint32_t time) {
     autoStopTime = time;

@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include "Config.h"
 
-
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
     {HardwareConfig::JOY_UP_PIN, UP, ButtonSources::PCF},
     {HardwareConfig::JOY_DOWN_PIN, DOWN, ButtonSources::PCF},
@@ -11,16 +10,6 @@ const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUT
     {HardwareConfig::JOY_PRESS_PIN, CENTER, ButtonSources::PCF},
     {HardwareConfig::FIRE_BUTTON_PIN, FIRE, ButtonSources::ESP32_GPIO}
 };
-
-
-
-void knobCallback( long value )
-{
-    // This gets executed every time the knob is turned
-
-    Serial.printf( "Value: %i\n", value );
-}
-
 
 InputManager::InputManager(): callback(nullptr) {}
 

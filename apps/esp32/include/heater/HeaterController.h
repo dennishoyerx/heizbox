@@ -40,7 +40,6 @@ public:
     State getState() const;
     bool isHeating() const;
     bool isPaused() const;
-    uint32_t getElapsedTime() const;
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
 
