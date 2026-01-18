@@ -4,8 +4,6 @@
 
 class Timer {
 public:
-    Timer();
-
     void start() { startedAt = millis(); };
     void stop()  { durationMs += millis() - startedAt; startedAt = 0; };
     void reset() { startedAt = 0; durationMs = 0; };

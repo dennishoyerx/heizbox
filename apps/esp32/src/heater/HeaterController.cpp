@@ -108,8 +108,6 @@ void HeaterController::stopHeating(bool finalize) {
 }
 
 namespace Safety {
-    static const int xxx[] = { 1, 3, 5, 7, 11 };
-
     bool cutoffTemperatureReached() {
         auto& hs = HeaterState::instance();
         if (hs.tempLimit == 420) return false;
