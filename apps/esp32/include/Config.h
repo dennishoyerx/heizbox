@@ -21,7 +21,7 @@ struct InputConfig {
     };
 
 
-    static constexpr uint8_t FIRE_BUTTON = 16;
+    static constexpr uint8_t FIRE_BUTTON = 13;
 
     
     static constexpr uint32_t HOLD_THRESHOLD_MS = 300;

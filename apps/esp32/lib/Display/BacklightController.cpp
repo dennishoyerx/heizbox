@@ -6,12 +6,10 @@ BacklightController::BacklightController(uint8_t pin)
       pin(pin) {}
 
 void BacklightController::init() {
-    // WICHTIG: Erst Setup, DANN Pin attach!
     ledcSetup(DisplayPWMConfig::PWM_CHANNEL, DisplayPWMConfig::PWM_FREQUENCY, DisplayPWMConfig::PWM_RESOLUTION);
     ledcAttachPin(pin, DisplayPWMConfig::PWM_CHANNEL);
     
-    // Initiale Helligkeit setzen
-    setBrightness(brightness);
+    //setBrightness(brightness);
 }
 
 void BacklightController::setBrightness(uint8_t level) {
@@ -25,7 +23,7 @@ void BacklightController::setBrightness(uint8_t level) {
                                    0, maxPwmValue);
 
     // Moderne API: ledcWrite verwendet direkt den Pin
-    ledcWrite(pin, pwmValue);
+    ledcWrite(DisplayPWMConfig::PWM_CHANNEL, pwmValue);
 
     Serial.printf("💡 Brightness: %u%% (PWM: %u/%u)\n", brightness, pwmValue, maxPwmValue);
 }

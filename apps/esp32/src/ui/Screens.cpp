@@ -37,10 +37,10 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     auto menuItems = MenuBuilder()
          .addAction("Heater", [&]() {
-             screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::FADE);
+             screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::NONE);
          })
          .addAction("Debug", [&]() {
-             screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::FADE);
+             screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::NONE);
          })
         .addHeadline("DISPLAY")
         .addObservableRange("Brightness", state.brightness,
@@ -54,7 +54,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(10), "%")
         .addObservableToggle("Dark Mode", state.darkMode)
         .addAction("Timezone", [&]() {
-            screenManager.setScreen(timezoneScreen.get(), ScreenTransition::FADE);
+            screenManager.setScreen(timezoneScreen.get(), ScreenTransition::NONE);
         })
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
                              60000,    // 1 Minute min
@@ -114,6 +114,6 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     // Setup timezone exit callback
     timezoneScreen->setCallback([&]() {
-        screenManager.setScreen(this->mainMenuScreen.get(), ScreenTransition::FADE);
+        screenManager.setScreen(this->mainMenuScreen.get(), ScreenTransition::NONE);
     });
 }

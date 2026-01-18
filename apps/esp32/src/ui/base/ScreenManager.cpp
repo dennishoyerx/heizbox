@@ -179,7 +179,7 @@ void ScreenManager::drawTransitionFrame() {
                     ? map(transition.progress, 0, 50, brightness, 0)
                     : map(transition.progress, 50, 100, 0, brightness);
 
-                display.setBrightness(targetBrightness);
+                //display.setBrightness(targetBrightness);
 
                 // Bei 50% Screen wechseln
                 if (transition.progress >= 50 && previousScreen) {
@@ -202,7 +202,7 @@ void ScreenManager::completeTransition() {
     previousScreen = nullptr;
 
     // Restore brightness
-    display.setBrightness(transition.originalBrightness);
+    //display.setBrightness(transition.originalBrightness);
 
     if (currentScreen) {
         currentScreen->clear();

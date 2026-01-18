@@ -12,6 +12,7 @@
 struct Rect { int16_t x, y, w, h; };
 
 enum class TextSize {
+    xs,
     sm,
     md,
     lg,

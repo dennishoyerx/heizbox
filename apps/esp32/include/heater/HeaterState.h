@@ -12,7 +12,7 @@ struct Preset {
     Observable<uint8_t> currentPreset{0};
     PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 185};
     PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 200};
-    PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
+    PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 210};
     PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
     PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};
     PersistedObservable<uint8_t> cycle2preset{"preset", "cycle_2", 2};
@@ -45,7 +45,7 @@ struct HeaterState {
         Observable<uint8_t> currentPreset{1};
         PersistedObservable<uint8_t> preset1Temp{"preset", "1_temp", 185};
         PersistedObservable<uint8_t> preset2Temp{"preset", "2_temp", 200};
-        PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 215};
+        PersistedObservable<uint8_t> preset3Temp{"preset", "3_temp", 210};
         PersistedObservable<uint8_t> preset4Temp{"preset", "4_temp", 220};
         PersistedObservable<uint8_t> cycle1preset{"preset", "cycle_1", 1};
         PersistedObservable<uint8_t> cycle2preset{"preset", "cycle_2", 2};

@@ -204,7 +204,7 @@ public:
     
     void execute() override {
         if (manager_ && targetScreen_) {
-            manager_->setScreen(targetScreen_, ScreenTransition::FADE);
+            manager_->setScreen(targetScreen_, ScreenTransition::NONE);
         }
     }
 
