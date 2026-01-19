@@ -8,8 +8,8 @@ public:
     void stop()  { durationMs += millis() - startedAt; startedAt = 0; };
     void reset() { startedAt = 0; durationMs = 0; };
 
-    uint16_t getDuration() const { return durationMs / 1000; }
-    uint16_t getDurationMs() const { return durationMs; }
+    uint16_t getDuration() const { return getDurationMs() / 1000; }
+    uint16_t getDurationMs() const { return durationMs + millis() - startedAt; }
 protected:
     uint32_t durationMs;
     uint32_t startedAt;

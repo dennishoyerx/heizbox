@@ -65,7 +65,7 @@ struct RenderProps {
 };
 
 void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
-    int textH = size == TextSize::bmd ? 24 : 32;
+    int textH = size == TextSize::bmd ? 18 : 24;
     int valueY = p.y + textH;
     
     p.s.text(p.x, p.y, label, TextSize::sm);

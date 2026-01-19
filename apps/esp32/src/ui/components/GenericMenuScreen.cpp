@@ -73,11 +73,9 @@ void GenericMenuScreen::draw() {
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {
-    if (event.type != PRESSED && event.type != HOLD && event.type != HOLD_ONCE && event.type != ROTARY_CCW && event.type != ROTARY_CW) return;
-    
-    if (adjustMode_) {
+    if (event.type == PRESS || event.type == HOLD && adjustMode_) {
         handleAdjustMode(event);
-    } else {
+    } else if (event.type == RELEASE) {
         handleNavigationMode(event);
     }
 }
