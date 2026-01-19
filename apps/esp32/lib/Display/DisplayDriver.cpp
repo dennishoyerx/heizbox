@@ -31,7 +31,7 @@ void DisplayDriver::clear() {
 }
 
 void DisplayDriver::setBrightness(uint8_t level) {
-    //backlight->setBrightness(level);
+    backlight->setBrightness(level);
 }
 
 uint8_t DisplayDriver::getBrightness() const {

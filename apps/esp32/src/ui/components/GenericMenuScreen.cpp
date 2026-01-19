@@ -75,7 +75,7 @@ void GenericMenuScreen::draw() {
 void GenericMenuScreen::handleInput(InputEvent event) {
     if (event.type == PRESS || event.type == HOLD && adjustMode_) {
         handleAdjustMode(event);
-    } else if (event.type == RELEASE) {
+    } else if (event.type == PRESS) {
         handleNavigationMode(event);
     }
 }
@@ -127,13 +127,11 @@ void GenericMenuScreen::handleAdjustMode(InputEvent event) {
         return;
     } 
     switch (event.button) {
-        case LEFT:
         case DOWN:
             items_[selectedIndex_]->adjust(-1);
             dirty();
             break;
             
-        case RIGHT:
         case UP:
             items_[selectedIndex_]->adjust(1);
             dirty();

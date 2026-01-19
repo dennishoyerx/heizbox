@@ -10,9 +10,9 @@
 void StateBinder::bindDisplay(DisplayDriver* display) {
     auto& ds = DeviceState::instance();
 
-    //display->setBrightness(ds.brightness.get());
+    display->setBrightness(ds.brightness.get());
     ds.brightness.addListener([display](uint8_t value) {
-        //display->setBrightness(value);
+        display->setBrightness(value);
     });
 
     //display->setDarkMode(ds.darkMode.get());

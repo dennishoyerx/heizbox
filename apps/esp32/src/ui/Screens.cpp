@@ -36,6 +36,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
 
     auto menuItems = MenuBuilder()
+        .addAction(" ", [&]() {})
          .addAction("Heater", [&]() {
              screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::NONE);
          })
