@@ -1,0 +1,7 @@
+{
+  "name": "ESP",
+  "version": "1.0.0",
+  "description": "",
+  "frameworks": "arduino",
+  "platforms": "*"
+}

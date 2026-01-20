@@ -1,4 +1,4 @@
-#include "heater/ZVSDriver.h"
+#include "driver/ZVSDriver.h"
 #include "utils/Logger.h"
 
 ZVSDriver::ZVSDriver(uint8_t mosfetPin, uint8_t statusLedPin)

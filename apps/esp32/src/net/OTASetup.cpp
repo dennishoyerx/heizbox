@@ -1,6 +1,6 @@
 #include "net/OTASetup.h"
-#include "utils/Logger.h"
 #include "core/EventBus.h"
+#include "Interfaces.h"
 
 OTASetup::OTASetup() {}
 

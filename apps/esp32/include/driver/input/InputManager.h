@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include "Config.h"
-#include "hardware/input/ButtonSource.h"
+#include "driver/input/ButtonSource.h"
 #include <ESP32RotaryEncoder.h>
 #define PCF8574_LOW_MEMORY
 #include "PCF8574.h"

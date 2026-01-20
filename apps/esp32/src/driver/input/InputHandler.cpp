@@ -1,4 +1,4 @@
-#include "hardware/input/InputHandler.h"
+#include "driver/input/InputHandler.h"
 #include "utils/Logger.h"
 
 InputHandler::InputHandler(ScreenManager& screenManager)

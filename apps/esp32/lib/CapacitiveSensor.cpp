@@ -1,4 +1,4 @@
-#include "hardware/sensor/CapacitiveSensor.h"
+#include "driver/sensor/CapacitiveSensor.h"
 #include "core/DeviceState.h"
 #include "core/Device.h"
 #include "heater/HeaterController.h"

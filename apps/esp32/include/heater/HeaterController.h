@@ -1,17 +1,14 @@
 #pragma once
 
-//#include "forward.h"
-
 #include <cstdint>
 #include "TempSensor.h" // CONVERTED: Use forward.h
 #include "IRTempSensor.h" // CONVERTED: Use forward.h
-#include "heater/ZVSDriver.h" // CONVERTED: Use forward.h
+#include "driver/ZVSDriver.h" // CONVERTED: Use forward.h
 #include "heater/Sensors.h"
 #include "heater/HeaterState.h"
 #include "app/HeatCycle.h"
 #include "ITemperatureSensor.h"
 #include "heater/Temperature.h"
-#include "heater/HeatMode.h"
 
 class HeaterController {
 public:
@@ -54,8 +51,6 @@ private:
     Temperature::Controller _temperature;
     Sensors temperature;
     ZVSDriver* zvsDriver;
-    //HeatMode* mode;
-
     HeatCycle heatCycle;
 
     void transitionTo(State newState);

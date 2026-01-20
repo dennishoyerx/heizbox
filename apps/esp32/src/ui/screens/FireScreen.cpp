@@ -12,7 +12,7 @@
 #include <utility>
 #include "heater/HeaterState.h"
 #include "heater/Presets.h"
-#include "hardware/Audio.h"
+#include "driver/Audio.h"
 
 #include "utils/Logger.h"
 #include "utils/Format.h"

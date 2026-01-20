@@ -4,7 +4,7 @@
 #include "utils/Logger.h"
 #include "core/EventBus.h"
 #include "SysModule.h"
-#include "hardware/Audio.h"
+#include "driver/Audio.h"
 
 HeaterController::HeaterController()
     : state(State::IDLE), 

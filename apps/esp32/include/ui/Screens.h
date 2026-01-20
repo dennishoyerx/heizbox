@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "forward.h"
-
 #include <memory>
 #include "ui/screens/FireScreen.h"
 #include "ui/screens/OtaUpdateScreen.h"

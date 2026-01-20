@@ -3,7 +3,7 @@
 
 //#include "forward.h"
 
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 #include "ui/base/ScreenManager.h" // CONVERTED: Use forward.h
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenTransition.h"

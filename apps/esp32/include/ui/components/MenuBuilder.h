@@ -10,7 +10,7 @@
 #include "ui/base/Screen.h" // CONVERTED: Use forward.h
 #include "ui/base/ScreenManager.h" // For ScreenTransition
 #include "DisplayDriver.h" // For DisplayManager and TFT_ colors
-#include "hardware/input/InputManager.h" // For InputEvent
+#include "driver/input/InputManager.h" // For InputEvent
   // For Observable
 
 // Custom make_unique for C++11 compatibility if needed

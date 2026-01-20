@@ -1,8 +1,8 @@
 #pragma once
 
 #include "DisplayDriver.h"
-#include "hardware/input/InputHandler.h"
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputHandler.h"
+#include "driver/input/InputManager.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/base/UI.h"
 #include "ui/Screens.h"

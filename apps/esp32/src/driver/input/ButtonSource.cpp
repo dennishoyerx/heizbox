@@ -1,4 +1,4 @@
-#include "hardware/input/ButtonSource.h"
+#include "driver/input/ButtonSource.h"
 
 void Pcf8574ButtonSource::update() {
     // Quick probe: check whether device ACKs — avoids long waits if absent/bus stuck

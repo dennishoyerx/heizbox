@@ -1,4 +1,4 @@
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 #include <Arduino.h>
 #include "Config.h"
 

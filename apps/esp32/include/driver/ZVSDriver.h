@@ -2,17 +2,9 @@
 
 #include <Arduino.h>
 #include <functional>
+#include "Interfaces.h"
 
-/**
- * @brief Low-level driver for ZVS (Zero Voltage Switching) heater control
- * 
- * Handles:
- * - MOSFET switching
- * - PWM duty cycle management
- * - Temperature sensor timing during OFF phase
- * - Hardware safety
- */
-class ZVSDriver {
+class ZVSDriver: public IDriver {
 public:
     /**
      * @brief Get current duty cycle phase

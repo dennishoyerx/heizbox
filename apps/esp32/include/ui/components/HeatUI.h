@@ -4,7 +4,7 @@
 
 #include "ui/base/Screen.h"
 #include "ui/base/UI.h"
-#include "heater/ZVSDriver.h" // CONVERTED: Use forward.h
+#include "driver/ZVSDriver.h" // CONVERTED: Use forward.h
 #include "core/DeviceState.h"
 #include <Menu.h>
 

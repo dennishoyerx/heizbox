@@ -1,17 +1,18 @@
 #pragma once
 #include <Arduino.h>
-#include "Config.h"
 
 struct SysModuleBoot {
     String key;
     uint32_t time;
 };
 
+static bool disabled = false;
+ 
 class SysModules {
 public:
     using bootCallback = std::function<void()>;
     void add(SysModuleBoot boot) {
-        if (!DebugFlags::LOG_BOOT) return;
+        if (disabled) return;
         modules.push_back(boot);
     }
 
@@ -35,3 +36,11 @@ private:
     SysModules() = default;
     std::vector<SysModuleBoot> modules;
 };
+
+static void disableModuleLogging() {
+    disabled = true;
+}
+
+static void enableModuleLogging() {
+    disabled = false;
+}

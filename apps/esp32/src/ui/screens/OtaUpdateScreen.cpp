@@ -1,5 +1,5 @@
 #include "ui/screens/OtaUpdateScreen.h"
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 #include "bitmaps.h"
 #include "ui/ColorPalette.h"
 #include "core/EventBus.h"

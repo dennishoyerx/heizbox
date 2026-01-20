@@ -4,7 +4,7 @@
 
 #include "ui/base/Screen.h"
 #include "DisplayDriver.h"
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 
 class StartupScreen : public AnimatedScreen {
 public:

@@ -1,5 +1,5 @@
-#include "hardware/input/InputManager.h"
-#include "hardware/input/InputHandler.h"
+#include "driver/input/InputManager.h"
+#include "driver/input/InputHandler.h"
 
 class InputController {
 public:

@@ -5,7 +5,7 @@
 #include "Observable.h"
 #include "ui/base/UI.h"
 #include "ui/base/ScreenTransition.h"
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 
 class ScreenManager;
 

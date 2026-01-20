@@ -6,15 +6,14 @@
 
 #include "Types.h"
 #include "core/StateBinder.h"
-#include "heater/HeaterController.h"
 #include "net/Network.h"
-#include "ui/DeviceUI.h"
+
+class HeaterController;
+class DeviceUI;
 
 class Device {
-
 public:
     Device();
-    ~Device(); 
     void setup();
     void loop();
 
@@ -22,4 +21,5 @@ private:
     HeaterController heater;
     DeviceUI ui;
     Network network;
+    void initNVS();
 };

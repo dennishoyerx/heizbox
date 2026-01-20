@@ -1,7 +1,7 @@
 #include "ui/base/Screen.h"
 #include "ui/base/ScreenManager.h"
 #include "ui/base/UI.h"
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 
 
 Screen::Screen() : manager(nullptr) {

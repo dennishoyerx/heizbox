@@ -5,7 +5,7 @@
 #include "heater/Sensors.h"
 #include "heater/Presets.h"
 #include "DisplayDriver.h"
-#include "hardware/Audio.h"
+#include "driver/Audio.h"
 
 void StateBinder::bindDisplay(DisplayDriver* display) {
     auto& ds = DeviceState::instance();

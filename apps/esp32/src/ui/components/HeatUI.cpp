@@ -50,14 +50,11 @@ void Timer(RenderSurface s, uint32_t time) {
     char timeStr[4];
     snprintf(timeStr, sizeof(timeStr), "%lu", time);
 
-    s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
     s.sprite->setTextDatum(MC_DATUM);
-    s.sprite->setTextSize(2);
-    s.sprite->setFreeFont(&FreeSansBold18pt7b);
-    s.sprite->drawString(timeStr, s.centerX(), s.centerY(), 1);
-    s.sprite->setTextSize(1);
+    s.text(s.centerX(), s.centerY(), timeStr, TextSize::bxxl);
     s.sprite->setTextDatum(ML_DATUM);
 }
+
 struct RenderProps {
     RenderSurface s;
     int x;

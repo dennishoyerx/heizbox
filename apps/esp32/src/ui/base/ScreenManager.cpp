@@ -4,7 +4,7 @@
 #include "ui/base/UI.h"
 #include "Config.h"
 
-#include "hardware/input/InputManager.h"
+#include "driver/input/InputManager.h"
 #include "ui/base/ScreenTransition.h"
 
 class RenderArea {
