@@ -12,8 +12,8 @@ namespace App {
         auto& hs = HeaterState::instance();
         auto& ds = DeviceState::instance();
         
-        ds.isHeating.addListener([&](bool isHeating) {
+        /*ds.isHeating.addListener([&](bool isHeating) {
             WebSocketManager::instance().sendStatusUpdate(true, isHeating);
-        });
+        });*/
     };
 };

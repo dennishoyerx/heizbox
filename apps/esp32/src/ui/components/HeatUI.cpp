@@ -139,14 +139,14 @@ void HeatUI::render(UI* _ui, ZVSDriver* zvs, MenuManager* menu) {
         float progress = std::min(1.0f, (float)hs.temp / hs.tempLimit);
         Background(s, smoothProgress(progress), 15);
         
-        if (DeviceState::instance().oscDebug) ZVSOscilloscopeUI(s, zvs);
+        if (DeviceState::instance().debug.osc) ZVSOscilloscopeUI(s, zvs);
         Temperature(s, true);
 
         Timer(s, hs.timer);
         
         Cycle(s);
 
-        if (DeviceState::instance().zvsDebug) ZVSDebug(s, zvs);
+        if (DeviceState::instance().debug.zvs) ZVSDebug(s, zvs);
 
         
         const IMenuItem* cur = menu->current();

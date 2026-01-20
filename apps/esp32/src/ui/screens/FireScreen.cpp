@@ -26,9 +26,9 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
-    bindTo(state.consumption.session, ds.sessionConsumption);
-    bindTo(state.consumption.today, ds.todayConsumption);
-    bindTo(state.consumption.yesterday, ds.yesterdayConsumption);
+    bindTo(state.consumption.session, ds.consumption.session);
+    bindTo(state.consumption.today, ds.consumption.today);
+    bindTo(state.consumption.yesterday, ds.consumption.yesterday);
     
     bindMultiple(hs.isHeating, hs.power, hs.cycle, 
         hs.tempLimit, hs.temp, hs.tempIR, hs.tempK, 
@@ -177,8 +177,8 @@ void FireScreen::handleInput(InputEvent event) {
     if (input(event, {FIRE}, {PRESSED, HOLD}) && input(event, {CENTER}, {PRESSED, HOLD})) {
         bool locked = ds.locked.set(!ds.locked);
         static uint8_t initialBrightness;
-        if (locked) initialBrightness = ds.brightness;
-        ds.brightness.set(locked ? 10 : initialBrightness ? initialBrightness : 100, false);
+        if (locked) initialBrightness = ds.display.brightness;
+        ds.display.brightness.set(locked ? 10 : initialBrightness ? initialBrightness : 100, false);
         return;
     }
     if (ds.locked) return;

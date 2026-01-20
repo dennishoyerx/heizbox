@@ -7,16 +7,24 @@
 #include "DisplayDriver.h"
 #include "driver/Audio.h"
 
+template <typename T>
+void bind(Observable<T>& observable, std::function<void(const T&)> setter) {
+    setter(observable.get());
+    observable.addListener([&setter](T v) {
+        setter(v);
+    });
+}
+
 void StateBinder::bindDisplay(DisplayDriver* display) {
     auto& ds = DeviceState::instance();
-
-    display->setBrightness(ds.brightness.get());
-    ds.brightness.addListener([display](uint8_t value) {
-        display->setBrightness(value);
+    
+    bind<uint8_t>(ds.display.brightness, [display](uint8_t val) {
+        display->setBrightness(val);
     });
 
+
     //display->setDarkMode(ds.darkMode.get());
-    ds.darkMode.addListener([display](bool enabled) {
+    ds.display.darkMode.addListener([display](bool enabled) {
         //display->setDarkMode(enabled);
     });
 
@@ -26,22 +34,20 @@ void StateBinder::bindDisplay(DisplayDriver* display) {
     });*/
 }
 
+
 void StateBinder::bindHeater(HeaterController* heater) {
     auto& state = DeviceState::instance();
     auto& hs = HeaterState::instance();
 
-    Audio::setVolume(state.audio.volume);
-    state.audio.volume.addListener([&](uint8_t val) {
+    bind<uint8_t>(state.audio.volume, [](uint8_t val) {
         Audio::setVolume(val);
     });
 
-    heater->setPower(hs.power);
-    hs.power.addListener([heater](uint8_t val) {
+    bind<uint8_t>(hs.power, [heater](uint8_t val) {
         heater->setPower(val);
     });
 
-    heater->setAutoStopTime(state.autoStopTime.get());
-    state.autoStopTime.addListener([heater](uint32_t time) {
+    bind<uint32_t>(state.autoStopTime, [heater](uint32_t time) {
         heater->setAutoStopTime(time);
     });
 
@@ -50,8 +56,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
         if (hs.mode == HeaterMode::PRESET) {
             uint8_t preset = val == 1 ? hs.cycle1preset : hs.cycle2preset;
             hs.currentPreset.set(preset);
-            hs.tempLimit.set(Presets::getPresetTemp(preset));            
-            return;
+            hs.tempLimit.set(Presets::getPresetTemp(preset));
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
@@ -69,24 +74,22 @@ void StateBinder::bindHeater(HeaterController* heater) {
         heater->getIRTempSensor()->setEmissivity(val / 100.0f);
     });*/
 
-    heater->getIRTempSensor()->enableAmbientCorrection(hs.ambientCorrection != 0, hs.ambientCorrection / 100.0f);
-    hs.ambientCorrection.addListener([heater](int8_t val) {
+    
+    bind<int8_t>(hs.ambientCorrection, [heater](int8_t val) {
         if (val == 0) heater->getIRTempSensor()->enableAmbientCorrection(false, 0.0f);
         else heater->getIRTempSensor()->enableAmbientCorrection(true, val / 100.0f);
     });
     
-    heater->getTempSensor(Sensors::Type::K)->setReadInterval(hs.tempSensorReadInterval);
-    hs.tempSensorReadInterval.addListener([heater](uint32_t time) {
+
+    bind<uint32_t>(hs.tempSensorReadInterval, [heater](uint32_t time) {
         heater->getTempSensor(Sensors::Type::K)->setReadInterval(time);
     });
-    
-    heater->getZVSDriver()->setSensorOffTime(hs.tempSensorOffTime);
-    hs.tempSensorOffTime.addListener([heater](uint32_t time) {
+
+    bind<uint32_t>(hs.tempSensorOffTime, [heater](uint32_t time) {
         heater->getZVSDriver()->setSensorOffTime(time);
     });
 
-    heater->getZVSDriver()->setPeriod(hs.zvsDutyCyclePeriodMs);
-    hs.zvsDutyCyclePeriodMs.addListener([heater](uint32_t val) {
+    bind<uint32_t>(hs.zvsDutyCyclePeriodMs, [heater](uint32_t val) {
         heater->getZVSDriver()->setPeriod(val);
     });
     
@@ -99,7 +102,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
 void StateBinder::bindDebug(DeviceUI* ui) {
     auto& state = DeviceState::instance();
 
-    state.debugInput.addListener([ui] (bool val) {
+    state.debug.input.addListener([ui] (bool val) {
         ui->getInputHandler()->setDebug(val);
     });
 }

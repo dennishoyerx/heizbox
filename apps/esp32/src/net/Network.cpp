@@ -57,14 +57,15 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
 
 void Network::handleWebSocketMessage(const char* type, const JsonDocument& doc) {
     if (strcmp(type, "sessionData") == 0 || strcmp(type, "sessionUpdate") == 0) {
+        auto& ds = DeviceState::instance();
         if (!doc["consumption"].isNull()) {
-            DeviceState::instance().sessionConsumption.set(doc["consumption"].as<float>());
+            ds.consumption.session.set(doc["consumption"].as<float>());
         }
         if (!doc["consumptionTotal"].isNull()) {
-            DeviceState::instance().todayConsumption.set(doc["consumptionTotal"].as<float>());
+            ds.consumption.today.set(doc["consumptionTotal"].as<float>());
         }
         if (!doc["consumptionTotal"].isNull()) {
-            DeviceState::instance().yesterdayConsumption.set(doc["consumptionYesterday"].as<float>());
+            ds.consumption.yesterday.set(doc["consumptionYesterday"].as<float>());
         }
     }
 }

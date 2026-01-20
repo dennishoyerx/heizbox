@@ -44,7 +44,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
              screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::NONE);
          })
         .addHeadline("DISPLAY")
-        .addObservableRange("Brightness", state.brightness,
+        .addObservableRange("Brightness", state.display.brightness,
                            static_cast<uint8_t>(20),
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
@@ -53,7 +53,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(0),
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
-        .addObservableToggle("Dark Mode", state.darkMode)
+        .addObservableToggle("Dark Mode", state.display.darkMode)
         .addAction("Timezone", [&]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::NONE);
         })
@@ -105,10 +105,10 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::HEAT_MENU, this->heaterMenuScreen.get());
     
     auto debugMenuItems = MenuBuilder()
-         .addObservableToggle("Input logging", state.debugInput)
-         .addObservableToggle("ZVS OSC", state.oscDebug)
-         .addObservableToggle("ZVS Debug", state.zvsDebug)
-         .addObservableToggle("Raw Temp", state.showRawTemp)
+         .addObservableToggle("Input logging", state.debug.input)
+         .addObservableToggle("ZVS OSC", state.debug.osc)
+         .addObservableToggle("ZVS Debug", state.debug.zvs)
+         .addObservableToggle("Raw Temp", state.debug.showRawTemp)
          .build();
     this->debugMenuScreen = std::make_unique<GenericMenuScreen>("DEBUG", std::move(debugMenuItems));
     screenManager.registerScreen(ScreenType::DEBUG_MENU, this->debugMenuScreen.get());
