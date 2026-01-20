@@ -33,4 +33,8 @@ void beepBatteryLow();
 void playSuperMario();
 void playTetris();
 
+void beepCycleUp();
+void beepCycleDown();
+
+
 }

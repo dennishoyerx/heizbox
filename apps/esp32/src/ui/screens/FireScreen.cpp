@@ -197,7 +197,8 @@ void FireScreen::handleInput(InputEvent event) {
 
     if (input(event, {ROTARY_ENCODER}, {PRESSED})) {
         HeaterCycle::next();
-        Audio::beepHeatCycleSwitch();
+        if (HeaterCycle::is(1)) Audio::beepCycleDown();
+        else Audio::beepCycleUp();
         return;
     }
     

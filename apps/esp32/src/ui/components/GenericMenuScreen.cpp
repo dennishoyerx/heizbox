@@ -50,10 +50,7 @@ void GenericMenuScreen::draw() {
     const char* footer = adjustMode_ 
         ? "L/R: Adjust  OK: Done"
         : "OK: Select  HOLD L: Back";
-//    s.sprite->drawText(10, 210, footer, COLOR_TEXT_SECONDARY, 1);
-        s.sprite->setFreeFont(&FreeSans9pt7b);
-        s.sprite->setCursor(10, 210);
-        s.sprite->print(footer);
+        s.text(30, 210, footer, TextSize::sm);
     });
 }
 

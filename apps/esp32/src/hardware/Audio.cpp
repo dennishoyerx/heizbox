@@ -137,8 +137,9 @@ void beepMenu() {
 }
 
 void beepHeatCycleSwitch() {
-    
-    chirp(300, 650, 180, 45);
+    chirp(100, 250, 45, 45);
+    silence(35);
+    chirp(30, 160, 45, 45);
 
     return;
     tone(A4, 45, 65);
@@ -149,37 +150,43 @@ void beepHeatCycleSwitch() {
 void beepHeatStart() {
     chirp(300, 900, 220, 75);
     tone(1200, 120, 65);
+}
 
-    return;
-    tone(E4, 60, 80);              // Kick
-    silence(20);
-    chirp(G4, E5, 220, 90);  
+void beepCycleUp() {
+    beepCycleDown();
+    silence(65);
+    beepCycleDown();
+}
+
+void beepCycleDown() {
+    tone(2800, 15, 65);
+    silence(10);
+    tone(3000, 15, 70);
 }
 
 void beepHeatFinish() {
-    
-    // Wasserblub (tiefer, leicht moduliert)
+    static bool togx = false;
+    if (togx) {
+        
+    // Option 1: Mehr "Dampf-Release" Gefühl
+    chirp(180, 140, 85, 55);      // Blub 1
+    silence(18);
+    chirp(180, 140, 85, 55);      // Blub 2
+    silence(25);
+    chirp(400, 1400, 300, 75);    // Längerer, höherer Inhale
+    silence(40);                   // Kurze Pause vor Release
+    tone(800, 250, 50, true); 
+        togx = false;
+}
+    else { 
     chirp(180, 140, 90, 55);
     silence(20);
     chirp(180, 140, 90, 55);
     silence(30);
-
-    // Inhale (langer, smoother Sweep)
-    chirp(400, 1200, 280, 70);
-
-    // Release / Ausatmen
-    tone(600, 220, 45, true);
-
-    return;
-    // Blub
-    tone(C4, 40, 55);
-    silence(25);
-    tone(C4, 40, 55);
-    silence(35);
-
-    // Zug / Release
-    chirp(E4, C5, 220, 70);
-    tone(A4, 180, 50, true);
+    chirp(350, 1000, 250, 70);    // Sanfterer Inhale
+    tone(700, 300, 45, true);   
+        togx = true;
+}
 }
 
 void beepError() {
@@ -196,7 +203,6 @@ void beepSuccess() {
 }
 
 void beepStartup() {
-    
     chirp(C4, G4, 180, 60);   // sanfter Aufstieg
     silence(40);
     tone(C5, 120, 55, true); 
