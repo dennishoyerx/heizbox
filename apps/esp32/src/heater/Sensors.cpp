@@ -24,11 +24,6 @@ uint16_t Sensors::get(Type type) {
     return temp;
 }
 
-
-bool Sensors::limitReached() {
-    return false;
-}
-
 ITemperatureSensor* Sensors::getSensor(Type type) {
     if (type == Type::K) return &kSensor;
     if (type == Type::IR) return &irSensor;

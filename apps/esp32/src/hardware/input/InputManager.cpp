@@ -3,12 +3,13 @@
 #include "Config.h"
 
 const InputManager::ButtonConfig InputManager::BUTTON_PINS[InputManager::NUM_BUTTONS] = {
+    {7, ROTARY_ENCODER, ButtonSources::PCF},
     {HardwareConfig::JOY_UP_PIN, UP, ButtonSources::PCF},
     {HardwareConfig::JOY_DOWN_PIN, DOWN, ButtonSources::PCF},
     {HardwareConfig::JOY_LEFT_PIN, LEFT, ButtonSources::PCF},
     {HardwareConfig::JOY_RIGHT_PIN, RIGHT, ButtonSources::PCF},
     {HardwareConfig::JOY_PRESS_PIN, CENTER, ButtonSources::PCF},
-    {HardwareConfig::FIRE_BUTTON_PIN, FIRE, ButtonSources::ESP32_GPIO}
+    {HardwareConfig::FIRE_BUTTON_PIN, FIRE, ButtonSources::ESP32_GPIO},
 };
 
 InputManager::InputManager(): callback(nullptr) {}

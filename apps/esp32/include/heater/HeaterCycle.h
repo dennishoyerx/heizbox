@@ -15,12 +15,3 @@ public:
     HeaterCycle& instance();
 private:
 };
-/*
-class Sensors {
-public:
-    Sensors();
-
-    static uint8_t current();
-    static uint8_t target();
-    static uint8_t setTarget(uint8_t cycle);
-};*/

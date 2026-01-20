@@ -7,22 +7,20 @@
 
 GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items) : 
         title_(title), items_(std::move(items)), selectedIndex_(0), adjustMode_(false) {
-            selectedIndex_ = 0;
-        while (selectedIndex_ < items_.size() && items_[selectedIndex_]->getType() == MenuItemType::HEADLINE) {
-            selectedIndex_++;
-        }
-
-        // Fallback, falls alle HEADLINEs
-        if (selectedIndex_ >= items_.size()) selectedIndex_ = 0;
+    selectedIndex_ = 0;
+    while (selectedIndex_ < items_.size() && items_[selectedIndex_]->getType() == MenuItemType::HEADLINE) {
+        selectedIndex_++;
     }
+
+    // Fallback, falls alle HEADLINEs
+    if (selectedIndex_ >= items_.size()) selectedIndex_ = 0;
+}
 
 // Implementations of methods declared in GenericMenuScreen.h
 void GenericMenuScreen::draw() {
     _ui->clear();    
     _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
         s.sprite->fillSprite(COLOR_BG);
-
-    //centerText(s.sprite, 10, title_, COLOR_TEXT_PRIMARY, 2);
     
     // Items (with scrolling support)
     const int itemsPerPage = 5;
@@ -36,29 +34,16 @@ void GenericMenuScreen::draw() {
         const auto& item = items_[i];
         const bool isSelected = (i == selectedIndex_);
         const uint8_t color = isSelected ? COLOR_ACCENT : COLOR_TEXT_PRIMARY;
-        s.sprite->setFreeFont(&FreeSans12pt7b);
-        s.sprite->setTextColor(COLOR_TEXT_PRIMARY);
         
         // Selection indicator
-        if (isSelected) {
-        s.sprite->setCursor(10, y);
-        s.sprite->print(adjustMode_ ? ">" : "*");
-            //s.sprite->drawText(10, y, adjustMode_ ? ">" : "*", color, 2);
-        }
-        
+        if (isSelected) s.text(10, y, adjustMode_ ? ">" : "*", TextSize::md, color);
+
         // Item title
-        //s.sprite->drawText(30, y, item->getTitle(), color, 2);
-        s.sprite->setCursor(30, y);
-        s.sprite->print(item->getTitle());
+        s.text(30, y, item->getTitle(), TextSize::md, color);
         
         // Item value (if any)
         const char* value = item->getValue();
-        if (value) {
-            const int16_t valueX = 200;
-            //s.sprite->drawString(valueX, y, value, color, 2);
-        s.sprite->setCursor(valueX, y);
-        s.sprite->print(value);
-        }
+        if (value) s.text(200, y, value, TextSize::md, color);
     }
     
     // Footer
@@ -73,76 +58,49 @@ void GenericMenuScreen::draw() {
 }
 
 void GenericMenuScreen::handleInput(InputEvent event) {
-    if (event.type == PRESS || event.type == HOLD && adjustMode_) {
+    if (adjustMode_ && input(event, {UP, DOWN, ROTARY_ENCODER, CENTER}, {PRESSED, HOLD, ROTARY_CW, ROTARY_CCW})) {
         handleAdjustMode(event);
-    } else if (event.type == PRESS) {
+    } else if (input(event, {UP, DOWN}, {PRESSED, HOLD}) || input(event, {CENTER}, {PRESSED})) {
         handleNavigationMode(event);
     }
 }
 
 void GenericMenuScreen::handleNavigationMode(InputEvent event) {
-    switch (event.button) {
-                case DOWN:
-                case ROTARY_CW:
-            do {
-                selectedIndex_ = (selectedIndex_ + 1) % items_.size();
-            } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
-            dirty();
-            break;
+    static auto navUp = [this]() {
+        do selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
+        while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
+        dirty();
+    };
+    static auto navDown = [this]() {
+        do selectedIndex_ = (selectedIndex_ + 1) % items_.size();
+        while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
+        dirty();
+    };
+    static auto navSelect = [this]() {
+        if (selectedIndex_ > items_.size()) return;
+        auto& item = items_[selectedIndex_];
+        if (item->getType() == MenuItemType::RANGE) adjustMode_ = true;
+        else item->execute();
+        dirty();
+    };
 
-        case UP:
-        case ROTARY_CCW:
-            do {
-                selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
-            } while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
-            dirty();
-            break;
-            
-        case CENTER:
-            if (selectedIndex_ < items_.size()) {
-                auto& item = items_[selectedIndex_];
-                
-                if (item->getType() == MenuItemType::RANGE) {
-                    adjustMode_ = true;
-                } else {
-                    item->execute();
-                }
-                dirty();
-            }
-            break;
-            
-        default:
-            break;
-    }
+    if (event.button == DOWN || event.type == ROTARY_CW) navDown();
+    else if (event.button == UP || event.type == ROTARY_CCW) navUp();
+    else if (event.button == CENTER && event.type == PRESSED) navSelect();
 }
 
 void GenericMenuScreen::handleAdjustMode(InputEvent event) {
-    if (event.type == ROTARY_CW) {
-        items_[selectedIndex_]->adjust(10);
+    static auto adjust = [this](int val) {
+        items_[selectedIndex_]->adjust(val);
         dirty();
-        return;
-    } else if (event.type == ROTARY_CCW) {
-        items_[selectedIndex_]->adjust(-10);
+    };
+
+    if (event.type == ROTARY_CW) adjust(10);
+    else if (event.type == ROTARY_CCW) adjust(-10);
+    else if (event.button == DOWN) adjust(-1);
+    else if (event.button == UP) adjust(1);
+    else if (event.button == CENTER && event.type == PRESSED) {
+        adjustMode_ = false;
         dirty();
-        return;
-    } 
-    switch (event.button) {
-        case DOWN:
-            items_[selectedIndex_]->adjust(-1);
-            dirty();
-            break;
-            
-        case UP:
-            items_[selectedIndex_]->adjust(1);
-            dirty();
-            break;
-            
-        case CENTER:
-            adjustMode_ = false;
-            dirty();
-            break;
-            
-        default:
-            break;
     }
 }

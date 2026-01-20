@@ -47,7 +47,7 @@ public:
 
     void pcfInterrupt();
 
-    static constexpr uint8_t NUM_BUTTONS = 6;
+    static constexpr uint8_t NUM_BUTTONS = 7;
 
     struct ButtonConfig {
         uint8_t pin;

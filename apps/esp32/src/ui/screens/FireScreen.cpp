@@ -183,21 +183,21 @@ void FireScreen::handleInput(InputEvent event) {
     }
     if (ds.locked) return;
 
-    static uint32_t _temp;
-    if (input(event, {FIRE}, {PRESSED})) {
-        _handleHeatingTrigger(!heater.isHeating());
-        return;
-    }
-
-    if (input(event, {FIRE}, {HOLD_ONCE})) {
+    if (input(event, {FIRE}, {PRESSED})) return _handleHeatingTrigger(!heater.isHeating());
+    else if (input(event, {FIRE}, {HOLD_ONCE})) {
         hs.tempLimit.set(HeaterConfig::MAX_TEMPERATURE);
         _handleHeatingTrigger(true);
         return;
-    }
-    if (input(event, {FIRE}, {RELEASE})) {
+    } else if (input(event, {FIRE}, {RELEASE})) {
         _handleHeatingTrigger(false);
         if (hs.mode == HeaterMode::PRESET) hs.tempLimit.set(Presets::getPresetTemp(hs.currentPreset));
         else hs.tempLimit.set(HeaterCycle::is(1) ? hs.tempLimitCycle1: hs.tempLimitCycle2);
+        return;
+    }
+
+    if (input(event, {ROTARY_ENCODER}, {PRESSED})) {
+        HeaterCycle::next();
+        Audio::beepHeatCycleSwitch();
         return;
     }
     
@@ -267,10 +267,6 @@ void FireScreen::handleInput(InputEvent event) {
             dirty();
             return;
         }
-
-        // default CENTER behavior (cycle)
-        HeaterCycle::next();
-        Audio::beepHeatCycleSwitch();
         return;
     }
 
@@ -303,7 +299,6 @@ void FireScreen::handleInput(InputEvent event) {
         
         hs.tempLimit.set(hs.tempLimit.get() + delta);
         dirty();
-    
     }
 }
 

@@ -20,8 +20,6 @@ public:
     TempSensor* getKSensor() { return &kSensor; }
     IRTempSensor* getIRSensor() { return &irSensor; }
 
-    bool limitReached();
-
 private:
     TempSensor kSensor;
     IRTempSensor irSensor;
