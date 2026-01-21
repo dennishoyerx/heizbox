@@ -50,7 +50,6 @@ void StateBinder::bindHeater(HeaterController* heater) {
     bind<uint32_t>(state.autoStopTime, [heater](uint32_t time) {
         heater->setAutoStopTime(time);
     });
-
     
     hs.cycle.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) {
@@ -60,7 +59,6 @@ void StateBinder::bindHeater(HeaterController* heater) {
         } else hs.tempLimit.set(val == 1 ? hs.tempLimitCycle1 : hs.tempLimitCycle2);
     });
 
-//    hs.currentPreset.set(Presets::)
     if (hs.mode == HeaterMode::PRESET) hs.tempLimit.set(Presets::getPresetTemp(hs.currentPreset));
     hs.tempLimit.addListener([&hs](uint16_t val) {
         if (hs.mode == HeaterMode::PRESET) return;

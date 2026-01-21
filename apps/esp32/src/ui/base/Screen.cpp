@@ -8,8 +8,7 @@ Screen::Screen() : manager(nullptr) {
     initState();
 }
 
-Screen::~Screen() {
-}
+Screen::~Screen() {}
 
 void Screen::setManager(ScreenManager* mgr) {
     manager = mgr;

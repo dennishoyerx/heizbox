@@ -1,7 +1,5 @@
 #pragma once
 
-//#include "forward.h"
-
 #include "ui/DeviceUI.h" // CONVERTED: Use forward.h
 #include "DisplayDriver.h" // CONVERTED: Use forward.h
 #include "heater/HeaterController.h" // CONVERTED: Use forward.h
