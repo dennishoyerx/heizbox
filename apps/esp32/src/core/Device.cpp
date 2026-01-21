@@ -1,7 +1,7 @@
 #include "core/Device.h"
 #include "Config.h"
 #include "credentials.h"
-#include "net/Network.h"
+#include "driver/net/Network.h"
 #include "ui/DeviceUI.h"
 #include "heater/HeaterController.h"
 #include "driver/Audio.h"

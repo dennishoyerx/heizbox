@@ -1,6 +1,5 @@
 #include "heater\Sensors.h"
 #include "heater\HeaterState.h"
-#include "app\HeatData.h"
 #include "core/DeviceState.h"
 #include "Config.h"
 
@@ -20,7 +19,6 @@ bool Sensors::update(Type type, bool ignoreInterval) {
 
 uint16_t Sensors::get(Type type) {
     uint16_t temp = getSensor(type)->getCelsius();
-    HeatLog::instance().log(type, temp);
     return temp;
 }
 

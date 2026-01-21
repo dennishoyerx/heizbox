@@ -64,7 +64,6 @@ void HeaterController::startHeating() {
     if (state == State::IDLE) {
         heatCycle.start();
         startTime = millis();
-        //HeatLog::instance().start();
 
         zvsDriver->setEnabled(true);
         

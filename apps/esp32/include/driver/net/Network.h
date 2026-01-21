@@ -1,7 +1,7 @@
 #pragma once
 
-#include "net/WiFiManager.h"
-#include "net/OTASetup.h"
+#include "driver/net/WiFiManager.h"
+#include "driver/net/OTASetup.h"
 #include "Config.h"
 #include <ArduinoJson.h>
 #include <functional>

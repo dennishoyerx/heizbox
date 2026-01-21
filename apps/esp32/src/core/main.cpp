@@ -4,7 +4,7 @@
 
 // For safe mode
 #include "credentials.h"
-#include "net/WiFiManager.h"
+#include "driver/net/WiFiManager.h"
 #include <ArduinoOTA.h>
 
 Device device;

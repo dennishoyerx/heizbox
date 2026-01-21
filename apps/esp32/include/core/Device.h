@@ -6,7 +6,7 @@
 
 #include "Types.h"
 #include "core/StateBinder.h"
-#include "net/Network.h"
+#include "driver/net/Network.h"
 
 class HeaterController;
 class DeviceUI;

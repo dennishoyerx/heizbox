@@ -1,6 +1,5 @@
-#include "app/HeatCycle.h"
+#include "services/HeatCycle.h"
 #include "heater/HeaterCycle.h"
-#include "Config.h"
 
 HeatCycle::HeatCycle() {}
 

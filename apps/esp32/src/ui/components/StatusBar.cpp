@@ -1,7 +1,7 @@
 #include "ui/components/StatusBar.h"
 #include "bitmaps.h"
-#include "net/WiFiManager.h"
-#include "net/WebSocketManager.h"
+#include "driver/net/WiFiManager.h"
+#include "driver/net/WebSocketManager.h"
 #include "utils/clock.h"
 #include "ui/ColorPalette.h"
 

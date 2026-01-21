@@ -1,11 +1,11 @@
-#include "net/Network.h"
+#include "driver/net/Network.h"
 #include "core/DeviceState.h"
 #include "utils/Logger.h"
 #include "Config.h"
 #include <time.h>
 #include "core/EventBus.h"
 #include "SysModule.h"
-#include "net/WebSocketManager.h"
+#include "driver/net/WebSocketManager.h"
 
 Network::Network() : wifi(), ota(), initialized(false) {}
 
