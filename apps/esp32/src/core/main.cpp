@@ -9,18 +9,6 @@
 
 Device device;
 
-void setup() {
-    pinMode(HardwareConfig::FIRE_BUTTON_PIN, INPUT_PULLUP);
-    digitalWrite(HardwareConfig::FIRE_BUTTON_PIN, HIGH);
-    delay(50):
-    if (digitalRead(HardwareConfig::FIRE_BUTTON_PIN) == LOW) safeMode();
-
-    device.setup();
-}
-
-void loop() {
-    device.loop();
-}
 
 void safeMode() {
     Serial.begin(115200);
@@ -77,4 +65,17 @@ void safeMode() {
             delay(900);
         }
     }
+}
+
+void setup() {
+    pinMode(HardwareConfig::FIRE_BUTTON_PIN, INPUT_PULLUP);
+    digitalWrite(HardwareConfig::FIRE_BUTTON_PIN, HIGH);
+    delay(50);
+    if (digitalRead(HardwareConfig::FIRE_BUTTON_PIN) == LOW) safeMode();
+
+    device.setup();
+}
+
+void loop() {
+    device.loop();
 }

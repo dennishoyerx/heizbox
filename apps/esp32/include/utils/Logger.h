@@ -2,7 +2,7 @@
 #define LOGGER_H
 
 #include <Arduino.h>
-#include "WebSocketManager.h"
+#include "driver/net/WebSocketManager.h"
 #include <stdarg.h>
 
 // Helper function for variadic arguments
