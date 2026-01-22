@@ -9,7 +9,7 @@
 #include "ui/components/MenuBuilder.h"
 #include "base/GenericMenuScreen.h"
 
-#include "heater/HeaterController.h" // CONVERTED: Use forward.h
+#include "heater/HeaterController.h"
 
 class Screens {
 public:

@@ -1,13 +1,11 @@
 #pragma once
 
-//#include "forward.h"
 
-#include "ui/base/Screen.h" // CONVERTED: Use forward.h
+#include "ui/base/Screen.h"
 #include "ui/base/UI.h"
 #include "ui/components/StatusBar.h"
-#include "driver/input/InputManager.h" // CONVERTED: Use forward.h
-#include "DisplayDriver.h" // CONVERTED: Use forward.h
-#include "ui/base/ScreenTransition.h"
+#include "driver/input/InputManager.h"
+#include "DisplayDriver.h"
 
 class ScreenManager {
 public:
@@ -20,12 +18,12 @@ public:
     void handleInput(InputEvent event);
 
     // Screen management
-    void setScreen(Screen* newScreen, ScreenTransition transition = ScreenTransition::NONE);
+    void setScreen(Screen* newScreen);
     Screen* getCurrentScreen() const { return currentScreen; }
     ScreenType getCurrentScreenType() const { return currentScreenType; }
     void registerScreen(ScreenType type, Screen* screen);
     Screen* getScreen(ScreenType type);
-    void switchScreen(ScreenType screenType, ScreenTransition transition = ScreenTransition::NONE);
+    void switchScreen(ScreenType screenType);
 
     // Dirty flag für Re-Rendering
     void setDirty() { dirty = true; }
@@ -45,28 +43,10 @@ private:
 
     // Screen state
     Screen* currentScreen;
-    Screen* previousScreen;  // Für Transitions
     ScreenType currentScreenType;
     std::unordered_map<ScreenType, Screen*> screens_;
 
     // Rendering state
     bool dirty;
-    uint32_t lastDrawTime;
     bool statusbarVisible = false;
-
-    // Transition state
-    struct TransitionState {
-        ScreenTransition type;
-        bool inProgress;
-        uint32_t startTime;
-        uint8_t progress;  // 0-100
-        uint8_t originalBrightness;
-
-        static constexpr uint32_t DURATION_MS = 200;
-    } transition;
-
-    // Helper methods
-    void performTransition();
-    void completeTransition();
-    void drawTransitionFrame();
 };

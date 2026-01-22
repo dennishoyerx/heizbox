@@ -50,7 +50,7 @@ bool InputHandler::handleGlobalShortcuts(InputEvent event) {
     if (event.button == CENTER && event.type == HOLD_ONCE) {
         ScreenType targetType = (currentScreen == ScreenType::FIRE)
             ? ScreenType::MAIN_MENU : ScreenType::FIRE;
-        screenManager.switchScreen(targetType, ScreenTransition::NONE);
+        screenManager.switchScreen(targetType);
         return true;
     }
 

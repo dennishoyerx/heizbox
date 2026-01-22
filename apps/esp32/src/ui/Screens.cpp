@@ -10,7 +10,7 @@ void Screens::setup(ScreenManager& screenManager) {
     timezoneScreen = std::make_unique<TimezoneScreen>();
     startupScreen = std::make_unique<StartupScreen>([&]() {
         screenManager.setStatusbarVisible(true);
-        screenManager.switchScreen(ScreenType::FIRE, ScreenTransition::NONE);
+        screenManager.switchScreen(ScreenType::FIRE);
     });
 
     screenManager.registerScreen(ScreenType::STARTUP, startupScreen.get());
@@ -38,10 +38,10 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     auto menuItems = MenuBuilder()
         .addAction(" ", [&]() {})
          .addAction("Heater", [&]() {
-             screenManager.switchScreen(ScreenType::HEAT_MENU, ScreenTransition::NONE);
+             screenManager.switchScreen(ScreenType::HEAT_MENU);
          })
          .addAction("Debug", [&]() {
-             screenManager.switchScreen(ScreenType::DEBUG_MENU, ScreenTransition::NONE);
+             screenManager.switchScreen(ScreenType::DEBUG_MENU);
          })
         .addHeadline("DISPLAY")
         .addObservableRange("Brightness", state.display.brightness,
@@ -57,7 +57,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
          .addObservableToggle("Flip Screen", state.display.flipOrientation)
         .addHeadline("SETTINGS")
         .addAction("Timezone", [&]() {
-            screenManager.setScreen(timezoneScreen.get(), ScreenTransition::NONE);
+            screenManager.setScreen(timezoneScreen.get());
         })
         .addObservableRangeMs("Sleep Timeout", state.sleepTimeout,
                              60000,    // 1 Minute min
@@ -119,6 +119,6 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
     // Setup timezone exit callback
     timezoneScreen->setCallback([&]() {
-        screenManager.setScreen(this->mainMenuScreen.get(), ScreenTransition::NONE);
+        screenManager.setScreen(this->mainMenuScreen.get());
     });
 }
