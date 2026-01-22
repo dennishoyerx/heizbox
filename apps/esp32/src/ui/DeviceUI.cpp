@@ -3,6 +3,7 @@
 #include "BacklightController.h"
 #include "TFT_eSPI_Driver.h"
 #include "core/EventBus.h"
+#include "core/DeviceState.h"
 #include "heater/HeaterController.h"
 #include "utils/Logger.h"
 #include "SysModule.h"

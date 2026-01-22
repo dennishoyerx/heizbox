@@ -26,7 +26,7 @@ public:
 
     void setBackgroundColor(uint16_t color) { backgroundColor = color; }
     
-    void setOrientation(uint8_t orientation) { this->orientation = orientation; }
+    void setOrientation(uint8_t orientation);
     uint8_t getOrientation() const { return orientation; }
 
 private:

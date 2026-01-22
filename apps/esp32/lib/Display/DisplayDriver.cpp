@@ -15,7 +15,7 @@ DisplayDriver::~DisplayDriver() {}
 
 void DisplayDriver::init() {
     tft->init();
-    tft->setRotation(3);
+    tft->setRotation(1);
     backlight->init();
 
     tft->fillScreen(backgroundColor);
@@ -23,6 +23,11 @@ void DisplayDriver::init() {
     TFT_eSPI& tft_spi = static_cast<TFT_eSPI_Driver*>(tft.get())->getTFT();
     
     Serial.println("📺 DisplayDriver initialized");
+}
+
+void DisplayDriver::setOrientation(uint8_t orientation) {
+    this->orientation = orientation;
+    tft->setRotation(orientation);
 }
 
 

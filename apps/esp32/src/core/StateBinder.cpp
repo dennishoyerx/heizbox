@@ -28,10 +28,9 @@ void StateBinder::bindDisplay(DisplayDriver* display) {
         //display->setDarkMode(enabled);
     });
 
-    /*display->setOrientation(ds.display.flipOrientation ? 1 : 0);
     ds.display.flipOrientation.addListener([display](bool enabled) {
-        display->setOrientation(enabled ? 1 : 0);
-    });*/
+        display->setOrientation(enabled ? 1 : 3);
+    });
 }
 
 

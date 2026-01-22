@@ -147,6 +147,7 @@ void ScreenManager::handleInput(InputEvent event) {
 
     if (currentScreen) {
         currentScreen->handleInput(event);
+        dirty = true;
     }
 }
 

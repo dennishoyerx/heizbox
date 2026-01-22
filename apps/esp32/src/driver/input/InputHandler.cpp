@@ -1,11 +1,23 @@
 #include "driver/input/InputHandler.h"
 #include "utils/Logger.h"
+#include "core/DeviceState.h"
 
 InputHandler::InputHandler(ScreenManager& screenManager)
     : screenManager(screenManager)
 {}
 
 void InputHandler::handleInput(InputEvent event) {
+    /*auto& ds = DeviceState::instance();
+    if (ds.display.flipOrientation) {
+        switch (event.button) {
+            case UP: event.button = DOWN; break;
+            case DOWN: event.button = UP; break;
+            case LEFT: event.button = RIGHT; break;
+            case RIGHT: event.button = LEFT; break;
+            default: break;
+        }
+    }*/
+
     const char* typeStr = (event.type == PRESS) ? "PRESS" :
                      (event.type == PRESSED) ? "PRESSED" :
                      (event.type == RELEASE) ? "RELEASE" : 
@@ -26,9 +38,7 @@ void InputHandler::handleInput(InputEvent event) {
     if (debug) logPrint("Input", "%s %s\n", btnStr, typeStr);
 
     // Handle global shortcuts
-    if (handleGlobalShortcuts(event)) {
-        return;
-    }
+    if (handleGlobalShortcuts(event)) return;
 
     // Pass to screen manager
     screenManager.handleInput(event);

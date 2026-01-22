@@ -54,6 +54,8 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
         .addObservableToggle("Dark Mode", state.display.darkMode)
+         .addObservableToggle("Flip Screen", state.display.flipOrientation)
+        .addHeadline("SETTINGS")
         .addAction("Timezone", [&]() {
             screenManager.setScreen(timezoneScreen.get(), ScreenTransition::NONE);
         })
@@ -66,6 +68,8 @@ void Screens::setupMenus(ScreenManager& screenManager) {
             esp_restart();
         })
         .addAction(BUILD_TIME, [this]() {
+        })
+        .addAction("Restart", [this]() {
             esp_restart();
         })
         .build();
@@ -73,13 +77,13 @@ void Screens::setupMenus(ScreenManager& screenManager) {
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());
 
     auto heaterMenuItems = MenuBuilder()
-         .addHeadline("Presets")
+         .addAction("Presets", [&]() {})
          .addObservableRange("Mode", hs.mode, static_cast<uint8_t>(0), static_cast<uint8_t>(1), static_cast<uint8_t>(1), "")
          .addObservableRange("Flavor Temp", hs.preset1Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
          .addObservableRange("Balanced Temp", hs.preset2Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
          .addObservableRange("Extraction Temp", hs.preset3Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
          .addObservableRange("Full Temp", hs.preset4Temp, static_cast<uint8_t>(150), static_cast<uint8_t>(240), static_cast<uint8_t>(1), "°C")
-         .addHeadline("Calibration")
+         .addAction("Calibration", [&]() {})
          .addObservableRange("Click 1 DV Temp", hs.irCalActualA, static_cast<uint16_t>(150), static_cast<uint16_t>(180), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Click 2 DV Temp", hs.irCalActualB, static_cast<uint16_t>(180), static_cast<uint16_t>(220), static_cast<uint16_t>(1), "°C")
          .addObservableRange("Click 1 IR Temp", hs.irCalMeasuredA, static_cast<uint16_t>(0), static_cast<uint16_t>(500), static_cast<uint16_t>(1), "°C")
@@ -92,11 +96,11 @@ void Screens::setupMenus(ScreenManager& screenManager) {
          .addAction("Clear Calibration", [&]() {
              heater.clearIRCalibration();
          })
-         .addHeadline("ZVS")
+         .addAction("ZVS", [&]() {})
          .addObservableRange("Power", hs.power, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(10), "%")
          .addObservableRangeMs("Off Period", hs.tempSensorOffTime, 0, 220, 20, true)
          .addObservableRangeMs("Duty Period", hs.zvsDutyCyclePeriodMs, 200, 2000, 100, true)
-         .addHeadline("Temperature")
+         .addAction("Temperature", [&]() {})
          .addObservableRange("Heating Offset", hs.tempCorrection, static_cast<int8_t>(-50), static_cast<int8_t>(50), static_cast<int8_t>(1), "°C")
          .addObservableRangeMs("Read interval", hs.tempSensorReadInterval, 50, 220, 10, true)
          .addObservableRange("IR Emissivity", hs.irEmissivity, static_cast<uint8_t>(0), static_cast<uint8_t>(100), static_cast<uint8_t>(1), "%")

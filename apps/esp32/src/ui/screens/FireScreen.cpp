@@ -56,6 +56,11 @@ FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
         [](const uint8_t& v){ return (String) TempPresets[v].name; }
     ));
 
+    menu.addItem(std::make_unique<ObservableValueItem<uint8_t>>(
+        "Power", hs.power, 10, 100, 10,
+        [](const uint8_t& v){ return (String) v + "%"; }
+    ));
+
     // --- IR calibration menu actions (select + CENTER to trigger) ---
     static Observable<uint8_t> menuIRCalA{0};
     static Observable<uint8_t> menuIRCalB{0};

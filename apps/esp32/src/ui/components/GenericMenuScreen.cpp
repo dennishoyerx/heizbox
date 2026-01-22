@@ -8,9 +8,9 @@
 GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_ptr<MenuItem>> items) : 
         title_(title), items_(std::move(items)), selectedIndex_(0), adjustMode_(false) {
     selectedIndex_ = 0;
-    while (selectedIndex_ < items_.size() && items_[selectedIndex_]->getType() == MenuItemType::HEADLINE) {
+    /*while (selectedIndex_ < items_.size() && items_[selectedIndex_]->getType() == MenuItemType::HEADLINE) {
         selectedIndex_++;
-    }
+    }*/
 
     // Fallback, falls alle HEADLINEs
     if (selectedIndex_ >= items_.size()) selectedIndex_ = 0;
@@ -64,13 +64,11 @@ void GenericMenuScreen::handleInput(InputEvent event) {
 
 void GenericMenuScreen::handleNavigationMode(InputEvent event) {
     static auto navUp = [this]() {
-        do selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
-        while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
+        selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
         dirty();
     };
     static auto navDown = [this]() {
-        do selectedIndex_ = (selectedIndex_ + 1) % items_.size();
-        while (items_[selectedIndex_]->getType() == MenuItemType::HEADLINE);
+        selectedIndex_ = (selectedIndex_ + 1) % items_.size();
         dirty();
     };
     static auto navSelect = [this]() {
