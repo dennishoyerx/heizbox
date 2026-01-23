@@ -6,6 +6,7 @@
 #include <Arduino.h>
 #include <mutex>
 #include <memory>
+#include <Task.h>
 
 enum class EventType {
     OTA_UPDATE_STARTED,

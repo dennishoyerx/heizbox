@@ -10,7 +10,10 @@
 #include <Wire.h>
 #include <utility>
 
-Device::Device(): heater(), ui(heater), network() {}
+#include <Task.h>
+
+Device::Device(): heater(), ui(heater), network() {
+}
 
 void Device::setup() {
     Serial.begin(115200);
@@ -28,12 +31,28 @@ void Device::setup() {
     Audio::init();
     Audio::beepStartup();
 
+    
+    auto cb = [this]() {
+        network.update();
+    };
+
+    auto task = dh::Task({
+        .callback = cb,
+        .config = {
+            .name = "net",
+            .stack_size_bytes = 4096,
+            .priority = 0,
+            .core_id = -1,
+        }
+    });
+    task.start();
+
+
     Serial.println("✅ Device initialized");
 }
 
 void Device::loop() {
     heater.update();
-    network.update();
     ui.update();
 }
 
