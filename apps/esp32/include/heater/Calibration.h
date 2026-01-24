@@ -16,7 +16,7 @@ public:
         uint16_t actual;
     };
 
-    struct BaseConfig {
+    struct Config {
         PointConfig a;
         PointConfig b;
         float slope;
@@ -34,5 +34,5 @@ public:
     float getOffset();
 
 private:
-    BaseConfig config;
+    Config config;
 };

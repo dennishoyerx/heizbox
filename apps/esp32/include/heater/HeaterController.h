@@ -10,6 +10,8 @@
 #include "ITemperatureSensor.h"
 #include "heater/Temperature.h"
 
+#include <BaseClass.h>
+
 class ICalibration {};
 
 class IRTwoPointCalibration: public ICalibration {
@@ -18,7 +20,7 @@ class IRTwoPointCalibration: public ICalibration {
         B
     };
 
-    struct BaseConfig {
+    struct Config {
         int16_t a;
         int16_t b;
         float slope;
@@ -36,10 +38,24 @@ class IRTwoPointCalibration: public ICalibration {
     float getOffset();
 
 private:
-    BaseConfig config;
+    Config config;
 };
 
-class HeaterController {
+namespace hzbx {
+
+class MosfetDriver {
+public:
+    void on();
+    void off();
+    
+private:
+};
+
+
+
+}
+
+class HeaterController: public dh::BaseClass {
 public:
     enum class State : uint8_t {
         IDLE,
@@ -61,8 +77,9 @@ public:
     float getIRCalibrationOffset() const;
     void computeIRCalibration();
 
-    bool isHeating() const;
-    bool isPaused() const;
+    bool isHeating() const { return state == State::HEATING; }
+    bool isPaused() const { return state == State::PAUSED; }
+    
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
     

@@ -3,7 +3,7 @@
 using namespace dh;
 
 
-Task::Task(const Params p): config(p.config), callback(std::move(p.callback)), name(p.config.name) {
+Task::Task(const Params p): BaseClass("Task"), config(p.config), callback(std::move(p.callback)), name(p.config.name) {
 
 };
 

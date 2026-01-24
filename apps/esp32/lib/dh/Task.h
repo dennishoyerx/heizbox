@@ -20,7 +20,7 @@ namespace dh {
 
 class Task: public dh::BaseClass {
 public:
-    struct BaseConfig {
+    struct Config {
         std::string name;              /**< Name of the task */
         size_t stack_size_bytes{4096}; /**< Stack Size (B) allocated to the task. */
         size_t priority{0}; /**< Priority of the task, 0 is lowest priority on ESP / FreeRTOS.  */
@@ -31,7 +31,7 @@ public:
 
     struct Params {
         callback_fn callback;
-        BaseConfig config;
+        Config config;
     };
 
     explicit Task(const Params p);
@@ -43,7 +43,7 @@ public:
 
 private:
     std::string name;
-    BaseConfig config;
+    Config config;
     callback_fn callback;
 
     bool running;

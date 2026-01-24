@@ -7,7 +7,8 @@
 #include "driver/Audio.h"
 
 HeaterController::HeaterController()
-    : state(State::IDLE), 
+    : BaseClass("HeaterController"),
+      state(State::IDLE), 
       startTime(0), 
       pauseTime(0),
       autoStopTime(60000) {
@@ -22,7 +23,7 @@ void HeaterController::init() {
     zvsDriver->init();
     zvsDriver->setPeriod(HeaterConfig::ZVS::DUTY_CYCLE_PERIOD_MS);
     zvsDriver->setSensorOffTime(HeaterConfig::KSensor::OFF_TIME_MS);
-    
+
     temperature.init();
 
     zvsDriver->onPhaseChange([this](ZVSDriver::Phase phase) {
@@ -33,9 +34,11 @@ void HeaterController::init() {
     zvsDriver->onTempMeasure([this]() {
         //temperature.update(Sensors::Sensor::K, true);
     });
+
+    logger.setLevel(dh::Logger::Level::INFO);
     
     
-    Serial.println("🔥 Heater initialized with ZVS driver");
+    logger.info("Initialized");
     booted();
 }
 
@@ -57,7 +60,7 @@ void HeaterController::startHeating() {
         zvsDriver->setEnabled(true);
         
         transitionTo(State::HEATING);
-        Serial.println("🔥 Heating started");
+        logger.info("🔥 Heating started");
 
         hs.isHeating.set(true);
         hs.startTime.set(startTime);
@@ -69,7 +72,7 @@ void HeaterController::startHeating() {
         hs.isHeating.set(true);
         
         transitionTo(State::HEATING);
-        Serial.println("🔥 Heating resumed");
+        logger.info("🔥 Heating resumed");
     }
 }
 
@@ -84,14 +87,14 @@ void HeaterController::stopHeating(bool finalize) {
         heatCycle.submit();
         startTime = millis();
         transitionTo(State::IDLE);
-        Serial.println("🔥 Heating stopped (finalized)");
+        logger.info("🔥 Heating stopped (finalized)");
         hs.startTime.set(0);
     } else {
         Audio::beepHeatFinish();
         heatCycle.stop();
         pauseTime = millis();
         transitionTo(State::PAUSED);
-        Serial.println("🔥 Heating paused");
+        logger.info("🔥 Heating paused");
     }
 }
 
@@ -139,7 +142,7 @@ void HeaterController::update() {
 
     if (state == State::PAUSED) {
         if (millis() - pauseTime >= hs.cycleTimeout) {
-            Serial.println("Pause timeout, finalizing cycle.");
+            logger.info("Pause timeout, finalizing cycle.");
             heatCycle.submit();
 
             startTime = millis();
@@ -155,8 +158,6 @@ void HeaterController::updateTemperature() {
 
     // IR Sensor
     if (temperature.update(Sensors::Type::IR)) {
-        //hs.tempIRAmb.set(static_cast<uint16_t>(temperature.getIRSensor()->getLastAmbientTemp() + 0.5f));
-
         float raw = temperature.get(Sensors::Type::IR);
         if (!isfinite(raw) || raw < 0.0f || raw > 1000.0f) {
             return; // Messung verwerfen
@@ -197,14 +198,6 @@ void HeaterController::updateTemperature() {
     } else if (kTemp > 0) {
         hs.temp.set(kTemp);
     }*/
-}
-
-bool HeaterController::isHeating() const {
-    return state == State::HEATING;
-}
-
-bool HeaterController::isPaused() const {
-    return state == State::PAUSED;
 }
 
 void HeaterController::setAutoStopTime(uint32_t time) {
