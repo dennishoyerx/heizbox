@@ -5,11 +5,11 @@
 #include "ui/DeviceUI.h"
 #include "heater/HeaterController.h"
 #include "driver/Audio.h"
-#include <SysModule.h>
 
 #include <Wire.h>
 #include <utility>
 
+#include <SysModule.h>
 #include <Task.h>
 
 Device::Device(): heater(), ui(heater), network() {
@@ -45,7 +45,7 @@ void Device::setup() {
             .core_id = -1,
         }
     });
-    task.start();
+    //task.start();
 
 
     Serial.println("✅ Device initialized");
@@ -53,6 +53,7 @@ void Device::setup() {
 
 void Device::loop() {
     heater.update();
+    network.update();
     ui.update();
 }
 

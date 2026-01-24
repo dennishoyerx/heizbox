@@ -10,6 +10,35 @@
 #include "ITemperatureSensor.h"
 #include "heater/Temperature.h"
 
+class ICalibration {};
+
+class IRTwoPointCalibration: public ICalibration {
+    enum Point {
+        A,
+        B
+    };
+
+    struct BaseConfig {
+        int16_t a;
+        int16_t b;
+        float slope;
+        float offset;
+    };
+
+    IRTwoPointCalibration();
+    
+    void compute();
+    void clear();
+
+    void setPoint(Point p, int16_t temp);
+    int16_t getPoint(Point p);
+    float getSlope();
+    float getOffset();
+
+private:
+    BaseConfig config;
+};
+
 class HeaterController {
 public:
     enum class State : uint8_t {
@@ -23,8 +52,6 @@ public:
     void init();
     void startHeating();
     void stopHeating(bool finalize = true);
-    void setPower(uint8_t power);
-    uint8_t getPower();
     void update();
     void updateTemperature();
 
@@ -34,12 +61,10 @@ public:
     float getIRCalibrationOffset() const;
     void computeIRCalibration();
 
-    State getState() const;
     bool isHeating() const;
     bool isPaused() const;
     void setAutoStopTime(uint32_t time);
     uint32_t getAutoStopTime() const;
-
     
     // Expose components
     ITemperatureSensor* getTempSensor(Sensors::Type sensor = Sensors::Type::K) { return temperature.getSensor(sensor); }
@@ -55,9 +80,7 @@ private:
 
     void transitionTo(State newState);
 
-
     State state = State::IDLE;
-    uint8_t power = 0;
     uint32_t startTime = 0;
     uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000;

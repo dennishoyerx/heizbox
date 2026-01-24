@@ -15,3 +15,15 @@ enum class EventType {
     WIFI_DISCONNECTED,
     STATS_UPDATED
 };*/
+
+template<typename T>
+struct Option {
+    T initial,
+    T max,
+    T min,
+    T step
+};
+
+struct displaycf {
+    Option<int> brightness{.initial = 100};
+};

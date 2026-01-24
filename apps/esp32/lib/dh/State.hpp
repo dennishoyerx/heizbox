@@ -18,7 +18,7 @@
 
 namespace dh {
 
-class Task: public dh::BaseClass {
+class State: public dh::BaseClass {
 public:
     struct BaseConfig {
         std::string name;              /**< Name of the task */
@@ -34,12 +34,7 @@ public:
         BaseConfig config;
     };
 
-    explicit Task(const Params p);
-
-    bool start();
-    bool run();
-    void stop();
-    bool isRunning() const { return running; }
+    explicit State(const Params p);
 
 private:
     std::string name;
@@ -47,14 +42,7 @@ private:
     callback_fn callback;
 
     bool running;
-
-    static TaskHandle_t task;
-
-    bool createTask(bool cleanTask = false);
 };
-
-
-
 
 
 

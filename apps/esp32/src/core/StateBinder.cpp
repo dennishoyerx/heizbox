@@ -43,7 +43,7 @@ void StateBinder::bindHeater(HeaterController* heater) {
     });
 
     bind<uint8_t>(hs.power, [heater](uint8_t val) {
-        heater->setPower(val);
+        heater->getZVSDriver()->setPower(val);
     });
 
     bind<uint32_t>(state.autoStopTime, [heater](uint32_t time) {

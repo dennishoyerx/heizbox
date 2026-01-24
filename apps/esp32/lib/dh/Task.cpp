@@ -7,14 +7,6 @@ Task::Task(const Params p): config(p.config), callback(std::move(p.callback)), n
 
 };
 
-bool Task::start() {
-    return createTask(false);
-};
-
-bool Task::run() {
-    return createTask(true);
-};
-
 bool Task::createTask(bool cleanTask) {
     BaseType_t ok = xTaskCreatePinnedToCore(
         cleanTask ?
@@ -37,6 +29,14 @@ bool Task::createTask(bool cleanTask) {
 
     return running = ok == pdPASS;
 }
+
+bool Task::start() {
+    return createTask(false);
+};
+
+bool Task::run() {
+    return createTask(true);
+};
 
 void Task::stop() {
     if (!running) return;

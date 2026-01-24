@@ -50,7 +50,7 @@ private:
 
     static TaskHandle_t task;
 
-    bool createTask(bool cleanTask = false);
+    bool createTask(const bool cleanTask = false);
 };
 
 

@@ -8,7 +8,6 @@
 
 HeaterController::HeaterController()
     : state(State::IDLE), 
-      power(100),
       startTime(0), 
       pauseTime(0),
       autoStopTime(60000) {
@@ -23,7 +22,6 @@ void HeaterController::init() {
     zvsDriver->init();
     zvsDriver->setPeriod(HeaterConfig::ZVS::DUTY_CYCLE_PERIOD_MS);
     zvsDriver->setSensorOffTime(HeaterConfig::KSensor::OFF_TIME_MS);
-    zvsDriver->setPower(power);
     
     temperature.init();
 
@@ -39,15 +37,6 @@ void HeaterController::init() {
     
     Serial.println("🔥 Heater initialized with ZVS driver");
     booted();
-}
-
-void HeaterController::setPower(uint8_t _power) {
-    power = _power;
-    zvsDriver->setPower(power);
-}
-
-uint8_t HeaterController::getPower() {
-    return power;
 }
 
 void HeaterController::transitionTo(State newState) {
@@ -208,10 +197,6 @@ void HeaterController::updateTemperature() {
     } else if (kTemp > 0) {
         hs.temp.set(kTemp);
     }*/
-}
-
-HeaterController::State HeaterController::getState() const {
-    return state;
 }
 
 bool HeaterController::isHeating() const {
