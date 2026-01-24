@@ -14,7 +14,7 @@ enum class EventType {
     WIFI_CONNECTED,
     WIFI_DISCONNECTED,
     STATS_UPDATED
-};*/
+};
 
 template<typename T>
 struct Option {
@@ -26,4 +26,4 @@ struct Option {
 
 struct displaycf {
     Option<int> brightness{.initial = 100};
-};
+};*/
