@@ -6,7 +6,6 @@
 namespace Temperature {
     struct State {
         uint16_t current;
-        uint16_t limit;
         uint16_t ambient;
         float raw;
     };
@@ -16,7 +15,6 @@ namespace Temperature {
         Controller();
         void init();
         void update();
-        bool limitReached();
 
     private:
         State state;

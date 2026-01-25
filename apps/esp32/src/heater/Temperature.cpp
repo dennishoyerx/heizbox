@@ -31,7 +31,3 @@ void Temperature::Controller::update() {
         state.current = static_cast<uint16_t>(calibrated + 0.5f);
     }
 }
-
-bool Temperature::Controller::limitReached() {
-    return state.current >= state.limit;
-}
