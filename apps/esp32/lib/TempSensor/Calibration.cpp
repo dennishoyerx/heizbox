@@ -1,28 +1,17 @@
 #include "heater/Calibration.h"
 
-IRTwoPointCalibration::IRTwoPointCalibration() {}
+IRCalibration::IRCalibration() {}
 
-void IRTwoPointCalibration::compute() {}
-void IRTwoPointCalibration::clear() {}
-
-void IRTwoPointCalibration::setPointConfig(PointId p, PointConfig pc) {
-    if (p == PointId::A) config.a = pc;
-    if (p == PointId::B) config.b = pc;
-}
-
-IRTwoPointCalibration::PointConfig IRTwoPointCalibration::getPointConfig(PointId p) { 
-    if (p == PointId::A) return config.a;
-    if (p == PointId::B) return config.b;
-    return PointConfig();
- }
+void IRCalibration::compute() {}
+void IRCalibration::clear() {}
 
  void xx() {
-    IRTwoPointCalibration c = IRTwoPointCalibration();
-    IRTwoPointCalibration::PointConfig pc = IRTwoPointCalibration::PointConfig();
+    IRCalibration c = IRCalibration();
+    IRCalibration::PointConfig pc = IRCalibration::PointConfig();
     pc.actual = 1;
     pc.measured = 2;
 
-    c.setPointConfig(IRTwoPointCalibration::PointId::A, { 
+    c.setPointConfig(IRCalibration::PointId::A, { 
         .measured = 2,
         .actual = 1,
     });

@@ -34,9 +34,6 @@ void HeaterController::init() {
     zvsDriver->onTempMeasure([this]() {
         //temperature.update(Sensors::Sensor::K, true);
     });
-
-    logger.setLevel(dh::Logger::Level::INFO);
-    
     
     logger.info("Initialized");
     booted();
@@ -178,26 +175,6 @@ void HeaterController::updateTemperature() {
         hs.tempIR.set(irTemp);
         hs.temp.set(irTemp);
     }
-    // K-Sensor, nur wenn Intervall erreicht
-    /*
-    static u32_t lastTempUpdate = 0;
-    if (hs.tempSensorOffTime < 0 && !hs.zvsOn &&
-        millis() - lastTempUpdate >= hs.tempSensorReadInterval) {
-        lastTempUpdate = millis();
-
-        if (temperature.update(Sensors::Sensor::K)) {
-            int16_t correction = isHeating() ? hs.tempCorrection : 0;
-            kTemp = static_cast<uint16_t>(temperature.get(Sensors::Sensor::K) + correction);
-            hs.tempK.set(kTemp);
-        }
-    }
-
-    // Temperatur setzen
-    if (hs.cutoffIr && irTemp > hs.tempK) {
-        hs.temp.set(irTemp);
-    } else if (kTemp > 0) {
-        hs.temp.set(kTemp);
-    }*/
 }
 
 void HeaterController::setAutoStopTime(uint32_t time) {

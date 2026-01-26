@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 #include "ITemperatureSensor.h"
+#include "Calibration.h"
 
 class IRTempSensor: public ITemperatureSensor {
 public:
@@ -18,6 +19,8 @@ public:
     void enableAmbientCorrection(bool enable, float coefficient = 0.15);
     float getLastAmbientTemp();
 
+    void setCalibration(IRCalibration::Config cal);
+
 private:
     Adafruit_MLX90614 mlx;
 
@@ -32,4 +35,6 @@ private:
     float ambientCorrectionCoeff;
     float referenceAmbient;
     float lastAmbient;
+    
+    IRCalibration calibration;
 };

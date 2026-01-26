@@ -9,14 +9,9 @@ IRTempSensor::IRTempSensor(uint8_t sda_pin, uint8_t scl_pin, uint16_t readInterv
       ambientCorrectionCoeff(0.15),
       referenceAmbient(25.0),
       lastAmbient(25.0),
-      ITemperatureSensor(readIntervalMs) {
-    //pinMode(sda_pin, INPUT_PULLUP);
-    //pinMode(scl_pin, INPUT_PULLUP);
-}
+      ITemperatureSensor(readIntervalMs) {}
 
 bool IRTempSensor::begin(float emissivity) {
-    //Wire.begin(sdaPin, sclPin);
-
     if (!mlx.begin()) {
         errorCount++;
         return false;
@@ -42,7 +37,6 @@ float IRTempSensor::read() {
         }
     }
     
-    // Beide Temperaturen lesen
     float objTemp = mlx.readObjectTempC();
     float ambTemp = mlx.readAmbientTempC();
     lastAmbient = ambTemp;
@@ -52,6 +46,8 @@ float IRTempSensor::read() {
         float factor = 1.0f + (ambientRatio - 1.0f) * ambientCorrectionCoeff;
         objTemp *= factor;
     }
+
+    if (calibration.hasConfig()) objTemp = calibration.processTemperature(objTemp);
     
     return objTemp; 
 }
@@ -69,13 +65,6 @@ bool IRTempSensor::setEmissivity(float emissivity) {
     // EEPROM-Write durchführen
     mlx.writeEmissivity(emissivity);   
     delay(10); // EEPROM Write Zeit abwarten
-    
-    // Sensor-Reset triggern (falls die Library das unterstützt)
-    // Alternativ: I2C-Bus kurz resetten
-    //Wire.end();
-    //delay(50);
-    //Wire.begin(sdaPin, sclPin);
-    //delay(50);
     
     if (!mlx.begin()) {
         return false;
@@ -112,4 +101,8 @@ void IRTempSensor::enableAmbientCorrection(bool enable, float coefficient) {
 
 float IRTempSensor::getLastAmbientTemp() {
     return lastAmbient;
+}
+
+void IRTempSensor::setCalibration(IRCalibration::Config cal) {
+    calibration.setConfig(cal);
 }

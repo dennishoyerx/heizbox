@@ -11,10 +11,10 @@
 #include "heater/Temperature.h"
 
 #include <BaseClass.h>
-
+/*
 class ICalibration {};
 
-class IRTwoPointCalibration: public ICalibration {
+class IRCalibration: public ICalibration {
     enum Point {
         A,
         B
@@ -27,7 +27,7 @@ class IRTwoPointCalibration: public ICalibration {
         float offset;
     };
 
-    IRTwoPointCalibration();
+    IRCalibration();
     
     void compute();
     void clear();
@@ -54,7 +54,7 @@ private:
 
 
 }
-
+*/
 class HeaterController: public dh::BaseClass {
 public:
     enum class State : uint8_t {
