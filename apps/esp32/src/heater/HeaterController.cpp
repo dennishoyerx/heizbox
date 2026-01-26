@@ -165,13 +165,8 @@ void HeaterController::updateTemperature() {
         // apply ambient correction if enabled in the sensor / state (existing behavior)
         float factor = 1.0f + (hs.irCorrection / 100.0f);
         float adjusted = raw * factor;
-
-        // apply two-point calibration if present
-        float slope = hs.irCalSlope;
-        float offset = hs.irCalOffset;
-        float calibrated = adjusted * slope + offset;
-
-        irTemp = static_cast<uint16_t>(calibrated + 0.5f); // Rundung
+        
+        irTemp = static_cast<uint16_t>(adjusted + 0.5f); // Rundung
         hs.tempIR.set(irTemp);
         hs.temp.set(irTemp);
     }

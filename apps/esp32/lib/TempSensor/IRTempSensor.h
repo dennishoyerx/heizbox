@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include <Wire.h>
 #include <Adafruit_MLX90614.h>
 #include "ITemperatureSensor.h"
 #include "Calibration.h"

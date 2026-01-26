@@ -1,9 +1,36 @@
-#include "heater/Calibration.h"
+#include "Calibration.h"
 
 IRCalibration::IRCalibration() {}
 
-void IRCalibration::compute() {}
-void IRCalibration::clear() {}
+void IRCalibration::compute() {
+    uint16_t mA = config.a.measured;
+    uint16_t mB = config.b.measured;
+    uint16_t aA = config.a.actual;
+    uint16_t aB = config.b.actual;
+
+    if (mA == 0 || mB == 0) {
+        //Serial.println("IR calibration: need two measured points.");
+        return;
+    }
+    if (mA == mB) {
+        //Serial.println("IR calibration: measured points identical, cannot compute.");
+        return;
+    }
+
+    config.slope = float(aB - aA) / float(mB - mA);
+    config.offset = float(aA) - config.slope * float(mA);
+}
+
+void IRCalibration::clear() { config = Config(); }
+
+void IRCalibration::setConfig(Config const c) { config = c; }
+bool const IRCalibration::hasConfig() { return config.a.measured != 0; }
+
+uint16_t const IRCalibration::processTemperature(uint16_t temp) {
+    if (!hasConfig()) return temp;
+    return temp * config.slope + config.offset;
+}
+
 
  void xx() {
     IRCalibration c = IRCalibration();
@@ -11,10 +38,10 @@ void IRCalibration::clear() {}
     pc.actual = 1;
     pc.measured = 2;
 
-    c.setPointConfig(IRCalibration::PointId::A, { 
+    /*c.setPointConfig(IRCalibration::PointId::A, { 
         .measured = 2,
         .actual = 1,
-    });
+    });*/
  }
 
 /*
@@ -53,29 +80,4 @@ int16_t HeaterController::markIRClick(uint16_t actualTemp) {
     computeIRCalibration();
     return returnVal;
 }
-
-void HeaterController::computeIRCalibration() {
-    auto& hs = HeaterState::instance();
-    uint16_t mA = hs.irCalMeasuredA;
-    uint16_t mB = hs.irCalMeasuredB;
-    uint16_t aA = hs.irCalActualA;
-    uint16_t aB = hs.irCalActualB;
-
-    if (mA == 0 || mB == 0) {
-        Serial.println("IR calibration: need two measured points.");
-        return;
-    }
-    if (mA == mB) {
-        Serial.println("IR calibration: measured points identical, cannot compute.");
-        return;
-    }
-
-    float slope = float(aB - aA) / float(mB - mA);
-    float offset = float(aA) - slope * float(mA);
-
-    hs.irCalSlope.set(slope);
-    hs.irCalOffset.set(offset);
-
-    Serial.printf("IR calibration computed: slope=%.6f offset=%.2f (mA=%u,aA=%u mB=%u,aB=%u)\n",
-                  slope, offset, mA, aA, mB, aB);
-}*/
+*/

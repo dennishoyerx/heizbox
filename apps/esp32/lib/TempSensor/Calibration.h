@@ -28,10 +28,10 @@ public:
 
     void setConfig(Config const c);
     bool const hasConfig();
-    Config const getConfig();
+    Config const getConfig() { return config; }
 
-    float const getSlope();
-    float const getOffset();
+    float const getSlope() { return config.slope; }
+    float const getOffset() { return config.offset; }
 
     uint16_t const processTemperature(uint16_t temp);
 
