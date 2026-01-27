@@ -9,6 +9,11 @@ public:
 
 class IRCalibration: public ICalibration {
 public:
+    enum class Point {
+        A,
+        B
+    };
+
     struct PointConfig {
         uint16_t measured;
         uint16_t actual;
@@ -26,6 +31,9 @@ public:
     void compute();
     void clear();
 
+    bool setMeasurement(Point p, uint16_t actual);
+
+    void setPointConfig(Point p, PointConfig c);
     void setConfig(Config const c);
     bool const hasConfig();
     Config const getConfig() { return config; }

@@ -19,6 +19,8 @@ public:
     float getLastAmbientTemp();
 
     void setCalibration(IRCalibration::Config cal);
+    IRCalibration getCalibration() { return calibration; }
+
 
 private:
     Adafruit_MLX90614 mlx;

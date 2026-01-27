@@ -22,6 +22,8 @@
 
 #include <ObservableMenuItem.h>
 
+#include <Time.hpp>
+
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
     auto& hs = HeaterState::instance();
@@ -146,22 +148,9 @@ return;
     });
 }
 
-void FireScreen::update() {
-    auto& hs = HeaterState::instance();
-    static uint32_t lastDirty = 0; // Zeitpunkt des letzten dirty-Aufrufs
-    uint32_t now = millis();
 
-    if (!hs.isHeating) {
-        // alle 200 ms, wenn nicht heizt
-        if (now - lastDirty >= 200) {
-            dirty();
-            lastDirty = now;
-        }
-    } else {
-        // beim Heizen: sofort dirty() aufrufen
-        dirty();
-        lastDirty = now; // optional, falls Intervall-Logik später noch wichtig
-    }
+void FireScreen::update() {
+    if (heater.isHeating()) dirty();
 }
 
 bool triggeredTwice(uint32_t intervalMs) {
@@ -174,6 +163,7 @@ bool triggeredTwice(uint32_t intervalMs) {
     lastTime = now;
     return false;
 }
+
 
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
@@ -209,25 +199,22 @@ void FireScreen::handleInput(InputEvent event) {
     
     // CENTER: either cycle or trigger selected menu action (IR Cal A/B/Clear)
     if (input(event, {CENTER}, {PRESSED})) {
-        for (uint8_t addr = 1; addr < 127; addr++) {
-            Wire.beginTransmission(addr);
-            if (Wire.endTransmission() == 0) {
-                char buf[6];
-                snprintf(buf, sizeof(buf), "0x%02X", addr);
-                logPrint(buf);
-            }
-        }
-
         const IMenuItem* cur = menu.current();
         String curName = cur ? String(cur->name()) : String();
-
-        if (curName == "IR Cal A") {
+        if (curName == "Temperature") {
+            if (hs.mode == HeaterMode::PRESET) {
+                Presets::setPresetTemp(hs.currentPreset, hs.tempLimit.get());
+                    showOverlay("Preset gespeichert.", 1500);
+                Audio::beepSuccess();
+            }
+        } else if (curName == "IR Cal A") {
             // trigger calibration A
             if (!heater.isHeating()) {
                 Serial.println("IR click ignored: not heating.");
                 showOverlay("IR click ignored: not heating", 1200);
                     Audio::beepError();
             } else {
+                uint16_t measured = heater.getIRTempSensor()->getCalibration().setMeasurement(IRCalibration::Point::A, hs.irCalActualA);
                 uint16_t actualTemp = hs.irCalActualA;
                 Serial.printf("Menu: Storing IR Cal A for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
@@ -251,6 +238,7 @@ void FireScreen::handleInput(InputEvent event) {
                 showOverlay("IR click ignored: not heating", 1200);
                     Audio::beepError();
             } else {
+                uint16_t measured = heater.getIRTempSensor()->getCalibration().setMeasurement(IRCalibration::Point::B, hs.irCalActualB);
                 uint16_t actualTemp = hs.irCalActualB;
                 Serial.printf("Menu: Storing IR Cal B for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
@@ -267,6 +255,7 @@ void FireScreen::handleInput(InputEvent event) {
             dirty();
             return;
         } else if (curName == "IR Cal Clear") {
+            heater.getIRTempSensor()->getCalibration().clear();
             heater.clearIRCalibration();
             showOverlay("IR Calibration cleared", 1400);
             Audio::beepWarning();

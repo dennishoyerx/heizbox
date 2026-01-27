@@ -67,8 +67,7 @@ void Screens::setupMenus(ScreenManager& screenManager) {
             nvs_flash_erase();
             esp_restart();
         })
-        .addAction(BUILD_TIME, [this]() {
-        })
+        .addAction(BUILD_TIME, [this]() {})
         .addAction("Restart", [this]() {
             esp_restart();
         })

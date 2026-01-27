@@ -16,7 +16,6 @@ GenericMenuScreen::GenericMenuScreen(const char* title, std::vector<std::unique_
     if (selectedIndex_ >= items_.size()) selectedIndex_ = 0;
 }
 
-// Implementations of methods declared in GenericMenuScreen.h
 void GenericMenuScreen::draw() {
     _ui->clear();    
     _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
@@ -63,25 +62,19 @@ void GenericMenuScreen::handleInput(InputEvent event) {
 }
 
 void GenericMenuScreen::handleNavigationMode(InputEvent event) {
-    static auto navUp = [this]() {
-        selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
-        dirty();
-    };
-    static auto navDown = [this]() {
+    if (event.button == DOWN || event.type == ROTARY_CW) {
         selectedIndex_ = (selectedIndex_ + 1) % items_.size();
         dirty();
-    };
-    static auto navSelect = [this]() {
+    } else if (event.button == UP || event.type == ROTARY_CCW) {
+        selectedIndex_ = (selectedIndex_ == 0 ? items_.size() - 1 : selectedIndex_ - 1);
+        dirty();
+    } else if (event.button == CENTER && event.type == PRESSED) {
         if (selectedIndex_ > items_.size()) return;
         auto& item = items_[selectedIndex_];
         if (item->getType() == MenuItemType::RANGE) adjustMode_ = true;
         else item->execute();
         dirty();
-    };
-
-    if (event.button == DOWN || event.type == ROTARY_CW) navDown();
-    else if (event.button == UP || event.type == ROTARY_CCW) navUp();
-    else if (event.button == CENTER && event.type == PRESSED) navSelect();
+    }
 }
 
 void GenericMenuScreen::handleAdjustMode(InputEvent event) {
