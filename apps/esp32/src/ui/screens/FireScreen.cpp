@@ -23,6 +23,7 @@
 #include <ObservableMenuItem.h>
 
 #include <Time.hpp>
+#include <Calibration.h>
 
 FireScreen::FireScreen(HeaterController &hc) : heater(hc) {
     auto& ds = DeviceState::instance();
@@ -214,7 +215,7 @@ void FireScreen::handleInput(InputEvent event) {
                 showOverlay("IR click ignored: not heating", 1200);
                     Audio::beepError();
             } else {
-                uint16_t measured = heater.getIRTempSensor()->getCalibration().setMeasurement(IRCalibration::Point::A, hs.irCalActualA);
+                //uint16_t measured = heater.getIRTempSensor()->getCalibration()->setMeasurement(IRCalibration::Point::A, hs.irCalActualA);
                 uint16_t actualTemp = hs.irCalActualA;
                 Serial.printf("Menu: Storing IR Cal A for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
@@ -238,7 +239,7 @@ void FireScreen::handleInput(InputEvent event) {
                 showOverlay("IR click ignored: not heating", 1200);
                     Audio::beepError();
             } else {
-                uint16_t measured = heater.getIRTempSensor()->getCalibration().setMeasurement(IRCalibration::Point::B, hs.irCalActualB);
+                //uint16_t measured = heater.getIRTempSensor()->getCalibration()->setMeasurement(IRCalibration::Point::B, hs.irCalActualB);
                 uint16_t actualTemp = hs.irCalActualB;
                 Serial.printf("Menu: Storing IR Cal B for actual=%u\n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
@@ -255,7 +256,7 @@ void FireScreen::handleInput(InputEvent event) {
             dirty();
             return;
         } else if (curName == "IR Cal Clear") {
-            heater.getIRTempSensor()->getCalibration().clear();
+            //heater.getIRTempSensor()->getCalibration()->clear();
             heater.clearIRCalibration();
             showOverlay("IR Calibration cleared", 1400);
             Audio::beepWarning();

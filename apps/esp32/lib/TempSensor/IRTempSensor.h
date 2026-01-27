@@ -19,7 +19,7 @@ public:
     float getLastAmbientTemp();
 
     void setCalibration(IRCalibration::Config cal);
-    IRCalibration getCalibration() { return calibration; }
+    IRCalibration* getCalibration() { return &calibration; }
 
 
 private:
