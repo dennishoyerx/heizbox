@@ -44,7 +44,7 @@ void StatusBar::draw(UI* ui) {
 }
 
 void StatusBar::drawTimeRegion(RenderSurface s) {
-    s.text(8, 0, String(state.time), TextSize::lg);
+    s.text(8, 0, String(state.time), ui::Text::Size::lg);
 }
 
 void StatusBar::drawWifiRegion(RenderSurface s) {

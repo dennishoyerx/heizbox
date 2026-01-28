@@ -13,9 +13,7 @@
 #include "Inter_24_bold.h"
 #include "Inter_32_bold.h"
 
-using namespace ui;
-
-const GFXfont* getFontForSize(Text::Size ts) {
+const GFXfont* ui::Text::getFontForSize(Text::Size ts) {
     switch (ts) {
         case Text::Size::xs: return &Inter_16;
         case Text::Size::sm: return &Inter_18;

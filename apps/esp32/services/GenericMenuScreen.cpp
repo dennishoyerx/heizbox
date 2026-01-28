@@ -38,20 +38,20 @@ void GenericMenuScreen::draw() {
         // Selection indicator
 
         // Item title
-        s.text(10, y, item->getTitle(), TextSize::sm, color);
+        s.text(10, y, item->getTitle(), ui::Text::Size::sm, color);
 
         s.text(0, 0, "", {.align = TextAlign::center});
         
         // Item value (if any)
         const char* value = item->getValue();
-        if (value) s.text(200, y, value, TextSize::md, color);
+        if (value) s.text(200, y, value, ui::Text::Size::md, color);
     }
     return;
     // Footer
     const char* footer = adjustMode_ 
         ? "L/R: Adjust  OK: Done"
         : "OK: Select  HOLD L: Back";
-        s.text(30, 210, footer, TextSize::sm);
+        s.text(30, 210, footer, ui::Text::Size::sm);
     });
 }
 

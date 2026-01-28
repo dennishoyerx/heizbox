@@ -28,8 +28,8 @@ float smoothProgress(float target) {
 
 
 void drawStats(RenderSurface& s, int x, int y, String label, String value) {
-    s.text(x, y, value, TextSize::bmd);
-    s.text(x, y + 24, label, TextSize::sm);
+    s.text(x, y, value, ui::Text::Size::bmd);
+    s.text(x, y + 24, label, ui::Text::Size::sm);
 }
 
 
@@ -51,7 +51,7 @@ void Timer(RenderSurface s, uint32_t time) {
     snprintf(timeStr, sizeof(timeStr), "%lu", time);
 
     s.sprite->setTextDatum(MC_DATUM);
-    s.text(s.centerX(), s.centerY(), timeStr, TextSize::bxxl);
+    s.text(s.centerX(), s.centerY(), timeStr, ui::Text::Size::bxxl);
     s.sprite->setTextDatum(ML_DATUM);
 }
 
@@ -61,23 +61,23 @@ struct RenderProps {
     int y;
 };
 
-void Temp(RenderProps p, String label, int value, TextSize size = TextSize::blg) {
-    int textH = size == TextSize::bmd ? 18 : 24;
+void Temp(RenderProps p, String label, int value, ui::Text::Size size = ui::Text::Size::blg) {
+    int textH = size == ui::Text::Size::bmd ? 18 : 24;
     int valueY = p.y + textH;
     
-    p.s.text(p.x, p.y, label, TextSize::sm);
+    p.s.text(p.x, p.y, label, ui::Text::Size::sm);
     p.s.text(p.x, valueY, value != 420 ? String(value): "OFF", size);
 };
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
     
-    Temp({s, 12, 16}, "Raw", hs.tempIRRaw, TextSize::bmd);
-    Temp({s, 12, 48}, "Amb", hs.tempIRAmb, TextSize::bmd);
+    Temp({s, 12, 16}, "Raw", hs.tempIRRaw, ui::Text::Size::bmd);
+    Temp({s, 12, 48}, "Amb", hs.tempIRAmb, ui::Text::Size::bmd);
     s.sprite->setTextDatum(MR_DATUM);
-    if (hs.tempIR < 1000) Temp({s, 134, 16}, "IR", hs.tempIR, TextSize::bxl);
+    if (hs.tempIR < 1000) Temp({s, 134, 16}, "IR", hs.tempIR, ui::Text::Size::bxl);
     s.sprite->setTextDatum(ML_DATUM);
-    Temp({s, 146, 16}, "Limit", hs.tempLimit, TextSize::bxl);
+    Temp({s, 146, 16}, "Limit", hs.tempLimit, ui::Text::Size::bxl);
 }
 
 
@@ -112,22 +112,22 @@ void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
     uint8_t yOffset = 110;
     s.sprite->setTextDatum(ML_DATUM);
 
-    s.text(10 + xOffset, 10 + yOffset, String("Phase: ") + phaseStr, TextSize::md);
-    s.text(10 + xOffset, 30 + yOffset, String("Power: ") + zvs->getPower() + "%", TextSize::md);
-    s.text(10 + xOffset, 50 + yOffset, String("MOSFET: ") + (zvs->isPhysicallyOn() ? "ON" : "OFF"), TextSize::md);
+    s.text(10 + xOffset, 10 + yOffset, String("Phase: ") + phaseStr, ui::Text::Size::md);
+    s.text(10 + xOffset, 30 + yOffset, String("Power: ") + zvs->getPower() + "%", ui::Text::Size::md);
+    s.text(10 + xOffset, 50 + yOffset, String("MOSFET: ") + (zvs->isPhysicallyOn() ? "ON" : "OFF"), ui::Text::Size::md);
 
     // Statistics
-    s.text(10 + xOffset, 70 + yOffset, String("Cycles: ") + stats.cycleCount, TextSize::sm);
-    s.text(10 + xOffset, 85 + yOffset, String("ON Time: ") + (stats.totalOnTime / 1000) + "s", TextSize::sm);
-    s.text(10 + xOffset, 100 + yOffset, String("OFF Time: ") + (stats.totalOffTime / 1000) + "s", TextSize::sm);
+    s.text(10 + xOffset, 70 + yOffset, String("Cycles: ") + stats.cycleCount, ui::Text::Size::sm);
+    s.text(10 + xOffset, 85 + yOffset, String("ON Time: ") + (stats.totalOnTime / 1000) + "s", ui::Text::Size::sm);
+    s.text(10 + xOffset, 100 + yOffset, String("OFF Time: ") + (stats.totalOffTime / 1000) + "s", ui::Text::Size::sm);
 
     // Duty cycle calculation
     float dutyCycle = 0;
     if ((stats.totalOnTime + stats.totalOffTime) > 0) {
         dutyCycle = (float)stats.totalOnTime / (stats.totalOnTime + stats.totalOffTime) * 100;
     }
-    s.text(130, 70 + yOffset, String("Duty: ") + String(dutyCycle, 1) + "%", TextSize::sm);
-    s.text(130, 85 + yOffset, String("Temp Reads: ") + stats.tempMeasures, TextSize::sm);
+    s.text(130, 70 + yOffset, String("Duty: ") + String(dutyCycle, 1) + "%", ui::Text::Size::sm);
+    s.text(130, 85 + yOffset, String("Temp Reads: ") + stats.tempMeasures, ui::Text::Size::sm);
 }
 
 
