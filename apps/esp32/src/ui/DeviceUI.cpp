@@ -33,6 +33,17 @@ void DeviceUI::update() {
     input.update();
     screenManager.update();
     screenManager.draw();
+
+    if (DeviceState::instance().display.idleTimeout == 0) return;
+
+    static bool displayDimmed;
+    if (!displayDimmed && input.getLastInputMs() >= DeviceState::instance().display.idleTimeout) {
+        displayDimmed = true;
+        display->setBrightness(DeviceState::instance().display.idleBrightness);
+    } else if (displayDimmed) {
+        displayDimmed = false;
+        display->setBrightness(DeviceState::instance().display.brightness);
+    }
 };
 
 ScreenManager* DeviceUI::getScreenManager() {

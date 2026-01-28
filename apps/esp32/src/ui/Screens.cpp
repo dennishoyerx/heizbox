@@ -36,23 +36,28 @@ void Screens::setupMenus(ScreenManager& screenManager) {
 
 
     auto menuItems = MenuBuilder()
-        .addAction(" ", [&]() {})
          .addAction("Heater", [&]() {
              screenManager.switchScreen(ScreenType::HEAT_MENU);
          })
-         .addAction("Debug", [&]() {
-             screenManager.switchScreen(ScreenType::DEBUG_MENU);
-         })
+        .addObservableRange("Volume", state.audio.volume,
+                           static_cast<uint8_t>(0),
+                           static_cast<uint8_t>(100),
+                           static_cast<uint8_t>(10), "%")
         .addHeadline("DISPLAY")
         .addObservableRange("Brightness", state.display.brightness,
                            static_cast<uint8_t>(20),
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
-                           
-        .addObservableRange("Volume", state.audio.volume,
+
+        .addObservableRangeMs("Display Timeout", state.display.idleTimeout,
+                             0,    // 0 Minute min
+                             1800000,  // 30 Minuten max
+                             60000)    // 1 Minute step
+        .addObservableRange("Timeout Brightness", state.display.idleBrightness,
                            static_cast<uint8_t>(0),
-                           static_cast<uint8_t>(100),
+                           static_cast<uint8_t>(80),
                            static_cast<uint8_t>(10), "%")
+                           
         .addObservableToggle("Dark Mode", state.display.darkMode)
          .addObservableToggle("Flip Screen", state.display.flipOrientation)
         .addHeadline("SETTINGS")
@@ -67,7 +72,9 @@ void Screens::setupMenus(ScreenManager& screenManager) {
             nvs_flash_erase();
             esp_restart();
         })
-        .addAction(BUILD_TIME, [this]() {})
+        .addAction(BUILD_TIME, [&]() {
+            screenManager.switchScreen(ScreenType::DEBUG_MENU);
+        })
         .addAction("Restart", [this]() {
             esp_restart();
         })

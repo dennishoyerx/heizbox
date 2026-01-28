@@ -32,7 +32,7 @@ public:
     UI* getUI() const { return ui; }
 
     void setStatusbarVisible(bool visible) { statusbarVisible = visible; }
-    
+    bool isStatusbarVisible() const { return statusbarVisible; }
 
 private:
     // Core components

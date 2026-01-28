@@ -16,6 +16,9 @@ struct DisplaySettings {
     PersistedObservable<bool> flipOrientation{"display", "flip", false};
     PersistedObservable<uint8_t> brightness{"display", "brightness", 100};
     PersistedObservable<bool> darkMode{"display", "darkMode", true};
+    PersistedObservable<uint8_t> idleBrightness{"display", "idle_brightness", 50};
+    PersistedObservable<uint32_t> idleTimeout{"display", "idle_timeout", 12000000};
+
 };
 
 struct DebugSettings {

@@ -47,6 +47,8 @@ public:
 
     void pcfInterrupt();
 
+    uint32_t getLastInputMs() const { return millis() - lastInputMs; }
+
     static constexpr uint8_t NUM_BUTTONS = 7;
 
     struct ButtonConfig {
@@ -62,6 +64,8 @@ private:
     RotaryEncoder* rotaryEncoder;
 
     EventCallback callback = nullptr;
+
+    uint32_t lastInputMs = 0;
 
     uint8_t pressedMask = 0;
     uint8_t holdSentMask = 0;

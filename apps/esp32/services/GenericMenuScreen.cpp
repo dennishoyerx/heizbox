@@ -23,7 +23,7 @@ void GenericMenuScreen::draw() {
         s.sprite->fillSprite(COLOR_BG);
     
     // Items (with scrolling support)
-    const int itemsPerPage = 7;
+    const int itemsPerPage = 8;
     const int startIdx = (selectedIndex_ / itemsPerPage) * itemsPerPage;
     const int endIdx = std::min(startIdx + itemsPerPage, static_cast<int>(items_.size()));
     
@@ -39,12 +39,14 @@ void GenericMenuScreen::draw() {
 
         // Item title
         s.text(10, y, item->getTitle(), TextSize::sm, color);
+
+        s.text(0, 0, "", {.align = TextAlign::center});
         
         // Item value (if any)
         const char* value = item->getValue();
         if (value) s.text(200, y, value, TextSize::md, color);
     }
-    
+    return;
     // Footer
     const char* footer = adjustMode_ 
         ? "L/R: Adjust  OK: Done"

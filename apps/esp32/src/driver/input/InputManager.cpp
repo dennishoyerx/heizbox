@@ -95,5 +95,8 @@ void InputManager::update() {
 }
 
 void InputManager::setCallback(EventCallback cb) {
-    callback = cb;
+    callback = [cb, this](InputEvent event) {
+        cb(event);
+        lastInputMs = millis();
+    };
 }
