@@ -1,4 +1,3 @@
-#pragma once
 #include "RenderSurface.h"
 #include "Inter_12.h"
 #include "Inter_16.h"

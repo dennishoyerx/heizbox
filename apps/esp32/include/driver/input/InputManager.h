@@ -15,8 +15,8 @@ enum InputEventType {
     RELEASE,
     HOLD,
     HOLD_ONCE,
-    ROTARY_CW,      // Rotary Encoder im Uhrzeigersinn gedreht
-    ROTARY_CCW,     // Rotary Encoder gegen Uhrzeigersinn gedreht
+    ROTARY_CW,
+    ROTARY_CCW,
 };
 
 enum InputButton {

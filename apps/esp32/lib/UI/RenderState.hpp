@@ -13,7 +13,6 @@ struct RenderStateHash {
   std::unordered_map<std::string, StateValue> values;
   size_t hash = 0;
 
-  // Calculate hash from all values
   size_t calculateHash() const {
     size_t h = 0;
     for (const auto& [key, value] : values) {
@@ -48,11 +47,10 @@ struct RenderStateHash {
       }, value);
     }
 
-    if (newHash != hash) {
-      hash = newHash;
-      values = newValues;
-      return true;
-    }
-    return false;
+    if (newHash == hash) return false;
+
+    hash = newHash;
+    values = newValues;
+    return true;    
   }
 };
