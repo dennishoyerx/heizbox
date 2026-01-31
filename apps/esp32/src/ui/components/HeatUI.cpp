@@ -71,9 +71,11 @@ void Temp(RenderProps p, String label, int value, ui::Text::Size size = ui::Text
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {
     auto& hs = HeaterState::instance();
-    
-    Temp({s, 12, 16}, "Raw", hs.tempIRRaw, ui::Text::Size::bmd);
-    Temp({s, 12, 48}, "Amb", hs.tempIRAmb, ui::Text::Size::bmd);
+    auto& ds = DeviceState::instance();
+    if (ds.debug.showRawTemp) {
+        Temp({s, 12, 16}, "Raw", hs.tempIRRaw, ui::Text::Size::bmd);
+        Temp({s, 12, 48}, "Amb", hs.tempIRAmb, ui::Text::Size::bmd);
+    }
     s.sprite->setTextDatum(MR_DATUM);
     if (hs.tempIR < 1000) Temp({s, 134, 16}, "IR", hs.tempIR, ui::Text::Size::bxl);
     s.sprite->setTextDatum(ML_DATUM);

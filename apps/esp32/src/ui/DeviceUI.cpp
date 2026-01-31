@@ -34,13 +34,14 @@ void DeviceUI::update() {
     screenManager.update();
     screenManager.draw();
 
-    if (DeviceState::instance().display.idleTimeout == 0) return;
+    if (DeviceState::instance().display.idleTimeoutMinutes == 0) return;
 
     static bool displayDimmed;
-    if (!displayDimmed && input.getLastInputMs() >= DeviceState::instance().display.idleTimeout) {
+    bool recentInput = input.getLastInputMs() <= DeviceState::instance().display.idleTimeoutMinutes * 60 * 1000;
+    if (!displayDimmed && !recentInput) {
         displayDimmed = true;
         display->setBrightness(DeviceState::instance().display.idleBrightness);
-    } else if (displayDimmed) {
+    } else if (displayDimmed && recentInput) {
         displayDimmed = false;
         display->setBrightness(DeviceState::instance().display.brightness);
     }

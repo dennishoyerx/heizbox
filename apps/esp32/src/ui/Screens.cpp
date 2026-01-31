@@ -49,10 +49,10 @@ void Screens::setupMenus(ScreenManager& screenManager) {
                            static_cast<uint8_t>(100),
                            static_cast<uint8_t>(10), "%")
 
-        .addObservableRangeMs("Display Timeout", state.display.idleTimeout,
-                             0,    // 0 Minute min
-                             1800000,  // 30 Minuten max
-                             60000)    // 1 Minute step
+        .addObservableRange("Display Timeout", state.display.idleTimeoutMinutes,
+                             static_cast<uint8_t>(0),   
+                             static_cast<uint8_t>(120), 
+                             static_cast<uint8_t>(1), "min")    
         .addObservableRange("Timeout Brightness", state.display.idleBrightness,
                            static_cast<uint8_t>(0),
                            static_cast<uint8_t>(80),

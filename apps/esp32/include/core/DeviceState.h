@@ -17,7 +17,7 @@ struct DisplaySettings {
     PersistedObservable<uint8_t> brightness{"display", "brightness", 100};
     PersistedObservable<bool> darkMode{"display", "darkMode", true};
     PersistedObservable<uint8_t> idleBrightness{"display", "idle_brightness", 50};
-    PersistedObservable<uint32_t> idleTimeout{"display", "idle_timeout", 12000000};
+    PersistedObservable<uint8_t> idleTimeoutMinutes{"display", "idle_timeout", 2};
 
 };
 
