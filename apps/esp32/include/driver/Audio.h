@@ -36,5 +36,5 @@ void playTetris();
 void beepCycleUp();
 void beepCycleDown();
 
-
+void rotaryTurn(bool up);
 }

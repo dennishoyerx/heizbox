@@ -165,6 +165,31 @@ bool triggeredTwice(uint32_t intervalMs) {
     return false;
 }
 
+class ManualControl {
+    static bool active;
+
+public:
+    static bool isActive() { return active; }
+    static void setActive(bool val) { active = val; }
+
+};
+
+class Every {
+    uint32_t _interval;
+    uint32_t _last;
+public:
+    Every(uint32_t interval) : _interval(interval), _last(0) {}
+    bool operator()() {
+        uint32_t now = millis();
+        if (now - _last >= _interval) {
+            _last = now;
+            return true;
+        }
+        return false;
+    }
+
+};
+
 
 void FireScreen::handleInput(InputEvent event) {
     auto& ds = DeviceState::instance();
@@ -230,7 +255,6 @@ void FireScreen::handleInput(InputEvent event) {
 
                 menu.nextOption();
             }
-            dirty();
             return;
         } else if (curName == "IR Cal B") {
             // trigger calibration B
@@ -253,14 +277,12 @@ void FireScreen::handleInput(InputEvent event) {
                 }
                 menu.prevOption();
             }
-            dirty();
             return;
         } else if (curName == "IR Cal Clear") {
             //heater.getIRTempSensor()->getCalibration()->clear();
             heater.clearIRCalibration();
             showOverlay("IR Calibration cleared", 1400);
             Audio::beepWarning();
-            dirty();
             return;
         }
         return;
@@ -269,32 +291,28 @@ void FireScreen::handleInput(InputEvent event) {
     if (input(event, {LEFT}, {PRESS})) {
         menu.prevOption();
         Audio::beepMenu();
-        dirty();
     }
     if (input(event, {RIGHT}, {PRESS})) {
         menu.nextOption();
         Audio::beepMenu();
-        dirty();
     }
 
     
     if (input(event, {UP}, {PRESS, HOLD})) {
         menu.increment();
         Audio::beepMenu();
-        dirty();
     }
     
     if (input(event, {DOWN}, {PRESS, HOLD})) {
         menu.decrement();
         Audio::beepMenu();
-        dirty();
     }
 
     if (input(event, {ROTARY_ENCODER}, {ROTARY_CW, ROTARY_CCW})) {
         int delta = event.type == ROTARY_CW ? 1 : -1;
         
         hs.tempLimit.set(hs.tempLimit.get() + delta);
-        dirty();
+        Audio::rotaryTurn(ROTARY_CW == event.type);
     }
 }
 
@@ -305,5 +323,4 @@ void FireScreen::_handleHeatingTrigger(bool shouldStartHeating) {
     } else if (heater.isHeating()) {
         heater.stopHeating(false);
     }
-    dirty();
 }

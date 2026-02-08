@@ -11,52 +11,30 @@
 #include "heater/Temperature.h"
 
 #include <BaseClass.h>
-/*
-class ICalibration {};
 
-class IRCalibration: public ICalibration {
-    enum Point {
-        A,
-        B
+namespace Heater {
+
+    enum class State : uint8_t {
+        IDLE,
+        HEATING,
+        PAUSED,
+        ERROR
     };
 
-    struct Config {
-        int16_t a;
-        int16_t b;
-        float slope;
-        float offset;
+    struct Status {
+        void set(State s) { state = s; }
+      private:
+        State state = State::IDLE;
     };
 
-    IRCalibration();
-    
-    void compute();
-    void clear();
-
-    void setPoint(Point p, int16_t temp);
-    int16_t getPoint(Point p);
-    float getSlope();
-    float getOffset();
-
-private:
-    Config config;
+struct AutoStopTime {
+    int8_t limit;
+    AutoStopTime(int8_t s) : limit(s) {}
+    bool hasExceeded(int8_t passedSeconds) { return passedSeconds > limit; }
+};
 };
 
-namespace hzbx {
-
-class MosfetDriver {
-public:
-    void on();
-    void off();
-    
-private:
-};
-
-
-
-}
-*/
-class HeaterController: public dh::BaseClass {
-public:
+struct HeaterController: public dh::BaseClass {
     enum class State : uint8_t {
         IDLE,
         HEATING,
@@ -98,7 +76,6 @@ private:
     void transitionTo(State newState);
 
     State state = State::IDLE;
-    uint32_t startTime = 0;
     uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000;
 };

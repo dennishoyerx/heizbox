@@ -1,4 +1,5 @@
 #include "heater/HeaterController.h"
+#include "heater/Safety.h"
 #include "Config.h"
 #include <Arduino.h>
 #include "utils/Logger.h"
@@ -9,7 +10,6 @@
 HeaterController::HeaterController()
     : BaseClass("HeaterController"),
       state(State::IDLE), 
-      startTime(0), 
       pauseTime(0),
       autoStopTime(60000) {
     zvsDriver = new ZVSDriver(
@@ -52,19 +52,14 @@ void HeaterController::startHeating() {
     Audio::beepHeatStart();
     if (state == State::IDLE) {
         heatCycle.start();
-        startTime = millis();
-
         zvsDriver->setEnabled(true);
         
         transitionTo(State::HEATING);
         logger.info("🔥 Heating started");
 
         hs.isHeating.set(true);
-        hs.startTime.set(startTime);
     } else if (state == State::PAUSED) {
         heatCycle.start();
-        startTime = millis() - (pauseTime - startTime);
-
         zvsDriver->setEnabled(true);
         hs.isHeating.set(true);
         
@@ -82,10 +77,8 @@ void HeaterController::stopHeating(bool finalize) {
 
     if (finalize) {
         heatCycle.submit();
-        startTime = millis();
         transitionTo(State::IDLE);
         logger.info("🔥 Heating stopped (finalized)");
-        hs.startTime.set(0);
     } else {
         Audio::beepHeatFinish();
         heatCycle.stop();
@@ -94,36 +87,6 @@ void HeaterController::stopHeating(bool finalize) {
         logger.info("🔥 Heating paused");
     }
 }
-
-namespace Safety {
-    bool cutoffTemperatureReached() {
-        auto& hs = HeaterState::instance();
-        if (hs.tempLimit == 420) return false;
-        return hs.temp > hs.tempLimit;
-    }
-
-    bool noTempClimb() {
-        static const int values[] = { };
-
-        auto& hs = HeaterState::instance();
-        hs.temp;
-        return false;
-    };
-    
-    bool timeLimit() {
-        auto& hs = HeaterState::instance();
-        return hs.timer >= hs.cycleTimeout;
-    };
-
-
-    bool checkFailed() {
-        if (cutoffTemperatureReached()) return true;
-        if (noTempClimb()) return true;
-        if (timeLimit()) return true;
-
-        return false;
-    };
-};
 
 void HeaterController::update() {
     auto& hs = HeaterState::instance();
@@ -137,14 +100,11 @@ void HeaterController::update() {
         return;
     }
 
-    if (state == State::PAUSED) {
-        if (millis() - pauseTime >= hs.cycleTimeout) {
-            logger.info("Pause timeout, finalizing cycle.");
-            heatCycle.submit();
+    if (state == State::PAUSED && millis() - pauseTime >= hs.cycleTimeout) {
+        logger.info("Pause timeout, finalizing cycle.");
+        heatCycle.submit();
 
-            startTime = millis();
-            transitionTo(State::IDLE);
-        }
+        transitionTo(State::IDLE);
     }
 }
 
@@ -153,7 +113,6 @@ void HeaterController::updateTemperature() {
     uint16_t irTemp = 0;
     uint16_t kTemp = 0;
 
-    // IR Sensor
     if (temperature.update(Sensors::Type::IR)) {
         float raw = temperature.get(Sensors::Type::IR);
         if (!isfinite(raw) || raw < 0.0f || raw > 1000.0f) {

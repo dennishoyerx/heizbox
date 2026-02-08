@@ -164,6 +164,14 @@ void beepCycleDown() {
     tone(3000, 15, 70);
 }
 
+void rotaryTurn(bool up) {
+    int firstTone = up ? 300 : 120;
+    int secondTone = up ? 120 : 300;
+    tone(firstTone, 15, 45);
+    silence(10);
+    tone(secondTone, 15, 50);
+}
+
 void beepHeatFinish() {
     static bool togx = false;
     if (togx) {

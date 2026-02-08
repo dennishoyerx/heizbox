@@ -12,14 +12,14 @@ class HeaterController;
 class DeviceUI;
 
 class Device {
+    HeaterController heater;
+    DeviceUI ui;
+    Network network;
+
+    void initNVS();
+
 public:
     Device();
     void setup();
     void loop();
-
-private:
-    HeaterController heater;
-    DeviceUI ui;
-    Network network;
-    void initNVS();
 };

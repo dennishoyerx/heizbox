@@ -29,6 +29,23 @@ void DeviceUI::init() {
     booted();
 };
 
+class DimDisplay {
+    bool dimmed;
+
+    struct Brightness {
+        int8_t active;
+        int8_t idle;
+    };
+    Brightness brightness;
+
+    int32_t lastInputMs;
+    int32_t timeoutMs;
+
+
+};
+
+
+
 void DeviceUI::update() {
     input.update();
     screenManager.update();
