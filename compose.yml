@@ -1,0 +1,66 @@
+services:
+  esp-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.esp
+    container_name: heizbox-esp
+    volumes:
+      - .:/app
+      - pio_cache:/app/apps/esp32/.pio
+    working_dir: /app/apps/esp32
+    command: pio run
+    profiles:
+      - esp
+      - build
+
+  esp-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile.esp
+    container_name: heizbox-esp-monitor
+    volumes:
+      - .:/app
+      - pio_cache:/app/apps/esp32/.pio
+    working_dir: /app/apps/esp32
+    privileged: true
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
+      - /dev/ttyUSB1:/dev/ttyUSB1
+    command: pio device monitor
+    profiles:
+      - esp
+      - monitor
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: heizbox-frontend
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "5173:5173"
+    command: pnpm nx serve frontend --host=0.0.0.0
+    profiles:
+      - frontend
+      - dev
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: heizbox-backend
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "8787:8787"
+    command: pnpm nx serve backend
+    profiles:
+      - backend
+      - dev
+
+volumes:
+  pio_cache:
+  node_modules:

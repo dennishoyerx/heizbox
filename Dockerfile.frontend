@@ -1,0 +1,20 @@
+FROM node:20-slim
+
+RUN npm install -g pnpm@latest
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY nx.json tsconfig*.json ./
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/frontend/package.json ./apps/frontend/
+COPY libs/types/package.json ./libs/types/
+COPY libs/utils/package.json ./libs/utils/
+
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+
+EXPOSE 5173 8787
+
+CMD ["pnpm", "nx", "serve", "frontend"]

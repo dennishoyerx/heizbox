@@ -1,0 +1,8 @@
+FROM platformio/platformio-core:latest
+
+RUN pip install --no-cache-dir platformio
+
+WORKDIR /app
+
+ENTRYPOINT ["pio"]
+CMD ["run"]
