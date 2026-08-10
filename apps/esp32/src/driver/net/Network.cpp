@@ -41,6 +41,7 @@ void Network::update() {
     wifi.update();
     WebSocketManager::instance().update();
     ota.handle();
+    firmwareUpdater.update();
 }
 
 void Network::setupWifi(const char* ssid, const char* password, const char* hostname) {
@@ -51,6 +52,8 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
             configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
             WebSocketManager::instance().init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
             initialized = true;
+            // Firmware-Check nach Connect (HTTPClient hat eigene Timeouts)
+            firmwareUpdater.checkNow();
         }
     });
 }

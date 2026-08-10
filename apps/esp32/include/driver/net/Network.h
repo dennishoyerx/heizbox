@@ -2,6 +2,7 @@
 
 #include "driver/net/WiFiManager.h"
 #include "driver/net/OTASetup.h"
+#include "services/FirmwareUpdater.h"
 #include "Config.h"
 #include <ArduinoJson.h>
 #include <functional>
@@ -20,6 +21,7 @@ public:
 private:
     WiFiManager wifi;
     OTASetup ota;
+    FirmwareUpdater firmwareUpdater;
 
     bool initialized = false;
 };

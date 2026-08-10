@@ -30,3 +30,6 @@ local_protocol = "http"
 
 [observability.logs]
 enabled = true
+
+# Static Assets (Firmware-Downloads)
+assets = { directory = "./public", binding = "ASSETS" }
