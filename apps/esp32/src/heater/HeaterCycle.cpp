@@ -1,5 +1,5 @@
-#include "heater\HeaterCycle.h"
-#include "heater\HeaterState.h"
+#include "heater/HeaterCycle.h"
+#include "heater/HeaterState.h"
 
 HeaterCycle::HeaterCycle() {}
 

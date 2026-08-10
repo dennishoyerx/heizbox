@@ -1,5 +1,5 @@
 #pragma once
-#include "heater\HeaterController.h"
+#include "heater/HeaterController.h"
 
 class HeaterCycle {
 public:

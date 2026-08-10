@@ -1,5 +1,5 @@
-#include "heater\Sensors.h"
-#include "heater\HeaterState.h"
+#include "heater/Sensors.h"
+#include "heater/HeaterState.h"
 #include "core/DeviceState.h"
 #include "Config.h"
 

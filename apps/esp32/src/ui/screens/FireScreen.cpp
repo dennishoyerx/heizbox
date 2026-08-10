@@ -6,7 +6,7 @@
 #include "core/DeviceState.h"
 #include "ui/ColorPalette.h"
 #include "bitmaps.h"
-#include "heater\HeaterCycle.h"
+#include "heater/HeaterCycle.h"
 #include "core/EventBus.h"
  #include <Wire.h>
 #include <utility>
@@ -242,7 +242,7 @@ void FireScreen::handleInput(InputEvent event) {
             } else {
                 //uint16_t measured = heater.getIRTempSensor()->getCalibration()->setMeasurement(IRCalibration::Point::A, hs.irCalActualA);
                 uint16_t actualTemp = hs.irCalActualA;
-                Serial.printf("Menu: Storing IR Cal A for actual=%u\n", actualTemp);
+                Serial.printf("Menu: Storing IR Cal A for actual=%u/n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
                 if (res == 0) {
                     showOverlay("IR click failed (no valid samples)", 1500);
@@ -265,7 +265,7 @@ void FireScreen::handleInput(InputEvent event) {
             } else {
                 //uint16_t measured = heater.getIRTempSensor()->getCalibration()->setMeasurement(IRCalibration::Point::B, hs.irCalActualB);
                 uint16_t actualTemp = hs.irCalActualB;
-                Serial.printf("Menu: Storing IR Cal B for actual=%u\n", actualTemp);
+                Serial.printf("Menu: Storing IR Cal B for actual=%u/n", actualTemp);
                 int res = heater.markIRClick(actualTemp);
                 if (res == 0) {
                     showOverlay("IR click failed (no valid samples)", 1500);

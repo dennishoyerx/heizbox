@@ -1,4 +1,4 @@
-#include "ui\components\HeatUI.h"
+#include "ui/components/HeatUI.h"
 #include "bitmaps.h"
 #include "ui/ColorPalette.h"
 #include "ui/base/Screen.h"

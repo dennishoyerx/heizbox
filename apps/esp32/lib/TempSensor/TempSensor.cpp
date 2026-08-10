@@ -1,5 +1,5 @@
 #include "TempSensor.h"
-#include <MAX6675.h>
+#include <max6675.h>
 #include <Arduino.h>
 
 TempSensor::TempSensor(uint8_t sck_pin, uint8_t cs_pin, uint8_t so_pin, uint16_t readIntervalMs)

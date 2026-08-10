@@ -1,5 +1,5 @@
 #pragma once
-#include <MAX6675.h>
+#include <max6675.h>
 #include <Arduino.h>
 #include "ITemperatureSensor.h"
 
