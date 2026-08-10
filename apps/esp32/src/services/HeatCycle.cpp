@@ -1,12 +1,12 @@
 #include "services/HeatCycle.h"
 #include "heater/HeaterCycle.h"
 
-uint16_t HeatCycle::start() {
+uint32_t HeatCycle::start() {
     WebSocketManager::instance().sendStatusUpdate(true, true);
     return timer.start();
 }
 
-uint16_t HeatCycle::stop() {
+uint32_t HeatCycle::stop() {
     WebSocketManager::instance().sendStatusUpdate(true, false);
     return timer.stop();
 }

@@ -4,13 +4,13 @@
 
 class Timer {
 public:
-    uint16_t start() { return startMs = millis(); };
-    uint16_t stop()  { return durationMs += millis() - startMs; startMs = 0; };
+    uint32_t start() { startMs = millis(); return startMs; };
+    uint32_t stop()  { durationMs += millis() - startMs; startMs = 0; return durationMs; };
     void reset() { startMs = 0; durationMs = 0; };
 
-    uint16_t getDuration() const { return getDurationMs() / 1000; }
-    uint16_t getDurationMs() const { return durationMs + millis() - startMs; }
-    uint16_t getStartMs() const { return startMs; }
+    uint32_t getDuration() const { return getDurationMs() / 1000; }
+    uint32_t getDurationMs() const { return durationMs + millis() - startMs; }
+    uint32_t getStartMs() const { return startMs; }
 
 protected:
     uint32_t durationMs;
@@ -19,11 +19,11 @@ protected:
 
 class HeatCycle {
 public:
-    uint16_t start();
-    uint16_t stop();
+    uint32_t start();
+    uint32_t stop();
     void submit();
-    uint16_t getTimer() const { return timer.getDuration(); }
-    uint16_t getTimerMs() const { return timer.getDurationMs(); }
+    uint32_t getTimer() const { return timer.getDuration(); }
+    uint32_t getTimerMs() const { return timer.getDurationMs(); }
 
 private:
     Timer timer;
