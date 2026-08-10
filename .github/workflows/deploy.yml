@@ -46,7 +46,7 @@ jobs:
       - name: Check affected projects
         id: affected
         run: |
-          AFFECTED=$(npx nx show projects --affected)
+          AFFECTED=$(npx nx show projects --affected --json | jq -r 'join(" ")')
           echo "affected=$AFFECTED" >> $GITHUB_OUTPUT
 
       - name: Deploy Backend Worker
