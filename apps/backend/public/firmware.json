@@ -1,7 +1,7 @@
 {
   "version": "1.4.1",
   "buildDate": "2026-08-10",
-  "url": "/firmware.bin",
+  "url": "/firmware-1.4.1.bin",
   "note": "Timer-Fixes: dead code in stop(), uint32_t overflow",
-  "size": 1447792
+  "size": 1447632
 }

@@ -5,6 +5,7 @@
 #include "credentials.h"
 
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <Update.h>
 #include <ArduinoJson.h>
 
@@ -23,9 +24,11 @@ int FirmwareUpdater::parseVersionPart(const String& v, int index) {
 }
 
 bool FirmwareUpdater::checkVersion() {
+    WiFiClientSecure client;
+    client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
     HTTPClient http;
     String url = String(API_ENDPOINT) + "/firmware.json";
-    http.begin(url);
+    http.begin(client, url);
     http.setTimeout(10000);
     http.setConnectTimeout(5000);
 
@@ -72,8 +75,10 @@ bool FirmwareUpdater::checkVersion() {
 
     if (size == 0) {
         // Falls size fehlt: HEAD-Request für Content-Length
+        WiFiClientSecure headClient;
+        headClient.setInsecure();
         HTTPClient head;
-        head.begin(binUrl);
+        head.begin(headClient, binUrl);
         head.setTimeout(10000);
         head.sendRequest("HEAD");
         size = head.getSize();
@@ -87,8 +92,10 @@ bool FirmwareUpdater::downloadAndFlash(const char* url, size_t size) {
     updating = true;
     EventBus::instance().publish(Event{EventType::OTA_UPDATE_STARTED, nullptr});
 
+    WiFiClientSecure client;
+    client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
     HTTPClient http;
-    http.begin(url);
+    http.begin(client, url);
     http.setTimeout(30000);
     http.setConnectTimeout(5000);
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
