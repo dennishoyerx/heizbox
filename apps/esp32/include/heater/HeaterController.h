@@ -78,4 +78,9 @@ private:
     State state = State::IDLE;
     uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000;
+
+    // Vape-Entfernung (Temp-Drop) Erkennung
+    uint16_t peakTemp = 0;
+    uint32_t heatStartTime = 0;
+    bool vaporRemoved(HeaterState& hs);
 };

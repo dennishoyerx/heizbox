@@ -77,6 +77,11 @@ struct HeaterConfig {
     struct ZVS {
         static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
     };
+
+    // Vape-Entfernung erkennen: IR-Temp fällt beim Heizen unter den Peak (Vape weggezogen)
+    static constexpr uint16_t TEMP_DROP_THRESHOLD = 40;      // °C Abfall unter Peak = Vape entfernt
+    static constexpr uint16_t TEMP_DROP_MIN_PEAK = 60;       // erst ab dieser Peak-Temp aktiv
+    static constexpr uint32_t TEMP_DROP_MIN_HEAT_MS = 3000;  // erst nach 3s Heizen aktiv
 };
 
 struct NetworkConfig {

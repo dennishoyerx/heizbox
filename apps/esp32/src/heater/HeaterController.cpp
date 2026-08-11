@@ -58,6 +58,8 @@ void HeaterController::startHeating() {
         logger.info("🔥 Heating started");
 
         hs.isHeating.set(true);
+        peakTemp = 0;
+        heatStartTime = millis();
     } else if (state == State::PAUSED) {
         heatCycle.start();
         zvsDriver->setEnabled(true);
@@ -65,6 +67,8 @@ void HeaterController::startHeating() {
         
         transitionTo(State::HEATING);
         logger.info("🔥 Heating resumed");
+        peakTemp = 0;
+        heatStartTime = millis();
     }
 }
 
@@ -94,7 +98,21 @@ void HeaterController::update() {
     updateTemperature();
 
     if (state == State::HEATING) {
-        if (Safety::checkFailed()) stopHeating(false);
+        if (Safety::checkFailed()) {
+            stopHeating(false);
+            return;
+        }
+
+        // Peak tracken (fuer Vape-Entfernung Erkennung)
+        if (hs.temp > peakTemp) peakTemp = hs.temp;
+
+        // Vape entfernt -> Temp fällt unter Peak -> Heater stoppen
+        if (vaporRemoved(hs)) {
+            logPrint("log", "🔥 Vape removed (temp %u -> %u), stopping", peakTemp, static_cast<unsigned int>(hs.temp));
+            stopHeating(true);
+            return;
+        }
+
         zvsDriver->update();
         hs.timer.set(heatCycle.getTimer());
         return;
@@ -134,6 +152,15 @@ void HeaterController::updateTemperature() {
         hs.tempIR.set(irTemp);
         hs.temp.set(irTemp);
     }
+}
+
+bool HeaterController::vaporRemoved(HeaterState& hs) {
+    // Nur nach Mindest-Heizdauer aktiv, damit der anfängliche Anstieg nicht als Drop zählt
+    if (millis() - heatStartTime < HeaterConfig::TEMP_DROP_MIN_HEAT_MS) return false;
+    // Erst ab einem Mindest-Peak aktiv (Gerät muss wirklich warm geworden sein)
+    if (peakTemp < HeaterConfig::TEMP_DROP_MIN_PEAK) return false;
+    // Signifikanter Abfall unter den Peak = Vape wurde entfernt
+    return hs.temp <= peakTemp - HeaterConfig::TEMP_DROP_THRESHOLD;
 }
 
 void HeaterController::setAutoStopTime(uint32_t time) {
