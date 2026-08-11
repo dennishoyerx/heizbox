@@ -1,7 +1,7 @@
 {
-  "version": "1.4.2",
+  "version": "1.4.3",
   "buildDate": "2026-08-11",
-  "url": "/firmware-1.4.2.bin",
-  "note": "WS-triggered update check, 30min fallback, TLS via WiFiClientSecure",
+  "url": "/firmware-1.4.3.bin",
+  "note": "OTA fix: ArduinoOTA starts after WiFi connect",
   "size": 1447664
 }

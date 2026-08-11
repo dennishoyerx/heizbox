@@ -39,7 +39,6 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
         }
     });
 
-    ota.setup();
     booted();
 }
 
@@ -57,6 +56,9 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
         if (!initialized && connected) {
             configTime(DeviceState::instance().timezoneOffset.get(), 0, NetworkConfig::NTP_SERVER);
             WebSocketManager::instance().init(NetworkConfig::BACKEND_WS_URL, NetworkConfig::DEVICE_ID, "device");
+            // OTA erst JETZT starten - ArduinoOTA braucht verbundenes WiFi,
+            // sonst bindet der Server auf ein Interface ohne IP (Port 3232 bleibt zu)
+            ota.setup();
             initialized = true;
             // Firmware-Check nach Connect (HTTPClient hat eigene Timeouts)
             firmwareUpdater.checkNow();
