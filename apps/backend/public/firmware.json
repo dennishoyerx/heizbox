@@ -3,5 +3,5 @@
   "buildDate": "2026-08-10",
   "url": "/firmware.bin",
   "note": "Timer-Fixes: dead code in stop(), uint32_t overflow",
-  "size": 1447776
+  "size": 1447792
 }
