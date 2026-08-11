@@ -1,7 +1,7 @@
 {
-  "version": "1.4.1",
-  "buildDate": "2026-08-10",
-  "url": "/firmware-1.4.1.bin",
-  "note": "Timer-Fixes: dead code in stop(), uint32_t overflow",
-  "size": 1447632
+  "version": "1.4.2",
+  "buildDate": "2026-08-11",
+  "url": "/firmware-1.4.2.bin",
+  "note": "WS-triggered update check, 30min fallback, TLS via WiFiClientSecure",
+  "size": 1447664
 }

@@ -31,6 +31,12 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
 
             submitted = true;
         }
+
+        // Firmware-Check bei jedem (Re-)Connect - WS ist staendig verbunden,
+        // dadurch schnelle Reaktion auf neue Firmware-Versionen
+        if (connected) {
+            firmwareUpdater.checkNow();
+        }
     });
 
     ota.setup();

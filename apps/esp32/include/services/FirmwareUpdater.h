@@ -18,6 +18,7 @@ private:
     static int parseVersionPart(const String& v, int index);
 
     uint32_t lastCheck = 0;
-    static constexpr uint32_t CHECK_INTERVAL_MS = 6UL * 60 * 60 * 1000; // alle 6h
+    static constexpr uint32_t CHECK_INTERVAL_MS = 30UL * 60 * 1000; // Fallback: alle 30min
+    static constexpr uint32_t MIN_CHECK_GAP_MS = 60 * 1000; // max 1x pro Minute
     bool updating = false;
 };
