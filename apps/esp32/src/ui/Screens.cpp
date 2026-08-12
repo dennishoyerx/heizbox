@@ -78,6 +78,9 @@ void Screens::setupMenus(ScreenManager& screenManager) {
         .addAction("Restart", [this]() {
             esp_restart();
         })
+        .addAction("Check Update", [&]() {
+            EventBus::instance().publish(Event{EventType::CHECK_FOR_UPDATES, nullptr});
+        })
         .build();
     this->mainMenuScreen = std::make_unique<GenericMenuScreen>("SETTINGS", std::move(menuItems));
     screenManager.registerScreen(ScreenType::MAIN_MENU, this->mainMenuScreen.get());

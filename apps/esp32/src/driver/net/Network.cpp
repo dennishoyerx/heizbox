@@ -39,6 +39,11 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
         }
     });
 
+    // Manueller Update-Check aus dem Menü
+    EventBus::instance().subscribe(EventType::CHECK_FOR_UPDATES, [this](const Event&) {
+        firmwareUpdater.checkNow();
+    });
+
     booted();
 }
 
