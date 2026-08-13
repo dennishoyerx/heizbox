@@ -1,4 +1,5 @@
 #include "driver/net/WebSocketManager.h"
+#include "utils/Logger.h"
 
 WebSocketManager& WebSocketManager::instance() {
     static WebSocketManager instance;
@@ -29,7 +30,7 @@ void WebSocketManager::init(const char* url, const char* deviceId, const char* c
     hostStr.toCharArray(hostBuf, sizeof(hostBuf));
     pathStr.toCharArray(pathBuf, sizeof(pathBuf));
 
-    Serial.printf("WebSocket connecting to: %s%s\n", hostBuf, pathBuf);
+    logPrint("ws", "WebSocket connecting to: %s%s", hostBuf, pathBuf);
     
     webSocket.begin(hostBuf, 80, pathBuf); // plain WS (kein TLS - RAM-Limit)
     //webSocket.beginSSL(hostBuf, 443, pathBuf, "", "");
@@ -60,7 +61,7 @@ void WebSocketManager::update() {
 
 bool WebSocketManager::sendJson(const JsonDocument& doc) {
     if (!state.connected) {
-        Serial.println("WebSocket not connected");
+        logPrint("ws", "WebSocket not connected");
         return false;
     }
 
@@ -137,13 +138,13 @@ bool WebSocketManager::sendSessionUpdate(int clicks, int caps) {
 void WebSocketManager::handleEvent(WStype_t type, uint8_t* payload, size_t length) {
     switch (type) {
         case WStype_DISCONNECTED:
-            Serial.println("WebSocket disconnected");
+            logPrint("ws", "WebSocket disconnected");
             state.connected = false;
             if (connectionCallback) connectionCallback(false);
             break;
 
         case WStype_CONNECTED:
-            Serial.printf("WebSocket connected");
+            logPrint("ws", "WebSocket connected");
             state.connected = true;
             state.reconnectAttempts = 0;
             state.lastHeartbeat = millis();
@@ -167,7 +168,7 @@ void WebSocketManager::handleEvent(WStype_t type, uint8_t* payload, size_t lengt
                 DeserializationError error = deserializeJson(doc, payload, length);
 
                 if (error) {
-                    Serial.printf("JSON parse error: %s\n", error.c_str());
+                    logPrint("ws", "JSON parse error: %s", error.c_str());
                     return;
                 }
 
@@ -179,7 +180,8 @@ void WebSocketManager::handleEvent(WStype_t type, uint8_t* payload, size_t lengt
             break;
 
         case WStype_ERROR:
-            Serial.printf("WebSocket error: %s\n", payload);
+            if (payload) logPrint("ws", "WebSocket error: %s", payload);
+            else logPrint("ws", "WebSocket error (no payload)");
             break;
 
         default:
