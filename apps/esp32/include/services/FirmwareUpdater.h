@@ -5,8 +5,8 @@ class FirmwareUpdater {
 public:
     FirmwareUpdater();
 
-    // Einmaliger Check (z.B. nach WiFi-Connect)
-    void checkNow();
+    // Einmaliger Check (z.B. nach WiFi-Connect); force = Rate-Limit ueberspringen
+    bool checkNow(bool force = false);
     // Im Loop aufrufen, prüft Intervall
     void update();
     // Aktuell laufendes Update?

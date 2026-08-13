@@ -32,6 +32,15 @@ button.danger{background:#c62828}
 <h1>🔥 Heizbox Debug <span id="ver" style="font-size:12px;color:#888"></span></h1>
 <div id="status"><b>Firmware</b><span id="s_fw">-</span><b>WiFi</b><span id="s_wifi">-</span><b>IP</b><span id="s_ip">-</span><b>RSSI</b><span id="s_rssi">-</span><b>WebSocket</b><span id="s_ws">-</span><b>Uptime</b><span id="s_up">-</span><b>Heap</b><span id="s_heap">-</span><b>Backend</b><span id="s_be">-</span></div>
 <button onclick="restart()">🔄 Neustart</button>
+<div style="margin-bottom:12px">
+<button onclick="checkUpdate()">\u2b06 Update checken</button>
+</div>
+<div id="settings" style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px;margin-bottom:12px;font-size:13px">
+<b>\u2699 Settings</b><br>
+<label>Brightness <input type="range" id="set_brightness" min="20" max="100" step="5" oninput="document.getElementById('s_brightness').textContent=this.value"> <span id="s_brightness">-</span></label><br>
+<label>Idle <input type="range" id="set_idle" min="20" max="100" step="5" oninput="document.getElementById('s_idle').textContent=this.value"> <span id="s_idle">-</span></label><br>
+<button onclick="saveSettings()">\ud83d\udcbe Speichern</button>
+</div>
 <div id="log">Lade Log...</div>
 <script>
 let lastTs = 0;
@@ -64,8 +73,34 @@ async function restart(){
   if(!confirm('Heizbox neu starten?')) return;
   await fetch('/api/restart',{method:'POST'});
 }
+async function checkUpdate(){
+  try{
+    const r = await fetch('/api/update',{method:'POST'}); const j = await r.json();
+    alert(j.ok ? 'Update-Check gestartet' : 'Update-Check: ' + (j.error||'Fehler'));
+  }catch(e){ alert('Update-Check fehlgeschlagen'); }
+}
+async function loadSettings(){
+  try{
+    const r = await fetch('/api/settings'); const s = await r.json();
+    document.getElementById('set_brightness').value = s.brightness;
+    document.getElementById('set_idle').value = s.idleBrightness;
+    document.getElementById('s_brightness').textContent = s.brightness;
+    document.getElementById('s_idle').textContent = s.idleBrightness;
+  }catch(e){}
+}
+async function saveSettings(){
+  try{
+    const b = document.getElementById('set_brightness').value;
+    const i = document.getElementById('set_idle').value;
+    const r = await fetch('/api/settings',{method:'POST',body:'brightness='+b+'&idleBrightness='+i,headers:{'Content-Type':'application/x-www-form-urlencoded'}});
+    const j = await r.json();
+    if(!j.ok) alert('Fehler: '+(j.error||'?'));
+    else loadSettings();
+  }catch(e){ alert('Speichern fehlgeschlagen'); }
+}
 setInterval(refresh, 2000);
 refresh();
+loadSettings();
 </script>
 </body>
 </html>
@@ -83,6 +118,9 @@ void DebugServer::init() {
     server.on("/api/nettest", HTTP_GET, [this]() {
         handleApiNetTest();
     });
+    server.on("/api/settings", HTTP_GET, [this]() { handleApiSettingsGet(); });
+    server.on("/api/settings", HTTP_POST, [this]() { handleApiSettingsPost(); });
+    server.on("/api/update", HTTP_POST, [this]() { handleApiUpdate(); });
     server.on("/api/ota", HTTP_POST,
         [this]() { handleApiOtaDone(); },
         [this]() { handleApiOtaUpload(); });
@@ -109,6 +147,7 @@ void DebugServer::handleApiStatus() {
     json += "\"ws\":" + String(ws.isConnected() ? "true" : "false") + ",";
     json += "\"uptime\":\"" + String(millis() / 1000) + "s\",";
     json += "\"heap\":" + String(ESP.getFreeHeap() / 1024) + ",";
+    json += "\"freeSketch\":" + String(ESP.getFreeSketchSpace()) + ",";
     json += "\"backend\":\"" + String(NetworkConfig::BACKEND_WS_URL) + "\"";
     json += "}";
     server.send(200, "application/json", json);
@@ -163,6 +202,12 @@ void DebugServer::handleApiNetTest() {
 }
 
 void DebugServer::handleApiOtaDone() {
+    if (otaTooBig_) {
+        otaTooBig_ = false;
+        logPrint("ota", "OTA abgebrochen: Datei zu gross");
+        server.send(413, "application/json", "{\"ok\":false,\"error\":\"firmware too big for partition\"}");
+        return;
+    }
     if (Update.hasError()) {
         logPrint("ota", "OTA failed: %s", Update.errorString());
         server.send(500, "text/plain", String("OTA failed: ") + Update.errorString());
@@ -178,10 +223,17 @@ void DebugServer::handleApiOtaUpload() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
         logPrint("ota", "OTA Start: %s (%u bytes)", upload.filename.c_str(), upload.totalSize);
+        if (upload.totalSize == 0 || upload.totalSize > ESP.getFreeSketchSpace()) {
+            logPrint("ota", "OTA size %u zu gross (freeSketch %u), abort", upload.totalSize, ESP.getFreeSketchSpace());
+            Update.abort();
+            otaTooBig_ = true;
+            return;
+        }
         if (!Update.begin(upload.totalSize)) {
             logPrint("ota", "Update.begin failed: %s", Update.errorString());
         }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (otaTooBig_) return;
         if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
             logPrint("ota", "Update.write failed: %s", Update.errorString());
         }
@@ -192,6 +244,54 @@ void DebugServer::handleApiOtaUpload() {
     } else if (upload.status == UPLOAD_FILE_ABORTED) {
         Update.abort();
         logPrint("ota", "OTA aborted");
+    }
+}
+
+void DebugServer::handleApiSettingsGet() {
+    auto& ds = DeviceState::instance();
+    String json = "{";
+    json += "\"brightness\":" + String(ds.display.brightness.get()) + ",";
+    json += "\"idleBrightness\":" + String(ds.display.idleBrightness.get());
+    json += "}";
+    server.send(200, "application/json", json);
+}
+
+void DebugServer::handleApiSettingsPost() {
+    auto& ds = DeviceState::instance();
+    bool changed = false;
+    if (server.hasArg("brightness")) {
+        int v = server.arg("brightness").toInt();
+        if (v < DisplayConfig::BRIGHTNESS_MIN || v > DisplayConfig::BRIGHTNESS_MAX) {
+            server.send(400, "application/json", "{\"ok\":false,\"error\":\"brightness out of range\"}");
+            return;
+        }
+        ds.display.brightness.set((uint8_t)v);
+        changed = true;
+        logPrint("api", "brightness -> %d", v);
+    }
+    if (server.hasArg("idleBrightness")) {
+        int v = server.arg("idleBrightness").toInt();
+        if (v < DisplayConfig::BRIGHTNESS_MIN || v > DisplayConfig::BRIGHTNESS_MAX) {
+            server.send(400, "application/json", "{\"ok\":false,\"error\":\"idleBrightness out of range\"}");
+            return;
+        }
+        ds.display.idleBrightness.set((uint8_t)v);
+        changed = true;
+        logPrint("api", "idleBrightness -> %d", v);
+    }
+    if (changed) server.send(200, "application/json", "{\"ok\":true}");
+    else server.send(400, "application/json", "{\"ok\":false,\"error\":\"no valid args\"}");
+}
+
+void DebugServer::handleApiUpdate() {
+    if (!updateCb_) {
+        server.send(500, "application/json", "{\"ok\":false,\"error\":\"no-update-callback\"}");
+        return;
+    }
+    if (updateCb_()) {
+        server.send(200, "application/json", "{\"ok\":true,\"update\":\"checking\"}");
+    } else {
+        server.send(429, "application/json", "{\"ok\":false,\"error\":\"rate-limited\"}");
     }
 }
 

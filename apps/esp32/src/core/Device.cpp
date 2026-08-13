@@ -34,6 +34,9 @@ void Device::setup() {
 
     // Debug-Schnittstelle via IP (http://<IP>/debug)
     DebugServer::instance().init();
+    DebugServer::instance().setUpdateCallback([this]() {
+        return network.firmware().checkNow(true);
+    });
 
     
     auto cb = [this]() {

@@ -16,6 +16,7 @@ public:
     void setupWifi(const char* ssid, const char* password, const char* hostname);
     void update();
     void handleWebSocketMessage(const char* type, const JsonDocument& doc);
+    FirmwareUpdater& firmware() { return firmwareUpdater; }
 
 
 private:

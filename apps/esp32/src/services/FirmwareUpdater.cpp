@@ -151,14 +151,18 @@ bool FirmwareUpdater::downloadAndFlash(const char* url, size_t size) {
     return false;
 }
 
-void FirmwareUpdater::checkNow() {
-    if (updating) return;
+bool FirmwareUpdater::checkNow(bool force) {
+    if (updating) return false;
     uint32_t now = millis();
     // Rate-Limit: max 1 Check pro Minute (WS-Reconnects koennen haeufig sein)
-    if (now - lastCheck < MIN_CHECK_GAP_MS) return;
+    if (!force && now - lastCheck < MIN_CHECK_GAP_MS) {
+        logPrint("log", "Update check rate-limited");
+        return false;
+    }
+    lastCheck = now;
     logPrint("log", "Checking firmware...");
     checkVersion();
-    lastCheck = now;
+    return true;
 }
 
 void FirmwareUpdater::update() {
