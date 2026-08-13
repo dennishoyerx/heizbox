@@ -2,6 +2,7 @@
 #include "utils/Logger.h"
 #include "driver/net/WebSocketManager.h"
 #include "core/DeviceState.h"
+#include "heater/HeaterState.h"
 #include "Config.h"
 
 #include <WiFi.h>
@@ -249,15 +250,24 @@ void DebugServer::handleApiOtaUpload() {
 
 void DebugServer::handleApiSettingsGet() {
     auto& ds = DeviceState::instance();
+    auto& hs = HeaterState::instance();
     String json = "{";
     json += "\"brightness\":" + String(ds.display.brightness.get()) + ",";
-    json += "\"idleBrightness\":" + String(ds.display.idleBrightness.get());
+    json += "\"idleBrightness\":" + String(ds.display.idleBrightness.get()) + ",";
+    json += "\"irSlope\":" + String(hs.irCalSlope.get(), 4) + ",";
+    json += "\"irOffset\":" + String(hs.irCalOffset.get(), 2) + ",";
+    json += "\"irCorrection\":" + String(hs.irCorrection.get()) + ",";
+    json += "\"irMeasuredA\":" + String(hs.irCalMeasuredA.get()) + ",";
+    json += "\"irMeasuredB\":" + String(hs.irCalMeasuredB.get()) + ",";
+    json += "\"irActualA\":" + String(hs.irCalActualA.get()) + ",";
+    json += "\"irActualB\":" + String(hs.irCalActualB.get());
     json += "}";
     server.send(200, "application/json", json);
 }
 
 void DebugServer::handleApiSettingsPost() {
     auto& ds = DeviceState::instance();
+    auto& hs = HeaterState::instance();
     bool changed = false;
     if (server.hasArg("brightness")) {
         int v = server.arg("brightness").toInt();
@@ -278,6 +288,52 @@ void DebugServer::handleApiSettingsPost() {
         ds.display.idleBrightness.set((uint8_t)v);
         changed = true;
         logPrint("api", "idleBrightness -> %d", v);
+    }
+    if (server.hasArg("clearCalibration") && server.arg("clearCalibration") == "1") {
+        hs.irCalMeasuredA.set(0);
+        hs.irCalMeasuredB.set(0);
+        hs.irCalActualA.set(150);
+        hs.irCalActualB.set(200);
+        hs.irCalSlope.set(1.0f);
+        hs.irCalOffset.set(0.0f);
+        hs.irCorrection.set(0);
+        changed = true;
+        logPrint("api", "IR calibration cleared");
+    }
+    if (server.hasArg("irSlope")) {
+        float v = server.arg("irSlope").toFloat();
+        if (v < -10.0f || v > 10.0f) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irSlope out of range\"}"); return; }
+        hs.irCalSlope.set(v); changed = true; logPrint("api", "irSlope -> %.4f", v);
+    }
+    if (server.hasArg("irOffset")) {
+        float v = server.arg("irOffset").toFloat();
+        if (v < -200.0f || v > 200.0f) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irOffset out of range\"}"); return; }
+        hs.irCalOffset.set(v); changed = true; logPrint("api", "irOffset -> %.2f", v);
+    }
+    if (server.hasArg("irCorrection")) {
+        int v = server.arg("irCorrection").toInt();
+        if (v < -50 || v > 50) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irCorrection out of range\"}"); return; }
+        hs.irCorrection.set((int16_t)v); changed = true; logPrint("api", "irCorrection -> %d", v);
+    }
+    if (server.hasArg("irMeasuredA")) {
+        int v = server.arg("irMeasuredA").toInt();
+        if (v < 0 || v > 1000) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irMeasuredA out of range\"}"); return; }
+        hs.irCalMeasuredA.set((uint16_t)v); changed = true; logPrint("api", "irMeasuredA -> %d", v);
+    }
+    if (server.hasArg("irMeasuredB")) {
+        int v = server.arg("irMeasuredB").toInt();
+        if (v < 0 || v > 1000) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irMeasuredB out of range\"}"); return; }
+        hs.irCalMeasuredB.set((uint16_t)v); changed = true; logPrint("api", "irMeasuredB -> %d", v);
+    }
+    if (server.hasArg("irActualA")) {
+        int v = server.arg("irActualA").toInt();
+        if (v < 0 || v > 1000) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irActualA out of range\"}"); return; }
+        hs.irCalActualA.set((uint16_t)v); changed = true; logPrint("api", "irActualA -> %d", v);
+    }
+    if (server.hasArg("irActualB")) {
+        int v = server.arg("irActualB").toInt();
+        if (v < 0 || v > 1000) { server.send(400, "application/json", "{\"ok\":false,\"error\":\"irActualB out of range\"}"); return; }
+        hs.irCalActualB.set((uint16_t)v); changed = true; logPrint("api", "irActualB -> %d", v);
     }
     if (changed) server.send(200, "application/json", "{\"ok\":true}");
     else server.send(400, "application/json", "{\"ok\":false,\"error\":\"no valid args\"}");
