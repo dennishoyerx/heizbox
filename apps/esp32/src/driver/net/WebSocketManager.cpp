@@ -32,8 +32,9 @@ void WebSocketManager::init(const char* url, const char* deviceId, const char* c
 
     logPrint("ws", "WebSocket connecting to: %s%s", hostBuf, pathBuf);
     
-    webSocket.begin(hostBuf, 80, pathBuf); // plain WS (kein TLS - RAM-Limit)
-    //webSocket.beginSSL(hostBuf, 443, pathBuf, "", "");
+    // Cloudflare erzwingt TLS: Port 80 gibt 301 -> wss auf 443 nötig.
+    // beginSSL mit leerem Fingerprint = kein Zertifikats-Pinning (Cloudflare-TLS ok).
+    webSocket.beginSSL(hostBuf, 443, pathBuf, "", "");
     webSocket.onEvent(onWebSocketEvent);
     webSocket.setReconnectInterval(5000);
 }
