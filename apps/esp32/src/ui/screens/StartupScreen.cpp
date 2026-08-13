@@ -26,8 +26,12 @@ void StartupScreen::draw() {
         memcpy(short_time, BUILD_TIME, 5);
         short_time[5] = '\0';
 
+        char version[12];
+        snprintf(version, sizeof(version), "v%s", FIRMWARE_VERSION);
+
         s.text(20, 35, short_date);
         s.text(20, 55, short_time);
+        s.text(210, 35, version);
 
         // Optional: Progress-Bar
         const float progress = this->getProgress();
