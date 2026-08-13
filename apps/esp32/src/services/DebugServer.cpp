@@ -6,6 +6,7 @@
 
 #include <WiFi.h>
 #include <Update.h>
+#include <WiFiClientSecure.h>
 #include "utils/Logger.h"
 
 static const char* PAGE_HTML PROGMEM = R"rawliteral(
@@ -79,6 +80,9 @@ void DebugServer::init() {
         delay(100);
         ESP.restart();
     });
+    server.on("/api/nettest", HTTP_GET, [this]() {
+        handleApiNetTest();
+    });
     server.on("/api/ota", HTTP_POST,
         [this]() { handleApiOtaDone(); },
         [this]() { handleApiOtaUpload(); });
@@ -114,6 +118,48 @@ void DebugServer::handleApiLog() {
     uint32_t since = server.arg("since").toInt();
     String json = logRingJson(since);
     server.send(200, "application/json", json);
+}
+
+void DebugServer::handleApiNetTest() {
+    String result = "{";
+    // 1. DNS
+    IPAddress ip;
+    bool dnsOk = WiFi.hostByName("box.hzbx.de", ip);
+    result += "\"dns\":" + String(dnsOk ? "true" : "false");
+    result += ",\"ip\":\"" + (dnsOk ? ip.toString() : String("fail")) + "\"";
+
+    // 2. TCP-Connect
+    WiFiClient probe;
+    bool tcpOk = probe.connect(ip, 443);
+    result += ",\"tcp443\":" + String(tcpOk ? "true" : "false");
+    if (tcpOk) probe.stop();
+
+    // 3. TLS-Handshake
+    WiFiClientSecure tls;
+    tls.setInsecure();
+    bool tlsOk = tls.connect("box.hzbx.de", 443);
+    result += ",\"tls\":" + String(tlsOk ? "true" : "false");
+    if (tlsOk) {
+        result += ",\"tlsErr\":\"\"";
+        tls.stop();
+    } else {
+        result += ",\"tlsErr\":\"" + String(tls.lastError(nullptr, 0)) + "\"";
+    }
+
+    // 4. HTTP GET auf box.hzbx.de (ohne WS)
+    WiFiClientSecure http;
+    http.setInsecure();
+    if (http.connect("box.hzbx.de", 443)) {
+        http.print("GET /health HTTP/1.1\r\nHost: box.hzbx.de\r\nConnection: close\r\n\r\n");
+        String resp = http.readStringUntil('\n');
+        result += ",\"http\":\"" + resp + "\"";
+        http.stop();
+    } else {
+        result += ",\"http\":\"fail\"";
+    }
+
+    result += "}";
+    server.send(200, "application/json", result);
 }
 
 void DebugServer::handleApiOtaDone() {

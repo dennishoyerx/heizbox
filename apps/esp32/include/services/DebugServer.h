@@ -18,6 +18,7 @@ private:
     void handleRoot();
     void handleApiStatus();
     void handleApiLog();
+    void handleApiNetTest();
     void handleApiOtaDone();
     void handleApiOtaUpload();
     void handleNotFound();
