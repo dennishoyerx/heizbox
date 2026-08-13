@@ -223,22 +223,39 @@ void DebugServer::handleApiOtaDone() {
 void DebugServer::handleApiOtaUpload() {
     HTTPUpload& upload = server.upload();
     if (upload.status == UPLOAD_FILE_START) {
-        logPrint("ota", "OTA Start: %s (%u bytes)", upload.filename.c_str(), upload.totalSize);
-        if (upload.totalSize == 0 || upload.totalSize > ESP.getFreeSketchSpace()) {
-            logPrint("ota", "OTA size %u zu gross (freeSketch %u), abort", upload.totalSize, ESP.getFreeSketchSpace());
+        logPrint("ota", "OTA Start: %s", upload.filename.c_str());
+        // totalSize ist bei multipart im ESP32-Core oft 0 -> max annehmen, echte Groesse tracken
+        if (upload.totalSize > ESP.getFreeSketchSpace()) {
+            logPrint("ota", "OTA size %u > freeSketch %u, abort", upload.totalSize, ESP.getFreeSketchSpace());
             Update.abort();
             otaTooBig_ = true;
             return;
         }
-        if (!Update.begin(upload.totalSize)) {
+        otaReceived_ = 0;
+        size_t sz = (upload.totalSize > 0) ? upload.totalSize : ESP.getFreeSketchSpace();
+        if (!Update.begin(sz)) {
             logPrint("ota", "Update.begin failed: %s", Update.errorString());
         }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
         if (otaTooBig_) return;
+        otaReceived_ += upload.currentSize;
+        if (otaReceived_ > ESP.getFreeSketchSpace()) {
+            logPrint("ota", "OTA empfangene Bytes %u > freeSketch %u, abort", otaReceived_, ESP.getFreeSketchSpace());
+            Update.abort();
+            otaTooBig_ = true;
+            return;
+        }
         if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
             logPrint("ota", "Update.write failed: %s", Update.errorString());
         }
     } else if (upload.status == UPLOAD_FILE_END) {
+        if (otaTooBig_) { logPrint("ota", "OTA aborted (too big)"); return; }
+        if (otaReceived_ == 0) {
+            logPrint("ota", "OTA leer, abort");
+            Update.abort();
+            server.send(400, "application/json", "{\"ok\":false,\"error\":\"empty upload\"}");
+            return;
+        }
         if (!Update.end(true)) {
             logPrint("ota", "Update.end failed: %s", Update.errorString());
         }

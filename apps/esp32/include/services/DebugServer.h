@@ -19,6 +19,7 @@ private:
     WebServer server{80};
     UpdateCallback updateCb_;
     bool otaTooBig_ = false;
+    size_t otaReceived_ = 0;
 
     void handleRoot();
     void handleApiStatus();

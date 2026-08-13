@@ -24,31 +24,42 @@ int FirmwareUpdater::parseVersionPart(const String& v, int index) {
 }
 
 bool FirmwareUpdater::checkVersion() {
-    WiFiClientSecure client;
-    client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
-    HTTPClient http;
-    String url = String(API_ENDPOINT) + "/firmware.json";
-    http.begin(client, url);
-    http.setTimeout(10000);
-    http.setConnectTimeout(5000);
+    // Failover: erst API_ENDPOINT (firmware.hzbx.de), bei Fehler backend.hzbx.de (Transitional-Host)
+    // loest das Problem von Boxen mit alter credentials.h (API_ENDPOINT zeigt auf toten Host)
+    const char* hosts[] = { API_ENDPOINT, "https://backend.hzbx.de" };
+    String remote, binUrl;
+    size_t size = 0;
+    int usedHost = -1;
 
-    int code = http.GET();
-    if (code != HTTP_CODE_OK) {
-        logPrint("warn", "Firmware check HTTP %d", code);
-        http.end();
-        return false;
+    for (int i = 0; i < 2; i++) {
+        WiFiClientSecure client;
+        client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
+        HTTPClient http;
+        String url = String(hosts[i]) + "/firmware.json";
+        http.begin(client, url);
+        http.setTimeout(10000);
+        http.setConnectTimeout(5000);
+
+        int code = http.GET();
+        if (code == HTTP_CODE_OK) {
+            JsonDocument doc;
+            DeserializationError err = deserializeJson(doc, http.getString());
+            http.end();
+            if (err) {
+                logPrint("error", "Firmware JSON parse failed");
+                continue;
+            }
+            remote = doc["version"] | "";
+            binUrl = String(hosts[i]) + doc["url"].as<String>();
+            size = doc["size"] | (size_t)0;
+            usedHost = i;
+            if (!remote.isEmpty()) break;
+        } else {
+            logPrint("warn", "Firmware check %s HTTP %d", hosts[i], code);
+            http.end();
+        }
     }
-
-    JsonDocument doc;
-    DeserializationError err = deserializeJson(doc, http.getString());
-    http.end();
-    if (err) {
-        logPrint("error", "Firmware JSON parse failed");
-        return false;
-    }
-
-    String remote = doc["version"] | "";
-    if (remote.isEmpty()) return false;
+    if (usedHost < 0 || remote.isEmpty()) return false;
 
     int rmaj = parseVersionPart(remote, 0);
     int rmin = parseVersionPart(remote, 1);
@@ -69,9 +80,6 @@ bool FirmwareUpdater::checkVersion() {
     }
 
     logPrint("log", "New firmware available: %s (local %s)", remote.c_str(), local.c_str());
-
-    String binUrl = String(API_ENDPOINT) + doc["url"].as<String>();
-    size_t size = doc["size"] | (size_t)0;
 
     if (size == 0) {
         // Falls size fehlt: HEAD-Request für Content-Length
