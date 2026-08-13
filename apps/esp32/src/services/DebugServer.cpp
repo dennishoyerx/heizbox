@@ -5,6 +5,7 @@
 #include "Config.h"
 
 #include <WiFi.h>
+#include <Update.h>
 
 static const char* PAGE_HTML PROGMEM = R"rawliteral(
 <!DOCTYPE html>
@@ -77,6 +78,9 @@ void DebugServer::init() {
         delay(100);
         ESP.restart();
     });
+    server.on("/api/ota", HTTP_POST,
+        [this]() { handleApiOtaDone(); },
+        [this]() { handleApiOtaUpload(); });
     server.onNotFound([this]() { handleNotFound(); });
     server.begin();
     logPrint("boot", "🔧 DebugServer auf Port 80 gestartet");
@@ -109,6 +113,39 @@ void DebugServer::handleApiLog() {
     uint32_t since = server.arg("since").toInt();
     String json = logRingJson(since);
     server.send(200, "application/json", json);
+}
+
+void DebugServer::handleApiOtaDone() {
+    if (Update.hasError()) {
+        logPrint("ota", "OTA failed: %s", Update.errorString());
+        server.send(500, "text/plain", String("OTA failed: ") + Update.errorString());
+    } else {
+        logPrint("ota", "OTA via DebugServer erfolgreich, reboot");
+        server.send(200, "application/json", "{\"ok\":true}");
+        delay(500);
+        ESP.restart();
+    }
+}
+
+void DebugServer::handleApiOtaUpload() {
+    HTTPUpload& upload = server.upload();
+    if (upload.status == UPLOAD_FILE_START) {
+        logPrint("ota", "OTA Start: %s (%u bytes)", upload.filename.c_str(), upload.totalSize);
+        if (!Update.begin(upload.totalSize)) {
+            logPrint("ota", "Update.begin failed: %s", Update.errorString());
+        }
+    } else if (upload.status == UPLOAD_FILE_WRITE) {
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+            logPrint("ota", "Update.write failed: %s", Update.errorString());
+        }
+    } else if (upload.status == UPLOAD_FILE_END) {
+        if (!Update.end(true)) {
+            logPrint("ota", "Update.end failed: %s", Update.errorString());
+        }
+    } else if (upload.status == UPLOAD_FILE_ABORTED) {
+        Update.abort();
+        logPrint("ota", "OTA aborted");
+    }
 }
 
 void DebugServer::handleNotFound() {
