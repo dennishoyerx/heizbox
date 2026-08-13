@@ -105,6 +105,18 @@ bool WebSocketManager::sendHeatCycleCompleted(uint32_t durationSec, uint8_t cycl
     return sendJson(doc);
 }
 
+bool WebSocketManager::sendTempReading(float tempRaw, float tempCalibrated, bool isHeating) {
+    if (!state.connected) return false;
+
+    JsonDocument doc;
+    doc["type"] = "tempReading";
+    doc["temp_raw"] = tempRaw;
+    doc["temp_calibrated"] = tempCalibrated;
+    doc["is_heating"] = isHeating;
+
+    return sendJson(doc);
+}
+
 bool WebSocketManager::sendSessionUpdate(int clicks, int caps) {
     JsonDocument doc;
     doc["type"] = "sessionUpdate";

@@ -27,6 +27,7 @@ public:
     bool sendStatusUpdate(bool isOn, bool isHeating);
     bool sendHeatCycleCompleted(uint32_t durationSec, uint8_t cycle);
     bool sendSessionUpdate(int clicks, int caps);
+    bool sendTempReading(float tempRaw, float tempCalibrated, bool isHeating);
 
     // Callbacks
     void onMessage(MessageCallback callback);

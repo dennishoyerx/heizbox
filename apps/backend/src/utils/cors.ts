@@ -1,8 +1,15 @@
 import { config } from '../config/index.js';
 
 export const isOriginAllowed = (origin: string): boolean => {
+  // Kein Origin-Header (curl, ESP32, nicht-Browser-Clients) -> immer erlauben
+  if (!origin) return true;
   const allowedOrigins = config.cors.allowedOrigins;
-  const originUrl = new URL(origin);
+  let originUrl: URL;
+  try {
+    originUrl = new URL(origin);
+  } catch {
+    return false;
+  }
 
   for (const allowedOrigin of allowedOrigins) {
     if (allowedOrigin.startsWith('.')) {

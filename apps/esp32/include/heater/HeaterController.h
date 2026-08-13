@@ -83,4 +83,7 @@ private:
     uint32_t heatStartTime = 0;
     uint32_t stallWindowStart = 0;
     uint16_t stallWindowStartTemp = 0;
+
+    // Temp-Readings (RAW + kalibriert) ans Backend loggen
+    uint32_t lastTempReadingSent = 0;
 };

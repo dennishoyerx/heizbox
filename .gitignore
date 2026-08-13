@@ -52,3 +52,6 @@ apps/esp32/compile_commands.json
 !apps/backend/migrations/*.sql
 
 .geminiignore
+
+# Lokale SQLite DB (VPS)
+apps/backend/data/

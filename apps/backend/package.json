@@ -20,8 +20,8 @@
     "wrangler": "^4.45.0"
   },
   "devDependencies": {
-    "better-sqlite3": "^12.4.1",
-    "sqlite": "^5.1.1"
+    "sqlite": "^5.1.1",
+    "better-sqlite3": "^12.4.1"
   },
   "scripts": {
     "dev": "wrangler dev",
@@ -29,6 +29,8 @@
     "deploy": "wrangler deploy --minify",
     "test": "vitest run",
     "monitor": "wrangler tail --format json",
-    "monitor:script": "wrangler tail | node formatLogs.js"
+    "monitor:script": "wrangler tail | node formatLogs.js",
+    "start": "bun run src/server.ts",
+    "dev:local": "bun run --watch src/server.ts"
   }
 }

@@ -6,6 +6,7 @@
 #include "core/EventBus.h"
 #include "SysModule.h"
 #include "driver/Audio.h"
+#include "driver/net/WebSocketManager.h"
 
 HeaterController::HeaterController()
     : BaseClass("HeaterController"),
@@ -128,6 +129,18 @@ void HeaterController::update() {
         heatCycle.submit();
 
         transitionTo(State::IDLE);
+    }
+
+    // Temp-Readings ans Backend loggen (RAW + kalibriert) für Analyse
+    // Während Heizen jede Sekunde, sonst alle 5s (Raumtemp-Baseline)
+    uint32_t interval = (state == State::HEATING) ? 1000 : 5000;
+    if (millis() - lastTempReadingSent >= interval) {
+        WebSocketManager::instance().sendTempReading(
+            static_cast<float>(hs.tempIRRaw),
+            static_cast<float>(hs.temp),
+            state == State::HEATING
+        );
+        lastTempReadingSent = millis();
     }
 }
 

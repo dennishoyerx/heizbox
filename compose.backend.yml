@@ -1,0 +1,33 @@
+name: heizbox-backend
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: heizbox-backend
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/data/heizbox.db
+      - PORT=3001
+    volumes:
+      - backend_data:/data
+    expose:
+      - "3001"
+    networks:
+      - public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.heizbox-backend.loadbalancer.server.port=3001"
+      - "traefik.http.services.heizbox-backend.loadbalancer.server.scheme=http"
+      - "traefik.docker.network=public"
+      - "traefik.http.routers.heizbox-backend.rule=Host(`backend.hzbx.de`)"
+      - "traefik.http.routers.heizbox-backend.entrypoints=web"
+      - "traefik.http.routers.heizbox-backend.priority=20"
+
+volumes:
+  backend_data:
+
+networks:
+  public:
+    external: true
