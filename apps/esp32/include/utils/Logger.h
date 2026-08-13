@@ -6,8 +6,8 @@
 #include <stdarg.h>
 
 // Ringbuffer-Größe für Debug-Server
-#define LOG_RING_SIZE 200
-#define LOG_LINE_MAX 192
+#define LOG_RING_SIZE 64
+#define LOG_LINE_MAX 160
 
 // Helper function for variadic arguments
 void vlogPrint(const char* type, const char* format, va_list args);
