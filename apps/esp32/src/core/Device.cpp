@@ -5,6 +5,7 @@
 #include "ui/DeviceUI.h"
 #include "heater/HeaterController.h"
 #include "driver/Audio.h"
+#include "services/DebugServer.h"
 
 #include <Wire.h>
 #include <utility>
@@ -31,6 +32,9 @@ void Device::setup() {
     Audio::init();
     Audio::beepStartup();
 
+    // Debug-Schnittstelle via IP (http://<IP>/debug)
+    DebugServer::instance().init();
+
     
     auto cb = [this]() {
         network.update();
@@ -55,6 +59,8 @@ void Device::loop() {
     heater.update();
     network.update();
     ui.update();
+
+    DebugServer::instance().update();
 }
 
 
