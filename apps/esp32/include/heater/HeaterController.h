@@ -79,8 +79,8 @@ private:
     uint32_t pauseTime = 0;
     uint32_t autoStopTime = 60000;
 
-    // Vape-Entfernung (Temp-Drop) Erkennung
-    uint16_t peakTemp = 0;
+    // Vape-Entfernung (Stagnations-) Erkennung
     uint32_t heatStartTime = 0;
-    bool vaporRemoved(HeaterState& hs);
+    uint32_t stallWindowStart = 0;
+    uint16_t stallWindowStartTemp = 0;
 };

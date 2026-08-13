@@ -78,10 +78,11 @@ struct HeaterConfig {
         static constexpr uint32_t DUTY_CYCLE_PERIOD_MS = 1000; // 1 Sekunde pro Zyklus
     };
 
-    // Vape-Entfernung erkennen: IR-Temp fällt beim Heizen unter den Peak (Vape weggezogen)
-    static constexpr uint16_t TEMP_DROP_THRESHOLD = 40;      // °C Abfall unter Peak = Vape entfernt
-    static constexpr uint16_t TEMP_DROP_MIN_PEAK = 60;       // erst ab dieser Peak-Temp aktiv
-    static constexpr uint32_t TEMP_DROP_MIN_HEAT_MS = 3000;  // erst nach 3s Heizen aktiv
+    // Vape-Entfernung erkennen: IR-Temp fällt langsam (Cap kühlt ab, bleibt im Sichtfeld).
+    // Statt Drop-Delta: Stagnations-Fenster — fällt die Temp über das Fenster, ist die Vape weg.
+    static constexpr uint32_t TEMP_STALL_WINDOW_MS = 4000;   // Beobachtungsfenster
+    static constexpr uint16_t TEMP_STALL_FALL_DELTA = 3;     // °C Abfall im Fenster = Vape entfernt
+    static constexpr uint32_t TEMP_STALL_MIN_HEAT_MS = 3000; // erst nach 3s Heizen aktiv
 };
 
 struct NetworkConfig {
