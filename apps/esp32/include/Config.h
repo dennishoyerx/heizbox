@@ -86,7 +86,7 @@ struct HeaterConfig {
 };
 
 struct NetworkConfig {
-    static constexpr const char *BACKEND_WS_URL = "wss://backend.hzbx.de/ws";
+    static constexpr const char *BACKEND_WS_URL = "wss://box.hzbx.de/ws";
     static constexpr const char *DEVICE_ID = "HeizboxESP32";
     static constexpr const char *NTP_SERVER = "pool.ntp.org";
     static constexpr const char *HOSTNAME = "Heizbox";

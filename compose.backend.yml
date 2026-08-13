@@ -21,7 +21,7 @@ services:
       - "traefik.http.services.heizbox-backend.loadbalancer.server.port=3001"
       - "traefik.http.services.heizbox-backend.loadbalancer.server.scheme=http"
       - "traefik.docker.network=public"
-      - "traefik.http.routers.heizbox-backend.rule=Host(`backend.hzbx.de`)"
+      - "traefik.http.routers.heizbox-backend.rule=Host(`box.hzbx.de`)"
       - "traefik.http.routers.heizbox-backend.entrypoints=web"
       - "traefik.http.routers.heizbox-backend.priority=20"
 

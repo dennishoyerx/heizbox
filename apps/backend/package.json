@@ -19,10 +19,7 @@
     "hono": "^4.9.10",
     "wrangler": "^4.45.0"
   },
-  "devDependencies": {
-    "sqlite": "^5.1.1",
-    "better-sqlite3": "^12.4.1"
-  },
+  "devDependencies": {},
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --minify --dry-run --outdir=dist",
