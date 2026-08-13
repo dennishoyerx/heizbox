@@ -100,6 +100,19 @@ void HeaterController::update() {
     
     updateTemperature();
 
+    // Temp-Readings ans Backend loggen (RAW + kalibriert) für Analyse
+    // Während Heizen jede Sekunde, sonst alle 5s (Raumtemp-Baseline)
+    // MUSS vor der State-Weiche stehen - der HEATING-Zweig returned sonst früh
+    uint32_t interval = (state == State::HEATING) ? 1000 : 5000;
+    if (millis() - lastTempReadingSent >= interval) {
+        WebSocketManager::instance().sendTempReading(
+            static_cast<float>(hs.tempIRRaw),
+            static_cast<float>(hs.temp),
+            state == State::HEATING
+        );
+        lastTempReadingSent = millis();
+    }
+
     if (state == State::HEATING) {
         if (Safety::checkFailed()) {
             stopHeating(false);
@@ -131,17 +144,6 @@ void HeaterController::update() {
         transitionTo(State::IDLE);
     }
 
-    // Temp-Readings ans Backend loggen (RAW + kalibriert) für Analyse
-    // Während Heizen jede Sekunde, sonst alle 5s (Raumtemp-Baseline)
-    uint32_t interval = (state == State::HEATING) ? 1000 : 5000;
-    if (millis() - lastTempReadingSent >= interval) {
-        WebSocketManager::instance().sendTempReading(
-            static_cast<float>(hs.tempIRRaw),
-            static_cast<float>(hs.temp),
-            state == State::HEATING
-        );
-        lastTempReadingSent = millis();
-    }
 }
 
 void HeaterController::updateTemperature() {

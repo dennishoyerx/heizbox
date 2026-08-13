@@ -18,20 +18,12 @@ void StartupScreen::draw() {
         s.sprite->drawBitmap(x, y, image_cat_96, bitmapWidth, bitmapHeight, COLOR_TEXT_PRIMARY);
 
 
-        // Build Info
-        char short_date[6];
-        snprintf(short_date, sizeof(short_date), "%.2s.%.2s", BUILD_DATE + 4, BUILD_DATE + 9);
-
-        char short_time[6];
-        memcpy(short_time, BUILD_TIME, 5);
-        short_time[5] = '\0';
-
+        // Build Info: Version anstelle von Datum/Uhrzeit (links oben)
         char version[12];
         snprintf(version, sizeof(version), "v%s", FIRMWARE_VERSION);
 
-        s.text(20, 35, short_date);
-        s.text(20, 55, short_time);
-        s.text(210, 35, version);
+        s.text(20, 35, version);
+        s.text(20, 55, "");
 
         // Optional: Progress-Bar
         const float progress = this->getProgress();

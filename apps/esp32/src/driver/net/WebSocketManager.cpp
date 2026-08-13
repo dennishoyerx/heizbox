@@ -27,7 +27,7 @@ void WebSocketManager::init(const char* url, const char* deviceId, const char* c
 
     Serial.printf("WebSocket connecting to: %s%s\n", host, path);
     
-    webSocket.begin(host.c_str(), 80, path.c_str()); 
+    webSocket.begin(host.c_str(), 80, path.c_str()); // plain WS (kein TLS - RAM-Limit)
     //webSocket.beginSSL(host, 443, path, "", "");
     webSocket.onEvent(onWebSocketEvent);
     webSocket.setReconnectInterval(5000);

@@ -24,6 +24,11 @@ services:
       - "traefik.http.routers.heizbox-backend.rule=Host(`box.hzbx.de`)"
       - "traefik.http.routers.heizbox-backend.entrypoints=web"
       - "traefik.http.routers.heizbox-backend.priority=20"
+      # Legacy: Box mit alter Firmware verbindet sich mit backend.hzbx.de/ws -> ans Backend
+      - "traefik.http.routers.heizbox-backend-legacy.rule=Host(`backend.hzbx.de`) && PathPrefix(`/ws`)"
+      - "traefik.http.routers.heizbox-backend-legacy.entrypoints=web"
+      - "traefik.http.routers.heizbox-backend-legacy.priority=30"
+      - "traefik.http.routers.heizbox-backend-legacy.service=heizbox-backend"
 
 volumes:
   backend_data:
