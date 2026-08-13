@@ -7,28 +7,32 @@ WebSocketManager& WebSocketManager::instance() {
 
 void WebSocketManager::init(const char* url, const char* deviceId, const char* clientType) {
     String urlStr(url);
+    urlStr.trim();
 
-    const char* protocol = "wss://";
-    const size_t protocolLen = 6;
-
-    if (urlStr.startsWith(protocol)) {
-        urlStr = urlStr.substring(protocolLen);
+    // "wss://" oder "ws://" Prefix strippen (plain WS Port 80, kein TLS - RAM-Limit)
+    if (urlStr.startsWith("wss://")) {
+        urlStr = urlStr.substring(6);
+    } else if (urlStr.startsWith("ws://")) {
+        urlStr = urlStr.substring(5);
     }
 
     int pathIndex = urlStr.indexOf('/');
-    String host = urlStr.substring(0, pathIndex);
-    String path = urlStr.substring(pathIndex);
+    String hostStr = (pathIndex > 0) ? urlStr.substring(0, pathIndex) : urlStr;
+    String pathStr = (pathIndex > 0) ? urlStr.substring(pathIndex) : "/";
 
-    // Append query params
-    path += "?deviceId=" + String(deviceId) + "&type=" + String(clientType);
+    // Query params anhängen
+    pathStr += "?deviceId=" + String(deviceId) + "&type=" + String(clientType);
 
-    host = host.c_str();
-    path = path.c_str();
+    // Sichere Kopien in char-Puffer (vermeidet self-assignment-Bug von String.c_str())
+    char hostBuf[96];
+    char pathBuf[160];
+    hostStr.toCharArray(hostBuf, sizeof(hostBuf));
+    pathStr.toCharArray(pathBuf, sizeof(pathBuf));
 
-    Serial.printf("WebSocket connecting to: %s%s\n", host, path);
+    Serial.printf("WebSocket connecting to: %s%s\n", hostBuf, pathBuf);
     
-    webSocket.begin(host.c_str(), 80, path.c_str()); // plain WS (kein TLS - RAM-Limit)
-    //webSocket.beginSSL(host, 443, path, "", "");
+    webSocket.begin(hostBuf, 80, pathBuf); // plain WS (kein TLS - RAM-Limit)
+    //webSocket.beginSSL(hostBuf, 443, pathBuf, "", "");
     webSocket.onEvent(onWebSocketEvent);
     webSocket.setReconnectInterval(5000);
 }
