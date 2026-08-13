@@ -20,26 +20,7 @@ void logPrint(const char* format, ...);
 
 void logRingPush(const char* type, const char* line);
 
-// Stream der Serial-Ausgaben abfängt und in den Ringbuffer spiegelt (für Lib-Debug-Logs)
-class RingStream : public Print {
-public:
-    size_t write(uint8_t c) override {
-        Serial.write(c);
-        if (c == '\n') {
-            if (bufLen > 0) {
-                buf[bufLen] = '\0';
-                logRingPush("lib", buf);
-                bufLen = 0;
-            }
-        } else if (bufLen < LOG_LINE_MAX - 1) {
-            buf[bufLen++] = c;
-        }
-        return 1;
-    }
-private:
-    char buf[LOG_LINE_MAX];
-    size_t bufLen = 0;
-};
+#include "utils/RingStream.h"
 
 // Ringbuffer: speichert die letzten Log-Zeilen für den Debug-Server.
 // Gibt die Zeilen als JSON-Array zurück: {"since":<ts>,"lines":[{"ts":<ms>,"t":"type","m":"msg"}]}

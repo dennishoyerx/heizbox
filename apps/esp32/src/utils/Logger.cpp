@@ -1,5 +1,21 @@
 #include "Logger.h"
 
+size_t RingStream::write(uint8_t c) {
+    Serial.write(c);
+    if (c == '\n') {
+        if (bufLen > 0) {
+            buf[bufLen] = '\0';
+            logRingPush("lib", buf);
+            bufLen = 0;
+        }
+    } else if (bufLen < sizeof(buf) - 1) {
+        buf[bufLen++] = c;
+    }
+    return 1;
+}
+
+RingStream g_ringStream;
+
 // ---- Ringbuffer ----
 struct LogEntry {
     uint32_t ts;

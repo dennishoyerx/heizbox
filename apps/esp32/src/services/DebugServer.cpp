@@ -8,10 +8,6 @@
 #include <Update.h>
 #include "utils/Logger.h"
 
-// Fängt Serial-Ausgaben der Libs ab und spiegelt sie in den Debug-Log-Ringbuffer
-RingStream g_ringStream;
-#define DEBUG_ESP_PORT g_ringStream
-
 static const char* PAGE_HTML PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="de">
