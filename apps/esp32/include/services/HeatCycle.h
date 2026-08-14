@@ -9,7 +9,7 @@ public:
     void reset() { startMs = 0; durationMs = 0; };
 
     uint32_t getDuration() const { return getDurationMs() / 1000; }
-    uint32_t getDurationMs() const { return durationMs + millis() - startMs; }
+    uint32_t getDurationMs() const { return durationMs + (startMs ? (millis() - startMs) : 0); }
     uint32_t getStartMs() const { return startMs; }
 
 protected:
