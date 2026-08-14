@@ -29,8 +29,8 @@ void Device::setup() {
 
     StateBinder::bindAll(&ui, &heater);
 
-    Audio::init();
-    Audio::beepStartup();
+    // Audio::init(); // DEAKTIVIERT - Heap-Korruption Fix
+    // Audio::beepStartup();
 
     // Debug-Schnittstelle via IP (http://<IP>/debug)
     DebugServer::instance().init();
