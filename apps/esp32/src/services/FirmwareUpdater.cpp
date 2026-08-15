@@ -26,7 +26,7 @@ int FirmwareUpdater::parseVersionPart(const String& v, int index) {
 bool FirmwareUpdater::checkVersion() {
     // Failover: erst API_ENDPOINT (firmware.hzbx.de), bei Fehler backend.hzbx.de (Transitional-Host)
     // loest das Problem von Boxen mit alter credentials.h (API_ENDPOINT zeigt auf toten Host)
-    const char* hosts[] = { API_ENDPOINT, "https://backend.hzbx.de" };
+    const char* hosts[] = { API_ENDPOINT, "http://backend.hzbx.de" };
     String remote, binUrl;
     size_t size = 0;
     int usedHost = -1;
