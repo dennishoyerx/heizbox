@@ -8,6 +8,7 @@ StartupScreen::StartupScreen(std::function<void()> callback) {
 
 void StartupScreen::draw() {
     _ui->withSurface(280, 240, 0, 0, [this](RenderSurface& s) {
+        if (!s.sprite) return;
         // Zentrale Position berechnen
         constexpr int16_t bitmapWidth = 96;
         constexpr int16_t bitmapHeight = 96;
