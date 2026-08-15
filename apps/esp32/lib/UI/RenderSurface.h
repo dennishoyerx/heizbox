@@ -33,8 +33,8 @@ struct RenderSurface {
 
   void clear(uint16_t color = TFT_BLACK) { if (sprite && clean) sprite->fillSprite(color); }
   void blitToScreen(int16_t x, int16_t y) { if (sprite) sprite->pushSprite(x, y); }
-  void text(int16_t x, int16_t y, const char* t, Text::Size ts = Text::Size::md, uint16_t color = 3) { Text::draw(sprite, t, Text::Config{x, y, ts, Text::Align::left, color}); }
-  void text(int16_t x, int16_t y,  const String& t, Text::Size ts = Text::Size::md, uint16_t color = 3) { Text::draw(sprite, t.c_str(), Text::Config{x, y, ts, Text::Align::left, color}); }
+  void text(int16_t x, int16_t y, const char* t, Text::Size ts = Text::Size::md, uint16_t color = 3) { if (sprite) Text::draw(sprite, t, Text::Config{x, y, ts, Text::Align::left, color}); }
+  void text(int16_t x, int16_t y,  const String& t, Text::Size ts = Text::Size::md, uint16_t color = 3) { if (sprite) Text::draw(sprite, t.c_str(), Text::Config{x, y, ts, Text::Align::left, color}); }
 
   private:
 };
