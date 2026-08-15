@@ -70,6 +70,7 @@ void Temp(RenderProps p, String label, int value, ui::Text::Size size = ui::Text
 };
 
 void HeatUI::Temperature(RenderSurface s, bool heating) {
+    if (!s.sprite) return;  // Heap-Korruption Fix
     auto& hs = HeaterState::instance();
     auto& ds = DeviceState::instance();
     if (ds.debug.showRawTemp) {
