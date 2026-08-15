@@ -32,11 +32,19 @@ bool FirmwareUpdater::checkVersion() {
     int usedHost = -1;
 
     for (int i = 0; i < 2; i++) {
-        WiFiClientSecure client;
-        client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
-        HTTPClient http;
+        // HTTP braucht WiFiClient, HTTPS braucht WiFiClientSecure
         String url = String(hosts[i]) + "/firmware.json";
-        http.begin(client, url);
+        bool useTls = url.startsWith("https");
+        std::unique_ptr<WiFiClient> clientPtr;
+        if (useTls) {
+            auto secure = std::make_unique<WiFiClientSecure>();
+            secure->setInsecure();
+            clientPtr = std::move(secure);
+        } else {
+            clientPtr = std::make_unique<WiFiClient>();
+        }
+        HTTPClient http;
+        http.begin(*clientPtr, url);
         http.setTimeout(10000);
         http.setConnectTimeout(5000);
 
@@ -100,8 +108,7 @@ bool FirmwareUpdater::downloadAndFlash(const char* url, size_t size) {
     updating = true;
     EventBus::instance().publish(Event{EventType::OTA_UPDATE_STARTED, nullptr});
 
-    WiFiClientSecure client;
-    client.setInsecure(); // Cloudflare TLS - public cert, kein PIN noetig
+    WiFiClient client;  // HTTP, kein TLS noetig
     HTTPClient http;
     http.begin(client, url);
     http.setTimeout(30000);
