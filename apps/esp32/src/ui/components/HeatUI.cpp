@@ -34,7 +34,7 @@ void drawStats(RenderSurface& s, int x, int y, String label, String value) {
 }
 
 
-void ZVSOscilloscopeUI(RenderSurface s, ZVSDriver* zvs) {
+void ZVSOscilloscopeUI(RenderSurface& s, ZVSDriver* zvs) {
     static ZVSOscilloscope osc = ZVSOscilloscope(zvs, 280);
     osc.update();
     int h = s.height() /2;        // osc-Höhe
@@ -42,13 +42,13 @@ void ZVSOscilloscopeUI(RenderSurface s, ZVSDriver* zvs) {
     osc.draw(s, 0, y, h);
 }
 
-void Background(RenderSurface s, float progress, uint8_t color) {
+void Background(RenderSurface& s, float progress, uint8_t color) {
     if (!s.sprite) return;
     int fillHeight = (int)(s.height() * progress);
     s.sprite->fillRect(s.left(), s.bottom() - fillHeight, s.width(), fillHeight, color);
 }
 
-void Timer(RenderSurface s, uint32_t time) {
+void Timer(RenderSurface& s, uint32_t time) {
     if (!s.sprite) return;
     char timeStr[4];
     snprintf(timeStr, sizeof(timeStr), "%lu", time);
@@ -59,12 +59,12 @@ void Timer(RenderSurface s, uint32_t time) {
 }
 
 struct RenderProps {
-    RenderSurface s;
+    RenderSurface& s;
     int x;
     int y;
 };
 
-void Temp(RenderProps p, String label, int value, ui::Text::Size size = ui::Text::Size::blg) {
+void Temp(const RenderProps& p, String label, int value, ui::Text::Size size = ui::Text::Size::blg) {
     int textH = size == ui::Text::Size::bmd ? 18 : 24;
     int valueY = p.y + textH;
     
@@ -72,7 +72,7 @@ void Temp(RenderProps p, String label, int value, ui::Text::Size size = ui::Text
     p.s.text(p.x, valueY, value != 420 ? String(value): "OFF", size);
 };
 
-void HeatUI::Temperature(RenderSurface s, bool heating) {
+void HeatUI::Temperature(RenderSurface& s, bool heating) {
     if (!s.sprite) return;  // Heap-Korruption Fix
     auto& hs = HeaterState::instance();
     auto& ds = DeviceState::instance();
@@ -87,12 +87,12 @@ void HeatUI::Temperature(RenderSurface s, bool heating) {
 }
 
 
-void HeatUI::Cycle(RenderSurface s) {
+void HeatUI::Cycle(RenderSurface& s) {
     if (!s.sprite) return;
     if (HeaterCycle::is(1)) s.sprite->drawBitmap(s.width() - 56, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
 }
 
-void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
+void ZVSDebug(RenderSurface& s, ZVSDriver* zvs) {
     if (!zvs || !s.sprite)
         return;
 

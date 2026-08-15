@@ -43,11 +43,11 @@ void StatusBar::draw(UI* ui) {
     });
 }
 
-void StatusBar::drawTimeRegion(RenderSurface s) {
+void StatusBar::drawTimeRegion(RenderSurface& s) {
     s.text(8, 0, String(state.time), ui::Text::Size::lg);
 }
 
-void StatusBar::drawWifiRegion(RenderSurface s) {
+void StatusBar::drawWifiRegion(RenderSurface& s) {
     // Clear nur WiFi-Icon Bereich
     const int8_t iconSize = 6;
     const int8_t iconRadius = iconSize / 2;

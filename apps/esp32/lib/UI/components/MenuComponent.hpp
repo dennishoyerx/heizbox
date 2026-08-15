@@ -21,7 +21,7 @@ void Row(int width, RowCb cb) {
 };
 
 
-void R(RenderSurface s) {
+void R(RenderSurface& s) {
     // w280 h240
     s.text(0, 0, "Heater");
     s.text(0, 0, "Display");

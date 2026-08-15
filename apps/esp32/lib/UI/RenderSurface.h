@@ -18,9 +18,16 @@ struct RenderSurface {
   TFT_eSprite *sprite = nullptr;
   bool clean = true;
   RenderStateHash stateHash;
-  std::map<std::string, StateValue> state;
 
   RenderSurface(TFT_eSprite* s = nullptr, bool clear = true) : sprite(s), clean(clear) {}
+
+  // SCHLANKER Copy: nur Pointer + Flag, KEINE Maps kopieren (Heap-Stress!)
+  // stateHash bleibt beim Copy leer - wird explizit in SurfaceFactory gesetzt.
+  RenderSurface(const RenderSurface& other) : sprite(other.sprite), clean(other.clean) {}
+  RenderSurface& operator=(const RenderSurface& other) {
+    if (this != &other) { sprite = other.sprite; clean = other.clean; }
+    return *this;
+  }
 
   int16_t width() const { return sprite ? sprite->width() : 0; }
   int16_t height() const { return sprite ? sprite->height() : 0; }

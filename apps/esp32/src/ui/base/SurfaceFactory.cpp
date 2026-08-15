@@ -19,7 +19,7 @@ RenderSurface SurfaceFactory::createSurface(int16_t w, int16_t h, bool clear) {
   for (auto it = _pool.begin(); it != _pool.end(); ++it) {
     if (it->sprite && it->w == w && it->h == h) {
       TFT_eSprite* spr = it->sprite;
-      RenderStateHash hash = it->stateHash; // Preserve state
+      RenderStateHash hash = std::move(it->stateHash); // Preserve state (Move, kein Copy)
       _pool.erase(it);
       RenderSurface s{ spr, clear };
       s.stateHash = hash;
@@ -51,7 +51,7 @@ void SurfaceFactory::releaseSurface(RenderSurface& s) {
   e.sprite = s.sprite;
   e.w = s.sprite->width();
   e.h = s.sprite->height();
-  e.stateHash = s.stateHash; // Store state for next use
+  e.stateHash = std::move(s.stateHash); // Store state (Move, kein Copy)
   _pool.push_back(e);
   s.sprite = nullptr;
 }

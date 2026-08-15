@@ -2,7 +2,7 @@
 #include <functional>
 #include "RenderSurface.h"
 
-using RenderFn = std::function<void(RenderSurface)>;
+using RenderFn = std::function<void(RenderSurface&)>;
 struct Component {
     struct Config {
         RenderFn render;
@@ -30,7 +30,7 @@ struct Area: public Element {
 
 
 Component::Config TempComponent = {
-    .render = [](RenderSurface s) {
+    .render = [](RenderSurface& s) {
         s.text(0, 0, "Text");
     }
 };

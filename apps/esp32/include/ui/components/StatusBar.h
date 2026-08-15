@@ -33,8 +33,8 @@ private:
     } dirty;
 
     // Helper methods
-    void drawTimeRegion(RenderSurface s);
-    void drawWifiRegion(RenderSurface s);
+    void drawTimeRegion(RenderSurface& s);
+    void drawWifiRegion(RenderSurface& s);
     int8_t getWifiStrength() const;
 
     static constexpr uint32_t TIME_UPDATE_INTERVAL_MS = 5000;
