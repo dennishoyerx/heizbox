@@ -11,7 +11,7 @@ WiFiManager::WiFiManager()
     state.lastReconnectAttempt = 0;
     state.reconnectCount = 0;
     state.notifiedConnected = false;
-    state.maxRetries = 3;  // Max 3 Reconnect-Versuche
+    state.reconnectEnabled = true;  // Reconnect kann deaktivert werden
     instance = this;
 }
 
@@ -62,25 +62,29 @@ void WiFiManager::checkStatus() {
 void WiFiManager::handleDisconnection() {
     const uint32_t now = millis();
     
-    // Max. 3 Reconnect-Versuche, dann WiFi deaktivieren
-    if (state.reconnectCount >= state.maxRetries) {
-        Serial.println("WiFi: Max retries reached, disabling WiFi");
-        WiFi.disconnect();
-        WiFi.mode(WIFI_OFF);  // WiFi komplett deaktivieren
+    // Nach max retries: Reconnect deaktivieren (WiFi bleibt aktiv!)
+    if (state.reconnectCount >= MAX_RECONNECT_RETRIES && state.reconnectEnabled) {
+        Serial.println("WiFi: Max retries reached, disabling auto-reconnect");
+        state.reconnectEnabled = false;  // Nur Reconnect stoppen, WiFi bleibt an
         return;
     }
     
-    if (now - state.lastReconnectAttempt >= RECONNECT_INTERVAL_MS) {
+    // Nur reconnecten wenn erlaubt
+    if (state.reconnectEnabled && (now - state.lastReconnectAttempt >= RECONNECT_INTERVAL_MS)) {
         state.reconnectCount++;
         state.lastReconnectAttempt = now;
         Serial.printf("WiFi reconnecting... (attempt %lu/%d)\n", 
-                     state.reconnectCount, state.maxRetries);
+                     state.reconnectCount, MAX_RECONNECT_RETRIES);
         WiFi.reconnect();
     }
 }
 
 void WiFiManager::onConnectionChange(ConnectionCallback callback) {
     connectionCallback = callback;
+}
+
+bool WiFiManager::isConnected() const {
+    return state.lastStatus == WL_CONNECTED;
 }
 
 void WiFiManager::onWiFiEvent(WiFiEvent_t event) {
