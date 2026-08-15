@@ -161,13 +161,7 @@ bool FirmwareUpdater::downloadAndFlash(const char* url, size_t size) {
 
 bool FirmwareUpdater::checkNow(bool force) {
     if (updating) return false;
-    uint32_t now = millis();
-    // Rate-Limit: max 1 Check pro Minute (WS-Reconnects koennen haeufig sein)
-    if (!force && now - lastCheck < MIN_CHECK_GAP_MS) {
-        logPrint("log", "Update check rate-limited");
-        return false;
-    }
-    lastCheck = now;
+    lastCheck = millis();
     logPrint("log", "Checking firmware...");
     checkVersion();
     return true;
