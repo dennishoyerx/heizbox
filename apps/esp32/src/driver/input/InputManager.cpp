@@ -19,7 +19,10 @@ void InputManager::onTurn(long value) {
 }
 
 void InputManager::setup() {
-    pcf8574 = new PCF8574(0x20);
+    // PCF8574 MIT expliziten I2C-Pins konstruieren!
+    // Default-Ctor setzt _sda/_scl nicht -> begin() ruft Wire.begin(0,0)
+    // -> I2C-Treiber re-init mit Muell-Pins -> Heap-Corruption + Panic
+    pcf8574 = new PCF8574(0x20, HardwareConfig::SDA_PIN, HardwareConfig::SCL_PIN);
     pcf8574->begin();
 
     rotaryEncoder = new RotaryEncoder(InputConfig::RotaryEncoder::CLK, InputConfig::RotaryEncoder::DT);
