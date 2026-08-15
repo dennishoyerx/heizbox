@@ -28,6 +28,7 @@ float smoothProgress(float target) {
 
 
 void drawStats(RenderSurface& s, int x, int y, String label, String value) {
+    if (!s.sprite) return;
     s.text(x, y, value, ui::Text::Size::bmd);
     s.text(x, y + 24, label, ui::Text::Size::sm);
 }
@@ -42,11 +43,13 @@ void ZVSOscilloscopeUI(RenderSurface s, ZVSDriver* zvs) {
 }
 
 void Background(RenderSurface s, float progress, uint8_t color) {
+    if (!s.sprite) return;
     int fillHeight = (int)(s.height() * progress);
     s.sprite->fillRect(s.left(), s.bottom() - fillHeight, s.width(), fillHeight, color);
 }
 
 void Timer(RenderSurface s, uint32_t time) {
+    if (!s.sprite) return;
     char timeStr[4];
     snprintf(timeStr, sizeof(timeStr), "%lu", time);
 
