@@ -25,4 +25,5 @@ private:
     FirmwareUpdater firmwareUpdater;
 
     bool initialized = false;
+    bool pendingUpdateCheck = false;
 };

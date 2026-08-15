@@ -7,7 +7,7 @@
 #include "SysModule.h"
 #include "driver/net/WebSocketManager.h"
 
-Network::Network() : wifi(), ota(), initialized(false) {}
+Network::Network() : wifi(), ota(), initialized(false), pendingUpdateCheck(false) {}
 
 void Network::init(const char* ssid, const char* password, const char* hostname) {
     auto booted = SysModules::booting("net");
@@ -20,7 +20,7 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
     });
 
     ws.onConnectionChange([this](bool connected) {
-        Serial.printf("🔌 WebSocket %s\n", connected ? "connected" : "disconnected");
+        Serial.printf("WS %s\n", connected ? "connected" : "disconnected");
         static bool submitted = false;
         if (!submitted && connected) {
             std::vector<SysModuleBoot> modules = SysModules::instance().get();
@@ -32,16 +32,16 @@ void Network::init(const char* ssid, const char* password, const char* hostname)
             submitted = true;
         }
 
-        // Firmware-Check bei jedem (Re-)Connect - WS ist staendig verbunden,
-        // dadurch schnelle Reaktion auf neue Firmware-Versionen
+        // Kein HTTP hier im Event-Callback! (Stack-Overflow).
+        // Flag setzen, update() macht den Check im Loop-Kontext.
         if (connected) {
-            firmwareUpdater.checkNow();
+            pendingUpdateCheck = true;
         }
     });
 
-    // Manueller Update-Check aus dem Menü
+    // Manueller Update-Check aus dem Men\u00fc - ebenfalls nur Flag setzen
     EventBus::instance().subscribe(EventType::CHECK_FOR_UPDATES, [this](const Event&) {
-        firmwareUpdater.checkNow();
+        pendingUpdateCheck = true;
     });
 
     booted();
@@ -52,6 +52,12 @@ void Network::update() {
     WebSocketManager::instance().update();
     ota.handle();
     firmwareUpdater.update();
+
+    // Deferred Firmware-Check im Loop-Kontext (grosser Stack)
+    if (pendingUpdateCheck) {
+        pendingUpdateCheck = false;
+        firmwareUpdater.checkNow();
+    }
 }
 
 void Network::setupWifi(const char* ssid, const char* password, const char* hostname) {
@@ -65,8 +71,8 @@ void Network::setupWifi(const char* ssid, const char* password, const char* host
             // sonst bindet der Server auf ein Interface ohne IP (Port 3232 bleibt zu)
             ota.setup();
             initialized = true;
-            // Firmware-Check nach Connect (HTTPClient hat eigene Timeouts)
-            firmwareUpdater.checkNow();
+            // Firmware-Check deferred in update() (HTTP im Event-Callback = Stack-Overflow)
+            pendingUpdateCheck = true;
         }
     });
 }
