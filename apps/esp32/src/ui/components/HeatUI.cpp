@@ -88,11 +88,12 @@ void HeatUI::Temperature(RenderSurface s, bool heating) {
 
 
 void HeatUI::Cycle(RenderSurface s) {
+    if (!s.sprite) return;
     if (HeaterCycle::is(1)) s.sprite->drawBitmap(s.width() - 56, 20, image_cap_fill_48, 48, 48, COLOR_TEXT_PRIMARY);
 }
 
 void ZVSDebug(RenderSurface s, ZVSDriver* zvs) {
-    if (!zvs)
+    if (!zvs || !s.sprite)
         return;
 
     const auto& stats = zvs->getStats();
